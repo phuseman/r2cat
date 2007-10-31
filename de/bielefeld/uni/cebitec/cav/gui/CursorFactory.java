@@ -68,13 +68,13 @@ public class CursorFactory {
 		// Load the desired image for the cursor
 		Image cursorImage = null;
 		if (cursor == CursorType.normal) {
-			cursorImage = toolkit.getImage("gui/selectioncursor.png");
+			cursorImage = toolkit.getImage("images/selectioncursor.png");
 		} else if (cursor == CursorType.add) {
-			cursorImage = toolkit.getImage("gui/selectioncursor_add.png");
+			cursorImage = toolkit.getImage("images/selectioncursor_add.png");
 		} else if (cursor == CursorType.remove) {
-			cursorImage = toolkit.getImage("gui/selectioncursor_remove.png");
-		} else if (cursor == CursorType.toggle) {
-			cursorImage = toolkit.getImage("gui/selectioncursor_toggle.png");
+			cursorImage = toolkit.getImage("images/selectioncursor_remove.png");
+		} else if (cursor == CursorType.toggle) { 
+			cursorImage = toolkit.getImage("images/selectioncursor_toggle.png");
 		}
 
 		// Create the desired hotspot for the cursor

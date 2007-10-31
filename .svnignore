@@ -1,2 +1,5 @@
+# svn propset ignore -F .svnignore .
 *.class
+*.jar
+
 

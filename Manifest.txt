@@ -1,0 +1,2 @@
+Main-Class: de/bielefeld/uni/cebitec/cav/ComparativeAssemblyViewer
+Class-Path: ./cav.jar
