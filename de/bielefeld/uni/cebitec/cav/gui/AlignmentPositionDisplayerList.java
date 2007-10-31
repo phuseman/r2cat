@@ -24,6 +24,7 @@ import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.Vector;
 
+import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 
@@ -70,6 +71,7 @@ public class AlignmentPositionDisplayerList implements
 	public void generateAlignmentPositionDisplayerList(int width, int heigth) {
 		double normalisationX = 1;
 		double normalisationY = 1;
+		
 
 		if (!alignmentsPositions.isEmpty()) {
 

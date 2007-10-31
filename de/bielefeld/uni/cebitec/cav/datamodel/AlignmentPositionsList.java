@@ -31,6 +31,8 @@ import java.util.Iterator;
 import java.util.Observable;
 import java.util.Vector;
 
+import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
+
 /**
  * This class is a list of alignment positions.
  * 
@@ -60,7 +62,7 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		alignmentPositions = new Vector<AlignmentPosition>();
 		targets = new HashMap<String, DNASequence>();
 		queries = new HashMap<String, DNASequence>();
-
+		
 		// Collections.sort(targets);
 		// Collections.sort(queries);
 	}

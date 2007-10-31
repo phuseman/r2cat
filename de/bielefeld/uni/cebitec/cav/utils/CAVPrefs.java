@@ -51,6 +51,14 @@ public class CAVPrefs {
 		preferences.putBoolean("unidirectional", b);
 	}
 	
+	public boolean displayOffsets() {
+		return preferences.getBoolean("offsets", false);
+	}
+
+	public void setDisplayOffsets(boolean b) {
+		preferences.putBoolean("offsets", b);
+	}
+	
 	public String lastFile() {
 		return preferences.get("lastFile", "testdata/query.csv");
 	}
