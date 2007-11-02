@@ -43,6 +43,8 @@ public class CAVPrefs {
 		}
 	}
 	
+	
+	
 	public boolean displayUnidirectional() {
 		return preferences.getBoolean("unidirectional", false);
 	}
@@ -67,6 +69,10 @@ public class CAVPrefs {
 		preferences.put("lastFile", s);
 	}
 
+	
+	
+	
+	
 	public void savePrefs() {
 		try {
 			preferences.flush();

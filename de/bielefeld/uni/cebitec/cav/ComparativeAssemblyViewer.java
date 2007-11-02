@@ -50,12 +50,20 @@ public class ComparativeAssemblyViewer {
 		
 		CSVParser csvParser = new CSVParser(new File(preferences.lastFile()));
 		AlignmentPositionsList apl = csvParser.parse();
+		
+
 
 
 		MainWindow main = new MainWindow();
 		DataViewPlugin view = new DataViewPlugin(apl);
 		main.setVisualisation(view);
 
+		// use the preferences: with offsets?
+		if (ComparativeAssemblyViewer.preferences.displayOffsets()) {
+			apl.generateStatistics(); // this sets the center of masses for each query
+			apl.addOffsets();
+		}
+		
 		JFrame tframe = new JFrame();
 		AlignmentTable at = new AlignmentTable(apl);
 		JScrollPane tp = new JScrollPane(at);

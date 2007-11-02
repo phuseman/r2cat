@@ -87,6 +87,13 @@ public class AlignmentPositionDisplayerList implements
 			for (AlignmentPosition ap : alignmentsPositions) {
 				alPosDispList.add(new AlignmentPositionDisplayer(ap));
 			}
+			
+			if (ComparativeAssemblyViewer.preferences.displayUnidirectional()) {
+				this.switchReversed();
+				// switchReversed would change the preferences.
+				// set it again to true
+				ComparativeAssemblyViewer.preferences.setDisplayUnidirectional(true);
+			}
 		}
 	}
 
@@ -137,6 +144,8 @@ public class AlignmentPositionDisplayerList implements
 		for (AlignmentPositionDisplayer elem : alPosDispList) {
 			elem.switchReversed();
 		}
+		// switch preferences
+		ComparativeAssemblyViewer.preferences.setDisplayUnidirectional(!ComparativeAssemblyViewer.preferences.displayUnidirectional());
 	}
 
 	/**
@@ -324,7 +333,10 @@ public class AlignmentPositionDisplayerList implements
 	}
 
 	public void toggleOffsets() {
+		// call the appropriate method on the datamodel
 		alignmentsPositions.toggleOffsets();
+		
+		// rescale sets the new positions including offsets or not
 		for (AlignmentPositionDisplayer apd : alPosDispList) {
 			apd.rescale();
 		}

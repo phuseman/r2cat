@@ -130,6 +130,7 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 			// + sequence.getOffset());
 		}
 		queriesWithOffsets = true;
+		ComparativeAssemblyViewer.preferences.setDisplayOffsets(true);
 	}
 
 	/**
@@ -140,7 +141,8 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 			sequence.setOffset(0);
 		}
 		queriesWithOffsets = false;
-	}
+		ComparativeAssemblyViewer.preferences.setDisplayOffsets(false);
+		}
 
 	public void toggleOffsets() {
 		if (queriesWithOffsets == false) {
@@ -217,6 +219,15 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 			statistics = new AlignmentPositionsStatistics(this);
 		}
 		return statistics;
+	}
+	
+	
+	/**
+	 * Generates a Statistics Object which does some counting.
+	 * The Statistics Object sets the center of mass for each contig/query
+	 */
+	public void generateStatistics() {
+		this.getStatistics();
 	}
 
 	public void markQueriesWithSelectedAps() {

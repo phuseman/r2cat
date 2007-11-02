@@ -33,6 +33,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
+import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
 
@@ -73,7 +74,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		optionsMenu.getAccessibleContext().setAccessibleDescription("Options");
 
 		JCheckBoxMenuItem reverted = new JCheckBoxMenuItem(
-				"Unidirectional Alignments");
+				"Unidirectional Alignments", ComparativeAssemblyViewer.preferences.displayUnidirectional());
 		reverted.setMnemonic(KeyEvent.VK_U);
 		reverted.getAccessibleContext().setAccessibleDescription(
 				"Display the alignments reverted if necessary");
@@ -81,7 +82,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		optionsMenu.add(reverted);
 
 		JCheckBoxMenuItem offsets = new JCheckBoxMenuItem(
-		"Queries with offsets");
+		"Queries with offsets", ComparativeAssemblyViewer.preferences.displayOffsets());
 offsets.setMnemonic(KeyEvent.VK_O);
 offsets.getAccessibleContext().setAccessibleDescription(
 		"Consecutive Queries vs. all queries start at zero");
