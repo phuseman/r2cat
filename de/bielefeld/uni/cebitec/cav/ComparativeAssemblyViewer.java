@@ -11,6 +11,7 @@ import de.bielefeld.uni.cebitec.cav.gui.AlignmentTable;
 import de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
 import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
+import de.bielefeld.uni.cebitec.cav.utils.SwiftExternal;
 
 /***************************************************************************
  *   Copyright (C) 2007 by Peter Husemann                                  *
@@ -48,7 +49,12 @@ public class ComparativeAssemblyViewer {
 	public static void main(String[] args) {
 		preferences = new CAVPrefs();
 		
-		CSVParser csvParser = new CSVParser(new File(preferences.lastFile()));
+		
+		SwiftExternal s = new SwiftExternal();
+		
+		
+		
+		CSVParser csvParser = new CSVParser(new File(preferences.getLastFile()));
 		AlignmentPositionsList apl = csvParser.parse();
 		
 
@@ -59,7 +65,7 @@ public class ComparativeAssemblyViewer {
 		main.setVisualisation(view);
 
 		// use the preferences: with offsets?
-		if (ComparativeAssemblyViewer.preferences.displayOffsets()) {
+		if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
 			apl.generateStatistics(); // this sets the center of masses for each query
 			apl.addOffsets();
 		}

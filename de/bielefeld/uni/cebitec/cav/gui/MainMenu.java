@@ -74,7 +74,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		optionsMenu.getAccessibleContext().setAccessibleDescription("Options");
 
 		JCheckBoxMenuItem reverted = new JCheckBoxMenuItem(
-				"Unidirectional Alignments", ComparativeAssemblyViewer.preferences.displayUnidirectional());
+				"Unidirectional Alignments", ComparativeAssemblyViewer.preferences.getDisplayUnidirectional());
 		reverted.setMnemonic(KeyEvent.VK_U);
 		reverted.getAccessibleContext().setAccessibleDescription(
 				"Display the alignments reverted if necessary");
@@ -82,7 +82,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		optionsMenu.add(reverted);
 
 		JCheckBoxMenuItem offsets = new JCheckBoxMenuItem(
-		"Queries with offsets", ComparativeAssemblyViewer.preferences.displayOffsets());
+		"Queries with offsets", ComparativeAssemblyViewer.preferences.getDisplayOffsets());
 offsets.setMnemonic(KeyEvent.VK_O);
 offsets.getAccessibleContext().setAccessibleDescription(
 		"Consecutive Queries vs. all queries start at zero");

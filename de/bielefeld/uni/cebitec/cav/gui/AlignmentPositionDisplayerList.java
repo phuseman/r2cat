@@ -88,7 +88,7 @@ public class AlignmentPositionDisplayerList implements
 				alPosDispList.add(new AlignmentPositionDisplayer(ap));
 			}
 			
-			if (ComparativeAssemblyViewer.preferences.displayUnidirectional()) {
+			if (ComparativeAssemblyViewer.preferences.getDisplayUnidirectional()) {
 				this.switchReversed();
 				// switchReversed would change the preferences.
 				// set it again to true
@@ -145,7 +145,7 @@ public class AlignmentPositionDisplayerList implements
 			elem.switchReversed();
 		}
 		// switch preferences
-		ComparativeAssemblyViewer.preferences.setDisplayUnidirectional(!ComparativeAssemblyViewer.preferences.displayUnidirectional());
+		ComparativeAssemblyViewer.preferences.setDisplayUnidirectional(!ComparativeAssemblyViewer.preferences.getDisplayUnidirectional());
 	}
 
 	/**

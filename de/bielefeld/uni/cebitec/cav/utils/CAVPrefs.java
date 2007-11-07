@@ -45,7 +45,7 @@ public class CAVPrefs {
 	
 	
 	
-	public boolean displayUnidirectional() {
+	public boolean getDisplayUnidirectional() {
 		return preferences.getBoolean("unidirectional", false);
 	}
 
@@ -53,7 +53,7 @@ public class CAVPrefs {
 		preferences.putBoolean("unidirectional", b);
 	}
 	
-	public boolean displayOffsets() {
+	public boolean getDisplayOffsets() {
 		return preferences.getBoolean("offsets", false);
 	}
 
@@ -61,7 +61,7 @@ public class CAVPrefs {
 		preferences.putBoolean("offsets", b);
 	}
 	
-	public String lastFile() {
+	public String getLastFile() {
 		return preferences.get("lastFile", "testdata/query.csv");
 	}
 	
@@ -69,6 +69,13 @@ public class CAVPrefs {
 		preferences.put("lastFile", s);
 	}
 
+	public String getSwiftExecutable() {
+		return preferences.get("swiftExecutable", "swift");
+	}
+	
+	public void setSwiftExecutable(String s) {
+		preferences.put("swiftExecutable", s);
+	}
 	
 	
 	
