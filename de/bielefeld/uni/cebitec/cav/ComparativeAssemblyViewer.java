@@ -1,6 +1,7 @@
 package de.bielefeld.uni.cebitec.cav;
 
 import java.io.File;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -47,10 +48,21 @@ public class ComparativeAssemblyViewer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
 		preferences = new CAVPrefs();
 		
+		// option to remove all preferences
+		if (args.length >=1 && args[0].matches("clearprefs")) {
+			try {
+				preferences.getPreferences().clear();
+			} catch (BackingStoreException e) {
+				e.printStackTrace();
+			}
+			System.exit(0);
+		}
 		
-		SwiftExternal s = new SwiftExternal();
+		
+		//SwiftExternal s = new SwiftExternal();
 		
 		
 		
@@ -75,6 +87,7 @@ public class ComparativeAssemblyViewer {
 		JScrollPane tp = new JScrollPane(at);
 		tframe.add(tp);
 		tframe.pack();
+		tframe.setLocationByPlatform(true);
 		tframe.setVisible(true);
 
 		main.setVisible(true);

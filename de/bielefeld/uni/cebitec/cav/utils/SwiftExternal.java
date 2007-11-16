@@ -20,8 +20,11 @@
 
 package de.bielefeld.uni.cebitec.cav.utils;
 
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -30,20 +33,20 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.prefs.Preferences;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
-import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
-import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
-import de.bielefeld.uni.cebitec.cav.gui.CSVFileFilter;
-import de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin;
 
 /**
  * @author Peter Husemann
@@ -53,9 +56,15 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		KeyListener {
 	private Process swiftProcess;
 
+	private Preferences prefs;
+
 	private File swiftExecutable;
 
-	private boolean swiftExecutableOk = false;
+	private File query;
+
+	private File target;
+
+	private File output;
 
 	private JTextField tfSwiftExecutable;
 
@@ -75,18 +84,32 @@ public class SwiftExternal extends JFrame implements ActionListener,
 
 	private JButton run;
 
+	private JTextArea log;
+
 	/**
 	 * @param swiftProcess
 	 */
 	public SwiftExternal() {
 		super();
+		prefs = CAVPrefs.getPreferences();
 		init();
-		this.setSize(400, 200);
+
+		this.setSize(this.getPreferredSize());
 		this.pack();
+		this.setLocationByPlatform(true);
 		this.setVisible(true);
+
 	}
 
+	/**
+	 * Initialisations of the gui. Buttons and so on.
+	 */
 	private void init() {
+
+		GridBagConstraints c = new GridBagConstraints();
+
+		JPanel files = new JPanel();
+		files.setBorder(BorderFactory.createTitledBorder("Paths and Files"));
 
 		tfSwiftExecutable = new JTextField();
 		tfSwiftExecutable.addKeyListener(this);
@@ -112,30 +135,81 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		buOutput = new JButton("Set");
 		buOutput.addActionListener(this);
 
-		swiftExecutable = new File(ComparativeAssemblyViewer.preferences
-				.getSwiftExecutable());
-		swiftExecutableOk = swiftExecutable.canExecute();
+		// initialize with prefs if possible
+		this.setSwiftExecutable(new File(prefs.get("swiftExecutable", "")));
+		this.setQuery(new File(prefs.get("query", "")));
+		this.setTarget(new File(prefs.get("target", "")));
+		this.setOutput(new File(prefs.get("output", "")));
 
-		if (swiftExecutableOk) {
-			tfSwiftExecutable.setText(swiftExecutable.getName());
-		}
-
-		
 		run = new JButton("Run");
 		run.addActionListener(this);
-		
-		this.setLayout(new GridLayout(4, 2, 10, 10));
 
-		this.add(tfSwiftExecutable);
-		this.add(buSwiftExecutable);
-		this.add(tfQuery);
-		this.add(buQuery);
-		this.add(tfTarget);
-		this.add(buTarget);
-		this.add(tfOutput);
-		this.add(buOutput);
-		this.add(run);
+		files.setLayout(new GridBagLayout());
+		c.fill = GridBagConstraints.BOTH;
 
+		c.anchor = GridBagConstraints.PAGE_START;
+		c.ipadx = 3;
+		c.ipady = 3;
+
+		c.weightx = 0;
+		files.add(new JLabel("Swift Executable"), c);
+		c.weightx = 1;
+		files.add(tfSwiftExecutable, c);
+		c.weightx = 0;
+		c.gridwidth = GridBagConstraints.REMAINDER; // end row
+		files.add(buSwiftExecutable, c);
+
+		c.gridwidth = 1;
+		c.weightx = 0;
+		files.add(new JLabel("Query"), c);
+		c.weightx = 1;
+		files.add(tfQuery, c);
+		c.weightx = 0;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		files.add(buQuery, c);
+
+		c.gridwidth = 1;
+		c.weightx = 0;
+		files.add(new JLabel("Target"), c);
+		c.weightx = 1;
+		files.add(tfTarget, c);
+		c.weightx = 0;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		files.add(buTarget, c);
+
+		c.gridwidth = 1;
+		c.weightx = 0;
+		files.add(new JLabel("Output"), c);
+		c.weightx = 1;
+		files.add(tfOutput, c);
+		c.weightx = 0;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		files.add(buOutput, c);
+
+		this.setLayout(new GridBagLayout());
+
+		// reset the constraints
+		c = new GridBagConstraints();
+		c.weightx = 5;
+		c.weighty = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+
+		this.add(files, c);
+		c.weightx = 1;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		this.add(run, c);
+
+		c.fill = GridBagConstraints.BOTH;
+		c.weighty = 1;
+		c.gridwidth = GridBagConstraints.RELATIVE;
+
+		log = new JTextArea();
+
+		JScrollPane logPane = new JScrollPane(log);
+		logPane.setBorder(BorderFactory.createTitledBorder("log"));
+		logPane.setPreferredSize(new Dimension(200, 100));
+
+		this.add(logPane, c);
 	}
 
 	private File chooseFile() {
@@ -154,47 +228,162 @@ public class SwiftExternal extends JFrame implements ActionListener,
 	}
 
 	public void setSwiftExecutable(File exec) {
-
-		if (exec.canExecute()) {
+		if (exec == null || exec.getName().equalsIgnoreCase("")) {
+			return;
+		}
+		if (exec.canRead()) {
 			swiftExecutable = exec;
-			swiftExecutableOk = swiftExecutable.canExecute();
 			tfSwiftExecutable.setText(swiftExecutable.getName());
 			try {
-				ComparativeAssemblyViewer.preferences
-						.setSwiftExecutable(swiftExecutable.getCanonicalPath());
+				prefs
+						.put("swiftExecutable", swiftExecutable
+								.getCanonicalPath());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else {
-			JOptionPane.showMessageDialog(this, "Datei nicht ausführbar",
-					"Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "Datei ist nicht lesbar: "
+					+ exec.getName(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
-
 	}
 
-	public boolean excecuteSwift(File query, File target)  {
+	public void setQuery(File q) {
+		if (q == null || q.getName().equalsIgnoreCase("")) {
+			return;
+		}
+
+		if (q.canRead()) {
+			this.query = q;
+			tfQuery.setText(query.getName());
+			try {
+				prefs.put("query", query.getCanonicalPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			JOptionPane.showMessageDialog(this, "Datei ist nicht lesbar: "
+					+ q.getName(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	public void setTarget(File t) {
+		if (t == null || t.getName().equalsIgnoreCase("")) {
+			return;
+		}
+
+		if (t.canRead()) {
+			this.target = t;
+			tfTarget.setText(target.getName());
+			try {
+				prefs.put("target", target.getCanonicalPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			JOptionPane.showMessageDialog(this, "Datei ist nicht lesbar: "
+					+ t.getName(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	public void setOutput(File o) {
+		if (o == null || o.getName().equalsIgnoreCase("")) {
+			return;
+		}
+		if (!o.exists() || o.canWrite()) {
+			this.output = o;
+			tfOutput.setText(output.getName());
+			try {
+				prefs.put("output", output.getCanonicalPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			JOptionPane.showMessageDialog(this, "Datei ist nicht schreibbar: "
+					+ o.getName(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private void errorAlert(String error) {
+		JOptionPane.showMessageDialog(this, error, "Error",
+				JOptionPane.ERROR_MESSAGE);
+	}
+
+	private void log(String txt) {
+		this.log.append(txt);
+	}
+
+	// TODO fix!!
+	private void logBold(String txt) {
+		Font current = log.getFont();
+		Font bold = current.deriveFont(Font.BOLD);
+		log.setFont(bold);
+		this.log.append(txt);
+		log.setFont(current);
+	}
+
+	public boolean excecuteSwift(File query, File target) {
+		String errorMsg = "";
+		boolean error = false;
+
+		// test for errors
+		if (swiftExecutable == null || !swiftExecutable.canRead()) {
+			error = true;
+			errorMsg += "Swift not set or found\n";
+		}
+
+		if (error) {
+			errorAlert(errorMsg);
+		}
+
 		try {
-			swiftProcess = Runtime.getRuntime().exec(swiftExecutable.getCanonicalPath());
+			String swift = swiftExecutable.getCanonicalPath();
+			String swift_db = "database_" + this.target.getName();
+			String swift_query = "query_" + this.query.getName();
+			File outputdir= new File(this.output.getCanonicalPath());
+			System.out.println(outputdir);
 
+			String command_queryindex_createdb = swift + " create "
+					+ swift_query + " " + this.query.getCanonicalPath();
+			String command_queryindex_createindex = swift + " index "
+					+ swift_query + " --gram 11";
 
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				swiftProcess.getInputStream()));
-		
-	    for ( String s; (s = in.readLine()) != null; )
-	        System.out.println( s );
+			String command_dbindex = swift + " create " + swift_db + " "
+					+ this.target.getCanonicalPath() + "&&" + swift + " index "
+					+ swift_db + " --gram 11";
+			
+			log(command_queryindex_createdb);
+			// command, environment, working directory
+			swiftProcess = Runtime.getRuntime().exec(
+					command_queryindex_createdb, null, outputdir);
+
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					swiftProcess.getInputStream()));
+
+			for (String s; (s = in.readLine()) != null;) {
+				log.append(s + "\n");
+			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return true;
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource().equals(buSwiftExecutable)) {
 			this.setSwiftExecutable(this.chooseFile());
+		} else if (e.getSource().equals(buQuery)) {
+			this.setQuery(this.chooseFile());
+		} else if (e.getSource().equals(buTarget)) {
+			this.setTarget(this.chooseFile());
+		} else if (e.getSource().equals(buOutput)) {
+			this.setOutput(this.chooseFile());
 		} else if (e.getSource().equals(run)) {
 			excecuteSwift(null, null);
 		}

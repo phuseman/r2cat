@@ -69,13 +69,6 @@ public class CAVPrefs {
 		preferences.put("lastFile", s);
 	}
 
-	public String getSwiftExecutable() {
-		return preferences.get("swiftExecutable", "swift");
-	}
-	
-	public void setSwiftExecutable(String s) {
-		preferences.put("swiftExecutable", s);
-	}
 	
 	
 	
@@ -88,46 +81,15 @@ public class CAVPrefs {
 			e.printStackTrace();
 		}
 	}
-	
-	/**
-	 * @param pcl
-	 * @see java.util.prefs.Preferences#addPreferenceChangeListener(java.util.prefs.PreferenceChangeListener)
-	 */
-	public void addPreferenceChangeListener(PreferenceChangeListener pcl) {
-		preferences.addPreferenceChangeListener(pcl);
-	}
+
+
 
 	/**
-	 * @throws BackingStoreException
-	 * @see java.util.prefs.Preferences#clear()
+	 * @return the preferences
 	 */
-	public void clear() throws BackingStoreException {
-		preferences.clear();
+	public static Preferences getPreferences() {
+		return preferences;
 	}
 
-	/**
-	 * @throws BackingStoreException
-	 * @see java.util.prefs.Preferences#flush()
-	 */
-	public void flush() throws BackingStoreException {
-		preferences.flush();
-	}
-
-	/**
-	 * @return
-	 * @throws BackingStoreException
-	 * @see java.util.prefs.Preferences#keys()
-	 */
-	public String[] keys() throws BackingStoreException {
-		return preferences.keys();
-	}
-
-	/**
-	 * @throws BackingStoreException
-	 * @see java.util.prefs.Preferences#sync()
-	 */
-	public void sync() throws BackingStoreException {
-		preferences.sync();
-	}
 
 }
