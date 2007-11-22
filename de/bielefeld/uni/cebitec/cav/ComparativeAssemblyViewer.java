@@ -62,7 +62,8 @@ public class ComparativeAssemblyViewer {
 		}
 		
 		
-		//SwiftExternal s = new SwiftExternal();
+		//testing
+		SwiftExternal s = new SwiftExternal();
 		
 		
 		
@@ -88,7 +89,7 @@ public class ComparativeAssemblyViewer {
 		tframe.add(tp);
 		tframe.pack();
 		tframe.setLocationByPlatform(true);
-		tframe.setVisible(true);
+		//tframe.setVisible(true);
 
 		main.setVisible(true);
 	}

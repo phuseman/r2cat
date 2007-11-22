@@ -33,6 +33,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
@@ -53,7 +55,7 @@ import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
  * 
  */
 public class SwiftExternal extends JFrame implements ActionListener,
-		KeyListener {
+		KeyListener, Observer {
 	private Process swiftProcess;
 
 	private Preferences prefs;
@@ -85,6 +87,8 @@ public class SwiftExternal extends JFrame implements ActionListener,
 	private JButton run;
 
 	private JTextArea log;
+
+	private boolean running;
 
 	/**
 	 * @param swiftProcess
@@ -204,6 +208,7 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		c.gridwidth = GridBagConstraints.RELATIVE;
 
 		log = new JTextArea();
+		log.setLineWrap(true);
 
 		JScrollPane logPane = new JScrollPane(log);
 		logPane.setBorder(BorderFactory.createTitledBorder("log"));
@@ -317,6 +322,8 @@ public class SwiftExternal extends JFrame implements ActionListener,
 	}
 
 	// TODO fix!!
+	// JTextArea is only capable of one global layout.
+	// maybe use JTextPane
 	private void logBold(String txt) {
 		Font current = log.getFont();
 		Font bold = current.deriveFont(Font.BOLD);
@@ -325,7 +332,7 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		log.setFont(current);
 	}
 
-	public boolean excecuteSwift(File query, File target) {
+	public boolean excecuteSwift() {
 		String errorMsg = "";
 		boolean error = false;
 
@@ -335,37 +342,53 @@ public class SwiftExternal extends JFrame implements ActionListener,
 			errorMsg += "Swift not set or found\n";
 		}
 
+		// TODO add some more checks
+
 		if (error) {
 			errorAlert(errorMsg);
+			return false;
 		}
 
 		try {
 			String swift = swiftExecutable.getCanonicalPath();
 			String swift_db = "database_" + this.target.getName();
 			String swift_query = "query_" + this.query.getName();
-			File outputdir= new File(this.output.getCanonicalPath());
-			System.out.println(outputdir);
+			double swift_maxerror = 0.08;
+			int swift_minlen = 500;
+			int swift_gramlen = 11;
+
+			// the directory where the swift databases are stored
+			// should be the one where the result is stored.
+			File outputdir = this.output.getParentFile();
 
 			String command_queryindex_createdb = swift + " create "
 					+ swift_query + " " + this.query.getCanonicalPath();
 			String command_queryindex_createindex = swift + " index "
-					+ swift_query + " --gram 11";
+					+ swift_query + " --gram " + swift_gramlen;
 
-			String command_dbindex = swift + " create " + swift_db + " "
-					+ this.target.getCanonicalPath() + "&&" + swift + " index "
-					+ swift_db + " --gram 11";
-			
-			log(command_queryindex_createdb);
-			// command, environment, working directory
-			swiftProcess = Runtime.getRuntime().exec(
-					command_queryindex_createdb, null, outputdir);
+			String command_dbindex_createdb = swift + " create " + swift_db
+					+ " " + this.target.getCanonicalPath();
+			String command_dbindex_createindex = swift + " index " + swift_db
+					+ " --gram " + swift_gramlen;
 
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					swiftProcess.getInputStream()));
+			String command_doMatching = swift + " query --maxerror "
+					+ swift_maxerror + " --minlen " + swift_minlen + " --gram "
+					+ swift_gramlen + " " + swift_db + " " + swift_query
+					+ " --output " + this.output.getCanonicalPath()
+					+ " --compassemb";
 
-			for (String s; (s = in.readLine()) != null;) {
-				log.append(s + "\n");
-			}
+			// run the commands
+			SwiftExecutor swiftExec = new SwiftExecutor(this);
+			swiftExec.setOutputDir(outputdir);
+
+//			swiftExec.addCommand(command_queryindex_createdb);
+//			swiftExec.addCommand(command_queryindex_createindex);
+//			swiftExec.addCommand(command_dbindex_createdb);
+//			swiftExec.addCommand(command_dbindex_createindex);
+			swiftExec.addCommand(command_doMatching);
+
+			Thread t = new Thread(swiftExec);
+			t.run();
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -385,7 +408,7 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		} else if (e.getSource().equals(buOutput)) {
 			this.setOutput(this.chooseFile());
 		} else if (e.getSource().equals(run)) {
-			excecuteSwift(null, null);
+			this.excecuteSwift();
 		}
 
 	}
@@ -403,6 +426,10 @@ public class SwiftExternal extends JFrame implements ActionListener,
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void update(Observable o, Object arg) {
+		log.append((String) arg);
 	}
 
 }
