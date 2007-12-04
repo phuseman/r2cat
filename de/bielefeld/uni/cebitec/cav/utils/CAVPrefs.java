@@ -18,7 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 package de.bielefeld.uni.cebitec.cav.utils;
 
 import java.util.prefs.BackingStoreException;
@@ -26,53 +25,83 @@ import java.util.prefs.PreferenceChangeListener;
 import java.util.prefs.Preferences;
 
 /**
+ * This class should give access to various preferences. There are some
+ * predefined functions (get* set*) for an unambigeuos access. But it is also
+ * possible to get the sun Preferences object (getPreferences) for custom prefs.
+ * 
  * @author Peter Husemann
- *
+ * 
  */
 
 public class CAVPrefs {
-	
+
 	private static Preferences preferences = null;
 
 	/**
-	 * 
+	 * Initialises the java.util.prefs.Preferences object, so that it uses the default place to store the prefs.
+	 * On Windows this is the registry, whereas linux or unix use the ~/.java directory.
+	 * @see {@link Preferences}
 	 */
 	public CAVPrefs() {
 		if (preferences == null) {
-		preferences = Preferences.userNodeForPackage(this.getClass());
+			preferences = Preferences.userNodeForPackage(this.getClass());
 		}
 	}
-	
-	
-	
+
+	/**
+	 * Get preference: Should the viewer draw all alignments in one direction?
+	 * 
+	 * @return
+	 */
 	public boolean getDisplayUnidirectional() {
 		return preferences.getBoolean("unidirectional", false);
 	}
 
+	/**
+	 *  Set preference: Should the viewer draw all alignments in one direction?
+	 * @param b true, false
+	 */
 	public void setDisplayUnidirectional(boolean b) {
 		preferences.putBoolean("unidirectional", b);
 	}
-	
+
+	/**
+	 * Get preference: Should the viewer draw each contig with a offset or not?
+	 * @return
+	 */
 	public boolean getDisplayOffsets() {
 		return preferences.getBoolean("offsets", false);
 	}
 
+	/**
+	 * Set preference: Should the viewer draw each contig with a offset or not?
+	 * @param b
+	 */
 	public void setDisplayOffsets(boolean b) {
 		preferences.putBoolean("offsets", b);
 	}
-	
+
+	/**
+	 * Get preference: The last file with alignments that was opened.
+	 * @return
+	 */
 	public String getLastFile() {
 		return preferences.get("lastFile", "testdata/query.csv");
 	}
-	
+
+	/**
+	 * Set the last file with alignments that was open. This file will most likely
+	 * be opened the next time the viewer starts.
+	 * 
+	 * @param s
+	 */
 	public void setLastFile(String s) {
 		preferences.put("lastFile", s);
 	}
 
-	
-	
-	
-	
+	/**
+	 * Convinience nethod. Tries to save the actual preferences.
+	 */
 	public void savePrefs() {
 		try {
 			preferences.flush();
@@ -82,14 +111,13 @@ public class CAVPrefs {
 		}
 	}
 
-
-
 	/**
-	 * @return the preferences
+	 * If one does not want to use the get* and set* methods of this object, than the underlying
+	 * java.util.prefs.Preferences can be accessed for custom needs.
+	 * @return {@link Preferences}
 	 */
 	public static Preferences getPreferences() {
 		return preferences;
 	}
-
 
 }
