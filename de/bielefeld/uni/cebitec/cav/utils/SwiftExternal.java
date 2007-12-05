@@ -91,7 +91,9 @@ public class SwiftExternal extends JFrame implements ActionListener,
 	private boolean running;
 
 	/**
-	 * @param swiftProcess
+	 * Displays a window, where a swift executable as well as input and output
+	 * can be selected. After the selectio swift can be used to produce an
+	 * alignment fil which can be displayed then.
 	 */
 	public SwiftExternal() {
 		super();
@@ -112,6 +114,12 @@ public class SwiftExternal extends JFrame implements ActionListener,
 
 		GridBagConstraints c = new GridBagConstraints();
 
+		// the log has to be created here, because a warning for an already
+		// existing outputfile could be issued
+		log = new JTextArea();
+		log.setLineWrap(true);
+		log.setEditable(false);
+
 		JPanel files = new JPanel();
 		files.setBorder(BorderFactory.createTitledBorder("Paths and Files"));
 
@@ -128,15 +136,23 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		tfOutput.addKeyListener(this);
 
 		buSwiftExecutable = new JButton("Set");
+		buSwiftExecutable.setToolTipText("Select the swift executable");
 		buSwiftExecutable.addActionListener(this);
 
 		buQuery = new JButton("Set");
+		buQuery
+				.setToolTipText("Select the query sequence(s) in (multiple) fasta format");
 		buQuery.addActionListener(this);
 
 		buTarget = new JButton("Set");
+		buTarget
+				.setToolTipText("Select the target sequence(s) in (multiple) fasta format");
 		buTarget.addActionListener(this);
 
 		buOutput = new JButton("Set");
+		buOutput
+				.setToolTipText("Select the file in which the output should be written. "
+						+ "This determines also the directory, where some temporary files will be stored");
 		buOutput.addActionListener(this);
 
 		// initialize with prefs if possible
@@ -207,9 +223,6 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		c.weighty = 1;
 		c.gridwidth = GridBagConstraints.RELATIVE;
 
-		log = new JTextArea();
-		log.setLineWrap(true);
-
 		JScrollPane logPane = new JScrollPane(log);
 		logPane.setBorder(BorderFactory.createTitledBorder("log"));
 		logPane.setPreferredSize(new Dimension(400, 200));
@@ -217,8 +230,28 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		this.add(logPane, c);
 	}
 
-	private File chooseFile() {
+	/**
+	 * Displays a file open dialog and returns a selected file. If the dialog
+	 * was cancelled, then null is returned
+	 * 
+	 * @param prevFile
+	 *            File that was previously assinged. This is used to determine
+	 *            the apropriate directory. If this parameter is null nothing
+	 *            happens.
+	 * @param dialogTitle
+	 *            Gives the dialog a custom title. If null nothing happens.
+	 * @return The selected file or directory. null if cancelled.
+	 */
+	private File chooseFile(File prevFile, String dialogTitle) {
 		JFileChooser fileChooser = new JFileChooser();
+
+		if (dialogTitle != null) {
+			fileChooser.setDialogTitle(dialogTitle);
+		}
+
+		if (prevFile != null && prevFile.getParentFile().exists()) {
+			fileChooser.setCurrentDirectory(prevFile.getParentFile());
+		}
 
 		// disable all files filter
 		// fileChooser.setAcceptAllFileFilterUsed(false);
@@ -232,6 +265,14 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		}
 	}
 
+	/**
+	 * Sets the swift executable to the given file after performing some sanity
+	 * checks. Additionally the appropriate textfield is labeled and the path is
+	 * stored in the preferences.
+	 * 
+	 * @param file
+	 *            File to set
+	 */
 	public void setSwiftExecutable(File exec) {
 		if (exec == null || exec.getName().equalsIgnoreCase("")) {
 			return;
@@ -240,7 +281,8 @@ public class SwiftExternal extends JFrame implements ActionListener,
 			swiftExecutable = exec;
 			tfSwiftExecutable.setText(swiftExecutable.getName());
 			try {
-				tfSwiftExecutable.setToolTipText(swiftExecutable.getCanonicalPath());
+				tfSwiftExecutable.setToolTipText(swiftExecutable
+						.getCanonicalPath());
 				prefs
 						.put("swiftExecutable", swiftExecutable
 								.getCanonicalPath());
@@ -249,11 +291,19 @@ public class SwiftExternal extends JFrame implements ActionListener,
 				e.printStackTrace();
 			}
 		} else {
-			JOptionPane.showMessageDialog(this, "Datei ist nicht lesbar: "
-					+ exec.getName(), "Error", JOptionPane.ERROR_MESSAGE);
+
+			this.errorAlert("File is not readable: " + exec.getName());
 		}
 	}
 
+	/**
+	 * Sets the query to the given file after performing some sanity checks.
+	 * Additionally the appropriate textfield is labeled and the path is stored
+	 * in the preferences.
+	 * 
+	 * @param file
+	 *            File to set
+	 */
 	public void setQuery(File q) {
 		if (q == null || q.getName().equalsIgnoreCase("")) {
 			return;
@@ -270,11 +320,18 @@ public class SwiftExternal extends JFrame implements ActionListener,
 				e.printStackTrace();
 			}
 		} else {
-			JOptionPane.showMessageDialog(this, "Datei ist nicht lesbar: "
-					+ q.getName(), "Error", JOptionPane.ERROR_MESSAGE);
+			this.errorAlert("File is not readable: " + q.getName());
 		}
 	}
 
+	/**
+	 * Sets the target to the given file after performing some sanity checks.
+	 * Additionally the appropriate textfield is labeled and the path is stored
+	 * in the preferences.
+	 * 
+	 * @param file
+	 *            File to set
+	 */
 	public void setTarget(File t) {
 		if (t == null || t.getName().equalsIgnoreCase("")) {
 			return;
@@ -292,16 +349,26 @@ public class SwiftExternal extends JFrame implements ActionListener,
 				e.printStackTrace();
 			}
 		} else {
-			JOptionPane.showMessageDialog(this, "Datei ist nicht lesbar: "
-					+ t.getName(), "Error", JOptionPane.ERROR_MESSAGE);
+			this.errorAlert("File is not readable: " + t.getName());
 		}
 	}
 
+	/**
+	 * Sets the output to the given file after performing some sanity checks.
+	 * Additionally the appropriate textfield is labeled and the path is stored
+	 * in the preferences.
+	 * 
+	 * @param file
+	 *            File to set
+	 */
 	public void setOutput(File o) {
 		if (o == null || o.getName().equalsIgnoreCase("")) {
 			return;
 		}
-		if (!o.exists() || o.canWrite()) {
+		if ((!o.exists() && o.getParentFile().canWrite()) || o.canWrite()) {
+			if (o.exists()) {
+				this.logBold("Warning: Output file already exists!\n");
+			}
 			this.output = o;
 			tfOutput.setText(output.getName());
 			try {
@@ -313,16 +380,24 @@ public class SwiftExternal extends JFrame implements ActionListener,
 				e.printStackTrace();
 			}
 		} else {
-			JOptionPane.showMessageDialog(this, "Datei ist nicht schreibbar: "
-					+ o.getName(), "Error", JOptionPane.ERROR_MESSAGE);
+			this.errorAlert("Output file is not writable:\n"
+					+ o.getAbsolutePath());
 		}
 	}
 
+	/**
+	 *  Pop up an error message
+	 * @param error Message
+	 */
 	private void errorAlert(String error) {
 		JOptionPane.showMessageDialog(this, error, "Error",
 				JOptionPane.ERROR_MESSAGE);
 	}
 
+	/**
+	 * Append a txt to the log pane.
+	 * @param txt text to append to the log
+	 */
 	protected void log(String txt) {
 		this.log.append(txt);
 	}
@@ -345,7 +420,23 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		// test for errors
 		if (swiftExecutable == null || !swiftExecutable.canRead()) {
 			error = true;
-			errorMsg += "Swift not set or found\n";
+			errorMsg += "Swift not set or the executable can not be read\n";
+		}
+
+		if (query == null || !query.canRead()) {
+			error = true;
+			errorMsg += "The query was not selected or can not be read\n";
+		}
+
+		if (target == null || !target.canRead()) {
+			error = true;
+			errorMsg += "The target was not selected or can not be read\n";
+		}
+
+		if (output == null || !output.getParentFile().canWrite()) {
+			error = true;
+			errorMsg += "The output was not selected or you have no writing access in\n"
+					+ output.getParentFile();
 		}
 
 		// TODO add some more checks
@@ -406,13 +497,18 @@ public class SwiftExternal extends JFrame implements ActionListener,
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource().equals(buSwiftExecutable)) {
-			this.setSwiftExecutable(this.chooseFile());
+			this.setSwiftExecutable(this.chooseFile(swiftExecutable,
+					"Select swift executable"));
 		} else if (e.getSource().equals(buQuery)) {
-			this.setQuery(this.chooseFile());
+			this
+					.setQuery(this.chooseFile(query,
+							"Select query (fasta format)"));
 		} else if (e.getSource().equals(buTarget)) {
-			this.setTarget(this.chooseFile());
+			this.setTarget(this.chooseFile(target,
+					"Select target (fasta format)"));
 		} else if (e.getSource().equals(buOutput)) {
-			this.setOutput(this.chooseFile());
+			this.setOutput(this.chooseFile(output,
+					"Select output file (csv format)"));
 		} else if (e.getSource().equals(run)) {
 			this.excecuteSwift();
 		}
@@ -430,7 +526,9 @@ public class SwiftExternal extends JFrame implements ActionListener,
 	}
 
 	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
+		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+			System.out.println(e.getSource());
+		}
 
 	}
 
