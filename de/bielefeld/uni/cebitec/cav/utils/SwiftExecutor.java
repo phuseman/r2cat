@@ -5,24 +5,23 @@ package de.bielefeld.uni.cebitec.cav.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Vector;
 
 /**
+ * Start the swift program in a thread to avoid freezing of the gui.
  * @author phuseman
  * 
  */
-public class SwiftExecutor extends Observable implements Runnable {
+public class SwiftExecutor implements Runnable {
 
 	private File outputDir = null;
+	private SwiftExternal caller;
 
 	private Vector<String> commands;
 
-	public SwiftExecutor(Observer o) {
-		this.addObserver(o);
+	public SwiftExecutor(SwiftExternal se) {
+		this.caller=se;
 		commands = new Vector<String>();
 	}
 
@@ -35,7 +34,6 @@ public class SwiftExecutor extends Observable implements Runnable {
 	}
 
 	private void runCommand(String commandString) {
-		this.notifyObservers(commandString + "\n");
 
 		try {
 			// command, environment, working directory
@@ -44,15 +42,15 @@ public class SwiftExecutor extends Observable implements Runnable {
 			// start the job; current working directory is given by outputDir
 
 			// get the output
-//			BufferedReader in = new BufferedReader(new InputStreamReader(
-//					process.getInputStream()));
-//
-//			for (String s; (s = in.readLine()) != null;) {
-//				this.notifyObservers(s + "\n");
-//			}
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					process.getInputStream()));
 
-			this.notifyObservers("Process finished with status "
-					+ process.waitFor());
+			for (String s; (s = in.readLine()) != null;) {
+				caller.log(s + "\n");
+			}
+
+			caller.log("Process finished with status: "
+					+ process.waitFor() + "\n");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -62,10 +60,10 @@ public class SwiftExecutor extends Observable implements Runnable {
 
 	public void run() {
 		for (String command : commands) {
+			caller.logBold("Executing:\n" + command + "\n");
 			this.runCommand(command);
 		}
 		commands.removeAllElements();
-
 	}
 
 }

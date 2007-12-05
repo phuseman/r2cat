@@ -55,7 +55,7 @@ import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
  * 
  */
 public class SwiftExternal extends JFrame implements ActionListener,
-		KeyListener, Observer {
+		KeyListener {
 	private Process swiftProcess;
 
 	private Preferences prefs;
@@ -212,7 +212,7 @@ public class SwiftExternal extends JFrame implements ActionListener,
 
 		JScrollPane logPane = new JScrollPane(log);
 		logPane.setBorder(BorderFactory.createTitledBorder("log"));
-		logPane.setPreferredSize(new Dimension(200, 100));
+		logPane.setPreferredSize(new Dimension(400, 200));
 
 		this.add(logPane, c);
 	}
@@ -240,6 +240,7 @@ public class SwiftExternal extends JFrame implements ActionListener,
 			swiftExecutable = exec;
 			tfSwiftExecutable.setText(swiftExecutable.getName());
 			try {
+				tfSwiftExecutable.setToolTipText(swiftExecutable.getCanonicalPath());
 				prefs
 						.put("swiftExecutable", swiftExecutable
 								.getCanonicalPath());
@@ -262,6 +263,7 @@ public class SwiftExternal extends JFrame implements ActionListener,
 			this.query = q;
 			tfQuery.setText(query.getName());
 			try {
+				tfQuery.setToolTipText(query.getCanonicalPath());
 				prefs.put("query", query.getCanonicalPath());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -282,6 +284,8 @@ public class SwiftExternal extends JFrame implements ActionListener,
 			this.target = t;
 			tfTarget.setText(target.getName());
 			try {
+				tfTarget.setToolTipText(target.getCanonicalPath());
+
 				prefs.put("target", target.getCanonicalPath());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -301,6 +305,8 @@ public class SwiftExternal extends JFrame implements ActionListener,
 			this.output = o;
 			tfOutput.setText(output.getName());
 			try {
+				tfOutput.setToolTipText(output.getCanonicalPath());
+
 				prefs.put("output", output.getCanonicalPath());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -317,14 +323,14 @@ public class SwiftExternal extends JFrame implements ActionListener,
 				JOptionPane.ERROR_MESSAGE);
 	}
 
-	private void log(String txt) {
+	protected void log(String txt) {
 		this.log.append(txt);
 	}
 
 	// TODO fix!!
 	// JTextArea is only capable of one global layout.
 	// maybe use JTextPane
-	private void logBold(String txt) {
+	protected void logBold(String txt) {
 		Font current = log.getFont();
 		Font bold = current.deriveFont(Font.BOLD);
 		log.setFont(bold);
@@ -381,14 +387,14 @@ public class SwiftExternal extends JFrame implements ActionListener,
 			SwiftExecutor swiftExec = new SwiftExecutor(this);
 			swiftExec.setOutputDir(outputdir);
 
-//			swiftExec.addCommand(command_queryindex_createdb);
-//			swiftExec.addCommand(command_queryindex_createindex);
-//			swiftExec.addCommand(command_dbindex_createdb);
-//			swiftExec.addCommand(command_dbindex_createindex);
+			swiftExec.addCommand(command_queryindex_createdb);
+			swiftExec.addCommand(command_queryindex_createindex);
+			swiftExec.addCommand(command_dbindex_createdb);
+			swiftExec.addCommand(command_dbindex_createindex);
 			swiftExec.addCommand(command_doMatching);
 
 			Thread t = new Thread(swiftExec);
-			t.run();
+			t.start();
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -426,10 +432,6 @@ public class SwiftExternal extends JFrame implements ActionListener,
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
 
-	}
-
-	public void update(Observable o, Object arg) {
-		log.append((String) arg);
 	}
 
 }
