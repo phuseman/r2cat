@@ -88,7 +88,7 @@ public class SwiftExternal extends JFrame implements ActionListener,
 
 	private JTextArea log;
 
-	private boolean running;
+	protected boolean threadRunning = false;
 
 	/**
 	 * Displays a window, where a swift executable as well as input and output
@@ -118,6 +118,7 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		// existing outputfile could be issued
 		log = new JTextArea();
 		log.setLineWrap(true);
+		log.setWrapStyleWord(true);
 		log.setEditable(false);
 
 		JPanel files = new JPanel();
@@ -400,6 +401,7 @@ public class SwiftExternal extends JFrame implements ActionListener,
 	 */
 	protected void log(String txt) {
 		this.log.append(txt);
+		log.setCaretPosition(log.getDocument().getLength());
 	}
 
 	// TODO fix!!
@@ -417,6 +419,11 @@ public class SwiftExternal extends JFrame implements ActionListener,
 		String errorMsg = "";
 		boolean error = false;
 
+		if (threadRunning) {
+			error = true;
+			errorMsg += "The program is already running\n";
+		}
+		
 		// test for errors
 		if (swiftExecutable == null || !swiftExecutable.canRead()) {
 			error = true;
@@ -486,6 +493,7 @@ public class SwiftExternal extends JFrame implements ActionListener,
 
 			Thread t = new Thread(swiftExec);
 			t.start();
+			this.threadRunning=true;
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

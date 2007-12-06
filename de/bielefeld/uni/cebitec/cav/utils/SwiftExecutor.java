@@ -64,6 +64,7 @@ public class SwiftExecutor implements Runnable {
 			this.runCommand(command);
 		}
 		commands.removeAllElements();
+		caller.threadRunning = false;
 	}
 
 }
