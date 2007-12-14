@@ -387,8 +387,10 @@ public class SwiftExternal extends JFrame implements ActionListener,
 	}
 
 	/**
-	 *  Pop up an error message
-	 * @param error Message
+	 * Pop up an error message
+	 * 
+	 * @param error
+	 *            Message
 	 */
 	private void errorAlert(String error) {
 		JOptionPane.showMessageDialog(this, error, "Error",
@@ -397,7 +399,9 @@ public class SwiftExternal extends JFrame implements ActionListener,
 
 	/**
 	 * Append a txt to the log pane.
-	 * @param txt text to append to the log
+	 * 
+	 * @param txt
+	 *            text to append to the log
 	 */
 	protected void log(String txt) {
 		this.log.append(txt);
@@ -423,7 +427,7 @@ public class SwiftExternal extends JFrame implements ActionListener,
 			error = true;
 			errorMsg += "The program is already running\n";
 		}
-		
+
 		// test for errors
 		if (swiftExecutable == null || !swiftExecutable.canRead()) {
 			error = true;
@@ -493,7 +497,8 @@ public class SwiftExternal extends JFrame implements ActionListener,
 
 			Thread t = new Thread(swiftExec);
 			t.start();
-			this.threadRunning=true;
+			this.threadRunning = true; // lock, that the program is not run
+										// twice at the same time.
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

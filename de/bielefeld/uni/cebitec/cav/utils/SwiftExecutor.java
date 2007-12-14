@@ -10,18 +10,20 @@ import java.util.Vector;
 
 /**
  * Start the swift program in a thread to avoid freezing of the gui.
+ * 
  * @author phuseman
  * 
  */
 public class SwiftExecutor implements Runnable {
 
 	private File outputDir = null;
+
 	private SwiftExternal caller;
 
 	private Vector<String> commands;
 
 	public SwiftExecutor(SwiftExternal se) {
-		this.caller=se;
+		this.caller = se;
 		commands = new Vector<String>();
 	}
 
@@ -49,8 +51,8 @@ public class SwiftExecutor implements Runnable {
 				caller.log(s + "\n");
 			}
 
-			caller.log("Process finished with status: "
-					+ process.waitFor() + "\n");
+			caller.log("Process finished with status: " + process.waitFor()
+					+ "\n");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -64,7 +66,7 @@ public class SwiftExecutor implements Runnable {
 			this.runCommand(command);
 		}
 		commands.removeAllElements();
-		caller.threadRunning = false;
+		caller.threadRunning = false; // remove lock
 	}
 
 }

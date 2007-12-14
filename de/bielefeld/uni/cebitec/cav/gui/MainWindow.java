@@ -55,7 +55,7 @@ public class MainWindow extends JFrame {
 	protected MainMenu menuBar;
 
 	public MainWindow() {
-		super("Comperative Assembly Viewer");
+		super("Comparative Assembly Viewer");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		init();
 
