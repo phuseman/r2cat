@@ -22,15 +22,25 @@ public class SwiftExecutor implements Runnable {
 
 	private Vector<String> commands;
 
+	private static boolean threadRunning;
+
 	public SwiftExecutor(SwiftExternal se) {
 		this.caller = se;
 		commands = new Vector<String>();
 	}
 
+	/**
+	 * Adds a command to a queue. All commands are executed with <code>run()</code>
+	 * @param command
+	 */
 	public void addCommand(String command) {
 		this.commands.add(command);
 	}
 
+	/**
+	 * Sets the directory, where the output shall be written.
+	 * @param dir
+	 */
 	public void setOutputDir(File dir) {
 		this.outputDir = dir;
 	}
@@ -60,13 +70,26 @@ public class SwiftExecutor implements Runnable {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 * runs the thread. Use with Thread.start().
+	 */
 	public void run() {
+		SwiftExecutor.threadRunning = true; // set lock
 		for (String command : commands) {
 			caller.logBold("Executing:\n" + command + "\n");
 			this.runCommand(command);
 		}
 		commands.removeAllElements();
-		caller.threadRunning = false; // remove lock
+		SwiftExecutor.threadRunning = false; // remove lock
+	}
+
+	/**
+	 * Semaphore if already a thread is running. Remember the thread is only used that the GUI does not freezes.
+	 * @return the threadRunning
+	 */
+	public static boolean isThreadRunning() {
+		return threadRunning;
 	}
 
 }

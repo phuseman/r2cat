@@ -54,6 +54,9 @@ public class MainWindow extends JFrame {
 
 	protected MainMenu menuBar;
 
+	/**
+	 * Calls the super constructor and initializes the window
+	 */
 	public MainWindow() {
 		super("Comparative Assembly Viewer");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -61,12 +64,10 @@ public class MainWindow extends JFrame {
 
 	}
 
-	// class MainWindowAdapter extends WindowAdapter {
-	// public void windowClosing(WindowEvent e) {
-	// System.exit(0);
-	// }
-	// }
-
+	/**
+	 * Initializes all necessary parameters for the main window. (Size,
+	 * position, compontents and so on)
+	 */
 	private void init() {
 		Container content = this.getContentPane();
 
@@ -125,6 +126,12 @@ public class MainWindow extends JFrame {
 		this.pack();
 	}
 
+	/**
+	 * Sets the visualisation plugin and registers different listeners to the
+	 * plugin.
+	 * 
+	 * @param vplug
+	 */
 	public void setVisualisation(DataViewPlugin vplug) {
 		this.vplug = vplug;
 		this.addComponentListener(vplug);
