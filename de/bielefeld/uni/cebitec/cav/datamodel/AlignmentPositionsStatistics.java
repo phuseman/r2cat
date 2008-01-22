@@ -26,6 +26,9 @@ import java.util.Observer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
 
 /**
+ * Collects and computes some statistics for the alignment positions. This is sometimes used as a 
+ * convinience function and sometimes to avoid a unnecessary repeated calculation over all alignmentpositions.
+ * 
  * @author Peter Husemann
  * 
  */
@@ -56,6 +59,10 @@ public class AlignmentPositionsStatistics implements Observer {
 		this.generateStatistics();
 	}
 
+	
+	/**
+	 * Resets all stored statistics. Necessary to recompute all values.
+	 */
 	private void resetStatistics() {
 		minQueryLen = Long.MAX_VALUE;
 		maxQueryLen = 0;
@@ -68,24 +75,30 @@ public class AlignmentPositionsStatistics implements Observer {
 		numberTargets = 0;
 	}
 
+	/**
+	 * Generates some statistics. For example the minimum and maximum lengths of
+	 * targets and queries, the sum of the lengths and the center of mass for the queries.
+	 * the latter is used to order the queries on the y axis.
+	 */
 	protected void generateStatistics() {
 
 		this.resetStatistics();
 		
-		// compute the center of mass for each contig/query
+		// go through all AlignmentPositions and collect the weighted centers and the total lengths for each query
 		for (AlignmentPosition element : apl) {
 			element.getQuery().centerOfMass +=  element.getTargetCenter() * element.size();
 			element.getQuery().totalAlignmentLength += element.size();
 		}
-		
 
 
+		// go through all queries
 		for (DNASequence query : apl.getQueries().values()) {
 			
-			//center of mass
+			//compute the center of mass for each contig/query
 			query.centerOfMass = query.centerOfMass / query.totalAlignmentLength; 
 
 
+			// compute min and max query size
 			if (minQueryLen > query.getSize()) {
 				minQueryLen = query.getSize();
 			}
@@ -93,6 +106,7 @@ public class AlignmentPositionsStatistics implements Observer {
 				maxQueryLen = query.getSize();
 			}
 
+			// the sum of all queries and the sum of their sizes
 			sumQueryLen += query.getSize();
 			numberQueries++;
 		}
@@ -100,7 +114,7 @@ public class AlignmentPositionsStatistics implements Observer {
 		
 
 		
-		
+		// same for all targets
 		for (DNASequence target : apl.getTargets().values()) {
 			if (minTargetLen > target.getSize()) {
 				minTargetLen = target.getSize();
@@ -118,6 +132,12 @@ public class AlignmentPositionsStatistics implements Observer {
 	
 	}
 
+	/* (non-Javadoc)
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 * 
+	 * if the list of alignments is updated this method is called.
+	 * it regenerates the statistics, only if the list has changed
+	 */
 	public void update(Observable o, Object arg) {
 		if (arg == null) {
 			;
