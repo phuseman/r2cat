@@ -20,10 +20,6 @@
 
 package de.bielefeld.uni.cebitec.cav.datamodel;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,7 +36,7 @@ import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
  * 
  */
 public class AlignmentPositionsList extends Observable implements Serializable,
-		Externalizable, Iterable<AlignmentPosition> {
+		 Iterable<AlignmentPosition> /* TODO: maybe implement Externalizable to write out the alignments */ {
 	private Vector<AlignmentPosition> alignmentPositions;
 
 	private HashMap<String, DNASequence> targets;
@@ -52,7 +48,18 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 	private boolean queriesWithOffsets = false;
 
 	public static enum NotifyEvent {
-		MARK, HIDE, CHANGE
+		/**
+		 * This event is fired if alignments are marked in the gui
+		 */
+		MARK, 
+		/**
+		 * This event is fired if elements are going to hide. (not implemented yet) 
+		 */
+		HIDE, 
+		/**
+		 * This event is fired 
+		 */
+		CHANGE
 	};
 
 	/**
@@ -89,16 +96,6 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		return alignmentPositions.isEmpty();
 	}
 
-	public void readExternal(ObjectInput in) throws IOException,
-			ClassNotFoundException {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void writeExternal(ObjectOutput out) throws IOException {
-		// TODO Auto-generated method stub
-
-	}
 
 	public int size() {
 		return alignmentPositions.size();
