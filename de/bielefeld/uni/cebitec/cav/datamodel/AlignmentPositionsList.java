@@ -37,6 +37,11 @@ import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
  */
 public class AlignmentPositionsList extends Observable implements Serializable,
 		 Iterable<AlignmentPosition> /* TODO: maybe implement Externalizable to write out the alignments */ {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6784900397716077729L;
+
 	private Vector<AlignmentPosition> alignmentPositions;
 
 	private HashMap<String, DNASequence> targets;

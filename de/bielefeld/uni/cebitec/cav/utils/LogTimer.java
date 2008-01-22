@@ -68,16 +68,18 @@ public final class LogTimer {
 	}
 
 	public void startTimer() {
-		if (!timingActive)
+		if (!timingActive) {
 			return;
+		}
 		times.push(System.currentTimeMillis());
 		ThreadMXBean tb = ManagementFactory.getThreadMXBean();
 		cpuTimes.push(tb.getCurrentThreadCpuTime());
 	}
 
 	public void stopTimer(String message) {
-		if (!timingActive)
+		if (!timingActive) {
 			return;
+		}
 		String s = "";
 		try {
 			Long t0 = times.pop();
@@ -86,7 +88,7 @@ public final class LogTimer {
 			ThreadMXBean tb = ManagementFactory.getThreadMXBean();
 			long tCpu = tb.getCurrentThreadCpuTime() - t0cput;
 			lastPeriod = t / 1000.0f;
-			lastPeriodCpu = ((float) tCpu) * 1e-9f;
+			lastPeriodCpu = (tCpu) * 1e-9f;
 			for (int i = 0; i < times.size(); i++) {
 				s += "   ";
 			}
@@ -99,8 +101,9 @@ public final class LogTimer {
 	}
 
 	public void restartTimer(String message) {
-		if (!timingActive)
+		if (!timingActive) {
 			return;
+		}
 		stopTimer(message);
 		startTimer();
 	}

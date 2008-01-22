@@ -30,6 +30,7 @@ import javax.swing.filechooser.FileFilter;
  */
 public class CSVFileFilter extends FileFilter {
 
+	@Override
 	public boolean accept(File f) {
 		if (f.isDirectory()) {
 			return true;
@@ -43,6 +44,7 @@ public class CSVFileFilter extends FileFilter {
 	}
 
 	// The description of this filter
+	@Override
 	public String getDescription() {
 		return "comma-separated values (*.csv)";
 	}

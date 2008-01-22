@@ -43,6 +43,10 @@ import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
  */
 public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4355383922470557796L;
 	private MainWindow mainWindow = null;
 
 	public MainMenu() {

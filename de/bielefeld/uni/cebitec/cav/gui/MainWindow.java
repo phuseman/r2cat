@@ -31,12 +31,18 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 /**
  * @author Peter Husemann
  * 
  */
 public class MainWindow extends JFrame {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3695451270541548008L;
 
 	private boolean centerWindow = true;
 
@@ -100,7 +106,7 @@ public class MainWindow extends JFrame {
 
 		zoomSlider = new JSlider();
 		zoomSlider.addChangeListener(mainWindowListener);
-		zoomSlider.setOrientation(JSlider.HORIZONTAL);
+		zoomSlider.setOrientation(SwingConstants.HORIZONTAL);
 		zoomSlider.setMaximum(200);
 		zoomSlider.setMinimum(5);
 

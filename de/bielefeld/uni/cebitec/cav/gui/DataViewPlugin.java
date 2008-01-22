@@ -57,6 +57,11 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent
 public class DataViewPlugin extends JPanel implements Observer,
 		ComponentListener {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7711739793055363113L;
+
 	// constants
 	// transparent black
 	final private Color alignmentColor = new Color(0f, 0f, 0f, 0.5f);
@@ -301,6 +306,7 @@ public class DataViewPlugin extends JPanel implements Observer,
 	 * 
 	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
 	 */
+	@Override
 	protected void paintComponent(Graphics g) {
 		if (isOpaque()) { // paint background
 			g.setColor(getBackground());
@@ -521,6 +527,7 @@ public class DataViewPlugin extends JPanel implements Observer,
 	 * 
 	 * @see javax.swing.JComponent#getPreferredSize()
 	 */
+	@Override
 	public Dimension getPreferredSize() {
 
 		Rectangle innerArea = new Rectangle();

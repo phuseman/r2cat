@@ -21,7 +21,6 @@
 package de.bielefeld.uni.cebitec.cav.utils;
 
 import java.util.prefs.BackingStoreException;
-import java.util.prefs.PreferenceChangeListener;
 import java.util.prefs.Preferences;
 
 /**

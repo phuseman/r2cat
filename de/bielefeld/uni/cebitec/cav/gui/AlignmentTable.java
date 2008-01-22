@@ -38,6 +38,11 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent
  */
 public class AlignmentTable extends JTable implements Observer {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7954505821098415030L;
+
 	private AlignmentPositionsList apl;
 
 	private boolean selectionByUpdate = false;

@@ -84,6 +84,7 @@ public class AlignmentPosition implements Comparable {
 		return (targetStart + targetEnd) / 2.;
 	}
 
+	@Override
 	public String toString() {
 		String out = "";
 

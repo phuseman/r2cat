@@ -34,6 +34,11 @@ import javax.swing.table.AbstractTableModel;
  */
 public class AlignmentTableModel extends AbstractTableModel implements Observer {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5076289599342214580L;
+
 	private String[] columnNames = { "Query", "Start", "Stop", "Target",
 			"Start", "Stop", "QLen", "TLen" };
 
@@ -54,6 +59,7 @@ public class AlignmentTableModel extends AbstractTableModel implements Observer 
 		this.fireTableDataChanged();
 	}
 
+	@Override
 	public String getColumnName(int col) {
 		return columnNames[col].toString();
 	}
@@ -104,6 +110,7 @@ public class AlignmentTableModel extends AbstractTableModel implements Observer 
 		return out;
 	}
 
+	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		return false;
 	}
