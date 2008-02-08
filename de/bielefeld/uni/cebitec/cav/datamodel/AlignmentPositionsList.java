@@ -158,7 +158,7 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		return alignmentPositions;
 	}
 
-	protected HashMap<String, DNASequence> getQueries() {
+	public HashMap<String, DNASequence> getQueries() {
 		return queries;
 	}
 
@@ -218,7 +218,7 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 
 	public AlignmentPositionsStatistics getStatistics() {
 		if (statistics == null) {
-			statistics = new AlignmentPositionsStatistics(this);
+			this.generateStatistics();
 		}
 		return statistics;
 	}
@@ -229,9 +229,10 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 	 * The Statistics Object sets the center of mass for each contig/query
 	 */
 	public void generateStatistics() {
-		this.getStatistics();
+		statistics = new AlignmentPositionsStatistics(this);
 	}
 
+	
 	public void markQueriesWithSelectedAps() {
 		unmarkAllQueries();
 
