@@ -41,6 +41,9 @@ import de.bielefeld.uni.cebitec.cav.utils.SwiftExternal;
  */
 public class ComparativeAssemblyViewer {
 	public static CAVPrefs preferences;
+	private static MainWindow mainWindow;
+	private static AlignmentPositionsList alignmentPositionsList;
+	private static DataViewPlugin dataViewPlugin;
 
 	/**
 	 * The usual main method.
@@ -68,30 +71,26 @@ public class ComparativeAssemblyViewer {
 		
 		
 		CSVParser csvParser = new CSVParser(new File(preferences.getLastFile()));
-		AlignmentPositionsList apl = csvParser.parse();
-		
-
-
-
-		MainWindow main = new MainWindow();
-		DataViewPlugin view = new DataViewPlugin(apl);
-		main.setVisualisation(view);
+		alignmentPositionsList = csvParser.parse();
+		mainWindow = new MainWindow();
+		dataViewPlugin = new DataViewPlugin(alignmentPositionsList);
+		mainWindow.setVisualisation(dataViewPlugin);
 
 		// use the preferences: with offsets?
 		if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
-			apl.generateStatistics(); // this sets the center of masses for each query
-			apl.addOffsets();
+			alignmentPositionsList.generateStatistics(); // this sets the center of masses for each query
+			alignmentPositionsList.addOffsets();
 		}
 		
 		JFrame tframe = new JFrame();
-		AlignmentTable at = new AlignmentTable(apl);
+		AlignmentTable at = new AlignmentTable(alignmentPositionsList);
 		JScrollPane tp = new JScrollPane(at);
 		tframe.add(tp);
 		tframe.pack();
 		tframe.setLocationByPlatform(true);
 		tframe.setVisible(true);
 
-		main.setVisible(true);
+		mainWindow.setVisible(true);
 	}
 	
 	public static CAVPrefs getPrefs() {

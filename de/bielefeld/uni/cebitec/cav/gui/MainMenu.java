@@ -110,13 +110,13 @@ optionsMenu.add(offsets);
 	}
 
 	private void switchReverted() {
-		mainWindow.vplug.getAlignmentPositionDisplayerList().switchReversed();
-		mainWindow.vplug.repaint();
+		mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().switchReversed();
+		mainWindow.dataViewPlugin.repaint();
 	}
 	
 	private void toggleOffsets() {
-		mainWindow.vplug.getAlignmentPositionDisplayerList().toggleOffsets();
-		mainWindow.vplug.repaint();
+		mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().toggleOffsets();
+		mainWindow.dataViewPlugin.repaint();
 	}
 
 	/**

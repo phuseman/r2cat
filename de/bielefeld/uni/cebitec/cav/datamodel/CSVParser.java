@@ -48,14 +48,16 @@ public class CSVParser {
 	public AlignmentPositionsList parse() {
 		String line;
 		String[] tokens;
+		int lineNumber=1;
 
 		AlignmentPositionsList apl = new AlignmentPositionsList();
 
 		try {
 			while (input.ready()) {
 				line = input.readLine();
+				lineNumber++;
 
-				if (line.startsWith("#")) {
+				if (line.startsWith("#") || line.startsWith("\"#")) {
 					continue;
 				}
 
@@ -101,6 +103,7 @@ public class CSVParser {
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			System.err.println("Parsing error in line " + lineNumber);
 			e.printStackTrace();
 		}
 

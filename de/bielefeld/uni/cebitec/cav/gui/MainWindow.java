@@ -54,7 +54,7 @@ public class MainWindow extends JFrame {
 
 	protected JSlider zoomSlider;
 
-	protected DataViewPlugin vplug;
+	protected DataViewPlugin dataViewPlugin;
 
 	private MainWindowActionListener mainWindowListener;
 
@@ -139,7 +139,7 @@ public class MainWindow extends JFrame {
 	 * @param vplug
 	 */
 	public void setVisualisation(DataViewPlugin vplug) {
-		this.vplug = vplug;
+		this.dataViewPlugin = vplug;
 		this.addComponentListener(vplug);
 		vplug.addMouseMotionListener(mainWindowListener);
 		vplug.addMouseListener(mainWindowListener);

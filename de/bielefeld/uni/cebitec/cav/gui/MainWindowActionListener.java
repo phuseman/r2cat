@@ -86,7 +86,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	 */
 	private Point2D.Double convertMouseEventToCanvasPoint(MouseEvent e) {
 		SwingUtilities.convertMouseEvent((JComponent) e.getSource(), e,
-				mainWindow.vplug);
+				mainWindow.dataViewPlugin);
 
 		return convertPointToCanvasPoint(e.getPoint());
 	}
@@ -103,7 +103,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	private Point2D.Double convertPointToCanvasPoint(Point p) {
 		Point2D.Double transformedPoint = new Point2D.Double();
 		try {
-			mainWindow.vplug.getAlignmentPositionTransform().inverseTransform(
+			mainWindow.dataViewPlugin.getAlignmentPositionTransform().inverseTransform(
 					p, transformedPoint);
 
 		} catch (NoninvertibleTransformException e) {
@@ -133,7 +133,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	private void markNearestPoint(MouseEvent e) {
 		Point2D.Double clickedPoint = convertMouseEventToCanvasPoint(e);
 
-		AlignmentPositionDisplayer smallestap = mainWindow.vplug
+		AlignmentPositionDisplayer smallestap = mainWindow.dataViewPlugin
 				.getAlignmentPositionDisplayerList()
 				.getClosestHit(clickedPoint);
 
@@ -141,7 +141,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		if (smallestap.ptLineDist(clickedPoint) < 100) {
 			if (!e.isShiftDown() && !e.isControlDown()) {
 				// on single click only mark the nearest alignment
-				mainWindow.vplug.getAlignmentPositionDisplayerList().unmakAll();
+				mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().unmakAll();
 				smallestap.setSelected(true);
 			} else if (e.isShiftDown() && !e.isControlDown()) {
 				// with shift add the nearest alignment to the marked ones
@@ -164,7 +164,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
 	 */
 	public void mouseEntered(MouseEvent e) {
-		mainWindow.vplug.requestFocusInWindow();
+		mainWindow.dataViewPlugin.requestFocusInWindow();
 		// System.out.println(e.getComponent());
 	}
 
@@ -186,15 +186,15 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	public void mousePressed(MouseEvent e) {
 		// remember coordinates for scrolling
 		pressedCoordinates = e.getPoint();
-		vplugVisualRectangle = mainWindow.vplug.getVisibleRect();
-		lastDefaultCursor = mainWindow.vplug.getCursor();
+		vplugVisualRectangle = mainWindow.dataViewPlugin.getVisibleRect();
+		lastDefaultCursor = mainWindow.dataViewPlugin.getCursor();
 
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			// remember position for selection
 			selectionStart = e.getPoint();
 		} else if (SwingUtilities.isRightMouseButton(e)) {
 			// change to hand cursor for moving the viewport
-			mainWindow.vplug.setCursor(new Cursor(Cursor.MOVE_CURSOR));
+			mainWindow.dataViewPlugin.setCursor(new Cursor(Cursor.MOVE_CURSOR));
 		}
 	}
 
@@ -205,7 +205,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		}
 
 		if (lastDefaultCursor != null) {
-			mainWindow.vplug.setCursor(lastDefaultCursor);
+			mainWindow.dataViewPlugin.setCursor(lastDefaultCursor);
 			lastDefaultCursor = null;
 		}
 
@@ -220,7 +220,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	 */
 	private void markSelection(MouseEvent e) {
 		if (lastDefaultCursor != null) {
-			mainWindow.vplug.setCursor(lastDefaultCursor);
+			mainWindow.dataViewPlugin.setCursor(lastDefaultCursor);
 			lastDefaultCursor = null;
 		}
 
@@ -238,29 +238,29 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		// handle different cases:
 		if (!e.isShiftDown() && !e.isControlDown()) {
 			// new selection
-			mainWindow.vplug.getAlignmentPositionDisplayerList().markArea(
+			mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().markArea(
 					topLeft, bottomRight,
 					AlignmentPositionDisplayerList.SelectionType.ONLY);
 		} else if (e.isShiftDown() && !e.isControlDown()) {
 			// add alignments in selection
-			mainWindow.vplug.getAlignmentPositionDisplayerList().markArea(
+			mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().markArea(
 					topLeft, bottomRight,
 					AlignmentPositionDisplayerList.SelectionType.ADD);
 		} else if (!e.isShiftDown() && e.isControlDown()) {
 			// toggle alignments in selection
-			mainWindow.vplug.getAlignmentPositionDisplayerList().markArea(
+			mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().markArea(
 					topLeft, bottomRight,
 					AlignmentPositionDisplayerList.SelectionType.TOGGLE);
 		} else if (e.isShiftDown() && e.isControlDown()) {
 			// remove alignments in selected area
-			mainWindow.vplug.getAlignmentPositionDisplayerList().markArea(
+			mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().markArea(
 					topLeft, bottomRight,
 					AlignmentPositionDisplayerList.SelectionType.REMOVE);
 		}
 
 		// do not draw the selection rectangle any more
-		mainWindow.vplug.clearSelectionRectangle();
-		mainWindow.vplug.repaint();
+		mainWindow.dataViewPlugin.clearSelectionRectangle();
+		mainWindow.dataViewPlugin.repaint();
 	}
 
 	/*
@@ -299,7 +299,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		int bottomY = Math.max(selectionStart.y - e.getPoint().y,
 				e.getPoint().y - selectionStart.y);
 
-		mainWindow.vplug.setSelectionRectangle(new Rectangle(topX, topY,
+		mainWindow.dataViewPlugin.setSelectionRectangle(new Rectangle(topX, topY,
 				bottomX, bottomY));
 	}
 
@@ -351,11 +351,11 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		double zoomStep = 0.25;
 
 		SwingUtilities.convertMouseEvent((JComponent) e.getSource(), e,
-				mainWindow.vplug);
+				mainWindow.dataViewPlugin);
 
-		vplugVisualRectangle = mainWindow.vplug.getVisibleRect();
+		vplugVisualRectangle = mainWindow.dataViewPlugin.getVisibleRect();
 
-		double newZoomValue = mainWindow.vplug.getZoom()
+		double newZoomValue = mainWindow.dataViewPlugin.getZoom()
 				+ (zoomStep * -e.getWheelRotation());
 
 		// change the slider and the textfield accordingly
@@ -368,7 +368,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		// System.out.println(bounds);
 
 		// set zoom
-		mainWindow.vplug.setZoom(newZoomValue);
+		mainWindow.dataViewPlugin.setZoom(newZoomValue);
 
 		// SwingUtilities.calculateInnerArea(mainWindow.vplug, bounds);
 		// System.out.println(bounds);
@@ -453,19 +453,19 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 			// change to a cursor that indicates the action
 			if (!e.isShiftDown() && !e.isControlDown()) {
 				// new selection
-				mainWindow.vplug.setCursor(CursorFactory
+				mainWindow.dataViewPlugin.setCursor(CursorFactory
 						.createCursor(CursorFactory.CursorType.normal));
 			} else if (e.isShiftDown() && !e.isControlDown()) {
 				// add alignments
-				mainWindow.vplug.setCursor(CursorFactory
+				mainWindow.dataViewPlugin.setCursor(CursorFactory
 						.createCursor(CursorFactory.CursorType.add));
 			} else if (!e.isShiftDown() && e.isControlDown()) {
 				// toggle alignments
-				mainWindow.vplug.setCursor(CursorFactory
+				mainWindow.dataViewPlugin.setCursor(CursorFactory
 						.createCursor(CursorFactory.CursorType.toggle));
 			} else if (e.isShiftDown() && e.isControlDown()) {
 				// remove alignments
-				mainWindow.vplug.setCursor(CursorFactory
+				mainWindow.dataViewPlugin.setCursor(CursorFactory
 						.createCursor(CursorFactory.CursorType.remove));
 			}
 		}
@@ -488,8 +488,8 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 			double zoom = 1.;
 			zoom = mainWindow.zoomSlider.getValue() / 20.;
 			mainWindow.zoomValue.setText(Double.toString(zoom));
-			if (mainWindow.vplug != null) {
-				mainWindow.vplug.setZoom(zoom);
+			if (mainWindow.dataViewPlugin != null) {
+				mainWindow.dataViewPlugin.setZoom(zoom);
 			}
 
 			// vplugVisualRectangle.setFrameFromCenter(vplugVisualRectangle

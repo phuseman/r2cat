@@ -35,14 +35,19 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
+import java.util.Collection;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Vector;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import sun.java2d.loops.DrawLine;
+
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
+import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
 
 /**
@@ -74,7 +79,6 @@ public class DataViewPlugin extends JPanel implements Observer,
 
 	final private Color alignmentSameQuery = new Color(0f, 1f, 0f, 0.5f);
 
-	
 	final private int border = 20; // pixel
 
 	// class members
@@ -100,11 +104,11 @@ public class DataViewPlugin extends JPanel implements Observer,
 
 	// the width and height of the canvas
 	private int drawingWidth = 0;
+
 	private int drawingHeight = 0;
 
 	// a histogram generated from the alignments
 	private double[] histogram = {};
-
 
 	/**
 	 * Constructor of the main drawing canvas for the alignments.<br>
@@ -177,13 +181,14 @@ public class DataViewPlugin extends JPanel implements Observer,
 
 		// create displayer list if necessary
 		if (!alignmentPositionDisplayerList.isGenerated()) {
-			if (drawingWidth <= 0 || drawingHeight <=0) {
+			if (drawingWidth <= 0 || drawingHeight <= 0) {
 				drawingWidth = this.getParent().getWidth() - 2 * border;
 				drawingHeight = this.getParent().getHeight() - 2 * border;
 
 			}
 			alignmentPositionDisplayerList
-					.generateAlignmentPositionDisplayerList(drawingWidth, drawingHeight);
+					.generateAlignmentPositionDisplayerList(drawingWidth,
+							drawingHeight);
 		}
 
 		// draw the alignments. the colors have a alpha channel, so it can be
@@ -337,6 +342,9 @@ public class DataViewPlugin extends JPanel implements Observer,
 		}
 
 		drawAlignmentPositions(g2d);
+		
+// TODO: draw for the beginning of each contig a new line
+//		drawContigBorders(g2d);
 
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_OFF);
@@ -347,6 +355,24 @@ public class DataViewPlugin extends JPanel implements Observer,
 
 		g2d.dispose();
 	}
+
+//	private void drawContigBorders(Graphics2D g2d) {
+//				Color last = g2d.getColor();
+//				g2d.setColor(Color.BLACK);
+//		
+//		// TODO values is too slow
+//				for (DNASequence contig : alignmentsPositionsList.getQueries().values().iterator()) {
+//			if (contig.getOffset() > 0) {
+//				int offs = (int) (contig.getOffset()*AlignmentPositionDisplayer.getNormalisationFactorY());
+//				System.out.println(offs);
+//				g2d.drawLine(0, -10, drawingWidth, -10);
+//				g2d.fillOval(100, 10, 10, 10);
+//			}
+//		}
+//
+//		g2d.setColor(last);
+//
+//	}
 
 	/**
 	 * Draws a frame, if lastSelectionRectangle is set. This is used when
@@ -436,7 +462,8 @@ public class DataViewPlugin extends JPanel implements Observer,
 				;
 			} else if (action == NotifyEvent.CHANGE) {
 				alignmentPositionDisplayerList
-						.generateAlignmentPositionDisplayerList(drawingWidth, drawingHeight);
+						.generateAlignmentPositionDisplayerList(drawingWidth,
+								drawingHeight);
 			}
 
 			// for all cases
@@ -556,10 +583,12 @@ public class DataViewPlugin extends JPanel implements Observer,
 
 			if (alignmentPositionDisplayerList.isEmpty()) {
 				alignmentPositionDisplayerList
-						.generateAlignmentPositionDisplayerList(drawingWidth, drawingHeight);
+						.generateAlignmentPositionDisplayerList(drawingWidth,
+								drawingHeight);
 			} else {
 				alignmentPositionDisplayerList
-						.rescaleAlignmentPositionDisplayerList(drawingWidth, drawingHeight);
+						.rescaleAlignmentPositionDisplayerList(drawingWidth,
+								drawingHeight);
 			}
 
 			histogram = alignmentPositionDisplayerList
