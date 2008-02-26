@@ -27,6 +27,7 @@ import java.util.Vector;
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
+import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsStatistics;
 
 /**
  * @author Peter Husemann
@@ -225,49 +226,55 @@ public class AlignmentPositionDisplayerList implements
 	 */
 	public double[] getTargetHistogram(int numberOfBuckets) {
 		double[] histogram;
+		
 		if (numberOfBuckets <= 1) {
 			histogram = new double[1];
 			histogram[0] = 1;
 			return histogram;
 		}
+		
 		histogram = new double[numberOfBuckets];
 
-		long maximum = 0;
-		long maximumCount = 0;
+		
+		long maximum = alignmentsPositions.getStatistics().getTargetsSize();
 
-		for (AlignmentPositionDisplayer elem : alPosDispList) {
-			if (maximum < elem.getAlignmentPosition().getTarget().getSize()) {
-				maximum = elem.getAlignmentPosition().getTarget().getSize();
-			}
-		}
 
 		long bucketSize = (long) ((double) (maximum + 1) / (numberOfBuckets - 1));
 
 		long firstBucket = 0;
 		long lastBucket = 0;
+		long maximumCountOfABucket = 0;
 
-		for (AlignmentPositionDisplayer elem : alPosDispList) {
-			firstBucket = elem.getAlignmentPosition().getTargetStart()
+		//for each match...
+		for (AlignmentPosition ap : alignmentsPositions) {
+			//... get the first and the last bucket
+			firstBucket = ( ap.getTargetStart() + ap.getTarget().getOffset())
 					/ bucketSize;
-			lastBucket = elem.getAlignmentPosition().getTargetEnd()
+			lastBucket = ( ap.getTargetEnd() + ap.getTarget().getOffset())
 					/ bucketSize;
 
+			//switch first and last if reverted
 			if (firstBucket > lastBucket) {
 				long tmp = lastBucket;
 				lastBucket = firstBucket;
 				firstBucket = tmp;
 			}
 
+			// add one to each bucket in range (first to last)
 			for (int i = (int) firstBucket; i <= lastBucket; i++) {
 				histogram[i] += 1.;
-				if (histogram[i] > maximumCount) {
-					maximumCount = (long) histogram[i];
+				
+				// and compute the highest bucket so far for normalisation
+				if (histogram[i] > maximumCountOfABucket) {
+					maximumCountOfABucket = (long) histogram[i];
 				}
+				
 			}
 		}
 
+		// after each bucketcount is computed: normalize with the highest count
 		for (int i = 0; i < histogram.length; i++) {
-			histogram[i] /= maximumCount;
+			histogram[i] /= maximumCountOfABucket;
 		}
 
 		return histogram;
@@ -341,5 +348,5 @@ public class AlignmentPositionDisplayerList implements
 			apd.rescale();
 		}
 	}
-
+	
 }

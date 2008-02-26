@@ -71,12 +71,15 @@ public class AlignmentPositionDisplayer extends Line2D.Double {
 	 * Sets the drawing coordinates for an alignment. These are scaled by normalisation factors (x and y direction).
 	 */
 	private void setPosition() {
-		long os = alignmentPosition.getQuery().getOffset();
-		this.x1 = normalisationFactorX * alignmentPosition.getTargetStart();
-		this.y1 = -(normalisationFactorY * (os + alignmentPosition
+		long xOffset = alignmentPosition.getTarget().getOffset();
+		long yOffset = alignmentPosition.getQuery().getOffset();
+		
+		
+		this.x1 = normalisationFactorX * (xOffset + alignmentPosition.getTargetStart());
+		this.y1 = -(normalisationFactorY * (yOffset + alignmentPosition
 				.getQueryStart()));
-		this.x2 = (normalisationFactorX * alignmentPosition.getTargetEnd());
-		this.y2 = -(normalisationFactorY * (os + alignmentPosition
+		this.x2 = (normalisationFactorX * (xOffset + alignmentPosition.getTargetEnd()));
+		this.y2 = -(normalisationFactorY * (yOffset + alignmentPosition
 				.getQueryEnd()));
 	}
 
@@ -85,14 +88,18 @@ public class AlignmentPositionDisplayer extends Line2D.Double {
 	 * This is usefull to draw all alignments in the same direction. 
 	 */
 	private void setReversedPosition() {
-		long os = alignmentPosition.getQuery().getOffset();
+		
+		long xOffset = alignmentPosition.getTarget().getOffset();
+
+		long yOffset = alignmentPosition.getQuery().getOffset();
 		long alSize = alignmentPosition.getQuery().getSize();
 
-		this.x1 = normalisationFactorX * alignmentPosition.getTargetStart();
-		this.y1 = -(normalisationFactorY * (os + alSize - alignmentPosition
+
+		this.x1 = normalisationFactorX * (xOffset + alignmentPosition.getTargetStart());
+		this.y1 = -(normalisationFactorY * (yOffset + alSize - alignmentPosition
 				.getQueryStart()));
-		this.x2 = (normalisationFactorX * alignmentPosition.getTargetEnd());
-		this.y2 = -(normalisationFactorY * (os + alSize - alignmentPosition
+		this.x2 = (normalisationFactorX * (xOffset + alignmentPosition.getTargetEnd()));
+		this.y2 = -(normalisationFactorY * (yOffset + alSize - alignmentPosition
 				.getQueryEnd()));
 		
 	}

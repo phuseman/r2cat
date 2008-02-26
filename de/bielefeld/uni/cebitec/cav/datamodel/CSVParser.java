@@ -107,6 +107,8 @@ public class CSVParser {
 			e.printStackTrace();
 		}
 
+		apl.addOffsetsToTargets();
+		
 		return apl;
 	}
 

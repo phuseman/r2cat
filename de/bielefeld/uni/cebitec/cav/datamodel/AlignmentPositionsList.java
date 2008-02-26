@@ -62,7 +62,7 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		 */
 		HIDE, 
 		/**
-		 * This event is fired 
+		 * This event is fired if there is a change on the data
 		 */
 		CHANGE
 	};
@@ -78,6 +78,8 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		// Collections.sort(targets);
 		// Collections.sort(queries);
 	}
+	
+
 
 	public void addAlignmentPosition(AlignmentPosition a) {
 		alignmentPositions.add(a);
@@ -257,5 +259,19 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 	public void notifyObservers(Object arg) {
 		this.markQueriesWithSelectedAps();
 		super.notifyObservers(arg);
+	}
+
+
+
+	/**
+	 * Add offsets if there are multiple targets.
+	 * TODO: sort by length
+	 */
+	public void addOffsetsToTargets() {
+		long offset=0;
+		for (DNASequence target : targets.values()) {
+			target.setOffset(offset);
+			offset+=target.getSize();
+		}
 	}
 }
