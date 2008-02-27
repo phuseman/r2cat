@@ -110,13 +110,13 @@ optionsMenu.add(offsets);
 	}
 
 	private void switchReverted() {
-		mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().switchReversed();
-		mainWindow.dataViewPlugin.repaint();
+		mainWindow.dotPlotVisualisation.getAlignmentPositionDisplayerList().switchReversed();
+		mainWindow.dotPlotVisualisation.repaint();
 	}
 	
 	private void toggleOffsets() {
-		mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().toggleOffsets();
-		mainWindow.dataViewPlugin.repaint();
+		mainWindow.dotPlotVisualisation.getAlignmentPositionDisplayerList().toggleOffsets();
+		mainWindow.dotPlotVisualisation.repaint();
 	}
 
 	/**
@@ -138,7 +138,7 @@ optionsMenu.add(offsets);
 			CSVParser csvParser = new CSVParser(file);
 			AlignmentPositionsList apl = csvParser.parse();
 
-			DataViewPlugin view = new DataViewPlugin(apl);
+			DotPlotVisualisation view = new DotPlotVisualisation(apl);
 			mainWindow.setVisualisation(view);
 		}
 	}

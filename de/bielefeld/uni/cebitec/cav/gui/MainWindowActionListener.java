@@ -77,7 +77,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 
 	/**
 	 * Maps the mouse coordinates of a given event to the coordinates inside the
-	 * DataViewPlugin.<br>
+	 * DotPlotVisualisation.<br>
 	 * This way alignments near to this point can be found.
 	 * 
 	 * @param e
@@ -86,13 +86,13 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	 */
 	private Point2D.Double convertMouseEventToCanvasPoint(MouseEvent e) {
 		SwingUtilities.convertMouseEvent((JComponent) e.getSource(), e,
-				mainWindow.dataViewPlugin);
+				mainWindow.dotPlotVisualisation);
 
 		return convertPointToCanvasPoint(e.getPoint());
 	}
 
 	/**
-	 * The DataViewPlugin is usually transformed by a translation and possibly a
+	 * The DotPlotVisualisation is usually transformed by a translation and possibly a
 	 * scaling.<br>
 	 * This method calculates the inversly transformed point.
 	 * 
@@ -103,7 +103,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	private Point2D.Double convertPointToCanvasPoint(Point p) {
 		Point2D.Double transformedPoint = new Point2D.Double();
 		try {
-			mainWindow.dataViewPlugin.getAlignmentPositionTransform().inverseTransform(
+			mainWindow.dotPlotVisualisation.getAlignmentPositionTransform().inverseTransform(
 					p, transformedPoint);
 
 		} catch (NoninvertibleTransformException e) {
@@ -133,7 +133,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	private void markNearestPoint(MouseEvent e) {
 		Point2D.Double clickedPoint = convertMouseEventToCanvasPoint(e);
 
-		AlignmentPositionDisplayer smallestap = mainWindow.dataViewPlugin
+		AlignmentPositionDisplayer smallestap = mainWindow.dotPlotVisualisation
 				.getAlignmentPositionDisplayerList()
 				.getClosestHit(clickedPoint);
 
@@ -141,7 +141,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		if (smallestap.ptLineDist(clickedPoint) < 100) {
 			if (!e.isShiftDown() && !e.isControlDown()) {
 				// on single click only mark the nearest alignment
-				mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().unmakAll();
+				mainWindow.dotPlotVisualisation.getAlignmentPositionDisplayerList().unmakAll();
 				smallestap.setSelected(true);
 			} else if (e.isShiftDown() && !e.isControlDown()) {
 				// with shift add the nearest alignment to the marked ones
@@ -164,7 +164,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
 	 */
 	public void mouseEntered(MouseEvent e) {
-		mainWindow.dataViewPlugin.requestFocusInWindow();
+		mainWindow.dotPlotVisualisation.requestFocusInWindow();
 		// System.out.println(e.getComponent());
 	}
 
@@ -186,15 +186,15 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	public void mousePressed(MouseEvent e) {
 		// remember coordinates for scrolling
 		pressedCoordinates = e.getPoint();
-		vplugVisualRectangle = mainWindow.dataViewPlugin.getVisibleRect();
-		lastDefaultCursor = mainWindow.dataViewPlugin.getCursor();
+		vplugVisualRectangle = mainWindow.dotPlotVisualisation.getVisibleRect();
+		lastDefaultCursor = mainWindow.dotPlotVisualisation.getCursor();
 
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			// remember position for selection
 			selectionStart = e.getPoint();
 		} else if (SwingUtilities.isRightMouseButton(e)) {
 			// change to hand cursor for moving the viewport
-			mainWindow.dataViewPlugin.setCursor(new Cursor(Cursor.MOVE_CURSOR));
+			mainWindow.dotPlotVisualisation.setCursor(new Cursor(Cursor.MOVE_CURSOR));
 		}
 	}
 
@@ -205,7 +205,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		}
 
 		if (lastDefaultCursor != null) {
-			mainWindow.dataViewPlugin.setCursor(lastDefaultCursor);
+			mainWindow.dotPlotVisualisation.setCursor(lastDefaultCursor);
 			lastDefaultCursor = null;
 		}
 
@@ -220,7 +220,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	 */
 	private void markSelection(MouseEvent e) {
 		if (lastDefaultCursor != null) {
-			mainWindow.dataViewPlugin.setCursor(lastDefaultCursor);
+			mainWindow.dotPlotVisualisation.setCursor(lastDefaultCursor);
 			lastDefaultCursor = null;
 		}
 
@@ -238,29 +238,29 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		// handle different cases:
 		if (!e.isShiftDown() && !e.isControlDown()) {
 			// new selection
-			mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().markArea(
+			mainWindow.dotPlotVisualisation.getAlignmentPositionDisplayerList().markArea(
 					topLeft, bottomRight,
 					AlignmentPositionDisplayerList.SelectionType.ONLY);
 		} else if (e.isShiftDown() && !e.isControlDown()) {
 			// add alignments in selection
-			mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().markArea(
+			mainWindow.dotPlotVisualisation.getAlignmentPositionDisplayerList().markArea(
 					topLeft, bottomRight,
 					AlignmentPositionDisplayerList.SelectionType.ADD);
 		} else if (!e.isShiftDown() && e.isControlDown()) {
 			// toggle alignments in selection
-			mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().markArea(
+			mainWindow.dotPlotVisualisation.getAlignmentPositionDisplayerList().markArea(
 					topLeft, bottomRight,
 					AlignmentPositionDisplayerList.SelectionType.TOGGLE);
 		} else if (e.isShiftDown() && e.isControlDown()) {
 			// remove alignments in selected area
-			mainWindow.dataViewPlugin.getAlignmentPositionDisplayerList().markArea(
+			mainWindow.dotPlotVisualisation.getAlignmentPositionDisplayerList().markArea(
 					topLeft, bottomRight,
 					AlignmentPositionDisplayerList.SelectionType.REMOVE);
 		}
 
 		// do not draw the selection rectangle any more
-		mainWindow.dataViewPlugin.clearSelectionRectangle();
-		mainWindow.dataViewPlugin.repaint();
+		mainWindow.dotPlotVisualisation.clearSelectionRectangle();
+		mainWindow.dotPlotVisualisation.repaint();
 	}
 
 	/*
@@ -283,7 +283,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 	}
 
 	/**
-	 * Sets a rectangle to be drawn in the DataViewPlugin.<br>
+	 * Sets a rectangle to be drawn in the DotPlotVisualisation.<br>
 	 * The rectangle should aid the selection process.
 	 * 
 	 * @param e
@@ -299,7 +299,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		int bottomY = Math.max(selectionStart.y - e.getPoint().y,
 				e.getPoint().y - selectionStart.y);
 
-		mainWindow.dataViewPlugin.setSelectionRectangle(new Rectangle(topX, topY,
+		mainWindow.dotPlotVisualisation.setSelectionRectangle(new Rectangle(topX, topY,
 				bottomX, bottomY));
 	}
 
@@ -351,11 +351,11 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		double zoomStep = 0.25;
 
 		SwingUtilities.convertMouseEvent((JComponent) e.getSource(), e,
-				mainWindow.dataViewPlugin);
+				mainWindow.dotPlotVisualisation);
 
-		vplugVisualRectangle = mainWindow.dataViewPlugin.getVisibleRect();
+		vplugVisualRectangle = mainWindow.dotPlotVisualisation.getVisibleRect();
 
-		double newZoomValue = mainWindow.dataViewPlugin.getZoom()
+		double newZoomValue = mainWindow.dotPlotVisualisation.getZoom()
 				+ (zoomStep * -e.getWheelRotation());
 
 		// change the slider and the textfield accordingly
@@ -368,7 +368,7 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 		// System.out.println(bounds);
 
 		// set zoom
-		mainWindow.dataViewPlugin.setZoom(newZoomValue);
+		mainWindow.dotPlotVisualisation.setZoom(newZoomValue);
 
 		// SwingUtilities.calculateInnerArea(mainWindow.vplug, bounds);
 		// System.out.println(bounds);
@@ -453,19 +453,19 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 			// change to a cursor that indicates the action
 			if (!e.isShiftDown() && !e.isControlDown()) {
 				// new selection
-				mainWindow.dataViewPlugin.setCursor(CursorFactory
+				mainWindow.dotPlotVisualisation.setCursor(CursorFactory
 						.createCursor(CursorFactory.CursorType.normal));
 			} else if (e.isShiftDown() && !e.isControlDown()) {
 				// add alignments
-				mainWindow.dataViewPlugin.setCursor(CursorFactory
+				mainWindow.dotPlotVisualisation.setCursor(CursorFactory
 						.createCursor(CursorFactory.CursorType.add));
 			} else if (!e.isShiftDown() && e.isControlDown()) {
 				// toggle alignments
-				mainWindow.dataViewPlugin.setCursor(CursorFactory
+				mainWindow.dotPlotVisualisation.setCursor(CursorFactory
 						.createCursor(CursorFactory.CursorType.toggle));
 			} else if (e.isShiftDown() && e.isControlDown()) {
 				// remove alignments
-				mainWindow.dataViewPlugin.setCursor(CursorFactory
+				mainWindow.dotPlotVisualisation.setCursor(CursorFactory
 						.createCursor(CursorFactory.CursorType.remove));
 			}
 		}
@@ -488,8 +488,8 @@ public class MainWindowActionListener implements ActionListener, MouseListener,
 			double zoom = 1.;
 			zoom = mainWindow.zoomSlider.getValue() / 20.;
 			mainWindow.zoomValue.setText(Double.toString(zoom));
-			if (mainWindow.dataViewPlugin != null) {
-				mainWindow.dataViewPlugin.setZoom(zoom);
+			if (mainWindow.dotPlotVisualisation != null) {
+				mainWindow.dotPlotVisualisation.setZoom(zoom);
 			}
 
 			// vplugVisualRectangle.setFrameFromCenter(vplugVisualRectangle

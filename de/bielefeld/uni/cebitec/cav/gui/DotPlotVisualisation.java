@@ -59,8 +59,8 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent
  * @author Peter Husemann
  * 
  */
-public class DataViewPlugin extends JPanel implements Observer,
-		ComponentListener {
+public class DotPlotVisualisation extends JPanel implements Observer,
+		ComponentListener, DataViewPlugin {
 
 	/**
 	 * 
@@ -114,7 +114,7 @@ public class DataViewPlugin extends JPanel implements Observer,
 	 * Constructor of the main drawing canvas for the alignments.<br>
 	 * Turns on buffering, sets the background and some settings.
 	 */
-	public DataViewPlugin() {
+	public DotPlotVisualisation() {
 		super(true); // double buffering
 		this.setDoubleBuffered(true);
 
@@ -131,18 +131,13 @@ public class DataViewPlugin extends JPanel implements Observer,
 	 * 
 	 * @param alignmentsPositionsList
 	 */
-	public DataViewPlugin(AlignmentPositionsList ap) {
+	public DotPlotVisualisation(AlignmentPositionsList ap) {
 		this();
 		setAlignmentspositionsList(ap);
 	}
 
-	/**
-	 * This method sets the List of Alignment positions.<br>
-	 * For the drawing a list of PlignmentPositionDisplayers is generated ind
-	 * the <code>drawComponent</code> method.
-	 * 
-	 * @param ap
-	 *            the List to be set
+	/* (non-Javadoc)
+	 * @see de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin#setAlignmentspositionsList(de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList)
 	 */
 	public void setAlignmentspositionsList(AlignmentPositionsList ap) {
 		this.alignmentsPositionsList = ap;
@@ -312,7 +307,7 @@ public class DataViewPlugin extends JPanel implements Observer,
 	 * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
 	 */
 	@Override
-	protected void paintComponent(Graphics g) {
+	public void paintComponent(Graphics g) {
 		if (isOpaque()) { // paint background
 			g.setColor(getBackground());
 			g.fillRect(0, 0, getWidth(), getHeight());
@@ -449,6 +444,9 @@ public class DataViewPlugin extends JPanel implements Observer,
 	 * 
 	 * the observed object is the list of alignments
 	 */
+	/* (non-Javadoc)
+	 * @see de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin#update(java.util.Observable, java.lang.Object)
+	 */
 	public void update(Observable o, Object arg) {
 		if (arg == null) {
 			this.repaint();
@@ -471,14 +469,8 @@ public class DataViewPlugin extends JPanel implements Observer,
 		}
 	}
 
-	/**
-	 * Sets a zoom value which is applied before painting the alignments. The
-	 * new size is set relative to the parent frame.<br>
-	 * If the zoom value is smaller or equal to zero the component is just
-	 * repainted.
-	 * 
-	 * @param zoom
-	 *            value to zoom in.
+	/* (non-Javadoc)
+	 * @see de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin#setZoom(double)
 	 */
 	public void setZoom(double zoom) {
 		if (zoom <= 0) {

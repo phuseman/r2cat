@@ -54,7 +54,7 @@ public class MainWindow extends JFrame {
 
 	protected JSlider zoomSlider;
 
-	protected DataViewPlugin dataViewPlugin;
+	protected DotPlotVisualisation dotPlotVisualisation;
 
 	private MainWindowActionListener mainWindowListener;
 
@@ -138,8 +138,8 @@ public class MainWindow extends JFrame {
 	 * 
 	 * @param vplug
 	 */
-	public void setVisualisation(DataViewPlugin vplug) {
-		this.dataViewPlugin = vplug;
+	public void setVisualisation(DotPlotVisualisation vplug) {
+		this.dotPlotVisualisation = vplug;
 		this.addComponentListener(vplug);
 		vplug.addMouseMotionListener(mainWindowListener);
 		vplug.addMouseListener(mainWindowListener);
