@@ -6,10 +6,13 @@ import java.util.prefs.BackingStoreException;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
+import de.bielefeld.uni.cebitec.cav.controller.DataModelController;
+import de.bielefeld.uni.cebitec.cav.controller.GuiController;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
 import de.bielefeld.uni.cebitec.cav.gui.AlignmentTable;
 import de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin;
+import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisation;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
 import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
 import de.bielefeld.uni.cebitec.cav.utils.SwiftExternal;
@@ -41,9 +44,10 @@ import de.bielefeld.uni.cebitec.cav.utils.SwiftExternal;
  */
 public class ComparativeAssemblyViewer {
 	public static CAVPrefs preferences;
-	private static MainWindow mainWindow;
-	private static AlignmentPositionsList alignmentPositionsList;
-	private static DataViewPlugin dataViewPlugin;
+
+	public static DataModelController dataModelController;
+
+	public static GuiController guiController;
 
 	/**
 	 * The usual main method.
@@ -51,11 +55,13 @@ public class ComparativeAssemblyViewer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
+
 		preferences = new CAVPrefs();
-		
+		dataModelController = new DataModelController();
+		guiController = new GuiController();
+
 		// option to remove all preferences
-		if (args.length >=1 && args[0].matches("clearprefs")) {
+		if (args.length >= 1 && args[0].matches("clearprefs")) {
 			try {
 				preferences.getPreferences().clear();
 			} catch (BackingStoreException e) {
@@ -63,36 +69,27 @@ public class ComparativeAssemblyViewer {
 			}
 			System.exit(0);
 		}
-		
-		
-		//testing
-		SwiftExternal s = new SwiftExternal();
-		
-		
-		
-		CSVParser csvParser = new CSVParser(new File(preferences.getLastFile()));
-		alignmentPositionsList = csvParser.parse();
-		mainWindow = new MainWindow();
-		dataViewPlugin = new DataViewPlugin(alignmentPositionsList);
-		mainWindow.setVisualisation(dataViewPlugin);
 
-		// use the preferences: with offsets?
-		if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
-			alignmentPositionsList.generateStatistics(); // this sets the center of masses for each query
-			alignmentPositionsList.addOffsets();
-		}
-		
-		JFrame tframe = new JFrame();
-		AlignmentTable at = new AlignmentTable(alignmentPositionsList);
-		JScrollPane tp = new JScrollPane(at);
-		tframe.add(tp);
-		tframe.pack();
-		tframe.setLocationByPlatform(true);
-		tframe.setVisible(true);
+		//guiController.createSwiftCall();
 
-		mainWindow.setVisible(true);
+		AlignmentPositionsList apl = dataModelController.parseAlignmentPositionsFromCSV(new File(preferences
+				.getLastFile()));
+		dataModelController.setAlignmentsPositonsList(apl);
+
+		guiController.createMainWindow();
+		
+		DataViewPlugin dotPlotVisualisation = guiController
+				.createDotPlotVisualisation(dataModelController
+						.getAlignmentPositionsList());
+		
+		guiController.setVisualisation(dotPlotVisualisation);
+
+		guiController.createTableFrame(dataModelController
+				.getAlignmentPositionsList());
+
+		guiController.showMainWindow();
 	}
-	
+
 	public static CAVPrefs getPrefs() {
 		return preferences;
 	}
