@@ -226,6 +226,37 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 
 	}
 
+	private void drawGrid(Graphics2D g2d) {
+		Color last = g2d.getColor();
+		g2d.setColor(Color.LIGHT_GRAY);
+
+	
+		Line2D.Double separator;
+		//horizontal
+		double horizontalOffset=0;
+
+		for (DNASequence q : alignmentsPositionsList.getQueries().values()) {
+			horizontalOffset=(q.getOffset() * AlignmentPositionDisplayer.getNormalisationFactorY());
+			separator = new Line2D.Double(0, -horizontalOffset, drawingWidth, -horizontalOffset);
+			g2d.draw(separator);
+		}
+		
+
+		double verticalOffset=0;
+		//vertical 
+		for (DNASequence t : alignmentsPositionsList.getTargets().values()) {
+			verticalOffset=(t.getOffset() * AlignmentPositionDisplayer.getNormalisationFactorX());
+			separator = new Line2D.Double(verticalOffset, 0, verticalOffset, -this.getHeight() + 2 * border);
+			g2d.draw(separator);
+		}
+		
+
+		
+		
+
+	g2d.setColor(last);
+	}
+
 	/**
 	 * Draws a coordinate system.
 	 * 
@@ -336,6 +367,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 					RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 		}
 
+		drawGrid(g2d);
 		drawAlignmentPositions(g2d);
 		
 // TODO: draw for the beginning of each contig a new line
@@ -351,25 +383,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		g2d.dispose();
 	}
 
-//	private void drawContigBorders(Graphics2D g2d) {
-//				Color last = g2d.getColor();
-//				g2d.setColor(Color.BLACK);
-//		
-//		// TODO values is too slow
-//				for (DNASequence contig : alignmentsPositionsList.getQueries().values().iterator()) {
-//			if (contig.getOffset() > 0) {
-//				int offs = (int) (contig.getOffset()*AlignmentPositionDisplayer.getNormalisationFactorY());
-//				System.out.println(offs);
-//				g2d.drawLine(0, -10, drawingWidth, -10);
-//				g2d.fillOval(100, 10, 10, 10);
-//			}
-//		}
-//
-//		g2d.setColor(last);
-//
-//	}
-
-	/**
+/**
 	 * Draws a frame, if lastSelectionRectangle is set. This is used when
 	 * selecting alignments. The frame will be drawn before the transformation
 	 * is applied, so the coordinates are the same as in the window.<br>

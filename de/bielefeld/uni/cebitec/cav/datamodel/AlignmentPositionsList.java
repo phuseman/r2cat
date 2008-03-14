@@ -189,7 +189,7 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		}
 	}
 
-	protected HashMap<String, DNASequence> getTargets() {
+	public HashMap<String, DNASequence> getTargets() {
 		return targets;
 	}
 
