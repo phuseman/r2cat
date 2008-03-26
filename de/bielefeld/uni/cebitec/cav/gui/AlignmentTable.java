@@ -98,7 +98,7 @@ public class AlignmentTable extends JTable implements Observer {
 				// TODO: not yet implemented
 			} else if (action == NotifyEvent.CHANGE) {
 				System.out.println("Elements changed; adjust table");
-				// TODO: not yet implemented
+				this.revalidate();
 			}
 		}
 	}

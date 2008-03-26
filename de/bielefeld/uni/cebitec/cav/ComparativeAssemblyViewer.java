@@ -79,6 +79,7 @@ public class ComparativeAssemblyViewer {
 				.getAlignmentPositionsList());
 
 		guiController.showMainWindow();
+		guiController.showTableFrame();
 	}
 
 	private static void clearPreferences(String[] args) {

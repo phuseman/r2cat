@@ -48,16 +48,24 @@ public class DataModelController {
 	}
 
 	public void setAlignmentsPositonsList(AlignmentPositionsList apl) {
-		this.alignmentPositionsList = apl;
+		if (alignmentPositionsList == null) {
+			alignmentPositionsList = apl;
+		} else {
+			alignmentPositionsList.copyDataFromOtherAlignmentPositionsList(apl);
+		}
+		
 		alignmentPositionsStatistics = new AlignmentPositionsStatistics(
 				alignmentPositionsList);
 		// use the preferences: with offsets?
 		if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
 			alignmentPositionsList.generateStatistics(); // this sets the
-															// center of masses
-															// for each query
+			// center of masses
+			// for each query
 			alignmentPositionsList.addOffsets();
 		}
+
+		alignmentPositionsList
+				.notifyObservers(AlignmentPositionsList.NotifyEvent.CHANGE);
 	}
 
 	/**
@@ -72,5 +80,11 @@ public class DataModelController {
 	 */
 	public AlignmentPositionsStatistics getAlignmentPositionsStatistics() {
 		return alignmentPositionsStatistics;
+	}
+
+	/**
+	 * 
+	 */
+	public DataModelController() {
 	}
 }

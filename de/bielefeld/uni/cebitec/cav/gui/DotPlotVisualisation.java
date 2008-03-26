@@ -357,9 +357,13 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		// and zoom the canvas to the desired zoom level
 		alignmentPositionTransform.scale(zoom, zoom);
 
-		// apply to grapics context
+		// apply to graphics context
 		g2d.transform(alignmentPositionTransform);
 
+
+		drawGrid(g2d);
+
+		
 		if (antialiasing) {
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 					RenderingHints.VALUE_ANTIALIAS_ON);
@@ -367,11 +371,8 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 					RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 		}
 
-		drawGrid(g2d);
 		drawAlignmentPositions(g2d);
 		
-// TODO: draw for the beginning of each contig a new line
-//		drawContigBorders(g2d);
 
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_OFF);
@@ -473,9 +474,8 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 			} else if (action == NotifyEvent.HIDE) {
 				;
 			} else if (action == NotifyEvent.CHANGE) {
-				alignmentPositionDisplayerList
-						.generateAlignmentPositionDisplayerList(drawingWidth,
-								drawingHeight);
+				AlignmentPositionsList apl = ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList();
+				alignmentPositionDisplayerList = new AlignmentPositionDisplayerList(apl);
 			}
 
 			// for all cases

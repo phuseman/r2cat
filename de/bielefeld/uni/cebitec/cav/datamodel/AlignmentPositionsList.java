@@ -79,6 +79,20 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		// Collections.sort(queries);
 	}
 	
+	
+	
+	/**
+	 * This method keeps the already registered observers and copies the new data
+	 * @param other
+	 */
+	public void copyDataFromOtherAlignmentPositionsList( AlignmentPositionsList other){
+		this.alignmentPositions = other.getAlignmentPositions();
+		this.targets = other.getTargets();
+		this.queries = other.getQueries();
+		statistics=null; // will be recomputed
+		this.setChanged();
+	}
+	
 
 
 	public void addAlignmentPosition(AlignmentPosition a) {

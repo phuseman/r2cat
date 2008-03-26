@@ -21,6 +21,7 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -32,21 +33,24 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import de.bielefeld.uni.cebitec.cav.controller.GuiController;
 
 /**
  * @author Peter Husemann
  * 
  */
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame implements ChangeListener{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 3695451270541548008L;
 
 	private boolean centerWindow = true;
 
 	private JPanel controls;
+	
+	private DataViewPlugin  dataViewPlugin = null;
 
 	protected JScrollPane drawing;
 
@@ -54,17 +58,17 @@ public class MainWindow extends JFrame {
 
 	protected JSlider zoomSlider;
 
-	protected DotPlotVisualisation dotPlotVisualisation;
-
-	private MainWindowActionListener mainWindowListener;
 
 	protected MainMenu menuBar;
+
+	private GuiController guiController;
 
 	/**
 	 * Calls the super constructor and initializes the window
 	 */
-	public MainWindow() {
+	public MainWindow(GuiController guiController) {
 		super("Comparative Assembly Viewer");
+		this.guiController = guiController;
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		init();
 
@@ -96,7 +100,6 @@ public class MainWindow extends JFrame {
 					(height - windowsize.height) / 2 + bounds.y);
 		}
 
-		mainWindowListener = new MainWindowActionListener(this);
 
 		controls = new JPanel();
 		controls.setBorder(BorderFactory.createEtchedBorder());
@@ -105,7 +108,7 @@ public class MainWindow extends JFrame {
 		zoomPanel.setBorder(BorderFactory.createTitledBorder("Zoom"));
 
 		zoomSlider = new JSlider();
-		zoomSlider.addChangeListener(mainWindowListener);
+		zoomSlider.addChangeListener(this);
 		zoomSlider.setOrientation(SwingConstants.HORIZONTAL);
 		zoomSlider.setMaximum(200);
 		zoomSlider.setMinimum(5);
@@ -125,8 +128,7 @@ public class MainWindow extends JFrame {
 		content.add(controls, BorderLayout.SOUTH);
 		content.add(drawing, BorderLayout.CENTER);
 
-		menuBar = new MainMenu();
-		menuBar.registerMainWindow(this);
+		menuBar = new MainMenu(guiController);
 		this.setJMenuBar(menuBar);
 
 		this.pack();
@@ -136,20 +138,32 @@ public class MainWindow extends JFrame {
 	 * Sets the visualisation plugin and registers different listeners to the
 	 * plugin.
 	 * 
-	 * @param vplug
+	 * @param dotPlotVisualisation
 	 */
-	public void setVisualisation(DotPlotVisualisation vplug) {
-		this.dotPlotVisualisation = vplug;
-		this.addComponentListener(vplug);
-		vplug.addMouseMotionListener(mainWindowListener);
-		vplug.addMouseListener(mainWindowListener);
-		vplug.addMouseWheelListener(mainWindowListener);
-		vplug.addKeyListener(mainWindowListener);
+	public void setVisualisation(DataViewPlugin dataViewPlugin) {
+		this.addComponentListener(dataViewPlugin);
+		this.dataViewPlugin=dataViewPlugin;
 
-		// vplug.setAutoscrolls(true);
-
-		drawing.setViewportView(vplug);
+		drawing.setViewportView( (Component) dataViewPlugin);
 		drawing.validate();
 		drawing.setVisible(true);
 	}
+
+	
+	/**
+	 * Changes the zoom level when the zoom slider is moved
+	 * @param e
+	 */
+	public void stateChanged(ChangeEvent e) {
+		if (zoomSlider != null && zoomValue != null
+				&& e.getSource().equals(zoomSlider)) {
+			double zoom = 1.;
+			zoom = zoomSlider.getValue() / 20.;
+			zoomValue.setText(Double.toString(zoom));
+			if (dataViewPlugin != null) {
+				dataViewPlugin.setZoom(zoom);
+			}
+		}
+	}
+
 }

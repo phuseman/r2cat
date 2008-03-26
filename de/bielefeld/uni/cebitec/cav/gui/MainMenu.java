@@ -34,6 +34,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
+import de.bielefeld.uni.cebitec.cav.controller.GuiController;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
 
@@ -47,16 +48,14 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 	 * 
 	 */
 	private static final long serialVersionUID = 4355383922470557796L;
-	private MainWindow mainWindow = null;
+	private GuiController guiController;
 
-	public MainMenu() {
+	public MainMenu(GuiController guiController) {
 		super();
+		this.guiController = guiController;
 		init();
 	}
 
-	public void registerMainWindow(MainWindow mainWindow) {
-		this.mainWindow = mainWindow;
-	}
 
 	private void init() {
 		JMenu fileMenu = new JMenu("File");
@@ -101,23 +100,14 @@ optionsMenu.add(offsets);
 		if (e.getActionCommand().matches("Open File")) {
 			openFile();
 		} else if (e.getActionCommand().matches("Unidirectional Alignments")) {
-			switchReverted();
+			guiController.displayUnidirectional();
 		}else if (e.getActionCommand().matches("Queries with offsets")) {
-			toggleOffsets();
+			guiController.displayWithOffsets();
 		}
 		
 
 	}
 
-	private void switchReverted() {
-		mainWindow.dotPlotVisualisation.getAlignmentPositionDisplayerList().switchReversed();
-		mainWindow.dotPlotVisualisation.repaint();
-	}
-	
-	private void toggleOffsets() {
-		mainWindow.dotPlotVisualisation.getAlignmentPositionDisplayerList().toggleOffsets();
-		mainWindow.dotPlotVisualisation.repaint();
-	}
 
 	/**
 	 * 
@@ -135,11 +125,7 @@ optionsMenu.add(offsets);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
 
-			CSVParser csvParser = new CSVParser(file);
-			AlignmentPositionsList apl = csvParser.parse();
-
-			DotPlotVisualisation view = new DotPlotVisualisation(apl);
-			mainWindow.setVisualisation(view);
+			guiController.loadCSVFile(file);
 		}
 	}
 

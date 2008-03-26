@@ -20,25 +20,28 @@
 
 package de.bielefeld.uni.cebitec.cav.controller;
 
+import java.io.File;
 import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
+import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
+import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
 import de.bielefeld.uni.cebitec.cav.gui.AlignmentTable;
 import de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin;
 import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisation;
 import de.bielefeld.uni.cebitec.cav.gui.MainMenu;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
-import de.bielefeld.uni.cebitec.cav.gui.MainWindowActionListener;
+import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisationActionListener;
 import de.bielefeld.uni.cebitec.cav.utils.SwiftExternal;
 
 public class GuiController {
 
 	private MainWindow mainWindow =null;
 
-	private MainWindowActionListener mainWindowActionListener=null;
+	private DotPlotVisualisationActionListener dotPlotVisualisationActionListener=null;
 
 	private MainMenu mainMenu=null;
 
@@ -48,6 +51,8 @@ public class GuiController {
 
 	private JFrame tableFrame=null;
 
+	private DotPlotVisualisation dotPlotVisualisation;
+
 	/**
 	 * 
 	 */
@@ -56,12 +61,12 @@ public class GuiController {
 	}
 
 	public void createSwiftCall() {
-		//testing
+		// testing
 		SwiftExternal s = new SwiftExternal();		
 	}
 
 	public void createMainWindow() {
-		mainWindow = new MainWindow();		
+		mainWindow = new MainWindow(this);		
 	}
 
 	public void showMainWindow() {
@@ -69,7 +74,14 @@ public class GuiController {
 	}
 
 	public DataViewPlugin createDotPlotVisualisation(AlignmentPositionsList alignmentPositionsList) {
-		DotPlotVisualisation dotPlotVisualisation = new DotPlotVisualisation(alignmentPositionsList);
+		dotPlotVisualisation = new DotPlotVisualisation(alignmentPositionsList);
+		
+		DotPlotVisualisationActionListener dotPlotVisualisationListener = new DotPlotVisualisationActionListener(this,dotPlotVisualisation);
+
+		dotPlotVisualisation.addMouseMotionListener(dotPlotVisualisationListener);
+		dotPlotVisualisation.addMouseListener(dotPlotVisualisationListener);
+		dotPlotVisualisation.addMouseWheelListener(dotPlotVisualisationListener);
+		dotPlotVisualisation.addKeyListener(dotPlotVisualisationListener);
 		return dotPlotVisualisation;
 	}
 
@@ -93,4 +105,24 @@ public class GuiController {
 		}
 	}
 
+	public MainWindow getMainWindow() {
+		return mainWindow;
+	}
+
+	public void loadCSVFile(File file) {
+		ComparativeAssemblyViewer.dataModelController.setAlignmentsPositonsListFromCSV(file);
+	}
+
+	
+
+	public void displayWithOffsets() {
+		dotPlotVisualisation.getAlignmentPositionDisplayerList().toggleOffsets();
+		dotPlotVisualisation.repaint();
+	}
+
+	public void displayUnidirectional() {
+		dotPlotVisualisation.getAlignmentPositionDisplayerList().switchReversed();
+		dotPlotVisualisation.repaint();
+	}
+	
 }
