@@ -60,21 +60,12 @@ public class ComparativeAssemblyViewer {
 		dataModelController = new DataModelController();
 		guiController = new GuiController();
 
-		// option to remove all preferences
-		if (args.length >= 1 && args[0].matches("clearprefs")) {
-			try {
-				preferences.getPreferences().clear();
-			} catch (BackingStoreException e) {
-				e.printStackTrace();
-			}
-			System.exit(0);
-		}
+		clearPreferences(args);
 
 		//guiController.createSwiftCall();
 
-		AlignmentPositionsList apl = dataModelController.parseAlignmentPositionsFromCSV(new File(preferences
+		dataModelController.setAlignmentsPositonsListFromCSV(new File(preferences
 				.getLastFile()));
-		dataModelController.setAlignmentsPositonsList(apl);
 
 		guiController.createMainWindow();
 		
@@ -88,6 +79,18 @@ public class ComparativeAssemblyViewer {
 				.getAlignmentPositionsList());
 
 		guiController.showMainWindow();
+	}
+
+	private static void clearPreferences(String[] args) {
+		// option to remove all preferences
+		if (args.length >= 1 && args[0].matches("clearprefs")) {
+			try {
+				preferences.getPreferences().clear();
+			} catch (BackingStoreException e) {
+				e.printStackTrace();
+			}
+			System.exit(0);
+		}
 	}
 
 	public static CAVPrefs getPrefs() {

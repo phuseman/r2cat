@@ -18,7 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
 package de.bielefeld.uni.cebitec.cav.controller;
 
 import java.io.File;
@@ -30,30 +29,33 @@ import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
 
 /**
  * @author phuseman
- *
+ * 
  */
 public class DataModelController {
 
 	private AlignmentPositionsList alignmentPositionsList;
 	private AlignmentPositionsStatistics alignmentPositionsStatistics;
-	
-	
-	public AlignmentPositionsList parseAlignmentPositionsFromCSV(File csvFile){
+
+	public AlignmentPositionsList parseAlignmentPositionsFromCSV(File csvFile) {
 		CSVParser csvParser = new CSVParser(csvFile);
 		AlignmentPositionsList alignmentPositionsList = csvParser.parse();
 		return alignmentPositionsList;
 	}
-	
-	public void setAlignmentsPositonsListFromCSV(File csvFile){
-		this.setAlignmentsPositonsList(this.parseAlignmentPositionsFromCSV(csvFile));
+
+	public void setAlignmentsPositonsListFromCSV(File csvFile) {
+		this.setAlignmentsPositonsList(this
+				.parseAlignmentPositionsFromCSV(csvFile));
 	}
 
 	public void setAlignmentsPositonsList(AlignmentPositionsList apl) {
 		this.alignmentPositionsList = apl;
-		alignmentPositionsStatistics = new AlignmentPositionsStatistics(alignmentPositionsList);
+		alignmentPositionsStatistics = new AlignmentPositionsStatistics(
+				alignmentPositionsList);
 		// use the preferences: with offsets?
 		if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
-			alignmentPositionsList.generateStatistics(); // this sets the center of masses for each query
+			alignmentPositionsList.generateStatistics(); // this sets the
+															// center of masses
+															// for each query
 			alignmentPositionsList.addOffsets();
 		}
 	}

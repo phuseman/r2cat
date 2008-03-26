@@ -46,6 +46,7 @@ import javax.swing.SwingUtilities;
 
 import sun.java2d.loops.DrawLine;
 
+import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
@@ -62,11 +63,6 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent
 public class DotPlotVisualisation extends JPanel implements Observer,
 		ComponentListener, DataViewPlugin {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -7711739793055363113L;
-
 	// constants
 	// transparent black
 	final private Color alignmentColor = new Color(0f, 0f, 0f, 0.5f);
@@ -82,7 +78,6 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 	final private int border = 20; // pixel
 
 	// class members
-	private AlignmentPositionsList alignmentsPositionsList;
 
 	private AlignmentPositionDisplayerList alignmentPositionDisplayerList;
 
@@ -133,15 +128,14 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 	 */
 	public DotPlotVisualisation(AlignmentPositionsList ap) {
 		this();
-		setAlignmentspositionsList(ap);
+		setAlignmentsPositionsList(ap);
 	}
 
 	/* (non-Javadoc)
 	 * @see de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin#setAlignmentspositionsList(de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList)
 	 */
-	public void setAlignmentspositionsList(AlignmentPositionsList ap) {
-		this.alignmentsPositionsList = ap;
-		this.alignmentsPositionsList.addObserver(this);
+	public void setAlignmentsPositionsList(AlignmentPositionsList ap) {
+		ap.addObserver(this);
 		this.alignmentPositionDisplayerList = new AlignmentPositionDisplayerList(
 				ap);
 	}
@@ -226,6 +220,12 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 
 	}
 
+	
+	/**
+	 * Draws horizontal and vertical bars for the beginning of each sequence.
+	 * E.g. every contig in the y axis is separated by a light gray separation mark.
+	 * @param g2d
+	 */
 	private void drawGrid(Graphics2D g2d) {
 		Color last = g2d.getColor();
 		g2d.setColor(Color.LIGHT_GRAY);
@@ -235,7 +235,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		//horizontal
 		double horizontalOffset=0;
 
-		for (DNASequence q : alignmentsPositionsList.getQueries().values()) {
+		for (DNASequence q : ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().getQueries().values()) {
 			horizontalOffset=(q.getOffset() * AlignmentPositionDisplayer.getNormalisationFactorY());
 			separator = new Line2D.Double(0, -horizontalOffset, drawingWidth, -horizontalOffset);
 			g2d.draw(separator);
@@ -244,7 +244,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 
 		double verticalOffset=0;
 		//vertical 
-		for (DNASequence t : alignmentsPositionsList.getTargets().values()) {
+		for (DNASequence t : ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().getTargets().values()) {
 			verticalOffset=(t.getOffset() * AlignmentPositionDisplayer.getNormalisationFactorX());
 			separator = new Line2D.Double(verticalOffset, 0, verticalOffset, -this.getHeight() + 2 * border);
 			g2d.draw(separator);

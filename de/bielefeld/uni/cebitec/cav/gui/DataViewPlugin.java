@@ -15,7 +15,7 @@ ComponentListener {
 	 * @param ap
 	 *            the List to be set
 	 */
-	public abstract void setAlignmentspositionsList(AlignmentPositionsList ap);
+	public abstract void setAlignmentsPositionsList(AlignmentPositionsList ap);
 
 	/*
 	 * (non-Javadoc)

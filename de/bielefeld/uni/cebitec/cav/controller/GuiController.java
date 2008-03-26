@@ -36,17 +36,17 @@ import de.bielefeld.uni.cebitec.cav.utils.SwiftExternal;
 
 public class GuiController {
 
-	private MainWindow mainWindow;
+	private MainWindow mainWindow =null;
 
-	private MainWindowActionListener mainWindowActionListener;
+	private MainWindowActionListener mainWindowActionListener=null;
 
-	private MainMenu mainMenu;
+	private MainMenu mainMenu=null;
 
 	private Vector<DataViewPlugin> dataViews;
 
-	private AlignmentTable alignmentTable;
+	private AlignmentTable alignmentTable=null;
 
-	private JFrame tableFrame;
+	private JFrame tableFrame=null;
 
 	/**
 	 * 
@@ -62,6 +62,10 @@ public class GuiController {
 
 	public void createMainWindow() {
 		mainWindow = new MainWindow();		
+	}
+
+	public void showMainWindow() {
+		mainWindow.setVisible(true);
 	}
 
 	public DataViewPlugin createDotPlotVisualisation(AlignmentPositionsList alignmentPositionsList) {
@@ -80,12 +84,13 @@ public class GuiController {
 		tableFrame.add(tp);
 		tableFrame.pack();
 		tableFrame.setLocationByPlatform(true);
-		tableFrame.setVisible(true);
+
 	}
 
-	public void showMainWindow() {
-		mainWindow.setVisible(true);
-		
+	public void showTableFrame() {
+		if (tableFrame != null) {
+		tableFrame.setVisible(true);
+		}
 	}
 
 }
