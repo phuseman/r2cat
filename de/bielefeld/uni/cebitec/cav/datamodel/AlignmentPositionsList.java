@@ -28,6 +28,7 @@ import java.util.Observable;
 import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
+import de.bielefeld.uni.cebitec.cav.gui.AlignmentPositionDisplayer;
 
 /**
  * This class is a list of alignment positions.
@@ -36,7 +37,10 @@ import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
  * 
  */
 public class AlignmentPositionsList extends Observable implements Serializable,
-		 Iterable<AlignmentPosition> /* TODO: maybe implement Externalizable to write out the alignments */ {
+		Iterable<AlignmentPosition> /*
+									 * TODO: maybe implement Externalizable to
+									 * write out the alignments
+									 */{
 	/**
 	 * 
 	 */
@@ -56,11 +60,12 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		/**
 		 * This event is fired if alignments are marked in the gui
 		 */
-		MARK, 
+		MARK,
 		/**
-		 * This event is fired if elements are going to hide. (not implemented yet) 
+		 * This event is fired if elements are going to hide. (not implemented
+		 * yet)
 		 */
-		HIDE, 
+		HIDE,
 		/**
 		 * This event is fired if there is a change on the data
 		 */
@@ -74,30 +79,32 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		alignmentPositions = new Vector<AlignmentPosition>();
 		targets = new HashMap<String, DNASequence>();
 		queries = new HashMap<String, DNASequence>();
-		
+
 		// Collections.sort(targets);
 		// Collections.sort(queries);
 	}
-	
-	
-	
+
 	/**
-	 * This method keeps the already registered observers and copies the new data
+	 * This method keeps the already registered observers and copies the new
+	 * data
+	 * 
 	 * @param other
 	 */
-	public void copyDataFromOtherAlignmentPositionsList( AlignmentPositionsList other){
+	public void copyDataFromOtherAlignmentPositionsList(
+			AlignmentPositionsList other) {
 		this.alignmentPositions = other.getAlignmentPositions();
 		this.targets = other.getTargets();
 		this.queries = other.getQueries();
-		statistics=null; // will be recomputed
+		statistics = null; // will be recomputed
+		AlignmentPosition.setParentList(this);
+		unmarkAllAlignments();
+
 		this.setChanged();
 	}
-	
-
 
 	public void addAlignmentPosition(AlignmentPosition a) {
 		alignmentPositions.add(a);
-		AlignmentPosition.register(this);
+		AlignmentPosition.setParentList(this);
 
 		if (!targets.containsKey(a.getTarget().getId())) {
 			targets.put(a.getTarget().getId(), a.getTarget());
@@ -116,7 +123,6 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 	public boolean isEmpty() {
 		return alignmentPositions.isEmpty();
 	}
-
 
 	public int size() {
 		return alignmentPositions.size();
@@ -160,7 +166,7 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		}
 		queriesWithOffsets = false;
 		ComparativeAssemblyViewer.preferences.setDisplayOffsets(false);
-		}
+	}
 
 	public void toggleOffsets() {
 		if (queriesWithOffsets == false) {
@@ -238,17 +244,15 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		}
 		return statistics;
 	}
-	
-	
+
 	/**
-	 * Generates a Statistics Object which does some counting.
-	 * The Statistics Object sets the center of mass for each contig/query
+	 * Generates a Statistics Object which does some counting. The Statistics
+	 * Object sets the center of mass for each contig/query
 	 */
 	public void generateStatistics() {
 		statistics = new AlignmentPositionsStatistics(this);
 	}
 
-	
 	public void markQueriesWithSelectedAps() {
 		unmarkAllQueries();
 
@@ -261,11 +265,20 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 	}
 
 	/**
-	 * remove all markings 
+	 * remove all markings
 	 */
 	public void unmarkAllQueries() {
 		for (DNASequence query : queries.values()) {
 			query.setMarked(false);
+		}
+	}
+
+	public void unmarkAllAlignments() {
+		for (AlignmentPosition elem : alignmentPositions) {
+			elem.setSelected(false);
+		}
+		if (this.hasChanged()) {
+			this.notifyObservers(AlignmentPositionsList.NotifyEvent.MARK);
 		}
 	}
 
@@ -275,17 +288,14 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 		super.notifyObservers(arg);
 	}
 
-
-
 	/**
-	 * Add offsets if there are multiple targets.
-	 * TODO: sort by length
+	 * Add offsets if there are multiple targets. TODO: sort by length
 	 */
 	public void addOffsetsToTargets() {
-		long offset=0;
+		long offset = 0;
 		for (DNASequence target : targets.values()) {
 			target.setOffset(offset);
-			offset+=target.getSize();
+			offset += target.getSize();
 		}
 	}
 }

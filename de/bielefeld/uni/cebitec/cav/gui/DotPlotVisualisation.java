@@ -466,16 +466,24 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		if (arg == null) {
 			this.repaint();
 		} else {
-
 			AlignmentPositionsList.NotifyEvent action = (AlignmentPositionsList.NotifyEvent) arg;
 
+			
 			if (action == NotifyEvent.MARK) {
-				;
+				this.repaint();
 			} else if (action == NotifyEvent.HIDE) {
-				;
+				; // todo: not implemented yet
 			} else if (action == NotifyEvent.CHANGE) {
-				AlignmentPositionsList apl = ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList();
-				alignmentPositionDisplayerList = new AlignmentPositionDisplayerList(apl);
+				//if new data are loaded the AlignmentPositionsList will not
+				// be a new object to keep the observers (table and visualisation)
+				// ut one has to
+				//generate the new diagonal line segments:
+				alignmentPositionDisplayerList
+				.generateAlignmentPositionDisplayerList(drawingWidth,
+						drawingHeight);
+				//reset histogramm so that it will be recomputed with repaint()
+				histogram = new double[0]; 
+				this.repaint();
 			}
 
 			// for all cases

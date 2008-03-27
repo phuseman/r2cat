@@ -15,7 +15,7 @@ public class AlignmentPosition implements Comparable {
 
 	private boolean selected = false;
 
-	private static AlignmentPositionsList controller;
+	private static AlignmentPositionsList parentList;
 
 	/**
 	 * @param target
@@ -103,17 +103,14 @@ public class AlignmentPosition implements Comparable {
 		this.alignmentModified();
 	}
 
-	public static void register(AlignmentPositionsList controller) {
-		AlignmentPosition.controller = controller;
+	public static void setParentList(AlignmentPositionsList parentList) {
+		AlignmentPosition.parentList = parentList;
 	}
 
 	private void alignmentModified() {
-		controller.alignmentChanged();
+		parentList.alignmentChanged();
 	}
 
-	public static AlignmentPositionsList getAlignmentPositionsList() {
-		return controller;
-	}
 
 	public boolean hasSameTarget(AlignmentPosition pos) {
 		return this.target.equals(pos.target);

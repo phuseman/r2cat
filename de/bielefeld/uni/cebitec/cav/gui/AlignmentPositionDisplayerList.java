@@ -64,15 +64,17 @@ public class AlignmentPositionDisplayerList implements
 	}
 
 	/**
-	 * Generates a new list of {@link AlignmentPositionDisplayer}s which are scaled to a given width and heigth.
+	 * Generates a new list of {@link AlignmentPositionDisplayer}s which are
+	 * scaled to a given width and heigth.
 	 * 
-	 * @param width maximum width in pixel for the target(s)
-	 * @param heigth maximum heigth for the stacked queries
+	 * @param width
+	 *            maximum width in pixel for the target(s)
+	 * @param heigth
+	 *            maximum heigth for the stacked queries
 	 */
 	public void generateAlignmentPositionDisplayerList(int width, int heigth) {
 		double normalisationX = 1;
 		double normalisationY = 1;
-		
 
 		if (!alignmentsPositions.isEmpty()) {
 
@@ -88,19 +90,23 @@ public class AlignmentPositionDisplayerList implements
 			for (AlignmentPosition ap : alignmentsPositions) {
 				alPosDispList.add(new AlignmentPositionDisplayer(ap));
 			}
-			
-			if (ComparativeAssemblyViewer.preferences.getDisplayUnidirectional()) {
+
+			if (ComparativeAssemblyViewer.preferences
+					.getDisplayUnidirectional()) {
 				this.switchReversed();
 				// switchReversed would change the preferences.
 				// set it again to true
-				ComparativeAssemblyViewer.preferences.setDisplayUnidirectional(true);
+				ComparativeAssemblyViewer.preferences
+						.setDisplayUnidirectional(true);
 			}
 		}
 	}
 
 	/**
-	 * Rescales the {@link AlignmentPositionDisplayer}s to a given width and height. <br>
+	 * Rescales the {@link AlignmentPositionDisplayer}s to a given width and
+	 * height. <br>
 	 * If the list was not generated: fallback and do it. <br>
+	 * 
 	 * @param width
 	 * @param heigth
 	 */
@@ -117,16 +123,18 @@ public class AlignmentPositionDisplayerList implements
 		AlignmentPositionDisplayer.setNormalisationFactorY(normalisationY);
 
 		if (this.isGenerated()) {
-		for (AlignmentPositionDisplayer apd : alPosDispList) {
-			apd.rescale();
-		}
+			for (AlignmentPositionDisplayer apd : alPosDispList) {
+				apd.rescale();
+			}
 		} else {
 			this.generateAlignmentPositionDisplayerList(width, heigth);
 		}
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Iterable#iterator()
 	 */
 	public Iterator<AlignmentPositionDisplayer> iterator() {
@@ -136,8 +144,8 @@ public class AlignmentPositionDisplayerList implements
 	/**
 	 * Switch between:<br>
 	 * <ul>
-	 * 	 <li> displays all alignments in the direction as stored
-	 *   <li> displays all alignments in one direction
+	 * <li> displays all alignments in the direction as stored
+	 * <li> displays all alignments in one direction
 	 * </ul>
 	 * 
 	 */
@@ -146,13 +154,16 @@ public class AlignmentPositionDisplayerList implements
 			elem.switchReversed();
 		}
 		// switch preferences
-		ComparativeAssemblyViewer.preferences.setDisplayUnidirectional(!ComparativeAssemblyViewer.preferences.getDisplayUnidirectional());
+		ComparativeAssemblyViewer.preferences
+				.setDisplayUnidirectional(!ComparativeAssemblyViewer.preferences
+						.getDisplayUnidirectional());
 	}
 
 	/**
 	 * Returns the closest alignment to a given point.
 	 * 
-	 * @param point given point
+	 * @param point
+	 *            given point
 	 * @return AlignmentPositionDisplayer which is the closest
 	 */
 	public AlignmentPositionDisplayer getClosestHit(Point2D.Double point) {
@@ -200,13 +211,7 @@ public class AlignmentPositionDisplayerList implements
 	 * Unmarks all alignments and notifies all registered observers.
 	 */
 	public void unmakAll() {
-		for (AlignmentPositionDisplayer elem : alPosDispList) {
-			elem.setSelected(false);
-		}
-		if (alignmentsPositions.hasChanged()) {
-			alignmentsPositions
-					.notifyObservers(AlignmentPositionsList.NotifyEvent.MARK);
-		}
+		alignmentsPositions.unmarkAllAlignments();
 	}
 
 	public void setAllVisible() {
@@ -226,18 +231,16 @@ public class AlignmentPositionDisplayerList implements
 	 */
 	public double[] getTargetHistogram(int numberOfBuckets) {
 		double[] histogram;
-		
+
 		if (numberOfBuckets <= 1) {
 			histogram = new double[1];
 			histogram[0] = 1;
 			return histogram;
 		}
-		
+
 		histogram = new double[numberOfBuckets];
 
-		
 		long maximum = alignmentsPositions.getStatistics().getTargetsSize();
-
 
 		long bucketSize = (long) ((double) (maximum + 1) / (numberOfBuckets - 1));
 
@@ -245,15 +248,15 @@ public class AlignmentPositionDisplayerList implements
 		long lastBucket = 0;
 		long maximumCountOfABucket = 0;
 
-		//for each match...
+		// for each match...
 		for (AlignmentPosition ap : alignmentsPositions) {
-			//... get the first and the last bucket
-			firstBucket = ( ap.getTargetStart() + ap.getTarget().getOffset())
+			// ... get the first and the last bucket
+			firstBucket = (ap.getTargetStart() + ap.getTarget().getOffset())
 					/ bucketSize;
-			lastBucket = ( ap.getTargetEnd() + ap.getTarget().getOffset())
+			lastBucket = (ap.getTargetEnd() + ap.getTarget().getOffset())
 					/ bucketSize;
 
-			//switch first and last if reverted
+			// switch first and last if reverted
 			if (firstBucket > lastBucket) {
 				long tmp = lastBucket;
 				lastBucket = firstBucket;
@@ -263,12 +266,12 @@ public class AlignmentPositionDisplayerList implements
 			// add one to each bucket in range (first to last)
 			for (int i = (int) firstBucket; i <= lastBucket; i++) {
 				histogram[i] += 1.;
-				
+
 				// and compute the highest bucket so far for normalisation
 				if (histogram[i] > maximumCountOfABucket) {
 					maximumCountOfABucket = (long) histogram[i];
 				}
-				
+
 			}
 		}
 
@@ -281,7 +284,9 @@ public class AlignmentPositionDisplayerList implements
 	}
 
 	/**
-	 * Returns whether or not the List of displayable alignments has been generated or not.
+	 * Returns whether or not the List of displayable alignments has been
+	 * generated or not.
+	 * 
 	 * @return
 	 */
 	public boolean isGenerated() {
@@ -293,8 +298,9 @@ public class AlignmentPositionDisplayerList implements
 	}
 
 	/**
-	 * Marks all alignments in a rectangle between a given top left and bottom right point.
-	 * the type of selection can be specified by the markOperation.
+	 * Marks all alignments in a rectangle between a given top left and bottom
+	 * right point. the type of selection can be specified by the markOperation.
+	 * 
 	 * @param topLeft
 	 * @param bottomRight
 	 * @param markOperation
@@ -342,11 +348,11 @@ public class AlignmentPositionDisplayerList implements
 	public void toggleOffsets() {
 		// call the appropriate method on the datamodel
 		alignmentsPositions.toggleOffsets();
-		
+
 		// rescale sets the new positions including offsets or not
 		for (AlignmentPositionDisplayer apd : alPosDispList) {
 			apd.rescale();
 		}
 	}
-	
+
 }

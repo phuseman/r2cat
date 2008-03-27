@@ -74,7 +74,6 @@ public class AlignmentTable extends JTable implements Observer {
 		if (arg == null) {
 			this.revalidate();
 		} else {
-
 			AlignmentPositionsList.NotifyEvent action = (AlignmentPositionsList.NotifyEvent) arg;
 
 			if (action == NotifyEvent.MARK) {
@@ -117,8 +116,9 @@ public class AlignmentTable extends JTable implements Observer {
 	public void valueChanged(ListSelectionEvent e) {
 		super.valueChanged(e);
 
+		// avoid interference with the update method.
 		if (!selectionByUpdate) {
-
+			// wait until the selection has settled
 			if (!e.getValueIsAdjusting()) {
 				DefaultListSelectionModel lsm = (DefaultListSelectionModel) e
 						.getSource();
@@ -127,7 +127,7 @@ public class AlignmentTable extends JTable implements Observer {
 					apl.getAlignmentPositionAt(i).setSelected(
 							lsm.isSelectedIndex(i));
 				}
-				apl.notifyObservers(null);
+				apl.notifyObservers(NotifyEvent.MARK);
 			}
 
 		}

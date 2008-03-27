@@ -28,7 +28,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
  * Object for displaying an alignment between a query and a target sequence.
  * Alignment means in this case that a diagonal is drawn if there is a high similarity
  * between a certain query region and a certain target region.<br>
- * The object extends Line2D.Double which alows to be drawn with the draw funcion
+ * The object extends Line2D.Double which allows to be drawn with the draw function
  * of a graphics object. Additionally some geometrical functions are available.
  * @author Peter Husemann
  *
@@ -63,7 +63,6 @@ public class AlignmentPositionDisplayer extends Line2D.Double {
 		this.alignmentPosition = alignmentPosition;
 		this.setPosition();
 //		TODO ComparativeAssemblyViewer.preferences.displayUnidirectional();
-
 	}
 
 	

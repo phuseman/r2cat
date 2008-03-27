@@ -42,6 +42,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.controller.GuiController;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
@@ -163,7 +164,7 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 				smallestap.setSelected(false);
 			}
 		}
-		AlignmentPosition.getAlignmentPositionsList().notifyObservers(
+		ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().notifyObservers(
 				NotifyEvent.MARK);
 	}
 
