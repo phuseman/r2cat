@@ -119,4 +119,22 @@ public class CAVPrefs {
 		return preferences;
 	}
 
+	
+	/**
+	 * Get preference: Should the viewer draw a grid between contigs and reference genomes?
+	 * 
+	 * @return
+	 */
+	public boolean getDisplayGrid() {
+		return preferences.getBoolean("grid", false);
+	}
+
+	/**
+	 *  Set preference: Should the viewer draw grid between contigs and reference genomes?
+	 * @param b true, false
+	 */
+	public void setDisplayGrid(boolean b) {
+		preferences.putBoolean("grid", b);
+	}
+
 }

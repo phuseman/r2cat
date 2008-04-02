@@ -82,6 +82,7 @@ public class GuiController {
 		dotPlotVisualisation.addMouseListener(dotPlotVisualisationListener);
 		dotPlotVisualisation.addMouseWheelListener(dotPlotVisualisationListener);
 		dotPlotVisualisation.addKeyListener(dotPlotVisualisationListener);
+		dotPlotVisualisation.drawGrid(ComparativeAssemblyViewer.preferences.getDisplayGrid());
 		return dotPlotVisualisation;
 	}
 
@@ -110,6 +111,7 @@ public class GuiController {
 	}
 
 	public void loadCSVFile(File file) {
+		ComparativeAssemblyViewer.preferences.setLastFile(file.getAbsolutePath());
 		ComparativeAssemblyViewer.dataModelController.setAlignmentsPositonsListFromCSV(file);
 	}
 
@@ -122,6 +124,10 @@ public class GuiController {
 
 	public void displayUnidirectional() {
 		dotPlotVisualisation.getAlignmentPositionDisplayerList().switchReversed();
+		dotPlotVisualisation.repaint();
+	}
+	public void displayGrid(boolean b) {
+		dotPlotVisualisation.drawGrid(b);
 		dotPlotVisualisation.repaint();
 	}
 	

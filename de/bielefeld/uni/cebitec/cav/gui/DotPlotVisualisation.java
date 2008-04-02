@@ -105,6 +105,8 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 	// a histogram generated from the alignments
 	private double[] histogram = {};
 
+	private boolean drawGrid = false;
+
 	/**
 	 * Constructor of the main drawing canvas for the alignments.<br>
 	 * Turns on buffering, sets the background and some settings.
@@ -131,7 +133,9 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		setAlignmentsPositionsList(ap);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin#setAlignmentspositionsList(de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList)
 	 */
 	public void setAlignmentsPositionsList(AlignmentPositionsList ap) {
@@ -220,41 +224,46 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 
 	}
 
-	
 	/**
 	 * Draws horizontal and vertical bars for the beginning of each sequence.
-	 * E.g. every contig in the y axis is separated by a light gray separation mark.
+	 * E.g. every contig in the y axis is separated by a light gray separation
+	 * mark.
+	 * 
 	 * @param g2d
 	 */
 	private void drawGrid(Graphics2D g2d) {
-		Color last = g2d.getColor();
-		g2d.setColor(Color.LIGHT_GRAY);
 
-	
-		Line2D.Double separator;
-		//horizontal
-		double horizontalOffset=0;
+		if (drawGrid) {
 
-		for (DNASequence q : ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().getQueries().values()) {
-			horizontalOffset=(q.getOffset() * AlignmentPositionDisplayer.getNormalisationFactorY());
-			separator = new Line2D.Double(0, -horizontalOffset, drawingWidth, -horizontalOffset);
-			g2d.draw(separator);
+			Color last = g2d.getColor();
+			g2d.setColor(Color.LIGHT_GRAY);
+
+			Line2D.Double separator;
+			// horizontal
+			double horizontalOffset = 0;
+
+			for (DNASequence q : ComparativeAssemblyViewer.dataModelController
+					.getAlignmentPositionsList().getQueries().values()) {
+				horizontalOffset = (q.getOffset() * AlignmentPositionDisplayer
+						.getNormalisationFactorY());
+				separator = new Line2D.Double(0, -horizontalOffset,
+						drawingWidth, -horizontalOffset);
+				g2d.draw(separator);
+			}
+
+			double verticalOffset = 0;
+			// vertical
+			for (DNASequence t : ComparativeAssemblyViewer.dataModelController
+					.getAlignmentPositionsList().getTargets().values()) {
+				verticalOffset = (t.getOffset() * AlignmentPositionDisplayer
+						.getNormalisationFactorX());
+				separator = new Line2D.Double(verticalOffset, 0,
+						verticalOffset, -this.getHeight() + 2 * border);
+				g2d.draw(separator);
+			}
+
+			g2d.setColor(last);
 		}
-		
-
-		double verticalOffset=0;
-		//vertical 
-		for (DNASequence t : ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().getTargets().values()) {
-			verticalOffset=(t.getOffset() * AlignmentPositionDisplayer.getNormalisationFactorX());
-			separator = new Line2D.Double(verticalOffset, 0, verticalOffset, -this.getHeight() + 2 * border);
-			g2d.draw(separator);
-		}
-		
-
-		
-		
-
-	g2d.setColor(last);
 	}
 
 	/**
@@ -360,10 +369,8 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		// apply to graphics context
 		g2d.transform(alignmentPositionTransform);
 
-
 		drawGrid(g2d);
 
-		
 		if (antialiasing) {
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 					RenderingHints.VALUE_ANTIALIAS_ON);
@@ -372,7 +379,6 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		}
 
 		drawAlignmentPositions(g2d);
-		
 
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_OFF);
@@ -384,7 +390,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		g2d.dispose();
 	}
 
-/**
+	/**
 	 * Draws a frame, if lastSelectionRectangle is set. This is used when
 	 * selecting alignments. The frame will be drawn before the transformation
 	 * is applied, so the coordinates are the same as in the window.<br>
@@ -459,8 +465,11 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 	 * 
 	 * the observed object is the list of alignments
 	 */
-	/* (non-Javadoc)
-	 * @see de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin#update(java.util.Observable, java.lang.Object)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin#update(java.util.Observable,
+	 *      java.lang.Object)
 	 */
 	public void update(Observable o, Object arg) {
 		if (arg == null) {
@@ -468,21 +477,21 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		} else {
 			AlignmentPositionsList.NotifyEvent action = (AlignmentPositionsList.NotifyEvent) arg;
 
-			
 			if (action == NotifyEvent.MARK) {
 				this.repaint();
 			} else if (action == NotifyEvent.HIDE) {
 				; // todo: not implemented yet
 			} else if (action == NotifyEvent.CHANGE) {
-				//if new data are loaded the AlignmentPositionsList will not
-				// be a new object to keep the observers (table and visualisation)
+				// if new data are loaded the AlignmentPositionsList will not
+				// be a new object to keep the observers (table and
+				// visualisation)
 				// ut one has to
-				//generate the new diagonal line segments:
+				// generate the new diagonal line segments:
 				alignmentPositionDisplayerList
-				.generateAlignmentPositionDisplayerList(drawingWidth,
-						drawingHeight);
-				//reset histogramm so that it will be recomputed with repaint()
-				histogram = new double[0]; 
+						.generateAlignmentPositionDisplayerList(drawingWidth,
+								drawingHeight);
+				// reset histogramm so that it will be recomputed with repaint()
+				histogram = new double[0];
 				this.repaint();
 			}
 
@@ -491,7 +500,9 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin#setZoom(double)
 	 */
 	public void setZoom(double zoom) {
@@ -635,6 +646,14 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 	 * @see java.awt.event.ComponentListener#componentShown(java.awt.event.ComponentEvent)
 	 */
 	public void componentShown(ComponentEvent e) {
+	}
+
+	/**
+	 * @param drawGrid the drawGrid to set
+	 */
+	public void drawGrid(boolean drawGrid) {
+		ComparativeAssemblyViewer.preferences.setDisplayGrid(drawGrid);
+		this.drawGrid = drawGrid;
 	}
 
 }

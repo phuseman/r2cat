@@ -92,6 +92,15 @@ offsets.getAccessibleContext().setAccessibleDescription(
 offsets.addActionListener(this);
 optionsMenu.add(offsets);
 		
+
+JCheckBoxMenuItem grid = new JCheckBoxMenuItem(
+		"Grid", ComparativeAssemblyViewer.preferences.getDisplayGrid());
+grid.setMnemonic(KeyEvent.VK_G);
+grid.getAccessibleContext().setAccessibleDescription(
+		"Display a grid between queries and targets");
+grid.addActionListener(this);
+optionsMenu.add(grid);
+
 		this.add(optionsMenu);
 
 	}
@@ -101,9 +110,11 @@ optionsMenu.add(offsets);
 			openFile();
 		} else if (e.getActionCommand().matches("Unidirectional Alignments")) {
 			guiController.displayUnidirectional();
-		}else if (e.getActionCommand().matches("Queries with offsets")) {
+		} else if (e.getActionCommand().matches("Queries with offsets")) {
 			guiController.displayWithOffsets();
-		}
+	} else if (e.getActionCommand().matches("Grid")) {
+		guiController.displayGrid(((JCheckBoxMenuItem)e.getSource()).getState());
+	}
 		
 
 	}
@@ -119,7 +130,12 @@ optionsMenu.add(offsets);
 
 		// disable all files filter
 		// fileChooser.setAcceptAllFileFilterUsed(false);
-
+		File lastFile = new File(ComparativeAssemblyViewer.preferences.getLastFile());
+		File lastDir = lastFile.getParentFile();
+		if (lastDir != null){
+		fileChooser.setCurrentDirectory(lastDir);
+		}
+		
 		int returnVal = fileChooser.showOpenDialog(this);
 
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
