@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2008 by Peter Husemann                                  *
- *   phuseman@cebitec.uni-bielefeld.de                                     *
+ *   phuseman ät cebitec.uni-bielefeld.de                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -42,16 +42,17 @@ public class qGramCoder {
 
 	public qGramCoder(int q) {
 		this.q = q;
-		if (q <= 0)
+		if (q <= 0) {
 			throw new IllegalArgumentException("q must be >=0");
-
+		}
 		long power = 1;
 		this.q = q;
 
 		for (int i = 1; i <= q - 1; i++) {
 			power *= alphabetSize;
-			if (power < 0 || power > Integer.MAX_VALUE)
+			if (power < 0 || power > Integer.MAX_VALUE) {
 				throw new IllegalArgumentException("Values are getting to big");
+			}
 		}
 
 		divisor = (int) power; // alphabetsize^(q-1)
@@ -88,7 +89,7 @@ public class qGramCoder {
 	}
 
 	private int charToCharcode(char c) {
-		int character=0;
+		int character = 0;
 		switch (c) {
 		case 'a':
 			character = 0;
@@ -113,7 +114,7 @@ public class qGramCoder {
 	}
 
 	private int charcodeToChar(char charcode) {
-		char c='N';
+		char c = 'N';
 		switch (charcode) {
 		case 0:
 			c = 'a';
@@ -133,34 +134,33 @@ public class qGramCoder {
 		}
 		return c;
 	}
-	
-	public String decode (int qgram) {
-		String out="";
-		for (int i = 0; i < q-1; i++) {
-			qgram/=alphabetSize;
+
+	public String decode(int qgram) {
+		String out = "";
+		for (int i = 0; i < q - 1; i++) {
+			qgram /= alphabetSize;
 		}
 		return out;
 	}
 
-	
 	public static void main(String argv[]) {
 		String test = "acggtggaaagtgttgXaaagtttttttttgggggggggggggggggggg";
 
-		qGramCoder coder = new qGramCoder(2);
+		qGramCoder coder = new qGramCoder(11);
 
-		int[] table = new int[16];
+		QGramIndex qi = new QGramIndex(coder.numberOfQGrams());
+
 		for (int i = 0; i < test.length(); i++) {
+
 			coder.updateEncoding(test.charAt(i));
-			System.out.println(test.charAt(i) + " "
-					+ coder.getCurrentEncoding());
-			if(coder.getCurrentEncoding()>=0){
-			table[coder.getCurrentEncoding()]++;
-			}
+//			System.out.println(" i:" + i + " code:"
+//					+ coder.getCurrentEncoding() + " max:"
+//					+ coder.numberOfQGrams());
+
+			qi.addPosition(coder.getCurrentEncoding(), i);
 		}
-		
-		for (int i = 0; i < table.length; i++) {
-			System.out.println(i+" "+table[i]);
-		}
+
+		qi.print();
 	}
 
 	public int getCurrentEncoding() {
@@ -175,7 +175,7 @@ public class qGramCoder {
 		currentEncoding = 0;
 		currentQLength = 0;
 	}
-	
+
 	public int numberOfQGrams() {
 		return (int) maxEncoding;
 	}
