@@ -25,11 +25,13 @@ import java.util.Iterator;
  * @author phuseman
  * 
  */
-public class qGramCoder {
+public class QGramCoder {
 	private int q;
 
 	private int alphabetSize = 4;
 
+	private int[] alphabet;
+	
 	private int currentEncoding = 0;
 
 	private long maxEncoding = 0;
@@ -40,7 +42,26 @@ public class qGramCoder {
 
 	private boolean valid = false;
 
-	public qGramCoder(int q) {
+	public QGramCoder(int q) {
+		
+		
+		//create alphabet map
+		alphabet = new int[256];
+		for (int i = 0; i < alphabet.length; i++) {
+			alphabet[i]=-1;
+		}
+		
+		alphabet['a']=0;
+		alphabet['A']=0;
+		alphabet['c']=1;
+		alphabet['C']=1;
+		alphabet['g']=2;
+		alphabet['G']=2;
+		alphabet['t']=3;
+		alphabet['T']=4;
+		
+		
+		//check if values are getting too big
 		this.q = q;
 		if (q <= 0) {
 			throw new IllegalArgumentException("q must be >=0");
@@ -70,12 +91,10 @@ public class qGramCoder {
 			currentQLength++;
 		}
 
-		int character = 0;
-		character = charToCharcode(c);
 
 		currentEncoding %= divisor;
 		currentEncoding *= alphabetSize;
-		currentEncoding += character;
+		currentEncoding += charToCharcode(c);
 
 		if ((currentQLength >= q) && (currentEncoding < maxEncoding)) {
 			valid = true;
@@ -89,44 +108,30 @@ public class qGramCoder {
 	}
 
 	private int charToCharcode(char c) {
-		int character = 0;
-		switch (c) {
-		case 'a':
-			character = 0;
-			break;
-		case 't':
-			character = 1;
-			break;
-		case 'c':
-			character = 2;
-			break;
-		case 'g':
-			character = 3;
-			break;
-
-		default:
+		if (alphabet[c] != -1) {
+			return alphabet[c];
+		} else {
 			currentEncoding = 0;
 			currentQLength = 0;
 			valid = false;
-			break;
+			return -1;
 		}
-		return character;
 	}
 
-	private int charcodeToChar(char charcode) {
+	private char charcodeToChar(int charcode) {
 		char c = 'N';
 		switch (charcode) {
 		case 0:
 			c = 'a';
 			break;
 		case 1:
-			c = 't';
-			break;
-		case 2:
 			c = 'c';
 			break;
-		case 3:
+		case 2:
 			c = 'g';
+			break;
+		case 3:
+			c = 't';
 			break;
 
 		default:
@@ -135,18 +140,24 @@ public class qGramCoder {
 		return c;
 	}
 
-	public String decode(int qgram) {
-		String out = "";
-		for (int i = 0; i < q - 1; i++) {
-			qgram /= alphabetSize;
+	public String decodeQgramCode(int qGramCode) {
+		if (qGramCode < 0) {return "invalid";}
+		if (qGramCode > this.numberOfQGrams()) {return "codenumber too big";};
+		StringBuffer out = new StringBuffer();
+		out.setLength(q);
+		char next;
+		for (int i = 0; i <= q - 1; i++) {
+			next = charcodeToChar(qGramCode%alphabetSize);
+				qGramCode /= alphabetSize;
+				out.setCharAt(q-i-1, next);
 		}
-		return out;
+		return out.toString();
 	}
 
 	public static void main(String argv[]) {
 		String test = "acggtggaaagtgttgXaaagtttttttttgggggggggggggggggggg";
 
-		qGramCoder coder = new qGramCoder(11);
+		QGramCoder coder = new QGramCoder(11);
 
 		QGramIndex qi = new QGramIndex(coder.numberOfQGrams());
 
@@ -158,6 +169,7 @@ public class qGramCoder {
 //					+ coder.numberOfQGrams());
 
 			qi.addPosition(coder.getCurrentEncoding(), i);
+			System.out.println(coder.getCurrentEncoding() + " -> " + coder.decodeQgramCode(coder.getCurrentEncoding()));
 		}
 
 		qi.print();

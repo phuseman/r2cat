@@ -30,38 +30,31 @@ import java.util.Vector;
  * 
  */
 public class QGramIndex {
-	Vector<LinkedList<Integer>> positions;
+private int[] bucketPointers;
+private int[] qgramIndices;
+private byte[] input;
 
 	public QGramIndex(int maxQCode) {
-		positions = new Vector<LinkedList<Integer>>(maxQCode);
-		positions.setSize(maxQCode);
+		bucketPointers = new int[maxQCode];
+}
+
+	public void generateIndex(byte[] input){
+		this.input = input;
+		qgramIndices = new int[input.length];
+		computeBucketBoundaries();
+		collectQGramIndices();
 	}
 
-	public void addPosition(int qgram, int position) {
-		if (qgram == -1) {
-			return;
-		} else {
-			if (positions.elementAt(qgram) == null) {
-				positions.set(qgram, new LinkedList());
-			}
-			// System.out.println("size:"+positions.size());
-			positions.elementAt(qgram).add(position);
-		}
+	private void computeBucketBoundaries() {
+		for (int i = 0; i < input.length; i++) {
+			
+		} 
+		
 	}
 
-	public void print() {
-		for (int i = 0; i < positions.size(); i++) {
-			if (positions.get(i) != null) {
-				System.out.println("Code: " + i);
-
-				for (Iterator iter = positions.get(i).iterator(); iter
-						.hasNext();) {
-					int element = (Integer) iter.next();
-					System.out.print( element + ", ");
-
-				}
-				System.out.println();
-			}
-		}
+	private void collectQGramIndices() {
+		// TODO Auto-generated method stub
+		
 	}
+	
 }
