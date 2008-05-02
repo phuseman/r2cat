@@ -274,7 +274,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 	 */
 	private void drawCoordinateSystem(Graphics2D g2d) {
 
-		// TODO extend this, so it draws axis lables
+		// TODO extend this, so it draws axis labels
 
 		Color last = g2d.getColor();
 		g2d.setColor(Color.BLACK);
@@ -288,7 +288,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 				.drawString("Contigs", -(border / 2), -this.getHeight() + 2
 						* border);
 
-		String xLabel = "Reference Genome";
+		String xLabel = "Reference Genome(s)";
 		int xLabelSize = SwingUtilities.computeStringWidth(this
 				.getFontMetrics(this.getFont()), xLabel);
 

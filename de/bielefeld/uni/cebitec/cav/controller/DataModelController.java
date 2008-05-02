@@ -34,7 +34,6 @@ import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
 public class DataModelController {
 
 	private AlignmentPositionsList alignmentPositionsList;
-	private AlignmentPositionsStatistics alignmentPositionsStatistics;
 
 	public AlignmentPositionsList parseAlignmentPositionsFromCSV(File csvFile) {
 		CSVParser csvParser = new CSVParser(csvFile);
@@ -51,11 +50,10 @@ public class DataModelController {
 		if (alignmentPositionsList == null) {
 			alignmentPositionsList = apl;
 		} else {
+			// this method keeps the observers
 			alignmentPositionsList.copyDataFromOtherAlignmentPositionsList(apl);
 		}
 		
-		alignmentPositionsStatistics = new AlignmentPositionsStatistics(
-				alignmentPositionsList);
 		// use the preferences: with offsets?
 		if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
 			alignmentPositionsList.generateStatistics(); // this sets the
@@ -79,7 +77,7 @@ public class DataModelController {
 	 * @return the alignmentPositionsStatistics
 	 */
 	public AlignmentPositionsStatistics getAlignmentPositionsStatistics() {
-		return alignmentPositionsStatistics;
+		return alignmentPositionsList.getStatistics();
 	}
 
 	/**

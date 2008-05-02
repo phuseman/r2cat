@@ -78,8 +78,8 @@ public class ComparativeAssemblyViewer {
 		guiController.createTableFrame(dataModelController
 				.getAlignmentPositionsList());
 
-		guiController.showMainWindow();
 		guiController.showTableFrame();
+		guiController.showMainWindow();
 	}
 
 	private static void clearPreferences(String[] args) {

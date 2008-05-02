@@ -81,7 +81,7 @@ public class AlignmentPosition implements Comparable {
 	}
 	
 	public double getTargetCenter() {
-		return (targetStart + targetEnd) / 2.;
+		return ((targetStart + targetEnd) / 2.) + target.getOffset();
 	}
 
 	@Override

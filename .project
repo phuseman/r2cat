@@ -10,8 +10,14 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
+		<buildCommand>
+			<name>de.tud.st.ispace.builder.ISpaceBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>de.tud.st.ispace.builder.ISpaceNature</nature>
 	</natures>
 </projectDescription>
