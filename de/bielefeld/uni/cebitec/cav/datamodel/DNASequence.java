@@ -4,10 +4,13 @@ import java.io.File;
 
 public class DNASequence implements Comparable {
 	private File file;
+	private long offsetInFile=0;
 
-	private String id;
+	private String id=null;
 
-	private long size;
+	private String description=null;
+
+	private long size = 0;
 
 	private long offset = 0;
 	
@@ -29,6 +32,15 @@ public class DNASequence implements Comparable {
 		this.size = size;
 	}
 
+	public DNASequence(File file, String id, String description, long size, long offsetInFile ) {
+		this.file = file;
+		this.id = id;
+		this.description=description;
+		this.size = size;
+		this.offsetInFile = offsetInFile;
+		
+	}
+	
 	public int compareTo(Object o) {
 		int out = 0;
 		if (centerOfMass > ((DNASequence) o).getCenterOfMass()) {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2008 by Peter Husemann                                  *
- *   phuseman Ã¤t cebitec.uni-bielefeld.de                                     *
+ *   phuseman ät cebitec.uni-bielefeld.de                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -142,7 +142,7 @@ public class QGramCoder {
 
 	public String decodeQgramCode(int qGramCode) {
 		if (qGramCode < 0) {return "invalid";}
-		if (qGramCode > this.numberOfQGrams()) {return "codenumber too big";};
+		if (qGramCode > this.numberOfPossibleQGrams()) {return "codenumber too big";};
 		StringBuffer out = new StringBuffer();
 		out.setLength(q);
 		char next;
@@ -154,26 +154,7 @@ public class QGramCoder {
 		return out.toString();
 	}
 
-	public static void main(String argv[]) {
-		String test = "acggtggaaagtgttgXaaagtttttttttgggggggggggggggggggg";
 
-		QGramCoder coder = new QGramCoder(11);
-
-		QGramIndex qi = new QGramIndex(coder.numberOfQGrams());
-
-		for (int i = 0; i < test.length(); i++) {
-
-			coder.updateEncoding(test.charAt(i));
-//			System.out.println(" i:" + i + " code:"
-//					+ coder.getCurrentEncoding() + " max:"
-//					+ coder.numberOfQGrams());
-
-			qi.addPosition(coder.getCurrentEncoding(), i);
-			System.out.println(coder.getCurrentEncoding() + " -> " + coder.decodeQgramCode(coder.getCurrentEncoding()));
-		}
-
-		qi.print();
-	}
 
 	public int getCurrentEncoding() {
 		if (valid) {
@@ -188,7 +169,7 @@ public class QGramCoder {
 		currentQLength = 0;
 	}
 
-	public int numberOfQGrams() {
+	public int numberOfPossibleQGrams() {
 		return (int) maxEncoding;
 	}
 }
