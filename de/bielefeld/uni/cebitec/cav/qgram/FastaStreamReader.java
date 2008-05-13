@@ -23,7 +23,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
+
+import org.biojava.bio.program.gff.GFFErrorHandler.SkipRecordErrorHandler;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 
@@ -32,9 +36,11 @@ import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
  * 
  */
 public class FastaStreamReader {
-	File source = null;
-	char[] chararray;
-	Vector<DNASequence> sequences;
+	private File source = null;
+	private Vector<DNASequence> sequences;
+
+	private char[] chararray;
+	private HashMap<String, Integer> offsetsInCharArray;
 
 	public FastaStreamReader(File input) {
 		this.source = input;
@@ -45,32 +51,34 @@ public class FastaStreamReader {
 		BufferedReader in = null;
 		int character = 0;
 		long offsetInFile = 0;
-		
-		String lastSequenceId = ""; 
-		String lastSequenceDescription = ""; 
+
+		String lastSequenceId = "";
+		String lastSequenceDescription = "";
 		long lastSequenceLength = 0;
-		long lastOffsetInFile=0;
-		
+		long lastOffsetInFile = 0;
+
+		String line = "";
 		String identLine = "";
 		long validCharCounter = 0;
 		long lastValidCharCounter = 0;
 		boolean firstSequence = true;
-		StringBuilder sb=new StringBuilder();
+		StringBuilder sb = new StringBuilder();
+		offsetsInCharArray = new HashMap<String, Integer>();
 		try {
-			in = new BufferedReader(new FileReader(source));
+			in = new BufferedReader(new FileReader(source), 1024 * 16);
 
 			if (createCharArray) {
-				sb.setLength((int) (source.length()));
+				sb = new StringBuilder((int) source.length());
 			}
 
-			while ((character = in.read()) != -1) {
+			nextchar: while ((character = in.read()) != -1) {
 				offsetInFile++;
 
-				if ( Character.isLetter((char) character) && character != (int) '>'){
-					validCharCounter++;
-					if (createCharArray) {
-						sb.append((char)character);
-					}
+				// remove lines with comments
+				if (character == (int) '#') {
+					String comment = in.readLine();
+					offsetInFile += comment.length();
+					continue nextchar;
 				}
 
 				// read id and description
@@ -78,49 +86,80 @@ public class FastaStreamReader {
 					identLine = in.readLine();
 					offsetInFile += identLine.length();
 					lastOffsetInFile = offsetInFile;
+					// TODO: offset in file is buggy
 
 					if (!firstSequence) {
-						lastSequenceLength = validCharCounter - lastValidCharCounter;
+						lastSequenceLength = validCharCounter
+								- lastValidCharCounter;
 						System.out.println(" lastSequenceLength="
 								+ lastSequenceLength);
-						
-						sequences.add( new DNASequence(source, lastSequenceId, lastSequenceDescription, lastSequenceLength, lastOffsetInFile));
-						
+
+						sequences.add(new DNASequence(source, lastSequenceId,
+								lastSequenceDescription, lastSequenceLength,
+								lastOffsetInFile));
 					} else {
 						firstSequence = false;
 					}
 					lastValidCharCounter = validCharCounter;
 
 					int idCommentBoundary = 0;
-					
+
 					// separate id and description if possible
 					if ((idCommentBoundary = identLine.indexOf((int) ' ', 1)) >= 0) {
-						
-						lastSequenceId = identLine.substring(0, idCommentBoundary);
-						lastSequenceDescription = identLine.substring(idCommentBoundary + 1);
+
+						lastSequenceId = identLine.substring(0,
+								idCommentBoundary);
+						lastSequenceDescription = identLine
+								.substring(idCommentBoundary + 1);
 
 					} else {
 						lastSequenceId = identLine;
 						lastSequenceDescription = "";
 
-					} // id/description separation
+					} // end: id/description separation
 
-				} // read id line 
-				
+					if (createCharArray) {
+						// remember starting positions in the char array
+						// the length of the stringbuffer is the same as the
+						// offset of the next sequence
+						offsetsInCharArray.put(lastSequenceId, sb.length());
+					}
 
-			} // read the whole file
-			
-			if(createCharArray){
+				}// end: read id line
+				else if (Character.isLetter((char) character)) {
+					// count valid characters / sequence characters
+					validCharCounter++;
+					if (createCharArray) {
+						sb.append((char) character);
+					}
+
+					// line = in.readLine();
+					// offsetInFile += line.length();
+					// sb.append(line.trim());
+					// continue nextchar;
+				}
+
+			} // end: read the whole file
+
+			if (createCharArray) {
 				sb.trimToSize();
-			chararray = sb.toString().toCharArray();
+				chararray = sb.toString().toCharArray();
 			}
-		
+
 			lastSequenceLength = validCharCounter - lastValidCharCounter;
 			System.out.println(" lastSequenceLength=" + lastSequenceLength);
-			
-			// add last sequence
-			sequences.add( new DNASequence(source, lastSequenceId, lastSequenceDescription, lastSequenceLength, lastOffsetInFile));
 
+			// add last sequence
+			sequences.add(new DNASequence(source, lastSequenceId,
+					lastSequenceDescription, lastSequenceLength,
+					lastOffsetInFile));
+
+			// set the offset of each sequence object
+			for (DNASequence seq : sequences) {
+				// key is id, value is offset in a contiguous sequence
+				long offset = offsetsInCharArray.get(seq.getId());
+				seq.setOffset(offset);
+			}
 
 		} finally {
 			if (in != null) {
@@ -128,4 +167,25 @@ public class FastaStreamReader {
 			}
 		}
 	}
+
+	public char[] getCharArray() {
+		return chararray;
+	}
+
+	public int[] getOffsetsArray() {
+		int[] out = new int[offsetsInCharArray.size() + 1];
+
+		for (int i = 0; i < sequences.size(); i++) {
+			out[i] = (int) sequences.get(i).getOffset();
+		}
+		
+		out[sequences.size()]=chararray.length;
+
+		return out;
+	}
+	
+	public DNASequence getSequence(int index) {
+		return sequences.get(index);
+	}
+
 }

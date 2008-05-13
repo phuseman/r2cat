@@ -85,13 +85,14 @@ public class DNASequence implements Comparable {
 		return offset;
 	}
 
+	public void setOffset(long offset) {
+		this.offset = offset;
+	}
+
 	public long getSize() {
 		return size;
 	}
 
-	public void setOffset(long offset) {
-		this.offset = offset;
-	}
 
 	public boolean isMarked() {
 		return marked;
@@ -115,6 +116,10 @@ public class DNASequence implements Comparable {
 
 	public void setTotalAlignmentLength(double totalAlignmentLength) {
 		this.totalAlignmentLength = totalAlignmentLength;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 }

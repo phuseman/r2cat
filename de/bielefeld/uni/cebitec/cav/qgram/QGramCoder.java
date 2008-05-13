@@ -41,6 +41,8 @@ public class QGramCoder {
 	private int divisor = 0;
 
 	private boolean valid = false;
+	
+	private int numberOfInvalid=0;
 
 	public QGramCoder(int q) {
 		
@@ -58,7 +60,7 @@ public class QGramCoder {
 		alphabet['g']=2;
 		alphabet['G']=2;
 		alphabet['t']=3;
-		alphabet['T']=4;
+		alphabet['T']=3;
 		
 		
 		//check if values are getting too big
@@ -84,6 +86,8 @@ public class QGramCoder {
 			throw new IllegalArgumentException(
 					"Value alphabetsize^q exceeds maximum integer.");
 		}
+		
+		this.reset();
 	}
 
 	public int updateEncoding(char c) {
@@ -114,6 +118,8 @@ public class QGramCoder {
 			currentEncoding = 0;
 			currentQLength = 0;
 			valid = false;
+			numberOfInvalid++;
+//			System.out.println(c);
 			return -1;
 		}
 	}
@@ -144,14 +150,14 @@ public class QGramCoder {
 		if (qGramCode < 0) {return "invalid";}
 		if (qGramCode > this.numberOfPossibleQGrams()) {return "codenumber too big";};
 		StringBuffer out = new StringBuffer();
-		out.setLength(q);
+
 		char next;
-		for (int i = 0; i <= q - 1; i++) {
+		for (int i = 0; i < q ; i++) {
 			next = charcodeToChar(qGramCode%alphabetSize);
 				qGramCode /= alphabetSize;
-				out.setCharAt(q-i-1, next);
+				out.append(next);
 		}
-		return out.toString();
+		return out.reverse().toString();
 	}
 
 
@@ -167,6 +173,8 @@ public class QGramCoder {
 	public void reset() {
 		currentEncoding = 0;
 		currentQLength = 0;
+		numberOfInvalid = 0;
+		valid=false;
 	}
 
 	public int numberOfPossibleQGrams() {
