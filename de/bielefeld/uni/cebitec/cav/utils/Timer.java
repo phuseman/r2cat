@@ -30,12 +30,12 @@ import java.lang.management.ThreadMXBean;
 import java.util.EmptyStackException;
 import java.util.Stack;
 
-public final class LogTimer {
+public final class Timer {
 	public enum Level {
 		QUIET, NORMAL, VERBOSE, EVERYTHING, INSANE
 	};
 
-	private static LogTimer instance = null;
+	private static Timer instance = null;
 
 	private Stack<Long> times;
 
@@ -51,18 +51,20 @@ public final class LogTimer {
 
 	private float lastPeriodCpu;
 
-	private LogTimer() {
+	private Timer() {
 		defaultLevel = Level.NORMAL;
 		currentLevel = Level.QUIET;
 		timingActive = false;
 		times = null;
 		lastPeriod = 0.0f;
 		lastPeriodCpu = 0.0f;
+		this.setTimingActive(true);
 	}
 
-	public static LogTimer getInstance() {
+	public static Timer getInstance() {
 		if (instance == null) {
-			instance = new LogTimer();
+			instance = new Timer();
+
 		}
 		return instance;
 	}

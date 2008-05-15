@@ -1,13 +1,8 @@
 package de.bielefeld.uni.cebitec.cav.qgram;
 
-import java.io.*;
-import java.util.Iterator;
+import java.io.File;
 
-import org.biojava.bio.symbol.*;
-import org.biojava.bio.seq.*;
-import org.biojava.bio.seq.io.*;
-
-import de.bielefeld.uni.cebitec.cav.utils.LogTimer;
+import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 public class QGramFilter {
 
@@ -15,11 +10,11 @@ public class QGramFilter {
 
 		String fileName = "/homes/phuseman/tmp/test.fasta";
 
-		LogTimer t = LogTimer.getInstance();
+		Timer t = Timer.getInstance();
 		t.setTimingActive(true);
 		t.startTimer();
 
-		FastaStreamReader fstr = new FastaStreamReader(new File(fileName));
+		FastaFileReader fstr = new FastaFileReader(new File(fileName));
 		fstr.scanContents(true);
 		t.stopTimer("reading");
 
@@ -30,13 +25,10 @@ public class QGramFilter {
 
 		// qi.getQGramPositions(69);
 		t.startTimer();
-//		BufferedWriter out = new BufferedWriter(new FileWriter(fileName
-//				+ ".qhits"));
-//
-		
-		
-		
-		
+		// BufferedWriter out = new BufferedWriter(new FileWriter(fileName
+		// + ".qhits"));
+		//
+
 		t.stopTimer("matching");
 
 		System.exit(0);

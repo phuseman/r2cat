@@ -35,14 +35,14 @@ import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
  * @author phuseman
  * 
  */
-public class FastaStreamReader {
+public class FastaFileReader {
 	private File source = null;
 	private Vector<DNASequence> sequences;
 
 	private char[] chararray;
 	private HashMap<String, Integer> offsetsInCharArray;
 
-	public FastaStreamReader(File input) {
+	public FastaFileReader(File input) {
 		this.source = input;
 		sequences = new Vector<DNASequence>();
 	}

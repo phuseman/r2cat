@@ -20,7 +20,7 @@
 
 package de.bielefeld.uni.cebitec.cav.qgram;
 
-import de.bielefeld.uni.cebitec.cav.utils.LogTimer;
+import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 /**
  * @author phuseman
@@ -31,14 +31,14 @@ public class QGramIndex {
 	private int[] occurrenceTable;
 	private char[] input;
 	private int[] offsetsInInput;
-	private FastaStreamReader fastaStreamReader;
+	private FastaFileReader fastaFileReader;
 
 	private QGramCoder coder;
 
-	public QGramIndex(FastaStreamReader sequence) {
-		this.fastaStreamReader = sequence;
-		this.input = fastaStreamReader.getCharArray();
-		this.offsetsInInput = fastaStreamReader.getOffsetsArray();
+	public QGramIndex(FastaFileReader sequence) {
+		this.fastaFileReader = sequence;
+		this.input = fastaFileReader.getCharArray();
+		this.offsetsInInput = fastaFileReader.getOffsetsArray();
 		coder = new QGramCoder(11);
 
 	}
@@ -61,7 +61,7 @@ public class QGramIndex {
 		// so that they can be reused on the second run.
 		int[] codecache = new int[input.length];
 
-		LogTimer t = LogTimer.getInstance();
+		Timer t = Timer.getInstance();
 		// computeBucketBoundaries
 
 		t.startTimer();
@@ -75,9 +75,9 @@ public class QGramIndex {
 		// after each sequence the coder has to be resetted.
 		for (int j = 0; j < offsetsInInput.length - 1; j++) {
 			System.out.println("Processing "
-					+ fastaStreamReader.getSequence(j).getId() 
+					+ fastaFileReader.getSequence(j).getId() 
 					+ " ("
-					+ fastaStreamReader.getSequence(j).getDescription()
+					+ fastaFileReader.getSequence(j).getDescription()
 					+ ")"
 //					+ " from " + offsetsInInput[j] + " to "
 //					+ (offsetsInInput[j+1]-1)
@@ -99,8 +99,7 @@ public class QGramIndex {
 			}
 		}
 
-		t.stopTimer("counting");
-		t.startTimer();
+		t.restartTimer("counting");
 
 		int offset = 0;
 		int lastValue = 0;
@@ -122,8 +121,7 @@ public class QGramIndex {
 			tmparray[i] = hashTable[i];
 		}
 
-		t.stopTimer("accumulation and copying");
-		t.startTimer();
+		t.restartTimer("accumulation and copying");
 
 		occurrenceTable = new int[offset];
 
@@ -150,7 +148,7 @@ public class QGramIndex {
 			}
 		}
 
-		t.stopTimer("indexpositions");
+		t.stopTimer("fillingindexpositions");
 
 	}
 
