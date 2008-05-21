@@ -24,10 +24,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Vector;
-
-import org.biojava.bio.program.gff.GFFErrorHandler.SkipRecordErrorHandler;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 
@@ -36,6 +33,8 @@ import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
  * 
  */
 public class FastaFileReader {
+	private boolean initialized = false;
+
 	private File source = null;
 	private Vector<DNASequence> sequences;
 
@@ -161,6 +160,7 @@ public class FastaFileReader {
 				seq.setOffset(offset);
 			}
 
+			initialized = true;
 		} finally {
 			if (in != null) {
 				in.close();
@@ -168,24 +168,61 @@ public class FastaFileReader {
 		}
 	}
 
-	public char[] getCharArray() {
+	/**
+	 * Gives all dna sequences of a fasta file as a char array. there are no
+	 * separators between sequences. The method getOffsetsArray() gives the
+	 * bounds.
+	 * 
+	 * @return char array containing all dna sequences of the fasta file
+	 * @throws IOException
+	 */
+	public char[] getCharArray() throws IOException {
+		if (!initialized || chararray == null) {
+			this.scanContents(true);
+		}
 		return chararray;
 	}
 
-	public int[] getOffsetsArray() {
+	/**
+	 * Gives the bounds of the sequences in the char array from getCharArray().
+	 * For convenience the last entry is the size of the char array. This way it
+	 * is possible to iterate through all the sequences like <code>
+	for (int j = 0; j < offsetsInInput.length - 1; j++) {
+		for (int i = offsetsInInput[j]; i < offsetsInInput[j + 1]; i++) {
+			chararray[i] ...
+		}
+	}
+	 *  </code>
+	 * 
+	 * @return the bounds of all sequences in the char array
+	 * @throws IOException
+	 */
+	public int[] getOffsetsArray() throws IOException {
+		if (!initialized || chararray == null) {
+			this.scanContents(true);
+		}
+
 		int[] out = new int[offsetsInCharArray.size() + 1];
 
 		for (int i = 0; i < sequences.size(); i++) {
 			out[i] = (int) sequences.get(i).getOffset();
 		}
-		
-		out[sequences.size()]=chararray.length;
+
+		out[sequences.size()] = chararray.length;
 
 		return out;
 	}
-	
+
 	public DNASequence getSequence(int index) {
 		return sequences.get(index);
+	}
+
+	public File getSource() {
+		return source;
+	}
+
+	public Vector<DNASequence> getSequences() {
+		return sequences;
 	}
 
 }

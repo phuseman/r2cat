@@ -20,6 +20,10 @@
 
 package de.bielefeld.uni.cebitec.cav.qgram;
 
+import java.io.IOException;
+import java.util.Vector;
+
+import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 /**
@@ -27,20 +31,23 @@ import de.bielefeld.uni.cebitec.cav.utils.Timer;
  * 
  */
 public class QGramIndex {
+	private final int qLength = 11;
+	
 	private int[] hashTable;
 	private int[] occurrenceTable;
-	private char[] input;
+
+	private Vector<DNASequence> sequences;
 	private int[] offsetsInInput;
+	
 	private FastaFileReader fastaFileReader;
+	
+	private boolean indexGenerated= false;
+	
 
 	private QGramCoder coder;
 
-	public QGramIndex(FastaFileReader sequence) {
-		this.fastaFileReader = sequence;
-		this.input = fastaFileReader.getCharArray();
-		this.offsetsInInput = fastaFileReader.getOffsetsArray();
-		coder = new QGramCoder(11);
-
+	public QGramIndex() {
+		coder = new QGramCoder(qLength);
 	}
 
 	/**
@@ -54,7 +61,19 @@ public class QGramIndex {
 	 * cached, to be used again in the second step. <br>
 	 * 
 	 */
-	public void generateIndex() {
+	public void generateIndex(FastaFileReader fastaFileReader) {
+		char[] input=null;
+
+		try {
+			input = fastaFileReader.getCharArray();
+			offsetsInInput = fastaFileReader.getOffsetsArray();
+			sequences = fastaFileReader.getSequences();
+			
+		} catch (IOException e) {
+			System.err.println("Error reading Fasta file:" + fastaFileReader.getSource());
+			e.printStackTrace();
+		}
+		
 		hashTable = new int[coder.numberOfPossibleQGrams()];
 
 		// cache the sucessivly computed codes.
@@ -99,7 +118,7 @@ public class QGramIndex {
 			}
 		}
 
-		t.restartTimer("counting");
+		t.restartTimer("counting the qgrams");
 
 		int offset = 0;
 		int lastValue = 0;
@@ -148,23 +167,43 @@ public class QGramIndex {
 			}
 		}
 
-		t.stopTimer("fillingindexpositions");
-
+		t.stopTimer("filling in the qgram occurrences");
+		indexGenerated=true;
 	}
 
-	public void getQGramPositions(int code) {
-		System.out.println("code:" + code + " -> "
-				+ coder.decodeQgramCode(code));
-		for (int i = hashTable[code] - 1; i < hashTable[code + 1] + 1; i++) {
-			System.out.print("pos:" + occurrenceTable[i] + " ");
+//	public void getQGramPositions(int code) {
+//		if (! indexGenerated) {
+//			this.generateIndex();
+//		}
+//		
+//		System.out.println("code:" + code + " -> "
+//				+ coder.decodeQgramCode(code));
+//		for (int i = hashTable[code] - 1; i < hashTable[code + 1] + 1; i++) {
+//			System.out.print("pos:" + occurrenceTable[i] + " ");
+//
+//			for (int j = 0; j < 11; j++) {
+//				System.out.print(input[occurrenceTable[i] - 10 + j]);
+//			}
+//
+//			System.out.println();
+//		}
+//
+//	}
 
-			for (int j = 0; j < 11; j++) {
-				System.out.print(input[occurrenceTable[i] - 10 + j]);
-			}
+	public int[] getHashTable() {
+		return hashTable;
+	}
 
-			System.out.println();
-		}
+	public int[] getOccurrenceTable() {
+		return occurrenceTable;
+	}
 
+	public boolean isIndexGenerated() {
+		return indexGenerated;
+	}
+
+	public int getQLength() {
+		return qLength;
 	}
 
 }
