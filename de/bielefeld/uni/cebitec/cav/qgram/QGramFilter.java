@@ -39,6 +39,10 @@ public class QGramFilter {
 		t.stopTimer("total for indexing the content");
 
 		t.startTimer();
+		System.gc();
+		t.stopTimer("garbage collection");
+
+		t.startTimer();
 
 		t.startTimer();
 		FastaFileReader queryFasta = new FastaFileReader(query);
@@ -65,9 +69,32 @@ public class QGramFilter {
 	 * 
 	 */
 	public void match() {
+
+		double errorrate = 0.08;
+		int minMatchLength = 500;
+
 		int[] hashTable = qGramIndex.getHashTable();
 		int[] occurrenceTable = qGramIndex.getOccurrenceTable();
+
 		QGramCoder coder = new QGramCoder(qGramIndex.getQLength());
+
+		EpsilonZone eZone = new EpsilonZone(minMatchLength, qGramIndex
+				.getQLength(), errorrate);
+		while (!eZone.isValid()) {
+			errorrate -= 0.001;
+			eZone.init(minMatchLength, qGramIndex.getQLength(), errorrate);
+		}
+
+		// a counter for each bucket how many q-grams hit
+		int[] buckets = new int[eZone.getNumberOfZones(qGramIndex
+				.getInputLength()) + 1];
+		// for each bucket store the first and the last position, where this
+		// bucket was hit
+		// a zero entry means that there is no significant hit at the moment
+		int[] bucketFirstOccurrence = new int[buckets.length];
+		int[] bucketLastOccurrence = new int[buckets.length];
+
+		int mod = eZone.getDelta();
 
 		char[] querySequencesArray = null;
 		int[] queriesOffsets = null;
@@ -81,34 +108,97 @@ public class QGramFilter {
 			e.printStackTrace();
 		}
 
-		int code = 0;
-		
-		// go through all queries in foreward direction
-		for (int queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
-			for (int offsetInQueries = queriesOffsets[queryNumber]; offsetInQueries < queriesOffsets[queryNumber + 1]; offsetInQueries++) {
-				// get code for next qgram
-				code = coder.updateEncoding(querySequencesArray[offsetInQueries]);
+		int code = 0; // buffer for the integer code of the actual
+		int bucketindex = 0; // buffer for the bucketindex where the qgram
+		// has to be added
+		int remainder = 0; // buffer for the distance of the bucket start. used
+		// to add qgram in overlapping bucket
+		int position = 0; // buffer for the absolute position of the end of a
+		// qhit in the target.
 
-				System.out.println("code:" + code + " -> "
-						+ coder.decodeQgramCode(code));
+		// go through all queries in forward direction
+		for (int queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
+			System.out.print("Processing: "
+					+ query.getSequence(queryNumber).getId() + " ");
+			System.out.print("("
+					+ query.getSequences().get(queryNumber).getSize()
+					+ ") hits:\t ");
+
+			// each position of the actual query
+
+			for (int offsetInQueries = queriesOffsets[queryNumber], queryRelativePosition = 0; offsetInQueries < queriesOffsets[queryNumber + 1]; offsetInQueries++, queryRelativePosition++) {
+				// get code for next qgram
+				code = coder
+						.updateEncoding(querySequencesArray[offsetInQueries]);
+
+				// System.out.println("code:" + code + " -> "
+				// + coder.decodeQgramCode(code));
 
 				// if the code is valid process each occurrence position
 				if (code != -1) {
 					for (int occOffset = hashTable[code]; occOffset < hashTable[code + 1]; occOffset++) {
-						System.out.print(" pos:" + occurrenceTable[occOffset] + " ");
 
-						System.out.println();
-					}
-				}
+						// substract the relative position to get the
+						// appropriate diagonal
+						// TODO: has to be adjusted with several targets.
+						int positionTmp = occurrenceTable[occOffset];
+						
+	
+						position = occurrenceTable[occOffset];
+						// FIXME funktioniert noch nicht... diagonalen
+						// berechnen?
+						// position -= queryRelativePosition;
 
-			}
+						bucketindex = position / mod;
+						remainder = position % mod;
+
+						buckets[bucketindex]++;
+						// if new match zone -> remember startposition
+						if (bucketFirstOccurrence[bucketindex] == 0) {
+							bucketFirstOccurrence[bucketindex] = occurrenceTable[occOffset];
+						} else { // else adjust last occurrence
+							bucketLastOccurrence[bucketindex] = occurrenceTable[occOffset];
+						}
+
+						// same procedure for overlapping buckets
+						if (remainder < eZone.getWidth() && bucketindex > 0) {
+							buckets[bucketindex - 1]++;
+							// if new match zone -> remember startposition
+							if (bucketFirstOccurrence[bucketindex - 1] == 0) {
+								bucketFirstOccurrence[bucketindex - 1] = occurrenceTable[occOffset];
+							} else { // else adjust last occurrence
+								bucketLastOccurrence[bucketindex - 1] = occurrenceTable[occOffset];
+							}
+						}
+
+						if (buckets[bucketindex] >= eZone.getThreshold()
+								&& queryRelativePosition > eZone.getHeight()) {
+							// TODO: add or replace new matching zone
+							// System.out.println(occurrenceTable[occOffset]);
+						}
+
+					}// for each occurrence of this code
+				} // fi code was valid
+
+			}// for each query
+
 			// next query: reset coder and buckets
 			coder.reset();
-			//TODO reset buckets
+			int hits = 0;
+			for (int i = 0; i < buckets.length; i++) {
+				if (buckets[i] > eZone.getThreshold()) {
+					hits++;
+				}
+
+				buckets[i] = 0;
+				bucketFirstOccurrence[i] = 0;
+				bucketLastOccurrence[i] = 0;
+			}
+			System.out.println(hits);
+
 		}
-		
-		//TODO go through all queries in backward direction
+
+		// TODO go through all queries in backward direction
 
 	}
-
 }

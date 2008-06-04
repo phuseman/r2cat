@@ -38,6 +38,7 @@ public class QGramIndex {
 
 	private Vector<DNASequence> sequences;
 	private int[] offsetsInInput;
+	private int inputLength;
 	
 	private FastaFileReader fastaFileReader;
 	
@@ -68,6 +69,7 @@ public class QGramIndex {
 			input = fastaFileReader.getCharArray();
 			offsetsInInput = fastaFileReader.getOffsetsArray();
 			sequences = fastaFileReader.getSequences();
+			inputLength=input.length;
 			
 		} catch (IOException e) {
 			System.err.println("Error reading Fasta file:" + fastaFileReader.getSource());
@@ -204,6 +206,18 @@ public class QGramIndex {
 
 	public int getQLength() {
 		return qLength;
+	}
+
+	public int getInputLength() {
+		return inputLength;
+	}
+
+	public Vector<DNASequence> getSequences() {
+		return sequences;
+	}
+
+	public int[] getOffsetsInInput() {
+		return offsetsInInput;
 	}
 
 }

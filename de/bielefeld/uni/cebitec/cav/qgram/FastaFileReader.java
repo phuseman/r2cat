@@ -90,8 +90,8 @@ public class FastaFileReader {
 					if (!firstSequence) {
 						lastSequenceLength = validCharCounter
 								- lastValidCharCounter;
-						System.out.println(" lastSequenceLength="
-								+ lastSequenceLength);
+//						System.out.println(" lastSequenceLength="
+//								+ lastSequenceLength);
 
 						sequences.add(new DNASequence(source, lastSequenceId,
 								lastSequenceDescription, lastSequenceLength,
@@ -180,6 +180,23 @@ public class FastaFileReader {
 		if (!initialized || chararray == null) {
 			this.scanContents(true);
 		}
+		return chararray;
+	}
+	
+	/**
+	 * Gives all reversed dna sequences of a fasta file as a char array. there are no
+	 * separators between sequences. The method getOffsetsArray() gives the
+	 * bounds.
+	 * 
+	 * @return char array containing all dna sequences of the fasta file
+	 * @throws IOException
+	 */
+	public char[] getReversedCharArray() throws IOException {
+		if (!initialized || chararray == null) {
+			this.scanContents(true);
+		}
+		//TODO implement!
+		//reverse(chararray)
 		return chararray;
 	}
 
