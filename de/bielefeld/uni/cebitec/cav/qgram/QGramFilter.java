@@ -2,6 +2,7 @@ package de.bielefeld.uni.cebitec.cav.qgram;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
@@ -9,6 +10,12 @@ public class QGramFilter {
 
 	private QGramIndex qGramIndex;
 	private FastaFileReader query;
+	private int[] binCounts;
+	private int[] binMin;
+	private int[] binMax;
+
+	private Vector<int[]> hits;
+	private EpsilonZone eZone;
 
 	/**
 	 * @param target
@@ -17,6 +24,7 @@ public class QGramFilter {
 	public QGramFilter(QGramIndex targetIndex, FastaFileReader query) {
 		this.qGramIndex = targetIndex;
 		this.query = query;
+		hits = new Vector<int[]>();
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -71,42 +79,58 @@ public class QGramFilter {
 	public void match() {
 
 		double errorrate = 0.08;
-		int minMatchLength = 500;
+		int minMatchLength = 450;
 
 		int[] hashTable = qGramIndex.getHashTable();
 		int[] occurrenceTable = qGramIndex.getOccurrenceTable();
 
+		// use the same q which was used for the index.
 		QGramCoder coder = new QGramCoder(qGramIndex.getQLength());
 
-		EpsilonZone eZone = new EpsilonZone(minMatchLength, qGramIndex
-				.getQLength(), errorrate);
+		// calculates the necessary properties for a matching segment
+		eZone = new EpsilonZone(minMatchLength, qGramIndex.getQLength(),
+				errorrate);
+
 		while (!eZone.isValid()) {
-			errorrate -= 0.001;
+			errorrate -= 0.001; // reduce the errorrate if no paralelogram can
+			// be found
 			eZone.init(minMatchLength, qGramIndex.getQLength(), errorrate);
 		}
 
 		// a counter for each bucket how many q-grams hit
-		int[] buckets = new int[eZone.getNumberOfZones(qGramIndex
-				.getInputLength()) + 1];
+		// was bucket
+		binCounts = new int[eZone.getNumberOfZones(qGramIndex.getInputLength())];
 		// for each bucket store the first and the last position, where this
 		// bucket was hit
 		// a zero entry means that there is no significant hit at the moment
-		int[] bucketFirstOccurrence = new int[buckets.length];
-		int[] bucketLastOccurrence = new int[buckets.length];
+		binMin = new int[binCounts.length]; // was bucketFirstOccurrence
 
-		int mod = eZone.getDelta();
+		binMax = new int[binCounts.length]; // was bucketLastOccurrence
 
+		// get the query sequences
 		char[] querySequencesArray = null;
 		int[] queriesOffsets = null;
-
 		try {
 			querySequencesArray = query.getCharArray();
 			queriesOffsets = query.getOffsetsArray();
-
 		} catch (IOException e) {
 			System.err.println("Error reading Fasta file:" + query.getSource());
 			e.printStackTrace();
 		}
+
+		// variable names according to kim
+		// TODO give better / talking names
+		int d = 0;
+		int b0 = 0;
+		int bm = 0;
+		int numberOfBins = binCounts.length;
+		int targetSize = qGramIndex.getInputLength();
+		int z = eZone.getDeltaExponent();
+		int e = eZone.getWidth();
+		int w = eZone.getHeight();
+		int delta = eZone.getDelta();
+		int i = 0;
+		int j = 0;
 
 		int code = 0; // buffer for the integer code of the actual
 		int bucketindex = 0; // buffer for the bucketindex where the qgram
@@ -116,17 +140,22 @@ public class QGramFilter {
 		int position = 0; // buffer for the absolute position of the end of a
 		// qhit in the target.
 
+		// relative position inside one query sequence
+		int relativeQueryPosition = 0;
+
 		// go through all queries in forward direction
 		for (int queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
+			relativeQueryPosition = 0;
+
 			System.out.print("Processing: "
 					+ query.getSequence(queryNumber).getId() + " ");
-			System.out.print("("
-					+ query.getSequences().get(queryNumber).getSize()
-					+ ") hits:\t ");
+			System.out.println();
+			// System.out.print("("
+			// + query.getSequences().get(queryNumber).getSize()
+			// + ") hits:\t ");
 
 			// each position of the actual query
-
-			for (int offsetInQueries = queriesOffsets[queryNumber], queryRelativePosition = 0; offsetInQueries < queriesOffsets[queryNumber + 1]; offsetInQueries++, queryRelativePosition++) {
+			for (int offsetInQueries = queriesOffsets[queryNumber]; offsetInQueries < queriesOffsets[queryNumber + 1]; offsetInQueries++, relativeQueryPosition++) {
 				// get code for next qgram
 				code = coder
 						.updateEncoding(querySequencesArray[offsetInQueries]);
@@ -137,68 +166,112 @@ public class QGramFilter {
 				// if the code is valid process each occurrence position
 				if (code != -1) {
 					for (int occOffset = hashTable[code]; occOffset < hashTable[code + 1]; occOffset++) {
+						i = occurrenceTable[occOffset]-eZone.getQGramSize();
+						j = relativeQueryPosition;
 
-						// substract the relative position to get the
-						// appropriate diagonal
-						// TODO: has to be adjusted with several targets.
-						int positionTmp = occurrenceTable[occOffset];
-						
-	
-						position = occurrenceTable[occOffset];
-						// FIXME funktioniert noch nicht... diagonalen
-						// berechnen?
-						// position -= queryRelativePosition;
+						// Algorithm 2 page 303 in Rasmussen2006
+						d = targetSize + j - i;
+						b0 = d >> z;
+						bm = b0 % numberOfBins;
 
-						bucketindex = position / mod;
-						remainder = position % mod;
+//						System.out.println("Updatebin( Bins[" + bm + "], j="
+//								+ j + ", d=" + (b0 << z) + ")");
+						updateBin(bm, j, (b0 << z));
 
-						buckets[bucketindex]++;
-						// if new match zone -> remember startposition
-						if (bucketFirstOccurrence[bucketindex] == 0) {
-							bucketFirstOccurrence[bucketindex] = occurrenceTable[occOffset];
-						} else { // else adjust last occurrence
-							bucketLastOccurrence[bucketindex] = occurrenceTable[occOffset];
-						}
+						// System.out.println((d & (delta-1))+"<"+e);
+						if ((d & (delta - 1)) < e) {
+							bm = (bm + numberOfBins - 1) % numberOfBins;
 
-						// same procedure for overlapping buckets
-						if (remainder < eZone.getWidth() && bucketindex > 0) {
-							buckets[bucketindex - 1]++;
-							// if new match zone -> remember startposition
-							if (bucketFirstOccurrence[bucketindex - 1] == 0) {
-								bucketFirstOccurrence[bucketindex - 1] = occurrenceTable[occOffset];
-							} else { // else adjust last occurrence
-								bucketLastOccurrence[bucketindex - 1] = occurrenceTable[occOffset];
-							}
-						}
+//							System.out.println("Updatebin( Bins[" + bm
+//									+ "], j=" + j + ", d=" + ((b0 - 1) << z)
+//									+ ")");
+							updateBin(bm, j, ((b0 - 1) << z));
 
-						if (buckets[bucketindex] >= eZone.getThreshold()
-								&& queryRelativePosition > eZone.getHeight()) {
-							// TODO: add or replace new matching zone
-							// System.out.println(occurrenceTable[occOffset]);
 						}
 
 					}// for each occurrence of this code
+
+//					System.out.println((j - e) % (delta - 1) + "==0");
+					if ((j - e) % (delta - 1) == 0) {
+						b0 = (j - e) >> z;
+						bm = b0 % numberOfBins;
+//						System.out.println("CheckAndResetBin( Bins[" + bm
+//								+ "], j=" + j + ", d=" + (b0 << z) + ")");
+						checkAndResetBin(bm, j, (b0 << z));
+					}
+
 				} // fi code was valid
 
-			}// for each query
+			}// for each position in actual query
 
 			// next query: reset coder and buckets
 			coder.reset();
-			int hits = 0;
-			for (int i = 0; i < buckets.length; i++) {
-				if (buckets[i] > eZone.getThreshold()) {
-					hits++;
-				}
+			for (int k = 0; k < binCounts.length; k++) {
+				binCounts[k] = 0;
+				binMin[k] = 0;
+				binMax[k] = 0;
+			} // reset counters after query
 
-				buckets[i] = 0;
-				bucketFirstOccurrence[i] = 0;
-				bucketLastOccurrence[i] = 0;
-			}
-			System.out.println(hits);
+		}// for each query
 
-		}
-
+		
+		System.out.println("Hits:" + hits.size());
+		
 		// TODO go through all queries in backward direction
 
+		// remove references so that the garbage collector can free the space
+		binCounts = null;
+		binMax = null;
+		binMin = null;
+	}
+
+	private void updateBin(int bin, int hitPosition, int offsetDiagonal) {
+		int r = bin;
+		int j = hitPosition;
+		int d = offsetDiagonal;
+		int q = eZone.getQGramSize();
+
+		//FIXME this is not working correctly at the moment. check indices
+		
+		// TODO +q?
+		if (j - eZone.getHeight() + q > binMax[r]) {
+			if (binCounts[r] >= eZone.getThreshold()) {
+				int left = qGramIndex.getInputLength() - d;
+				int top = binMax[r];
+				int bottom = binMin[r];
+				int[] parallelogram = { left, top, bottom };
+				System.out.println("left:"+left+ " top:" +  top + " bottom:" + bottom);
+				hits.add(parallelogram);
+			}
+			binCounts[r] = 0;
+		}
+
+		if (binCounts[r] == 0) {
+			binMin[r] = j;
+		}
+
+		if (binMax[r] < j) {
+			binMax[r] = j;
+			binCounts[r]++;
+		}
+
+	}
+
+	private void checkAndResetBin(int bin, int hitPosition, int offsetDiagonal) {
+		int r = bin;
+		int j = hitPosition;
+		int d = offsetDiagonal;
+		int q = eZone.getQGramSize();
+
+		// TODO +q?
+		if (binCounts[r] >= eZone.getThreshold()) {
+			int left = qGramIndex.getInputLength() - d;
+			int top = binMax[r];
+			int bottom = binMin[r];
+			int[] parallelogram = { left, top, bottom };
+			System.out.println("left:"+left+ " top:" +  top + " bottom:" + bottom);
+			hits.add(parallelogram);
+		}
+		binCounts[r] = 0;
 	}
 }

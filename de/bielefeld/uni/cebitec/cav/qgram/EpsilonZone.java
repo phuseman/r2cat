@@ -217,4 +217,8 @@ public class EpsilonZone {
 //		return (int) Math.ceil( (inputSize-width_-delta)/((double) delta + 1.0) );
 	}
 
+	public int getQGramSize() {
+		return qGramSize;
+	}
+
 }
