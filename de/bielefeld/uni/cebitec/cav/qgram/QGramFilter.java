@@ -32,8 +32,8 @@ public class QGramFilter {
 		Timer t = Timer.getInstance();
 		t.startTimer();
 
-		File target = new File("/homes/phuseman/compassemb/DSM7109.fasta");
-		File query = new File("/homes/phuseman/compassemb/cur7111_min500.fas");
+		File target = new File("target.fasta");
+		File query = new File("query.fasta");
 
 		t.startTimer();
 
@@ -147,12 +147,10 @@ public class QGramFilter {
 		for (int queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
 			relativeQueryPosition = 0;
 
-			System.out.print("Processing: "
-					+ query.getSequence(queryNumber).getId() + " ");
-			System.out.println();
-			// System.out.print("("
-			// + query.getSequences().get(queryNumber).getSize()
-			// + ") hits:\t ");
+			System.out.println("Processing: "
+					+ query.getSequence(queryNumber).getId() + " ("
+					 + query.getSequences().get(queryNumber).getSize()
+					 + ")");
 
 			// each position of the actual query
 			for (int offsetInQueries = queriesOffsets[queryNumber]; offsetInQueries < queriesOffsets[queryNumber + 1]; offsetInQueries++, relativeQueryPosition++) {
@@ -166,51 +164,72 @@ public class QGramFilter {
 				// if the code is valid process each occurrence position
 				if (code != -1) {
 					for (int occOffset = hashTable[code]; occOffset < hashTable[code + 1]; occOffset++) {
-						i = occurrenceTable[occOffset]-eZone.getQGramSize();
-						j = relativeQueryPosition;
+						i = occurrenceTable[occOffset];
+						j = relativeQueryPosition-eZone.getQGramSize();
 
 						// Algorithm 2 page 303 in Rasmussen2006
-						d = targetSize + j - i;
-						b0 = d >> z;
-						bm = b0 % numberOfBins;
+						d = targetSize + j - i; // diagonal on the j-axis shifted by |Target| to obtain positive values
+						b0 = d >> z; // b0= d/2^z
+						bm = b0 % numberOfBins; // bucketindex
 
 //						System.out.println("Updatebin( Bins[" + bm + "], j="
 //								+ j + ", d=" + (b0 << z) + ")");
 						updateBin(bm, j, (b0 << z));
 
-						// System.out.println((d & (delta-1))+"<"+e);
-						if ((d & (delta - 1)) < e) {
+						// if bins are overlapping
+						// delta - 1 looks as bitstring like this: 0000..111111
+						// logical 'and' gives  the remainder of a division by delta
+						if ((d & (delta - 1)) < e) { 
 							bm = (bm + numberOfBins - 1) % numberOfBins;
 
 //							System.out.println("Updatebin( Bins[" + bm
 //									+ "], j=" + j + ", d=" + ((b0 - 1) << z)
 //									+ ")");
 							updateBin(bm, j, ((b0 - 1) << z));
-
-						}
+						} //fi overlapping hit
 
 					}// for each occurrence of this code
 
 //					System.out.println((j - e) % (delta - 1) + "==0");
-					if ((j - e) % (delta - 1) == 0) {
+					if (((j - e) % (delta - 1)) == 0) {
 						b0 = (j - e) >> z;
 						bm = b0 % numberOfBins;
 //						System.out.println("CheckAndResetBin( Bins[" + bm
 //								+ "], j=" + j + ", d=" + (b0 << z) + ")");
+												
 						checkAndResetBin(bm, j, (b0 << z));
 					}
 
 				} // fi code was valid
-
 			}// for each position in actual query
 
 			// next query: reset coder and buckets
 			coder.reset();
+			
+			//check parallelograms for hits and reset counters
 			for (int k = 0; k < binCounts.length; k++) {
+				
+				
+				//check if there are remaining parallelograms that have not been reported yet
+				if (binCounts[k] >= eZone.getThreshold()) {
+					int left = k << eZone.getDeltaExponent(); // FIXME I'm not sure if this is right
+					int top = binMax[k]+eZone.getQGramSize();
+					int bottom = binMin[k];
+					
+					if (top-bottom > eZone.getHeight()) {
+						int[] parallelogram = { left, top, bottom };
+						System.out.println(k+" remain: left:"+left+ " top:" +  top + " bottom:" + bottom + " (" + (top-bottom)+")");
+						hits.add(parallelogram);
+					}
+
+				}
+
+				
+				// reset counters after query
 				binCounts[k] = 0;
 				binMin[k] = 0;
 				binMax[k] = 0;
-			} // reset counters after query
+			} 
 
 		}// for each query
 
@@ -237,10 +256,10 @@ public class QGramFilter {
 		if (j - eZone.getHeight() + q > binMax[r]) {
 			if (binCounts[r] >= eZone.getThreshold()) {
 				int left = qGramIndex.getInputLength() - d;
-				int top = binMax[r];
+				int top = binMax[r]+q;
 				int bottom = binMin[r];
 				int[] parallelogram = { left, top, bottom };
-				System.out.println("left:"+left+ " top:" +  top + " bottom:" + bottom);
+				System.out.println("norml: left:"+left+ " top:" +  top + " bottom:" + bottom + " (" + (top-bottom)+")");
 				hits.add(parallelogram);
 			}
 			binCounts[r] = 0;
@@ -266,10 +285,10 @@ public class QGramFilter {
 		// TODO +q?
 		if (binCounts[r] >= eZone.getThreshold()) {
 			int left = qGramIndex.getInputLength() - d;
-			int top = binMax[r];
+			int top = binMax[r]+q;
 			int bottom = binMin[r];
 			int[] parallelogram = { left, top, bottom };
-			System.out.println("left:"+left+ " top:" +  top + " bottom:" + bottom);
+			System.out.println("c&r: left:"+left+ " top:" +  top + " bottom:" + bottom + " (" + (top-bottom)+")");
 			hits.add(parallelogram);
 		}
 		binCounts[r] = 0;

@@ -164,7 +164,8 @@ public class QGramIndex {
 					// codecache contains the integer codes for all qgrams.
 					// the position stored is relative to the actual sequence.
 					occurrenceTable[tmparray[codecache[i]]++] = i
-							- offsetsInInput[j];
+							- offsetsInInput[j] - getQLength();
+					// minus q to get the starting index of the q-gram instead of the end position
 				}
 			}
 		}
