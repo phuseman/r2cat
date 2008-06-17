@@ -1,6 +1,8 @@
 package de.bielefeld.uni.cebitec.cav.qgram;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Vector;
 
@@ -13,9 +15,14 @@ public class QGramFilter {
 	private int[] binCounts;
 	private int[] binMin;
 	private int[] binMax;
+	private float[] binMean;
+	private float[] binVariance;
+	
 
 	private Vector<int[]> hits;
 	private EpsilonZone eZone;
+	
+	private BufferedWriter logWriter;
 
 	/**
 	 * @param target
@@ -25,6 +32,17 @@ public class QGramFilter {
 		this.qGramIndex = targetIndex;
 		this.query = query;
 		hits = new Vector<int[]>();
+		
+		
+		
+		try {
+			logWriter=new BufferedWriter(new FileWriter( new File("log.txt")));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -63,6 +81,8 @@ public class QGramFilter {
 		t.stopTimer("matching");
 
 		t.stopTimer("Total");
+		
+		
 		System.exit(0);
 	}
 
@@ -106,6 +126,9 @@ public class QGramFilter {
 		binMin = new int[binCounts.length]; // was bucketFirstOccurrence
 
 		binMax = new int[binCounts.length]; // was bucketLastOccurrence
+		
+		binMean = new float[binCounts.length];
+		binVariance = new float[binCounts.length];
 
 		// get the query sequences
 		char[] querySequencesArray = null;
@@ -133,12 +156,6 @@ public class QGramFilter {
 		int j = 0;
 
 		int code = 0; // buffer for the integer code of the actual
-		int bucketindex = 0; // buffer for the bucketindex where the qgram
-		// has to be added
-		int remainder = 0; // buffer for the distance of the bucket start. used
-		// to add qgram in overlapping bucket
-		int position = 0; // buffer for the absolute position of the end of a
-		// qhit in the target.
 
 		// relative position inside one query sequence
 		int relativeQueryPosition = 0;
@@ -147,7 +164,8 @@ public class QGramFilter {
 		for (int queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
 			relativeQueryPosition = 0;
 
-			System.out.println("Processing: "
+			System.out.println("Processing: " 
+					+ "#"+queryNumber + " "
 					+ query.getSequence(queryNumber).getId() + " ("
 					 + query.getSequences().get(queryNumber).getSize()
 					 + ")");
@@ -174,7 +192,7 @@ public class QGramFilter {
 
 //						System.out.println("Updatebin( Bins[" + bm + "], j="
 //								+ j + ", d=" + (b0 << z) + ")");
-						updateBin(bm, j, (b0 << z));
+						updateBin(queryNumber, bm, j, (b0 << z), i);
 
 						// if bins are overlapping
 						// delta - 1 looks as bitstring like this: 0000..111111
@@ -185,7 +203,7 @@ public class QGramFilter {
 //							System.out.println("Updatebin( Bins[" + bm
 //									+ "], j=" + j + ", d=" + ((b0 - 1) << z)
 //									+ ")");
-							updateBin(bm, j, ((b0 - 1) << z));
+							updateBin(queryNumber, bm, j, ((b0 - 1) << z), i);
 						} //fi overlapping hit
 
 					}// for each occurrence of this code
@@ -197,7 +215,7 @@ public class QGramFilter {
 //						System.out.println("CheckAndResetBin( Bins[" + bm
 //								+ "], j=" + j + ", d=" + (b0 << z) + ")");
 												
-						checkAndResetBin(bm, j, (b0 << z));
+						checkAndResetBin(queryNumber, bm, j, (b0 << z));
 					}
 
 				} // fi code was valid
@@ -212,14 +230,18 @@ public class QGramFilter {
 				
 				//check if there are remaining parallelograms that have not been reported yet
 				if (binCounts[k] >= eZone.getThreshold()) {
-					int left = k << eZone.getDeltaExponent(); // FIXME I'm not sure if this is right
+					
+					// FIXME I'm not sure if this is right
+					// this IS wrong! how to get the left value from the bin index? compensate modulo
+					int left = k << eZone.getDeltaExponent(); 
+					// FIXME!! FIX!!
+					
 					int top = binMax[k]+eZone.getQGramSize();
 					int bottom = binMin[k];
 					
+
 					if (top-bottom > eZone.getHeight()) {
-						int[] parallelogram = { left, top, bottom };
-						System.out.println(k+" remain: left:"+left+ " top:" +  top + " bottom:" + bottom + " (" + (top-bottom)+")");
-						hits.add(parallelogram);
+						reportMatch(queryNumber, left, top, bottom, k, "remain");
 					}
 
 				}
@@ -229,7 +251,12 @@ public class QGramFilter {
 				binCounts[k] = 0;
 				binMin[k] = 0;
 				binMax[k] = 0;
-			} 
+				binMean[k] = 0;
+				binVariance[k] = 0;
+				
+			}
+			log("#-------------------reset-----------------------");
+
 
 		}// for each query
 
@@ -242,41 +269,81 @@ public class QGramFilter {
 		binCounts = null;
 		binMax = null;
 		binMin = null;
+		binMean = null;
+		binVariance = null;
+		
+		
+		try {
+			logWriter.flush();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 
-	private void updateBin(int bin, int hitPosition, int offsetDiagonal) {
+	private void updateBin(int querynumber, int bin, int hitPosition, int offsetDiagonal, int hitPositionTarget) {
 		int r = bin;
 		int j = hitPosition;
 		int d = offsetDiagonal;
 		int q = eZone.getQGramSize();
-
-		//FIXME this is not working correctly at the moment. check indices
 		
-		// TODO +q?
+		int i = hitPositionTarget;
+		int diagonal= i-j;
+
+
+		// TODO check correctness with unit test
 		if (j - eZone.getHeight() + q > binMax[r]) {
 			if (binCounts[r] >= eZone.getThreshold()) {
 				int left = qGramIndex.getInputLength() - d;
 				int top = binMax[r]+q;
 				int bottom = binMin[r];
-				int[] parallelogram = { left, top, bottom };
-				System.out.println("norml: left:"+left+ " top:" +  top + " bottom:" + bottom + " (" + (top-bottom)+")");
-				hits.add(parallelogram);
+				reportMatch(querynumber, left, top, bottom, bin, "normal");
 			}
 			binCounts[r] = 0;
 		}
 
 		if (binCounts[r] == 0) {
 			binMin[r] = j;
+			
+			//initial values for mean and variance of the hit-diagonal computation
+			binMean[r]=diagonal;
+			binVariance[r]=0;
 		}
 
 		if (binMax[r] < j) {
+
+			
+			if(binCounts[r]>=1) {
+			//compute the mean and the variance for the diagonal values in a recursive fashion
+			//(see Musterklassifikation Skript 2006/07 Uni Bi.; Franz Kummert; Page 18
+			double factor= 1. / binCounts[r];
+			
+			binVariance[r] = (float) ((1. - factor) * (binVariance[r] + factor
+					* ((diagonal - binMean[r]) * (diagonal - binMean[r]))));
+
+			binMean[r] = (float) ((1. - factor) * binMean[r] + factor
+					* diagonal);
+			
+//debugging			
+//			if (r==1822) {
+//				log(i+ "\t" +j+ "\tdiag:" + diagonal + "\tmean:" +binMean[r]+ "\tvar:" +binVariance[r]);
+//			}
+
+			}
+			
+			
+
+			// enlarge the parallelogram
 			binMax[r] = j;
+			//increase the q-hit counter for this parallelogram
 			binCounts[r]++;
+
 		}
+		
 
 	}
 
-	private void checkAndResetBin(int bin, int hitPosition, int offsetDiagonal) {
+	private void checkAndResetBin(int querynumber, int bin, int hitPosition, int offsetDiagonal) {
 		int r = bin;
 		int j = hitPosition;
 		int d = offsetDiagonal;
@@ -287,10 +354,35 @@ public class QGramFilter {
 			int left = qGramIndex.getInputLength() - d;
 			int top = binMax[r]+q;
 			int bottom = binMin[r];
-			int[] parallelogram = { left, top, bottom };
-			System.out.println("c&r: left:"+left+ " top:" +  top + " bottom:" + bottom + " (" + (top-bottom)+")");
-			hits.add(parallelogram);
+			reportMatch(querynumber, left, top, bottom, bin, "c&r");
 		}
 		binCounts[r] = 0;
 	}
+
+	private void log(String string) {
+		try {
+			logWriter.write(string+"\n");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void reportMatch(int querynumber, int left, int top, int bottom, int bucketindex, String debugstring) {
+		int[] parallelogram = { left, top, bottom };
+		hits.add(parallelogram);
+
+		this.log(bottom +"\t"+ top +"\t"+ (left+bottom) +"\t"+ (left+top) +"\t"+ binCounts[bucketindex] +"\t"+ binMean[bucketindex] +"\t"+ +binVariance[bucketindex] );
+
+//		System.out.println(debugstring
+//				+": bin:"+bucketindex
+//				+"  left:"+left
+//				+ " top:" +  top 
+//				+ " bottom:" + bottom 
+//				+ " (" + (top-bottom)+")"
+//				+ " hits:" + binCounts[bucketindex]
+//				+ " Mean:" + binMean[bucketindex]
+//				+" Variance:"+binVariance[bucketindex]);
+	}
+	
 }
