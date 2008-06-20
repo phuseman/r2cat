@@ -19,7 +19,6 @@
  ***************************************************************************/
 package de.bielefeld.uni.cebitec.cav.qgram;
 
-import java.util.Iterator;
 
 /**
  * @author phuseman
@@ -111,6 +110,39 @@ public class QGramCoder {
 		}
 	}
 
+	public int updateEncodingComplement(char c) {
+		char complement;
+		switch(c){
+			case 'a':
+				complement='t';
+				break;
+			case 'A':
+				complement='T';
+				break;
+			case 't':
+				complement='a';
+				break;
+			case 'T':
+				complement='A';
+				break;
+			case 'c':
+				complement='g';
+				break;
+			case 'C':
+				complement='G';
+				break;
+			case 'g':
+				complement='c';
+				break;
+			case 'G':
+				complement='C';
+				break;
+			default:
+				complement=c;
+		}
+		return this.updateEncoding(complement);
+	}
+	
 	private int charToCharcode(char c) {
 		if (alphabet[c] != -1) {
 			return alphabet[c];
