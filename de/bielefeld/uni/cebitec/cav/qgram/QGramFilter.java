@@ -11,8 +11,17 @@ import de.bielefeld.uni.cebitec.cav.utils.Timer;
 public class QGramFilter {
 
 	private QGramIndex qGramIndex;
+	private int[] hashTable = null;
+	private int[] occurrenceTable = null;
+
 	private FastaFileReader query;
 	private int queryNumber;
+	private char[] querySequencesArray;
+	
+	private boolean reverseComplementDirection;
+
+
+	
 	private int[] binCounts;
 	private int[] binMin;
 	private int[] binMax;
@@ -21,14 +30,14 @@ public class QGramFilter {
 	
 
 	private Vector<int[]> hits;
+
 	private EpsilonZone eZone;
 	private QGramCoder coder = null;
 	
 	private BufferedWriter logWriter;
 	
-	private int[] hashTable = null;
-	private int[] occurrenceTable = null;
-	private char[] querySequencesArray; 
+	
+	
 
 	
 	
@@ -191,16 +200,24 @@ public class QGramFilter {
 
 
 //		// go through all queries
-//		for (queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
-//			//match one query in forward direction
-//			matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
-//			//and reversed
-//			matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
-//		}// for each query
+		for (queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
+			//match one query in forward direction
+			matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
+			//and reversed
+			matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
+		}// for each query
 		
 		//debugging:
-		int queryNumber = 9;
-		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
+//		queryNumber = 0;
+//		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
+//		queryNumber = 1;
+//		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
+//		queryNumber = 15;
+//		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
+//		queryNumber = 66;
+//		matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
+//		queryNumber = 69;
+//		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
 
 		
 		System.out.println("Hits:" + hits.size());
@@ -227,21 +244,29 @@ public class QGramFilter {
 	}
 
 	
+	/**
+	 * Do the matching for one query specified by starting and ending position. (all queries are stored
+	 * in one array (querySequencesArray). The appropriate offset are stored in the queriesOffsets array.
+	 * <br>
+	 * If the startPos is bigger than the endPos, then the reverse complement is matched on the fly. 
+	 * 
+	 * @param startPos Starting position of a query (in querySequencesArray)
+	 * @param endPos Ending position of a query (in querySequencesArray)
+	 */
 	private void matchQuery(int startPos, int endPos) {
-		//if endPos is smaller than startPos -> match the reverse complement of the query
-		boolean backwards = (endPos-startPos)<0;
 		
-
+		reverseComplementDirection = (endPos-startPos)<0;
+		
 		System.out.println("Processing: " 
 				+ "#"+queryNumber + " "
 				+ query.getSequence(queryNumber).getId()
-				+ (backwards?" RC":"") +" ("
+				+ (reverseComplementDirection?" (reverse complement)":"") +" ("
 				 + query.getSequences().get(queryNumber).getSize()
 				 + ")");
 		
 		
 		//the bigger number would be the first character of the next sequence, so reduce it by one;
-	if (backwards) {
+	if (reverseComplementDirection) {
 		startPos--;
 		relativeQueryPosition = startPos-endPos;
 	} else {
@@ -250,17 +275,17 @@ public class QGramFilter {
 	}
 		
 
-	boolean nextBase=true;
 	int offsetInQueries = startPos;
 
 	//if normal direction go from start to end,
 	//if reversed direction go from end to start backwards and reverse complement the sequence
 	//the conditions are checked in the end of this while loop
+	boolean nextBase=true;
 	while(nextBase) {
 	
 
 		// get code for next qgram
-		if (backwards) {
+		if (reverseComplementDirection) {
 			//calculate complement code on the fly
 			code = coder.updateEncodingComplement(querySequencesArray[offsetInQueries]);
 		} else {
@@ -274,10 +299,10 @@ public class QGramFilter {
 					i = occurrenceTable[occOffset]; //hitposition in target
 					
 					//j is the hitposition in the query
-					if (backwards) {
+					if (reverseComplementDirection) {
 						// for the reverse complement we have to consider the position of the reversed string.
 						// otherwise the hitting diagonals are wrong
-						j= startPos-relativeQueryPosition-eZone.getQGramSize();
+						j= startPos-endPos-relativeQueryPosition-eZone.getQGramSize();
 					} else { //forward
 						j = relativeQueryPosition-eZone.getQGramSize();
 					}
@@ -296,11 +321,8 @@ public class QGramFilter {
 					// delta - 1 looks as bitstring like this: 0000..111111
 					// logical 'and' gives  the remainder of a division by delta
 					if ((d & (delta - 1)) < e) { 
-						bm = (bm + numberOfBins - 1) % numberOfBins;
-
-//						System.out.println("Updatebin( Bins[" + bm
-//								+ "], j=" + j + ", d=" + ((b0 - 1) << z)
-//								+ ")");
+						//get previous bin
+						bm = (bm + numberOfBins - 1) % numberOfBins; // avoid negative value if bm=0
 						updateBin(bm, i, j, ((b0 - 1) << z));
 					} //fi overlapping hit
 
@@ -319,8 +341,8 @@ public class QGramFilter {
 			
 			
 			// check conditions for the while loop
-			if(backwards) {
-				//reverse complement
+			if(reverseComplementDirection) {
+				//reverse complement, go backwards through the query
 				if (offsetInQueries>endPos) {
 					offsetInQueries--;
 					relativeQueryPosition--;
@@ -328,7 +350,7 @@ public class QGramFilter {
 						nextBase=false;
 					}
 			} else {
-				//forward direction
+				//forward direction, forward until the end of a query
 				if (offsetInQueries < endPos) {
 				offsetInQueries++;
 				relativeQueryPosition++;
@@ -343,114 +365,115 @@ public class QGramFilter {
 
 	}
 
-	private void resetCountsAndReportRemainingParalellograms() {
-
-		//check parallelograms for hits and reset counters
-		for (int k = 0; k < binCounts.length; k++) {
-			
-			
-			//check if there are remaining parallelograms that have not been reported yet
-			if (binCounts[k] >= eZone.getThreshold()) {
-				
-				// FIXME I'm not sure if this is right
-				// this IS wrong! how to get the left value from the bin index? compensate modulo
-				int left = k << eZone.getDeltaExponent(); 
-				// FIXME!! FIX!!
-				
-				int top = binMax[k]+eZone.getQGramSize();
-				int bottom = binMin[k];
-				
-
-				if (top-bottom > eZone.getHeight()) {
-					reportMatch(left, top, bottom, k, "remain");
-				}
-
-			}
-
-			
-			// reset coder and buckets for the next query
-			coder.reset();
-			
-			// reset counters after query
-			binCounts[k] = 0;
-			binMin[k] = 0;
-			binMax[k] = 0;
-			binMean[k] = 0;
-			binVariance[k] = 0;
-			
-		}
-		log("#-------------------reset-----------------------");
-	}
-	
 	/**
-	 * Increases the hitcount of the given bin, or reports a parallelogram, if the last hit was to far away and the threshold was reached.
-	 * 
-	 * @param b is the bin index (kim: bm)
-	 * @param hitPositionTarget the starting position of the hin in the target sequence (i)
-	 * @param hitPositionQuery the actual position in the query sequence (j)
-	 * @param offsetDiagonal the (first) diagonal of the parallelogram. (b0<<z)
-	 * d = (|Target| + position_in_query - position_in_target)/|Bins|
-	 */
-	private void updateBin(int b, int hitPositionTarget, int hitPositionQuery, int offsetDiagonal) {
-
-		
-
-
-		// TODO check correctness with unit test
-		if (hitPositionQuery - eZone.getHeight() + eZone.getQGramSize() > binMax[b]) {
-			if (binCounts[b] >= eZone.getThreshold()) {
-				int left = qGramIndex.getInputLength() - offsetDiagonal; // == index of the offset diagonal on the target
-				int top = binMax[b]+eZone.getQGramSize();
-				int bottom = binMin[b];
-				reportMatch(left, top, bottom, b, "normal");
+		 * Increases the hitcount of the given bin, or reports a parallelogram, if the last hit was to far away and the threshold was reached.
+		 * 
+		 * @param b is the bin index (kim: bm)
+		 * @param hitPositionTarget the starting position of the bin in the target sequence (i)
+		 * @param hitPositionQuery the actual position in the query sequence (j)
+		 * @param offsetDiagonal the (first) diagonal of the parallelogram. (b0<<z)
+		 * d = (|Target| + position_in_query - position_in_target)/|Bins|
+		 */
+		private void updateBin(int b, int hitPositionTarget, int hitPositionQuery, int offsetDiagonal) {
+			// the size of the query is needed for the reverse complement
+			int querySize = (int)query.getSequence(queryNumber).getSize();
+			
+			// TODO check correctness with unit test
+			// if the last hit was more than w+q away: report and/or start new parallelogram
+			if (hitPositionQuery - eZone.getHeight() + eZone.getQGramSize() > binMax[b]) {
+				//report only if there are enough hits
+				if (binCounts[b] >= eZone.getThreshold()) {
+					// kim: d is approx |A|+j-i, so |A|-d is -j+i which is the diagonal on the target
+					int left = qGramIndex.getInputLength() - offsetDiagonal; // == index of the offset diagonal on the target
+					int top = binMax[b]+eZone.getQGramSize();
+					int bottom = binMin[b];
+					 /*|\ 
+					 * | \
+					 * |  \ d=|A|+j-i
+					 * |   \ 
+					 * |    \ left
+					 * |     \|   i (hit target)
+					 * |______\___|____________ 
+					 * |       \
+					 * -bottom  \
+					 * |         \
+					 * -top       \ new hit j (hit query)
+					 * |
+					 * j
+					 */ 
+					if(reverseComplementDirection) {
+						// for the reverse complement the length of the query has to be added to get
+						// the intersection of the diagonal on the i axis.
+						// since diagonal is i+(|query|-j) =  i-j +|query|
+						// also top and bottom have to be flipped
+						reportMatch( left+querySize, querySize-top, querySize-bottom, b, "normal");
+					} else {
+						//normal direction
+					reportMatch(left, top, bottom, b, "normal");
+					}
+				}
+				binCounts[b] = 0;
 			}
-			binCounts[b] = 0;
+	
+			
+			//start a new paralelogram and initialize mean and variance
+			if (binCounts[b] == 0) {
+	
+				binMin[b] = hitPositionQuery;
+				
+				//initial values for mean and variance of the hit-diagonal computation
+				binMean[b]=hitPositionTarget-hitPositionQuery; // == diagonal
+				binVariance[b]=0; // variance for one sample is 0
+				
+				//adjust the mean if in reverse direction
+				// diagonal for reverse complement is i + (|query|-j) == i-j +|query|
+				if(reverseComplementDirection) {
+					binMean[b]+=querySize;
+				}
+				
+				
+			}
+	
+			//if there was no hit on the same query position
+			// this avoids the counting of multiple hits on a homopolymer region, for example "aaaaaaaaaa"
+			if (binMax[b] < hitPositionQuery) {
+				// enlarge the parallelogram
+				binMax[b] = hitPositionQuery;
+				//increase the q-hit counter for this parallelogram
+				binCounts[b]++;
+	
+				
+				
+				
+				//compute the mean and the variance recursively
+				if(binCounts[b]>=1) {
+					int diagonal= hitPositionTarget-hitPositionQuery;
+					//adjust the mean if in reverse direction
+					// diagonal for reverse complement is i + (|query|-j) == i-j +|query|
+					if(reverseComplementDirection) {
+						diagonal+=querySize;
+					}
+					
+	
+				//compute the mean and the variance for the diagonal values in a recursive fashion
+				//(see Musterklassifikation Skript 2006/07 Uni Bi.; Franz Kummert; Page 18
+				double factor= 1. / binCounts[b];
+				
+				//first update the variance because it depends on the mean value of the previous step
+				binVariance[b] = (float) ((1. - factor) * (binVariance[b] + factor
+						* ((diagonal - binMean[b]) * (diagonal - binMean[b]))));
+	
+				binMean[b] = (float) ((1. - factor) * binMean[b] + factor
+						* diagonal);
+				
+	//debugging			
+//				if (b==1907) {
+//					log("i:" +i+ "\tj:" +j+ "\tn-j:" +(querySize-j)+ "\tdiag:" + (querySize-j+i) + "\tmean:" +binMean[b]+ "\tvar:" +binVariance[b]);
+//				}
+	
+				} // mean and variance computation
+			} // enlargement of one paralellogram
 		}
-
-		
-		//start a new paralelogram and initialize mean and variance
-		if (binCounts[b] == 0) {
-
-			binMin[b] = hitPositionQuery;
-			
-			//initial values for mean and variance of the hit-diagonal computation
-			binMean[b]=hitPositionTarget-hitPositionQuery; // == diagonal
-			binVariance[b]=0; // variance for one sample is 0
-		}
-
-		//if there was no hit on the same query position
-		// this avoids the counting of multiple hits on a homopolymer region, for example "aaaaaaaaaa"
-		if (binMax[b] < hitPositionQuery) {
-			// enlarge the parallelogram
-			binMax[b] = hitPositionQuery;
-			//increase the q-hit counter for this parallelogram
-			binCounts[b]++;
-
-			
-			
-			
-			//compute the mean and the variance recursively
-			if(binCounts[b]>=1) {
-				int diagonal= hitPositionTarget-hitPositionQuery;
-
-			//compute the mean and the variance for the diagonal values in a recursive fashion
-			//(see Musterklassifikation Skript 2006/07 Uni Bi.; Franz Kummert; Page 18
-			double factor= 1. / binCounts[b];
-			
-			binVariance[b] = (float) ((1. - factor) * (binVariance[b] + factor
-					* ((diagonal - binMean[b]) * (diagonal - binMean[b]))));
-
-			binMean[b] = (float) ((1. - factor) * binMean[b] + factor
-					* diagonal);
-			
-//debugging			
-//			if (r==1822) {
-//				log(i+ "\t" +j+ "\tdiag:" + diagonal + "\tmean:" +binMean[r]+ "\tvar:" +binVariance[r]);
-//			}
-
-			} // mean and variance computation
-		} // enlargement of one paralellogram
-	}
 
 	/**
 	 * Since only |Targetsize|/delta (roughly) bins are used we have to take care that the ones which are shared
@@ -472,7 +495,7 @@ public class QGramFilter {
 	 * 
 	 * 
 	 * Diagonals in the area x, where j>i, are projected to x'. So we have to clear the bins of region y
-	 * when there is no possibility to extend them.  
+	 * which end on the border of A, because there is no possibility to extend them.  
 	 * 
 	 * 
 	 * @param b bin index
@@ -483,12 +506,84 @@ public class QGramFilter {
 			int left = qGramIndex.getInputLength() - offsetDiagonal; // == index of the offset diagonal on the target
 			int top = binMax[b]+eZone.getQGramSize();
 			int bottom = binMin[b];
-			reportMatch(left, top, bottom, b, "c&r");
+
+			if(reverseComplementDirection) {
+				// for the reverse complement the length of the query has to be added to get
+				// the intersection of the diagonal on the i axis.
+				// since diagonal is i+(|query|-j) =  i-j +|query|
+				// also top and bottom have to be flipped
+				int querySize = (int)query.getSequence(queryNumber).getSize();
+				reportMatch( left+querySize, querySize-top, querySize-bottom, b, "normal");
+			} else {
+				//normal direction
+			reportMatch(left, top, bottom, b, "normal");
+			}
 		}
 		binCounts[b] = 0;
 	}
 
-	
+	private void resetCountsAndReportRemainingParalellograms() {
+		int top=0;
+		int bottom=0;
+		int querySize = (int)query.getSequence(queryNumber).getSize();
+
+		
+		
+		//check parallelograms for hits and reset counters
+		for (int k = 0; k < binCounts.length; k++) {
+			//check if there are remaining parallelograms that have not been reported yet
+			if (binCounts[k] >= eZone.getThreshold()) {
+				top = binMax[k]+eZone.getQGramSize();
+				bottom = binMin[k];
+				if (top-bottom > eZone.getHeight()) {
+					int left = qGramIndex.getInputLength()- (k << eZone.getDeltaExponent()); 
+					/*
+					 * ^^^ this should be right, because all diagonals
+					 * of the area in x (where  j>i) are projected to x' with the modulo |Bins| operation.
+					 * all diagonals in area y, which have the same bin index like the ones in x,
+					 * are reported with the function checkAndResetBin, since they can not be extended.
+					 * So in the end, when j=|B| only the diagonals from area z and x remain.
+					 * 
+					 * 
+					 * |\ d=|A|+j-i
+					 * | \
+					 * |  \
+					 * |   \
+					 * |    \
+					 * |     \
+					 * |______\A i
+					 * |\  \  |\
+					 * | \  \y| \
+					 * | x\ z\|x'\
+					 * B
+					 * j
+					 */
+
+					if(reverseComplementDirection) {
+						// for the reverse complement the length of the query has to be added to get
+						// the intersection of the diagonal on the i axis.
+						// since diagonal is i+(|query|-j) =  i-j +|query|
+						// also top and bottom have to be flipped
+						reportMatch( left+querySize, querySize-top, querySize-bottom, k, "normal");
+					} else {
+						//normal direction
+						reportMatch(left, top, bottom, k, "remain");
+					}
+				}
+			}
+
+			// reset coder and buckets for the next query
+			coder.reset();
+			
+			// reset counters after query
+			binCounts[k] = 0;
+			binMin[k] = 0;
+			binMax[k] = 0;
+			binMean[k] = 0;
+			binVariance[k] = 0;
+		}
+		log("#-------------------reset-----------------------");
+	}
 	
 	private void log(String string) {
 		try {
@@ -503,8 +598,10 @@ public class QGramFilter {
 		int[] parallelogram = { left, top, bottom };
 		hits.add(parallelogram);
 		
+		// to get the query sequence (only if the clobal queryNumber is set properly)
 		//query.getSequence(queryNumber).getId();
-		
+//		to get the target sequence:
+//		qGramIndex.getSequenceAtPosition(position)
 		
 
 		this.log(bottom +"\t"+ top +"\t"+ (left+bottom) +"\t"+ (left+top) +"\t"+ binCounts[bucketindex] +"\t"+ binMean[bucketindex] +"\t"+ +binVariance[bucketindex] );
@@ -517,7 +614,10 @@ public class QGramFilter {
 				+ " (" + (top-bottom)+")"
 				+ " hits:" + binCounts[bucketindex]
 				+ " Mean:" + binMean[bucketindex]
+				+ " (" + (binMean[bucketindex] - left)+ ") "
 				+" Variance:"+binVariance[bucketindex]);
+		
+
 	}
 	
 }

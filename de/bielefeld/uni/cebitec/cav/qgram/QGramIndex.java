@@ -216,6 +216,24 @@ public class QGramIndex {
 	public Vector<DNASequence> getSequences() {
 		return sequences;
 	}
+	
+	
+	/**
+	 * Returns the Sequence object at a given position for which the index was built.<br>
+	 * If no sequence matches the method returns null.
+	 * @param position Position of a character
+	 * @return Sequence object
+	 */
+	public DNASequence getSequenceAtPosition( int position) {
+		
+		for (int j = 0; j < offsetsInInput.length - 1; j++) {
+			if (position>=offsetsInInput[j] && position<offsetsInInput[j+1]) {
+				return sequences.get(j);
+			}
+		}
+		
+		return null;
+	}
 
 	public int[] getOffsetsInInput() {
 		return offsetsInInput;
