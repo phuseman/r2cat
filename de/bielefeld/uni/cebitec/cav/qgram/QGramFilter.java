@@ -266,12 +266,12 @@ public class QGramFilter {
 		
 		
 		//the bigger number would be the first character of the next sequence, so reduce it by one;
-	if (reverseComplementDirection) {
-		startPos--;
-		relativeQueryPosition = startPos-endPos;
-	} else {
+	if (!reverseComplementDirection) {
 		endPos--;
 		relativeQueryPosition = 0;
+	} else {
+		startPos--;
+		relativeQueryPosition = startPos-endPos;
 	}
 		
 
@@ -285,12 +285,12 @@ public class QGramFilter {
 	
 
 		// get code for next qgram
-		if (reverseComplementDirection) {
+		if (!reverseComplementDirection){
+			code = coder.updateEncoding(querySequencesArray[offsetInQueries]);
+		} else  {
 			//calculate complement code on the fly
 			code = coder.updateEncodingComplement(querySequencesArray[offsetInQueries]);
-		} else {
-			code = coder.updateEncoding(querySequencesArray[offsetInQueries]);
-		}
+		} 
 		
 			// if the code is valid process each occurrence position
 			if (code != -1) {
@@ -299,12 +299,12 @@ public class QGramFilter {
 					i = occurrenceTable[occOffset]; //hitposition in target
 					
 					//j is the hitposition in the query
-					if (reverseComplementDirection) {
+					if (!reverseComplementDirection) { //forward
+						j = relativeQueryPosition-eZone.getQGramSize();
+					} else  {
 						// for the reverse complement we have to consider the position of the reversed string.
 						// otherwise the hitting diagonals are wrong
 						j= startPos-endPos-relativeQueryPosition-eZone.getQGramSize();
-					} else { //forward
-						j = relativeQueryPosition-eZone.getQGramSize();
 					}
 					
 
@@ -341,15 +341,7 @@ public class QGramFilter {
 			
 			
 			// check conditions for the while loop
-			if(reverseComplementDirection) {
-				//reverse complement, go backwards through the query
-				if (offsetInQueries>endPos) {
-					offsetInQueries--;
-					relativeQueryPosition--;
-					} else {
-						nextBase=false;
-					}
-			} else {
+			if(!reverseComplementDirection) {
 				//forward direction, forward until the end of a query
 				if (offsetInQueries < endPos) {
 				offsetInQueries++;
@@ -357,7 +349,15 @@ public class QGramFilter {
 				} else {
 					nextBase=false;
 				}
-			}
+			} else {
+				//reverse complement, go backwards through the query
+				if (offsetInQueries>endPos) {
+					offsetInQueries--;
+					relativeQueryPosition--;
+					} else {
+						nextBase=false;
+					}
+			}  
 		}//while loop: for each position in actual query
 
 	//after each query and each direction:
@@ -401,15 +401,15 @@ public class QGramFilter {
 					 * |
 					 * j
 					 */ 
-					if(reverseComplementDirection) {
+					if(!reverseComplementDirection){
+						//normal direction
+					reportMatch(left, top, bottom, b, "normal");
+					} else {
 						// for the reverse complement the length of the query has to be added to get
 						// the intersection of the diagonal on the i axis.
 						// since diagonal is i+(|query|-j) =  i-j +|query|
 						// also top and bottom have to be flipped
 						reportMatch( left+querySize, querySize-top, querySize-bottom, b, "normal");
-					} else {
-						//normal direction
-					reportMatch(left, top, bottom, b, "normal");
 					}
 				}
 				binCounts[b] = 0;
@@ -507,16 +507,16 @@ public class QGramFilter {
 			int top = binMax[b]+eZone.getQGramSize();
 			int bottom = binMin[b];
 
-			if(reverseComplementDirection) {
+			if(!reverseComplementDirection){
+				//normal direction
+			reportMatch(left, top, bottom, b, "normal");
+			} else  {
 				// for the reverse complement the length of the query has to be added to get
 				// the intersection of the diagonal on the i axis.
 				// since diagonal is i+(|query|-j) =  i-j +|query|
 				// also top and bottom have to be flipped
 				int querySize = (int)query.getSequence(queryNumber).getSize();
 				reportMatch( left+querySize, querySize-top, querySize-bottom, b, "normal");
-			} else {
-				//normal direction
-			reportMatch(left, top, bottom, b, "normal");
 			}
 		}
 		binCounts[b] = 0;
@@ -559,15 +559,15 @@ public class QGramFilter {
 					 * j
 					 */
 
-					if(reverseComplementDirection) {
+					if(!reverseComplementDirection){
+						//normal direction
+						reportMatch(left, top, bottom, k, "remain");
+					} else  {
 						// for the reverse complement the length of the query has to be added to get
 						// the intersection of the diagonal on the i axis.
 						// since diagonal is i+(|query|-j) =  i-j +|query|
 						// also top and bottom have to be flipped
 						reportMatch( left+querySize, querySize-top, querySize-bottom, k, "normal");
-					} else {
-						//normal direction
-						reportMatch(left, top, bottom, k, "remain");
 					}
 				}
 			}
@@ -604,8 +604,35 @@ public class QGramFilter {
 //		qGramIndex.getSequenceAtPosition(position)
 		
 
-		this.log(bottom +"\t"+ top +"\t"+ (left+bottom) +"\t"+ (left+top) +"\t"+ binCounts[bucketindex] +"\t"+ binMean[bucketindex] +"\t"+ +binVariance[bucketindex] );
+		if (!reverseComplementDirection) {
+			// normal hit; go from left to the hit position
+			/*              left
+			 * _____________|__________________ A
+			 * |             \
+			 * |              \- bottom
+			 * |               \
+			 * |                \- top
+			 */
+			this.log(bottom + "\t" + top + "\t" + (left + bottom) + "\t"
+					+ (left + top) + "\t" + binCounts[bucketindex] + "\t"
+					+ binMean[bucketindex] + "\t" + +binVariance[bucketindex]);
+		} else {
+			/* reverse complement hit; go from right to the hit position
+			 * 
+			 *               right
+			 * _____________|__________________ A
+			 * |           / 
+			 * |          /- bottom
+			 * |         /
+			 * |        /- top
+			 */
 
+			this.log(bottom + "\t" + top + "\t" + (left - bottom) + "\t"
+					+ (left - top) + "\t" + binCounts[bucketindex] + "\t"
+					+ binMean[bucketindex] + "\t" + +binVariance[bucketindex]);
+		}
+
+		
 		System.out.println(debugstring
 				+": bin:"+bucketindex
 				+"  left:"+left
@@ -614,7 +641,7 @@ public class QGramFilter {
 				+ " (" + (top-bottom)+")"
 				+ " hits:" + binCounts[bucketindex]
 				+ " Mean:" + binMean[bucketindex]
-				+ " (" + (binMean[bucketindex] - left)+ ") "
+				+ " (" + (left-binMean[bucketindex])+ ") "
 				+" Variance:"+binVariance[bucketindex]);
 		
 
