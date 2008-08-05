@@ -35,8 +35,6 @@ import javax.swing.JMenuItem;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.controller.GuiController;
-import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
-import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
 
 /**
  * @author Peter Husemann
@@ -63,7 +61,15 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		fileMenu.getAccessibleContext().setAccessibleDescription(
 				"File selection");
 
-		JMenuItem open = new JMenuItem("Open File");
+		JMenuItem newMatch = new JMenuItem("Match new");
+		newMatch.setMnemonic(KeyEvent.VK_N);
+		newMatch.getAccessibleContext()
+				.setAccessibleDescription("Match files dialog");
+		newMatch.addActionListener(this);
+		fileMenu.add(newMatch);
+		
+		
+		JMenuItem open = new JMenuItem("Open csv File");
 		open.setMnemonic(KeyEvent.VK_O);
 		open.getAccessibleContext()
 				.setAccessibleDescription("File open dialog");
@@ -106,15 +112,17 @@ optionsMenu.add(grid);
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().matches("Open File")) {
+		if (e.getActionCommand().matches("Open csv File")) {
 			openFile();
+		}else if (e.getActionCommand().matches("Match new")) {
+			guiController.showMatchDialog();
 		} else if (e.getActionCommand().matches("Unidirectional Alignments")) {
 			guiController.displayUnidirectional();
 		} else if (e.getActionCommand().matches("Queries with offsets")) {
 			guiController.displayWithOffsets();
 	} else if (e.getActionCommand().matches("Grid")) {
 		guiController.displayGrid(((JCheckBoxMenuItem)e.getSource()).getState());
-	}
+	} 
 		
 
 	}

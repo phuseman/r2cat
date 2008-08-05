@@ -28,13 +28,13 @@ import javax.swing.JScrollPane;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
-import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
 import de.bielefeld.uni.cebitec.cav.gui.AlignmentTable;
 import de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin;
 import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisation;
+import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisationActionListener;
 import de.bielefeld.uni.cebitec.cav.gui.MainMenu;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
-import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisationActionListener;
+import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
 import de.bielefeld.uni.cebitec.cav.utils.SwiftExternal;
 
 public class GuiController {
@@ -130,5 +130,15 @@ public class GuiController {
 		dotPlotVisualisation.drawGrid(b);
 		dotPlotVisualisation.repaint();
 	}
+	
+	public void showMatchDialog() {
+		MatchDialog matchDialog = new MatchDialog(mainWindow);
+		if (matchDialog != null) {
+			matchDialog.pack();
+			matchDialog.setLocationByPlatform(true);
+			matchDialog.setVisible(true);
+		}
+	}
+
 	
 }

@@ -1,21 +1,11 @@
 package de.bielefeld.uni.cebitec.cav;
 
-import java.io.File;
 import java.util.prefs.BackingStoreException;
-
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
 
 import de.bielefeld.uni.cebitec.cav.controller.DataModelController;
 import de.bielefeld.uni.cebitec.cav.controller.GuiController;
-import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
-import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
-import de.bielefeld.uni.cebitec.cav.gui.AlignmentTable;
 import de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin;
-import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisation;
-import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
 import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
-import de.bielefeld.uni.cebitec.cav.utils.SwiftExternal;
 
 /***************************************************************************
  *   Copyright (C) 2007 by Peter Husemann                                  *
@@ -64,10 +54,17 @@ public class ComparativeAssemblyViewer {
 
 		//guiController.createSwiftCall();
 
-		dataModelController.setAlignmentsPositonsListFromCSV(new File(preferences
-				.getLastFile()));
+//		dataModelController.setAlignmentsPositonsListFromCSV(new File(preferences
+//				.getLastFile()));
 
 		guiController.createMainWindow();
+
+		
+		//this should block until files are selected
+		guiController.showMatchDialog();
+		
+		if(dataModelController
+						.getAlignmentPositionsList() != null) {
 		
 		DataViewPlugin dotPlotVisualisation = guiController
 				.createDotPlotVisualisation(dataModelController
@@ -80,6 +77,7 @@ public class ComparativeAssemblyViewer {
 
 		guiController.showTableFrame();
 		guiController.showMainWindow();
+		}
 	}
 
 	private static void clearPreferences(String[] args) {

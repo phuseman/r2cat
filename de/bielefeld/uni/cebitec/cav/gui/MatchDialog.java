@@ -22,22 +22,25 @@ package de.bielefeld.uni.cebitec.cav.gui;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -45,14 +48,19 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
+import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
+import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
+import de.bielefeld.uni.cebitec.cav.qgram.QGramFilter;
+import de.bielefeld.uni.cebitec.cav.qgram.QGramIndex;
 import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
+import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 /**
  * @author phuseman
  * 
  */
-public class MatchDialog extends JFrame implements ActionListener,
+public class MatchDialog extends JDialog implements ActionListener,
 		PropertyChangeListener {
 
 	private Preferences prefs;
@@ -62,9 +70,6 @@ public class MatchDialog extends JFrame implements ActionListener,
 	private JTextArea progress;
 	private QGramMatcherTask matcherTask;
 
-	private File query;
-	private File target;
-
 	private JTextField tfQuery;
 
 	private JTextField tfTarget;
@@ -73,56 +78,103 @@ public class MatchDialog extends JFrame implements ActionListener,
 
 	private JButton buTarget;
 
+	private File query;
+
+	private File target;
+	
+	private File lastDir;
+
+	private AlignmentPositionsList result;
+
 	class QGramMatcherTask extends SwingWorker<AlignmentPositionsList, String> {
 		@Override
 		protected AlignmentPositionsList doInBackground() {
-			System.out.println("Thread");
+			progressBar.setValue(0);
 			progressBar.setIndeterminate(true);
+			progress.setText("");
+
+			Timer t = Timer.getInstance();
+			t.startTimer();
+
 			try {
-				progress.append("Generating q-Gram Index\n");
-				Thread.sleep(1000);
-				progressBar.setValue(25);
+			progress.append("Opening target file " + target.getName() + " (" + target.length()+ ")");
+			t.startTimer();
+			FastaFileReader targetFasta = new FastaFileReader(target);
+			targetFasta.scanContents(true);
+			progress.append(" ..."+t.stopTimer()+"\n");
 
-				progress.append("Second Pass\n");
-				Thread.sleep(1000);
-				progressBar.setValue(50);
+			progressBar.setValue(10);
 
-				progress.append("Matching Foreward Strand\n");
-				Thread.sleep(1000);
-				progressBar.setValue(75);
+					
+			progress.append("Generating q-Gram Index");
+			t.startTimer();
+			QGramIndex qi = new QGramIndex();
+			qi.generateIndex(targetFasta);
+			progress.append(" ..."+t.stopTimer()+"\n");
 
-				progress.append("Matching Backward Strand\n");
-				Thread.sleep(1000);
-				progressBar.setValue(100);
+			System.gc();
+			progressBar.setValue(30);
 
-			} catch (InterruptedException e) {
+			
+			progress.append("Opening query file"+ query.getName() + " (" + query.length()+ ")");
+			t.startTimer();
+			FastaFileReader queryFasta = new FastaFileReader(query);
+			queryFasta.scanContents(true);
+			progress.append(" ..."+t.stopTimer()+"\n");
+			
+			
+			progress.append("Matching");
+			t.startTimer();
+			QGramFilter qf = new QGramFilter(qi, queryFasta);
+			result = qf.match();
+			progress.append(" ..."+t.stopTimer()+"\n");
+
+			progress.append("Total time: "+t.stopTimer()+"\n");
+			progressBar.setValue(100);
+
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-			return null;
+
+			
+			return result;
 		}
 
 		public void done() {
-			Toolkit.getDefaultToolkit().beep();
 			startButton.setEnabled(true);
 			setCursor(null); // turn off the wait cursor
 			progress.append("Done!\n");
 			progressBar.setIndeterminate(false);
+			try {
+				result = this.get();
+				if (result!=null) {
+					ComparativeAssemblyViewer.dataModelController.setAlignmentsPositonsList(result);
+					dispose();
+				} else {
+					errorAlert("An error happened, change the files and try again");
+					progressBar.setValue(0);
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}
 	}
 
-	public MatchDialog() {
-		super("Find matching between queries (contigs) and a  target (reference genome)");
+	public MatchDialog(Frame parent) {
+		super(parent,
+				"Find matching between queries (contigs) and a  target (reference genome)",true);
 		this.setLayout(new BorderLayout());
 
 		// not used at the moment
 		prefs = CAVPrefs.getPreferences();
-
 		init();
-
-		this.setSize(this.getPreferredSize());
-		this.pack();
-		this.setLocationByPlatform(true);
-		this.setVisible(true);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		this.setSize(this.getPreferredSize());
 	}
 
 	private void init() {
@@ -151,6 +203,9 @@ public class MatchDialog extends JFrame implements ActionListener,
 				.setToolTipText("Select the target sequence(s) in (multiple) fasta format");
 		buTarget.addActionListener(this);
 
+		this.setQuery(new File(prefs.get("query", "")), true);
+		this.setTarget(new File(prefs.get("target", "")), true);
+
 		progressBar = new JProgressBar(0, 100);
 		progressBar.setValue(0);
 		progressBar.setStringPainted(true);
@@ -161,7 +216,7 @@ public class MatchDialog extends JFrame implements ActionListener,
 
 		JScrollPane logPane = new JScrollPane(progress);
 		logPane.setBorder(BorderFactory.createTitledBorder("Progress"));
-		logPane.setPreferredSize(new Dimension(400, 200));
+		logPane.setPreferredSize(new Dimension(600, 400));
 
 		// align files panel
 		files.setLayout(new GridBagLayout());
@@ -240,10 +295,16 @@ public class MatchDialog extends JFrame implements ActionListener,
 			fileChooser.setDialogTitle(dialogTitle);
 		}
 
+		
 		if (prevFile != null && prevFile.getParentFile().exists()) {
 			fileChooser.setCurrentDirectory(prevFile.getParentFile());
 		}
 
+		if (lastDir != null && lastDir.getParentFile().exists()) {
+			fileChooser.setCurrentDirectory(lastDir);
+		}
+
+		
 		// disable all files filter
 		// fileChooser.setAcceptAllFileFilterUsed(false);
 
@@ -257,15 +318,31 @@ public class MatchDialog extends JFrame implements ActionListener,
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals("start")) {
-			System.out.println("Go!");
+		if (e.getSource().equals(startButton)) {
+			// check files
+			
+			if(query != null && target != null && query.canRead() && target.canRead()) {
 			startButton.setEnabled(false);
 			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 			matcherTask = new QGramMatcherTask();
 			matcherTask.addPropertyChangeListener(this);
 			matcherTask.execute();
+			} else {
+				this.errorAlert("Cannot read query or target!");
+			}
+			
+		} else if (e.getSource().equals(buQuery)) {
+			this
+					.setQuery(this.chooseFile(query,
+							"Select query (fasta format)"), false);
+			
+			
+		} else if (e.getSource().equals(buTarget)) {
+			this.setTarget(this.chooseFile(target,
+					"Select target (fasta format)"), false);
 		}
+
 	}
 
 	@Override
@@ -274,8 +351,79 @@ public class MatchDialog extends JFrame implements ActionListener,
 
 	}
 
-	public static void main(String args[]) {
-		MatchDialog d = new MatchDialog();
+	/**
+	 * Pop up an error message
+	 * 
+	 * @param error
+	 *            Message
+	 */
+	private void errorAlert(String error) {
+		JOptionPane.showMessageDialog(this, error, "Error",
+				JOptionPane.ERROR_MESSAGE);
 	}
+
+	/**
+	 * Sets the query to the given file after performing some sanity checks.
+	 * Additionally the appropriate textfield is labeled and the path is stored
+	 * in the preferences.
+	 * 
+	 * @param file
+	 *            File to set
+	 */
+	public void setQuery(File q, boolean silent) {
+		if (q == null || q.getName().equalsIgnoreCase("")) {
+			return;
+		}
+
+		if (q.canRead()) {
+			this.lastDir = q.getParentFile();
+			this.query = q;
+			tfQuery.setText(query.getName());
+			try {
+				tfQuery.setToolTipText(query.getCanonicalPath());
+				prefs.put("query", query.getCanonicalPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			if (!silent) {
+				this.errorAlert("File is not readable: " + q.getName());
+			}
+		}
+	}
+
+	/**
+	 * Sets the target to the given file after performing some sanity checks.
+	 * Additionally the appropriate textfield is labeled and the path is stored
+	 * in the preferences.
+	 * 
+	 * @param file
+	 *            File to set
+	 */
+	public void setTarget(File t, boolean silent) {
+		if (t == null || t.getName().equalsIgnoreCase("")) {
+			return;
+		}
+
+		if (t.canRead()) {
+			this.lastDir = t.getParentFile();
+			this.target = t;
+			tfTarget.setText(target.getName());
+			try {
+				tfTarget.setToolTipText(target.getCanonicalPath());
+
+				prefs.put("target", target.getCanonicalPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			if (!silent) {
+				this.errorAlert("File is not readable: " + t.getName());
+			}
+		}
+	}
+
 
 }

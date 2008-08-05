@@ -101,6 +101,27 @@ public final class Timer {
 		}
 		System.out.println(s);
 	}
+	
+	public String stopTimer() {
+		if (!timingActive) {
+			return "";
+		}
+		String s = "";
+		try {
+			Long t0 = times.pop();
+			long t = System.currentTimeMillis() - t0;
+			Long t0cput = cpuTimes.pop();
+			ThreadMXBean tb = ManagementFactory.getThreadMXBean();
+			long tCpu = tb.getCurrentThreadCpuTime() - t0cput;
+			lastPeriod = t / 1000.0f;
+			lastPeriodCpu = (tCpu) * 1e-9f;
+
+			s = String.format(" real:%.3f cpu:%.3f", lastPeriod, lastPeriodCpu);
+		} catch (EmptyStackException e) {
+			s = "n/a"; 
+		}
+		return s;
+	}
 
 	public void restartTimer(String message) {
 		if (!timingActive) {

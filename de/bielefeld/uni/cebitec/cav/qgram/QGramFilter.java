@@ -4,8 +4,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Vector;
+import java.util.HashMap;
 
+import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
+import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
+import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 public class QGramFilter {
@@ -29,14 +32,15 @@ public class QGramFilter {
 	private float[] binVariance;
 	
 
-	private Vector<int[]> hits;
+
 
 	private EpsilonZone eZone;
 	private QGramCoder coder = null;
 	
 	private BufferedWriter logWriter;
 	
-	
+	private HashMap<Integer, AlignmentPosition> unsortedAlignmentPositions;
+	private AlignmentPositionsList result;
 	
 
 	
@@ -73,7 +77,6 @@ public class QGramFilter {
 	public QGramFilter(QGramIndex targetIndex, FastaFileReader query) {
 		this.qGramIndex = targetIndex;
 		this.query = query;
-		hits = new Vector<int[]>();
 		
 		
 		
@@ -138,11 +141,14 @@ public class QGramFilter {
 	 * 
 	 * 
 	 */
-	public void match() {
+	public AlignmentPositionsList match() {
 
 		double errorrate = 0.08;
 		int minMatchLength = 450;// not the real minimal match lenght, can be smaller.
 
+		unsortedAlignmentPositions = new HashMap<Integer, AlignmentPosition>();
+		result = new AlignmentPositionsList();
+		
 		hashTable = qGramIndex.getHashTable();
 		occurrenceTable = qGramIndex.getOccurrenceTable();
 
@@ -199,7 +205,7 @@ public class QGramFilter {
 		
 
 
-//		// go through all queries
+		// go through all queries
 		for (queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
 			//match one query in forward direction
 			matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
@@ -216,13 +222,9 @@ public class QGramFilter {
 //		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
 //		queryNumber = 66;
 //		matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
-//		queryNumber = 69;
+//		queryNumber = 67;
 //		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
 
-		
-		System.out.println("Hits:" + hits.size());
-		
-		// TODO go through all queries in backward direction
 
 		// remove references so that the garbage collector can free the space
 		binCounts = null;
@@ -241,6 +243,8 @@ public class QGramFilter {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		return result;
 	}
 
 	
@@ -313,6 +317,7 @@ public class QGramFilter {
 					b0 = d >> z; // b0= d/2^z
 					bm = b0 % numberOfBins; // bucketindex
 
+					
 //					System.out.println("Updatebin( Bins[" + bm + "], j="
 //							+ j + ", d=" + (b0 << z) + ")");
 					updateBin(bm, i, j, (b0 << z));
@@ -362,6 +367,8 @@ public class QGramFilter {
 
 	//after each query and each direction:
 	resetCountsAndReportRemainingParalellograms();
+	
+	unsortedAlignmentPositions.clear();
 
 	}
 
@@ -503,20 +510,22 @@ public class QGramFilter {
 	 */
 	private void checkAndResetBin(int b, int offsetDiagonal) {
 		if (binCounts[b] >= eZone.getThreshold()) {
-			int left = qGramIndex.getInputLength() - offsetDiagonal; // == index of the offset diagonal on the target
 			int top = binMax[b]+eZone.getQGramSize();
 			int bottom = binMin[b];
-
-			if(!reverseComplementDirection){
-				//normal direction
-			reportMatch(left, top, bottom, b, "normal");
-			} else  {
-				// for the reverse complement the length of the query has to be added to get
-				// the intersection of the diagonal on the i axis.
-				// since diagonal is i+(|query|-j) =  i-j +|query|
-				// also top and bottom have to be flipped
-				int querySize = (int)query.getSequence(queryNumber).getSize();
-				reportMatch( left+querySize, querySize-top, querySize-bottom, b, "normal");
+			if (top-bottom > eZone.getWidth()) {// normally height
+				int left = qGramIndex.getInputLength() - offsetDiagonal; // == index of the offset diagonal on the target
+	
+				if(!reverseComplementDirection){
+					//normal direction
+				reportMatch(left, top, bottom, b, "c+r");
+				} else  {
+					// for the reverse complement the length of the query has to be added to get
+					// the intersection of the diagonal on the i axis.
+					// since diagonal is i+(|query|-j) =  i-j +|query|
+					// also top and bottom have to be flipped
+					int querySize = (int)query.getSequence(queryNumber).getSize();
+					reportMatch( left+querySize, querySize-top, querySize-bottom, b, "c+r");
+				}
 			}
 		}
 		binCounts[b] = 0;
@@ -526,17 +535,18 @@ public class QGramFilter {
 		int top=0;
 		int bottom=0;
 		int querySize = (int)query.getSequence(queryNumber).getSize();
-
-		
+	
 		
 		//check parallelograms for hits and reset counters
-		for (int k = 0; k < binCounts.length; k++) {
+		for (int bin = 0; bin < binCounts.length; bin++) {
 			//check if there are remaining parallelograms that have not been reported yet
-			if (binCounts[k] >= eZone.getThreshold()) {
-				top = binMax[k]+eZone.getQGramSize();
-				bottom = binMin[k];
-				if (top-bottom > eZone.getHeight()) {
-					int left = qGramIndex.getInputLength()- (k << eZone.getDeltaExponent()); 
+			if (binCounts[bin] >= eZone.getThreshold()) {
+				top = binMax[bin]+eZone.getQGramSize();
+				bottom = binMin[bin];
+				
+				if (top-bottom > eZone.getWidth()) {//normally height
+					
+					int left = -(bin << eZone.getDeltaExponent()); 
 					/*
 					 * ^^^ this should be right, because all diagonals
 					 * of the area in x (where  j>i) are projected to x' with the modulo |Bins| operation.
@@ -561,13 +571,13 @@ public class QGramFilter {
 
 					if(!reverseComplementDirection){
 						//normal direction
-						reportMatch(left, top, bottom, k, "remain");
+						reportMatch(left, top, bottom, bin, "remain");
 					} else  {
 						// for the reverse complement the length of the query has to be added to get
 						// the intersection of the diagonal on the i axis.
 						// since diagonal is i+(|query|-j) =  i-j +|query|
 						// also top and bottom have to be flipped
-						reportMatch( left+querySize, querySize-top, querySize-bottom, k, "normal");
+						reportMatch( left+querySize, querySize-top, querySize-bottom, bin, "reset");
 					}
 				}
 			}
@@ -576,11 +586,11 @@ public class QGramFilter {
 			coder.reset();
 			
 			// reset counters after query
-			binCounts[k] = 0;
-			binMin[k] = 0;
-			binMax[k] = 0;
-			binMean[k] = 0;
-			binVariance[k] = 0;
+			binCounts[bin] = 0;
+			binMin[bin] = 0;
+			binMax[bin] = 0;
+			binMean[bin] = 0;
+			binVariance[bin] = 0;
 		}
 		log("#-------------------reset-----------------------");
 	}
@@ -595,17 +605,19 @@ public class QGramFilter {
 	}
 	
 	private void reportMatch(int left, int top, int bottom, int bucketindex, String debugstring) {
-		int[] parallelogram = { left, top, bottom };
-		hits.add(parallelogram);
 		
-		// to get the query sequence (only if the clobal queryNumber is set properly)
-		//query.getSequence(queryNumber).getId();
-//		to get the target sequence:
-//		qGramIndex.getSequenceAtPosition(position)
+		//take the mean instead of the left value
+		left = (int) binMean[bucketindex];
 		
+		AlignmentPosition ap;
+		long targetStart=0;
+		long targetEnd=0;
+		long queryStart=0;
+		long queryEnd=0;
 
+		
 		if (!reverseComplementDirection) {
-			// normal hit; go from left to the hit position
+			// normal hit; go from left (mean) to the hit position
 			/*              left
 			 * _____________|__________________ A
 			 * |             \
@@ -613,11 +625,12 @@ public class QGramFilter {
 			 * |               \
 			 * |                \- top
 			 */
-			this.log(bottom + "\t" + top + "\t" + (left + bottom) + "\t"
-					+ (left + top) + "\t" + binCounts[bucketindex] + "\t"
-					+ binMean[bucketindex] + "\t" + +binVariance[bucketindex]);
+			queryStart=bottom;
+			queryEnd=top;
+			targetStart=(left + bottom);
+			targetEnd=(left + top);
 		} else {
-			/* reverse complement hit; go from right to the hit position
+			/* reverse complement hit; go from right (mean) to the hit position
 			 * 
 			 *               right
 			 * _____________|__________________ A
@@ -627,24 +640,65 @@ public class QGramFilter {
 			 * |        /- top
 			 */
 
-			this.log(bottom + "\t" + top + "\t" + (left - bottom) + "\t"
-					+ (left - top) + "\t" + binCounts[bucketindex] + "\t"
-					+ binMean[bucketindex] + "\t" + +binVariance[bucketindex]);
+			queryStart=bottom;
+			queryEnd=top;
+			targetStart=(left - bottom);
+			targetEnd=(left - top);
 		}
+		
+		
+		
+//		System.out.println(debugstring
+//				+": bin:"+bucketindex
+//				+"  left:"+left
+//				+ " top:" +  top 
+//				+ " bottom:" + bottom 
+//				+ " (" + (top-bottom)+")"
+//				+ " hits:" + binCounts[bucketindex]
+//				+ " Mean:" + binMean[bucketindex]
+//				+ " (" + (left-binMean[bucketindex])+ ") "
+//				+" Variance:"+binVariance[bucketindex]);
+//		
+
+		// to get the query sequence (only if the global queryNumber is set properly)
+		//query.getSequence(queryNumber).getId();
+//		to get the target sequence:
+//		qGramIndex.getSequenceAtPosition(position)
 
 		
-		System.out.println(debugstring
-				+": bin:"+bucketindex
-				+"  left:"+left
-				+ " top:" +  top 
-				+ " bottom:" + bottom 
-				+ " (" + (top-bottom)+")"
-				+ " hits:" + binCounts[bucketindex]
-				+ " Mean:" + binMean[bucketindex]
-				+ " (" + (left-binMean[bucketindex])+ ") "
-				+" Variance:"+binVariance[bucketindex]);
+		// get the sequence objects
+		DNASequence dNASeqQuery = query.getSequence(queryNumber);
+		DNASequence dNASeqTarget = qGramIndex.getSequenceAtPosition((int)targetStart);
+
+		
+		ap = new AlignmentPosition(dNASeqTarget,
+				targetStart, targetEnd, dNASeqQuery, queryStart, queryEnd);
+
+
+		this.log(String.format("%s\t%d\t%s\t%d\tn/a\t%d\tn/a\tn/a\t%d\t%d\t%d\t%d\t%f\t%d\t***",
+				dNASeqQuery.getId(), dNASeqQuery.getSize(),
+				dNASeqTarget.getId(), dNASeqTarget.getSize(), Math.abs(top-bottom), queryStart, queryEnd,
+				targetStart, targetEnd, binVariance[bucketindex], bucketindex));
+
+//
+//		// save match temporary to sort out duplicate matches
+		// due to the overlapping parallelograms some hits are recognised twice
+		unsortedAlignmentPositions.put(bucketindex, ap);
+		
+		if (unsortedAlignmentPositions.containsKey(bucketindex+1)) {
+			//merge
+		} else if (unsortedAlignmentPositions.containsKey(bucketindex-1)) {
+			//merge
+		} else {
+			result.addAlignmentPosition(ap);
+		}//TODO
+//			
+
+		
 		
 
 	}
+	
+
 	
 }
