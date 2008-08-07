@@ -9,6 +9,7 @@ import java.util.HashMap;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
+import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 public class QGramFilter {
@@ -65,6 +66,8 @@ public class QGramFilter {
 	private int delta = 0; //delta
 	private int i = 0; // i
 	private int j = 0; // j
+	private MatchDialog matchDialog;
+	private double progress;
 	
 
 	
@@ -83,7 +86,6 @@ public class QGramFilter {
 		try {
 			logWriter=new BufferedWriter(new FileWriter( new File("log.txt")));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -95,8 +97,10 @@ public class QGramFilter {
 		Timer t = Timer.getInstance();
 		t.startTimer();
 
-		File target = new File("target.fasta");
-		File query = new File("query.fasta");
+		File query = new File("/homes/phuseman/compassemb/test/cur7111_min500contigs.fas");
+		File target = new File("/homes/phuseman/compassemb/test/DSM7109_mod.fas");
+//		File target = new File("/homes/phuseman/compassemb/test/DSM7109.fasta");
+
 
 		t.startTimer();
 
@@ -205,10 +209,14 @@ public class QGramFilter {
 		
 
 
+		int total=(queriesOffsets[queriesOffsets.length-1])*2;
+		
 		// go through all queries
 		for (queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
+			progress=(2.*queriesOffsets[queryNumber])/total;
 			//match one query in forward direction
 			matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
+			progress=((2.*queriesOffsets[queryNumber])+(queriesOffsets[queryNumber+1]-queriesOffsets[queryNumber]))/total;
 			//and reversed
 			matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
 		}// for each query
@@ -222,7 +230,7 @@ public class QGramFilter {
 //		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
 //		queryNumber = 66;
 //		matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
-//		queryNumber = 67;
+//		queryNumber = 29;
 //		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
 
 
@@ -261,7 +269,7 @@ public class QGramFilter {
 		
 		reverseComplementDirection = (endPos-startPos)<0;
 		
-		System.out.println("Processing: " 
+		this.reportProgress( progress , "Processing: " 
 				+ "#"+queryNumber + " "
 				+ query.getSequence(queryNumber).getId()
 				+ (reverseComplementDirection?" (reverse complement)":"") +" ("
@@ -301,6 +309,14 @@ public class QGramFilter {
 				for (int occOffset = hashTable[code]; occOffset < hashTable[code + 1]; occOffset++) {
 					
 					i = occurrenceTable[occOffset]; //hitposition in target
+//					System.out.println(code+" " + " " + i);
+//					System.out.println(coder.decodeQgramCode(code));
+//					for (int p=0; p<11;p++) {
+//						System.out.print(qGramIndex.getCharFromInput(i+p));
+//					}
+//					System.out.println();
+//					
+//					System.exit(0);
 					
 					//j is the hitposition in the query
 					if (!reverseComplementDirection) { //forward
@@ -308,7 +324,7 @@ public class QGramFilter {
 					} else  {
 						// for the reverse complement we have to consider the position of the reversed string.
 						// otherwise the hitting diagonals are wrong
-						j= startPos-endPos-relativeQueryPosition-eZone.getQGramSize();
+						j= startPos-endPos-relativeQueryPosition-eZone.getQGramSize()+1;
 					}
 					
 
@@ -606,8 +622,11 @@ public class QGramFilter {
 	
 	private void reportMatch(int left, int top, int bottom, int bucketindex, String debugstring) {
 		
+		//left is an artifact from kims implementation it is not needed if we take the mean.
 		//take the mean instead of the left value
 		left = (int) binMean[bucketindex];
+		
+		
 		
 		AlignmentPosition ap;
 		long targetStart=0;
@@ -668,31 +687,45 @@ public class QGramFilter {
 		
 		// get the sequence objects
 		DNASequence dNASeqQuery = query.getSequence(queryNumber);
-		DNASequence dNASeqTarget = qGramIndex.getSequenceAtPosition((int)targetStart);
+		//since we take the mean as diagonal and not the correct value
+		//it can happen that targetStart is smaller than zero, so we cheat al little bit here:
+		DNASequence dNASeqTarget = qGramIndex.getSequenceAtApproximatePosition((int)targetStart);
+		
+		//for the index all targets are concatenated together.
+		// substract the offset here, to get the relative value
+		targetStart-=dNASeqTarget.getOffset();
+		targetEnd-=dNASeqTarget.getOffset();
+		
 
 		
 		ap = new AlignmentPosition(dNASeqTarget,
 				targetStart, targetEnd, dNASeqQuery, queryStart, queryEnd);
 
+//		System.out.println(dNASeqTarget.getId());
+//		System.out.println(ap);
 
+
+		//write output similar to the swift output
 		this.log(String.format("%s\t%d\t%s\t%d\tn/a\t%d\tn/a\tn/a\t%d\t%d\t%d\t%d\t%f\t%d\t***",
 				dNASeqQuery.getId(), dNASeqQuery.getSize(),
 				dNASeqTarget.getId(), dNASeqTarget.getSize(), Math.abs(top-bottom), queryStart, queryEnd,
 				targetStart, targetEnd, binVariance[bucketindex], bucketindex));
 
-//
-//		// save match temporary to sort out duplicate matches
+		
+		//TODO:split hits if the go over two or more targets
+		
 		// due to the overlapping parallelograms some hits are recognised twice
+		// save match temporary to sort out duplicate matches
 		unsortedAlignmentPositions.put(bucketindex, ap);
 		
-		if (unsortedAlignmentPositions.containsKey(bucketindex+1)) {
-			//merge
-		} else if (unsortedAlignmentPositions.containsKey(bucketindex-1)) {
-			//merge
-		} else {
+		//TODO: merge hits, which are in the overlap part of two bins
+//		if (unsortedAlignmentPositions.containsKey(bucketindex+1)) {
+//			//TODO: merge
+//		} else if (unsortedAlignmentPositions.containsKey(bucketindex-1)) {
+//			//TODO: merge
+//		} else {
 			result.addAlignmentPosition(ap);
-		}//TODO
-//			
+//		}
 
 		
 		
@@ -700,5 +733,33 @@ public class QGramFilter {
 	}
 	
 
+	
+	/**
+	 * Registers the Match Dialog, to pass progress changes to it.
+	 * 
+	 * @param matchDialog
+	 */
+	public void register(MatchDialog matchDialog) {
+		this.matchDialog=matchDialog;
+	}
+	
+	/**
+	 * If a MatchDialog is registered the output will be written in its textfield.
+	 * Otherwise on the command line.
+	 * 
+	 * @param percentDone how far are we?
+	 * @param s explaining sentence
+	 */
+	public void reportProgress(double percentDone, String s) {
+		if (matchDialog != null) {
+			matchDialog.setProgress(percentDone, s);
+		} else {
+			System.out.println(
+					(percentDone>0?
+							((int)(percentDone*100)+ "% ")
+							:"") 
+							+ s);
+		}
+	}
 	
 }

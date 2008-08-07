@@ -116,7 +116,7 @@ public final class Timer {
 			lastPeriod = t / 1000.0f;
 			lastPeriodCpu = (tCpu) * 1e-9f;
 
-			s = String.format(" real:%.3f cpu:%.3f", lastPeriod, lastPeriodCpu);
+			s = String.format(" real:%.3f cpu:%.3f s", lastPeriod, lastPeriodCpu);
 		} catch (EmptyStackException e) {
 			s = "n/a"; 
 		}
@@ -129,6 +129,18 @@ public final class Timer {
 		}
 		stopTimer(message);
 		startTimer();
+	}
+	
+	public String  restartTimer() {
+String out="";
+		if (!timingActive) {
+			return null;
+		}
+		
+		out = stopTimer();
+		startTimer();
+		
+		return out;
 	}
 
 	public Level getLogLevel() {

@@ -146,7 +146,7 @@ public class FastaFileReader {
 			}
 
 			lastSequenceLength = validCharCounter - lastValidCharCounter;
-			System.out.println(" lastSequenceLength=" + lastSequenceLength);
+//			System.out.println(" lastSequenceLength=" + lastSequenceLength);
 
 			// add last sequence
 			sequences.add(new DNASequence(source, lastSequenceId,

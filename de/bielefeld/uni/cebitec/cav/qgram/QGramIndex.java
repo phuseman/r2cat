@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
+import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 /**
@@ -32,20 +33,22 @@ import de.bielefeld.uni.cebitec.cav.utils.Timer;
  */
 public class QGramIndex {
 	private final int qLength = 11;
-	
+
 	private int[] hashTable;
 	private int[] occurrenceTable;
 
 	private Vector<DNASequence> sequences;
 	private int[] offsetsInInput;
 	private int inputLength;
-	
-	private FastaFileReader fastaFileReader;
-	
-	private boolean indexGenerated= false;
-	
 
+	private FastaFileReader fastaFileReader;
+
+	private boolean indexGenerated = false;
+
+	private char[] input = null; //FIXME make local in generateIndex if not needed otherwise
 	private QGramCoder coder;
+
+	private MatchDialog matchDialog;
 
 	public QGramIndex() {
 		coder = new QGramCoder(qLength);
@@ -63,19 +66,19 @@ public class QGramIndex {
 	 * 
 	 */
 	public void generateIndex(FastaFileReader fastaFileReader) {
-		char[] input=null;
 
 		try {
 			input = fastaFileReader.getCharArray();
 			offsetsInInput = fastaFileReader.getOffsetsArray();
 			sequences = fastaFileReader.getSequences();
-			inputLength=input.length;
-			
+			inputLength = input.length;
+
 		} catch (IOException e) {
-			System.err.println("Error reading Fasta file:" + fastaFileReader.getSource());
+			System.err.println("Error reading Fasta file:"
+					+ fastaFileReader.getSource());
 			e.printStackTrace();
 		}
-		
+
 		hashTable = new int[coder.numberOfPossibleQGrams()];
 
 		// cache the sucessivly computed codes.
@@ -95,23 +98,17 @@ public class QGramIndex {
 		// it is easy to iterate through the sequences.
 		// after each sequence the coder has to be resetted.
 		for (int j = 0; j < offsetsInInput.length - 1; j++) {
-			System.out.println("Processing "
-					+ fastaFileReader.getSequence(j).getId() 
-					+ " ("
-					+ fastaFileReader.getSequence(j).getDescription()
-					+ ")"
-//					+ " from " + offsetsInInput[j] + " to "
-//					+ (offsetsInInput[j+1]-1)
-//					+ " ("
-//					+ (offsetsInInput[j+1]-offsetsInInput[j])
-//					+ ")"
-			);
+			this.reportProgress(0, "Indexing Sequence: "
+					+ fastaFileReader.getSequence(j).getId() + " ("
+					+ fastaFileReader.getSequence(j).getSize() + ")" + " from "
+					+ offsetsInInput[j] + " to " + (offsetsInInput[j + 1] - 1)
+					+ " (" + (offsetsInInput[j + 1] - offsetsInInput[j]) + ")");
 			coder.reset();
 
 			// encode each q-gram for one sequence
 			for (int i = offsetsInInput[j]; i < offsetsInInput[j + 1]; i++) {
 				code = coder.updateEncoding(input[i]);
-				if (code >= 0) {
+				if (code >= 0) {// if code is valid
 					// count the q-grams
 					hashTable[code]++;
 				}
@@ -120,7 +117,7 @@ public class QGramIndex {
 			}
 		}
 
-		t.restartTimer("counting the qgrams");
+		this.reportProgress(0, "counting the qgrams took:" + t.restartTimer());
 
 		int offset = 0;
 		int lastValue = 0;
@@ -142,7 +139,8 @@ public class QGramIndex {
 			tmparray[i] = hashTable[i];
 		}
 
-		t.restartTimer("accumulation and copying");
+		this.reportProgress(0, "accumulation and copying took:"
+				+ t.restartTimer());
 
 		occurrenceTable = new int[offset];
 
@@ -153,45 +151,49 @@ public class QGramIndex {
 		for (int j = 0; j < offsetsInInput.length - 1; j++) {
 
 			for (int i = offsetsInInput[j]; i < offsetsInInput[j + 1]; i++) {
-				// code = coder.updateEncoding(input[i]);
-				// if (code >=0 ) {
-				// qgramIndices[tmparray[code]++]=i;
-				// }
+				
 				if (codecache[i] >= 0) {
 					// in tmparray the index for a q-gram ist stored and
 					// incremented
 					// if we add a position.
 					// codecache contains the integer codes for all qgrams.
-					// the position stored is relative to the actual sequence.
+					// the position stored is *not* relative to the actual sequence.
+					//all sequences are concatenated together
 					occurrenceTable[tmparray[codecache[i]]++] = i
-							- offsetsInInput[j] - getQLength() + 1;
-					// minus q to get the starting index of the q-gram instead of the end position
+							 - getQLength() + 1;
+					// minus q to get the starting index of the q-gram instead
+					// of the end position
 				}
 			}
 		}
 
-		t.stopTimer("filling in the qgram occurrences");
-		indexGenerated=true;
+		this.reportProgress(0, "filling in the qgram occurrences took:"
+				+ t.restartTimer());
+		indexGenerated = true;
 	}
 
-//	public void getQGramPositions(int code) {
-//		if (! indexGenerated) {
-//			this.generateIndex();
-//		}
-//		
-//		System.out.println("code:" + code + " -> "
-//				+ coder.decodeQgramCode(code));
-//		for (int i = hashTable[code] - 1; i < hashTable[code + 1] + 1; i++) {
-//			System.out.print("pos:" + occurrenceTable[i] + " ");
-//
-//			for (int j = 0; j < 11; j++) {
-//				System.out.print(input[occurrenceTable[i] - 10 + j]);
-//			}
-//
-//			System.out.println();
-//		}
-//
-//	}
+	// public void getQGramPositions(int code) {
+	// if (! indexGenerated) {
+	// this.generateIndex();
+	// }
+	//		
+	// System.out.println("code:" + code + " -> "
+	// + coder.decodeQgramCode(code));
+	// for (int i = hashTable[code] - 1; i < hashTable[code + 1] + 1; i++) {
+	// System.out.print("pos:" + occurrenceTable[i] + " ");
+	//
+	// for (int j = 0; j < 11; j++) {
+	// System.out.print(input[occurrenceTable[i] - 10 + j]);
+	// }
+	//
+	// System.out.println();
+	// }
+	//
+	// }
+
+	public char getCharFromInput(int pos) {
+		return input[pos];
+	}
 
 	public int[] getHashTable() {
 		return hashTable;
@@ -216,27 +218,78 @@ public class QGramIndex {
 	public Vector<DNASequence> getSequences() {
 		return sequences;
 	}
-	
-	
+
 	/**
-	 * Returns the Sequence object at a given position for which the index was built.<br>
+	 * Returns the Sequence object at a given position for which the index was
+	 * built.<br>
 	 * If no sequence matches the method returns null.
-	 * @param position Position of a character
+	 * 
+	 * @param position
+	 *            Position of a character
 	 * @return Sequence object
 	 */
-	public DNASequence getSequenceAtPosition( int position) {
-		
+	public DNASequence getSequenceAtPosition(int position) {
+
 		for (int j = 0; j < offsetsInInput.length - 1; j++) {
-			if (position>=offsetsInInput[j] && position<offsetsInInput[j+1]) {
+			if (position >= offsetsInInput[j]
+					&& position < offsetsInInput[j + 1]) {
 				return sequences.get(j);
 			}
 		}
-		
+
 		return null;
+	}
+
+	/**
+	 * Same as getSequenceAtPosition(), but if the position is too large or too
+	 * small then it will return the last/first sequence.
+	 * 
+	 * @param position
+	 * @return
+	 */
+	public DNASequence getSequenceAtApproximatePosition(int position) {
+		DNASequence out = getSequenceAtPosition(position);
+		if (out == null) {
+			if (position <= 0) {
+				out = sequences.get(0);
+			} else if (position >= inputLength) {
+				out = sequences.get(offsetsInInput.length - 1);
+			}
+		}
+		return out;
 	}
 
 	public int[] getOffsetsInInput() {
 		return offsetsInInput;
+	}
+
+	/**
+	 * Registers the Match Dialog, to pass progress changes to it.
+	 * 
+	 * @param matchDialog
+	 */
+	public void register(MatchDialog matchDialog) {
+		this.matchDialog = matchDialog;
+	}
+
+	/**
+	 * If a MatchDialog is registered the output will be written in its
+	 * textfield. Otherwise on the command line.
+	 * 
+	 * @param percentDone
+	 *            how far are we?
+	 * @param s
+	 *            explaining sentence
+	 */
+	public void reportProgress(double percentDone, String s) {
+		if (matchDialog != null) {
+			matchDialog.setProgress(percentDone, s);
+		} else {
+			System.out
+					.println((percentDone > 0 ? ((int) (percentDone * 100) + "% ")
+							: "")
+							+ s);
+		}
 	}
 
 }

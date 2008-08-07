@@ -27,7 +27,6 @@ import java.util.Vector;
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
-import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsStatistics;
 
 /**
  * @author Peter Husemann
@@ -265,13 +264,15 @@ public class AlignmentPositionDisplayerList implements
 
 			// add one to each bucket in range (first to last)
 			for (int i = (int) firstBucket; i <= lastBucket; i++) {
-				histogram[i] += 1.;
-
-				// and compute the highest bucket so far for normalisation
-				if (histogram[i] > maximumCountOfABucket) {
-					maximumCountOfABucket = (long) histogram[i];
+				try {
+					histogram[i] += 1.;
+					// and compute the highest bucket so far for normalisation
+					if (histogram[i] > maximumCountOfABucket) {
+						maximumCountOfABucket = (long) histogram[i];
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {
+					System.err.println("\nHistogram bin should be smaller than "+ histogram.length + " but is " + i);
 				}
-
 			}
 		}
 

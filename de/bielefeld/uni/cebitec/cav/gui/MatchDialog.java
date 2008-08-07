@@ -103,17 +103,16 @@ public class MatchDialog extends JDialog implements ActionListener,
 			targetFasta.scanContents(true);
 			progress.append(" ..."+t.stopTimer()+"\n");
 
-			progressBar.setValue(10);
 
 					
-			progress.append("Generating q-Gram Index");
+			progress.append("Generating q-Gram Index\n");
 			t.startTimer();
 			QGramIndex qi = new QGramIndex();
+			qi.register(MatchDialog.this);
 			qi.generateIndex(targetFasta);
-			progress.append(" ..."+t.stopTimer()+"\n");
+			progress.append(" Generating q-Gram Index took: "+t.stopTimer()+"\n");
 
 			System.gc();
-			progressBar.setValue(30);
 
 			
 			progress.append("Opening query file"+ query.getName() + " (" + query.length()+ ")");
@@ -123,34 +122,38 @@ public class MatchDialog extends JDialog implements ActionListener,
 			progress.append(" ..."+t.stopTimer()+"\n");
 			
 			
-			progress.append("Matching");
+			progressBar.setIndeterminate(false);
+
+			progress.append("Matching:\n");
 			t.startTimer();
 			QGramFilter qf = new QGramFilter(qi, queryFasta);
+			qf.register(MatchDialog.this);
 			result = qf.match();
-			progress.append(" ..."+t.stopTimer()+"\n");
+			progress.append("Matching took: "+t.stopTimer()+"\n");
 
 			progress.append("Total time: "+t.stopTimer()+"\n");
 			progressBar.setValue(100);
-
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-
-			
-			return result;
-		}
-
-		public void done() {
 			startButton.setEnabled(true);
 			setCursor(null); // turn off the wait cursor
 			progress.append("Done!\n");
 			progressBar.setIndeterminate(false);
+
+			return result;
+		}
+
+		public void done() {
 			try {
 				result = this.get();
 				if (result!=null) {
 					ComparativeAssemblyViewer.dataModelController.setAlignmentsPositonsList(result);
-					dispose();
+					startButton.setText("Continue");
+					startButton.setActionCommand("ok");
+					MatchDialog.this.validate();
+					Thread.sleep(3000);
+					MatchDialog.this.dispose();
 				} else {
 					errorAlert("An error happened, change the files and try again");
 					progressBar.setValue(0);
@@ -162,7 +165,6 @@ public class MatchDialog extends JDialog implements ActionListener,
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 		}
 	}
 
@@ -319,17 +321,21 @@ public class MatchDialog extends JDialog implements ActionListener,
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource().equals(startButton)) {
-			// check files
-			
-			if(query != null && target != null && query.canRead() && target.canRead()) {
-			startButton.setEnabled(false);
-			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-			matcherTask = new QGramMatcherTask();
-			matcherTask.addPropertyChangeListener(this);
-			matcherTask.execute();
-			} else {
-				this.errorAlert("Cannot read query or target!");
+			if(e.getActionCommand().equals("start")) {
+			// check files
+				if(query != null && target != null && query.canRead() && target.canRead()) {
+					startButton.setEnabled(false);
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		
+					matcherTask = new QGramMatcherTask();
+					matcherTask.addPropertyChangeListener(this);
+					matcherTask.execute();
+					} else {
+						this.errorAlert("Cannot read query or target!");
+					}
+			} else if (e.getActionCommand().equals("ok")) {
+				this.dispose();
 			}
 			
 		} else if (e.getSource().equals(buQuery)) {
@@ -425,5 +431,18 @@ public class MatchDialog extends JDialog implements ActionListener,
 		}
 	}
 
+	
+	/**
+	 * Set the achieved progress with optional message
+	 * @param message
+	 * @param percentDone
+	 */
+	public void setProgress( double percentDone, String message) {
+		progressBar.setValue((int) (percentDone*100.));
+			if (message != null && !message.equals("")) {
+				progress.append(message+"\n");
+				progress.setCaretPosition(progress.getDocument().getLength());
+			}
+		}
 
 }
