@@ -62,6 +62,9 @@ public class DataModelController {
 			alignmentPositionsList.addOffsets();
 		}
 
+		if(!ComparativeAssemblyViewer.guiController.visualisationInitialized()) {
+		ComparativeAssemblyViewer.guiController.initVisualisation();
+		}
 		alignmentPositionsList
 				.notifyObservers(AlignmentPositionsList.NotifyEvent.CHANGE);
 	}

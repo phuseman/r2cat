@@ -66,6 +66,10 @@ public class CSVParser {
 				if (tokens.length < 5) {
 					continue;
 				}
+				
+//				for (int i = 0; i < tokens.length; i++) {
+//					System.out.println(i + " " + tokens[i]);
+//				}
 
 				String queryId = tokens[0];
 				long queryLength = Long.parseLong(tokens[1]);

@@ -35,16 +35,12 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
-import java.util.Collection;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Vector;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
-import sun.java2d.loops.DrawLine;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
@@ -486,10 +482,8 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 				// be a new object to keep the observers (table and
 				// visualisation)
 				// ut one has to
-				// generate the new diagonal line segments:
-				alignmentPositionDisplayerList
-						.generateAlignmentPositionDisplayerList(drawingWidth,
-								drawingHeight);
+				// empty diagonal line segments, so that they will be generated on the next draw call
+				alignmentPositionDisplayerList.clear();
 				// reset histogramm so that it will be recomputed with repaint()
 				histogram = new double[0];
 				this.repaint();

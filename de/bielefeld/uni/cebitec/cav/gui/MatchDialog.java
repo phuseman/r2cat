@@ -140,6 +140,8 @@ public class MatchDialog extends JDialog implements ActionListener,
 			setCursor(null); // turn off the wait cursor
 			progress.append("Done!\n");
 			progressBar.setIndeterminate(false);
+			startButton.setText("Continue");
+			startButton.setActionCommand("ok");
 
 			return result;
 		}
@@ -149,8 +151,7 @@ public class MatchDialog extends JDialog implements ActionListener,
 				result = this.get();
 				if (result!=null) {
 					ComparativeAssemblyViewer.dataModelController.setAlignmentsPositonsList(result);
-					startButton.setText("Continue");
-					startButton.setActionCommand("ok");
+
 					MatchDialog.this.validate();
 					Thread.sleep(3000);
 					MatchDialog.this.dispose();

@@ -620,6 +620,16 @@ public class QGramFilter {
 		}
 	}
 	
+	/**
+	 * This remembers the matches of the filtering phase and adds them to an AlignmentPositionsList object.
+	 * 
+	 * @param left was used by Kim. Here it is not needed, I take the computed mean value.
+	 * @param top highest index of the match in the query
+	 * @param bottom lowest index of the match in the query
+	 * @param bucketindex the bucketindex where the qgrams were counted
+	 * @param debugstring string which states in which method the match was reported.
+	 * either the normal way via update bin, or in checkandresetbin or in resetcountsandreportremainingbins.
+	 */
 	private void reportMatch(int left, int top, int bottom, int bucketindex, String debugstring) {
 		
 		//left is an artifact from kims implementation it is not needed if we take the mean.

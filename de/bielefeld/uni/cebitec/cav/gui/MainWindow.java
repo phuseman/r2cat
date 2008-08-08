@@ -145,8 +145,8 @@ public class MainWindow extends JFrame implements ChangeListener{
 		this.dataViewPlugin=dataViewPlugin;
 
 		drawing.setViewportView( (Component) dataViewPlugin);
-		drawing.validate();
 		drawing.setVisible(true);
+		drawing.validate();
 	}
 
 	

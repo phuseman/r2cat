@@ -4,7 +4,6 @@ import java.util.prefs.BackingStoreException;
 
 import de.bielefeld.uni.cebitec.cav.controller.DataModelController;
 import de.bielefeld.uni.cebitec.cav.controller.GuiController;
-import de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin;
 import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
 
 /***************************************************************************
@@ -59,25 +58,27 @@ public class ComparativeAssemblyViewer {
 
 		guiController.createMainWindow();
 
-		
-		//this should block until files are selected
-		guiController.showMatchDialog();
-		
-		if(dataModelController
-						.getAlignmentPositionsList() != null) {
-		
-		DataViewPlugin dotPlotVisualisation = guiController
-				.createDotPlotVisualisation(dataModelController
-						.getAlignmentPositionsList());
-		
-		guiController.setVisualisation(dotPlotVisualisation);
 
-		guiController.createTableFrame(dataModelController
-				.getAlignmentPositionsList());
-
-		guiController.showTableFrame();
 		guiController.showMainWindow();
-		}
+
+//		//this should block until files are selected
+//		guiController.showMatchDialog();
+//		
+//		if(dataModelController
+//						.getAlignmentPositionsList() != null) {
+//		
+//		DataViewPlugin dotPlotVisualisation = guiController
+//				.createDotPlotVisualisation(dataModelController
+//						.getAlignmentPositionsList());
+//		
+//		guiController.setVisualisation(dotPlotVisualisation);
+//
+//		guiController.createTableFrame(dataModelController
+//				.getAlignmentPositionsList());
+//
+//		guiController.showTableFrame();
+//		guiController.showMainWindow();
+//		}
 	}
 
 	private static void clearPreferences(String[] args) {

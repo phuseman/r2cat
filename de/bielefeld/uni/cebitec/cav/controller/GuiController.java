@@ -21,7 +21,6 @@
 package de.bielefeld.uni.cebitec.cav.controller;
 
 import java.io.File;
-import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -39,17 +38,19 @@ import de.bielefeld.uni.cebitec.cav.utils.SwiftExternal;
 
 public class GuiController {
 
-	private MainWindow mainWindow =null;
+	private MainWindow mainWindow = null;
 
-	private DotPlotVisualisationActionListener dotPlotVisualisationActionListener=null;
+	private DotPlotVisualisationActionListener dotPlotVisualisationActionListener = null;
 
-	private MainMenu mainMenu=null;
+	private MainMenu mainMenu = null;
 
-	private Vector<DataViewPlugin> dataViews;
+	// not used at the moment. should store different types of visualisation
+	// for a tabbed view
+	// private Vector<DataViewPlugin> dataViews;
 
-	private AlignmentTable alignmentTable=null;
+	private AlignmentTable alignmentTable = null;
 
-	private JFrame tableFrame=null;
+	private JFrame tableFrame = null;
 
 	private DotPlotVisualisation dotPlotVisualisation;
 
@@ -57,37 +58,44 @@ public class GuiController {
 	 * 
 	 */
 	public GuiController() {
-		dataViews = new Vector<DataViewPlugin>();
+		// not used - see above
+		// dataViews = new Vector<DataViewPlugin>();
 	}
 
 	public void createSwiftCall() {
 		// testing
-		SwiftExternal s = new SwiftExternal();		
+		SwiftExternal s = new SwiftExternal();
 	}
 
 	public void createMainWindow() {
-		mainWindow = new MainWindow(this);		
+		mainWindow = new MainWindow(this);
 	}
 
 	public void showMainWindow() {
 		mainWindow.setVisible(true);
 	}
 
-	public DataViewPlugin createDotPlotVisualisation(AlignmentPositionsList alignmentPositionsList) {
+	public DataViewPlugin createDotPlotVisualisation(
+			AlignmentPositionsList alignmentPositionsList) {
 		dotPlotVisualisation = new DotPlotVisualisation(alignmentPositionsList);
-		
-		DotPlotVisualisationActionListener dotPlotVisualisationListener = new DotPlotVisualisationActionListener(this,dotPlotVisualisation);
 
-		dotPlotVisualisation.addMouseMotionListener(dotPlotVisualisationListener);
+		DotPlotVisualisationActionListener dotPlotVisualisationListener = new DotPlotVisualisationActionListener(
+				this, dotPlotVisualisation);
+
+		dotPlotVisualisation
+				.addMouseMotionListener(dotPlotVisualisationListener);
 		dotPlotVisualisation.addMouseListener(dotPlotVisualisationListener);
-		dotPlotVisualisation.addMouseWheelListener(dotPlotVisualisationListener);
+		dotPlotVisualisation
+				.addMouseWheelListener(dotPlotVisualisationListener);
 		dotPlotVisualisation.addKeyListener(dotPlotVisualisationListener);
-		dotPlotVisualisation.drawGrid(ComparativeAssemblyViewer.preferences.getDisplayGrid());
+		dotPlotVisualisation.drawGrid(ComparativeAssemblyViewer.preferences
+				.getDisplayGrid());
 		return dotPlotVisualisation;
 	}
 
 	public void setVisualisation(DataViewPlugin vis) {
-		mainWindow.setVisualisation( (DotPlotVisualisation) vis);
+		mainWindow.setVisualisation((DotPlotVisualisation) vis);
+		mainWindow.validate();
 	}
 
 	public void createTableFrame(AlignmentPositionsList alignmentPositionsList) {
@@ -102,7 +110,7 @@ public class GuiController {
 
 	public void showTableFrame() {
 		if (tableFrame != null) {
-		tableFrame.setVisible(true);
+			tableFrame.setVisible(true);
 		}
 	}
 
@@ -111,26 +119,29 @@ public class GuiController {
 	}
 
 	public void loadCSVFile(File file) {
-		ComparativeAssemblyViewer.preferences.setLastFile(file.getAbsolutePath());
-		ComparativeAssemblyViewer.dataModelController.setAlignmentsPositonsListFromCSV(file);
+		ComparativeAssemblyViewer.preferences.setLastFile(file
+				.getAbsolutePath());
+		ComparativeAssemblyViewer.dataModelController
+				.setAlignmentsPositonsListFromCSV(file);
 	}
 
-	
-
 	public void displayWithOffsets() {
-		dotPlotVisualisation.getAlignmentPositionDisplayerList().toggleOffsets();
+		dotPlotVisualisation.getAlignmentPositionDisplayerList()
+				.toggleOffsets();
 		dotPlotVisualisation.repaint();
 	}
 
 	public void displayUnidirectional() {
-		dotPlotVisualisation.getAlignmentPositionDisplayerList().switchReversed();
+		dotPlotVisualisation.getAlignmentPositionDisplayerList()
+				.switchReversed();
 		dotPlotVisualisation.repaint();
 	}
+
 	public void displayGrid(boolean b) {
 		dotPlotVisualisation.drawGrid(b);
 		dotPlotVisualisation.repaint();
 	}
-	
+
 	public void showMatchDialog() {
 		MatchDialog matchDialog = new MatchDialog(mainWindow);
 		if (matchDialog != null) {
@@ -140,5 +151,24 @@ public class GuiController {
 		}
 	}
 
-	
+	public void initVisualisation() {
+		if (!visualisationInitialized()) {
+			if (ComparativeAssemblyViewer.dataModelController
+					.getAlignmentPositionsList() != null) {
+
+				DataViewPlugin dotPlotVisualisation = this
+						.createDotPlotVisualisation(ComparativeAssemblyViewer.dataModelController
+								.getAlignmentPositionsList());
+
+				this.setVisualisation(dotPlotVisualisation);
+				
+			}
+		}
+	}
+
+	public boolean visualisationInitialized() {
+		return (dotPlotVisualisation != null);
+
+	}
+
 }

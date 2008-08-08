@@ -74,6 +74,7 @@ public class AlignmentPositionDisplayerList implements
 	public void generateAlignmentPositionDisplayerList(int width, int heigth) {
 		double normalisationX = 1;
 		double normalisationY = 1;
+		
 
 		if (!alignmentsPositions.isEmpty()) {
 
@@ -99,6 +100,9 @@ public class AlignmentPositionDisplayerList implements
 						.setDisplayUnidirectional(true);
 			}
 		}
+		
+		System.out.println("generate apdl: "+width+" "+heigth);
+
 	}
 
 	/**
@@ -354,6 +358,13 @@ public class AlignmentPositionDisplayerList implements
 		for (AlignmentPositionDisplayer apd : alPosDispList) {
 			apd.rescale();
 		}
+	}
+	
+	/**
+	 * Removes all displayable elements
+	 */
+	public void clear() {
+		alPosDispList.clear();
 	}
 
 }
