@@ -100,8 +100,9 @@ public class AlignmentPositionDisplayerList implements
 						.setDisplayUnidirectional(true);
 			}
 		}
-		
-		System.out.println("generate apdl: "+width+" "+heigth);
+	
+		//debug
+//		System.out.println("generate apdl: "+width+" "+heigth);
 
 	}
 

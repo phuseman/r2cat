@@ -79,7 +79,7 @@ public class QGramIndex {
 			e.printStackTrace();
 		}
 
-		hashTable = new int[coder.numberOfPossibleQGrams()];
+		hashTable = new int[coder.numberOfPossibleQGrams()+1];
 
 		// cache the sucessivly computed codes.
 		// so that they can be reused on the second run.
@@ -101,8 +101,7 @@ public class QGramIndex {
 			this.reportProgress(0, "Indexing Sequence: "
 					+ fastaFileReader.getSequence(j).getId() + " ("
 					+ fastaFileReader.getSequence(j).getSize() + ")" + " from "
-					+ offsetsInInput[j] + " to " + (offsetsInInput[j + 1] - 1)
-					+ " (" + (offsetsInInput[j + 1] - offsetsInInput[j]) + ")");
+					+ offsetsInInput[j] + " to " + (offsetsInInput[j + 1] - 1));
 			coder.reset();
 
 			// encode each q-gram for one sequence
@@ -167,6 +166,7 @@ public class QGramIndex {
 			}
 		}
 
+		tmparray=null;
 		this.reportProgress(0, "filling in the qgram occurrences took:"
 				+ t.restartTimer());
 		indexGenerated = true;

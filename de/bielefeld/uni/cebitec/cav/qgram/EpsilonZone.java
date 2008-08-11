@@ -103,9 +103,6 @@ public class EpsilonZone {
 		this.width_ = e;
 		this.height_ = w;
 
-		System.out.println("minmatch:" + minimumMatchLength + " q:" + gramSize
-				+ " epsilon:" + errorRate + " -> thresh:" + threshold_
-				+ " width:" + width_ + " heig:" + height_);
 
 		return true;
 	}
@@ -219,6 +216,12 @@ public class EpsilonZone {
 
 	public int getQGramSize() {
 		return qGramSize;
+	}
+	
+	public String toString() {
+		return "minmatch:" + minimumMatchLength + " q:" + qGramSize
+				+ " epsilon:" + errorrate + " -> thresh:" + threshold_
+				+ " width:" + width_ + " heig:" + height_;
 	}
 
 }

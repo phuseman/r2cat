@@ -5,11 +5,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.prefs.Preferences;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
+import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 public class QGramFilter {
@@ -94,13 +96,20 @@ public class QGramFilter {
 
 	public static void main(String[] args) throws Exception {
 
+		CAVPrefs preferences = new CAVPrefs();
+		Preferences pref = CAVPrefs.getPreferences();
+		
+		
 		Timer t = Timer.getInstance();
 		t.startTimer();
-
-		File query = new File("/homes/phuseman/compassemb/test/cur7111_min500contigs.fas");
-		File target = new File("/homes/phuseman/compassemb/test/DSM7109_mod.fas");
+//debugging
+//		File query = new File("/homes/phuseman/compassemb/test/cur7111_min500contigs.fas");
+//		File target = new File("/homes/phuseman/compassemb/test/DSM7109_mod.fas");
 //		File target = new File("/homes/phuseman/compassemb/test/DSM7109.fasta");
-
+//match the files stored in the preferences
+		File query = new File(pref.get("query", ""));
+		File target = new File(pref.get("target", ""));
+		
 
 		t.startTimer();
 
@@ -168,6 +177,8 @@ public class QGramFilter {
 			// be found
 			eZone.init(minMatchLength, qGramIndex.getQLength(), errorrate);
 		}
+		
+		this.reportProgress(0, eZone.toString());
 
 		// a counter for each bucket how many q-grams hit
 		// was bucket
@@ -309,14 +320,15 @@ public class QGramFilter {
 				for (int occOffset = hashTable[code]; occOffset < hashTable[code + 1]; occOffset++) {
 					
 					i = occurrenceTable[occOffset]; //hitposition in target
+
+					// debug - compare code and locations on target
 //					System.out.println(code+" " + " " + i);
 //					System.out.println(coder.decodeQgramCode(code));
 //					for (int p=0; p<11;p++) {
 //						System.out.print(qGramIndex.getCharFromInput(i+p));
 //					}
 //					System.out.println();
-//					
-//					System.exit(0);
+
 					
 					//j is the hitposition in the query
 					if (!reverseComplementDirection) { //forward
