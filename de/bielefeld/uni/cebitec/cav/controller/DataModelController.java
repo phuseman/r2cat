@@ -22,6 +22,8 @@ package de.bielefeld.uni.cebitec.cav.controller;
 
 import java.io.File;
 
+import javax.swing.JOptionPane;
+
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsStatistics;
@@ -47,29 +49,36 @@ public class DataModelController {
 	}
 
 	public void setAlignmentsPositonsList(AlignmentPositionsList apl) {
-		if (alignmentPositionsList == null) {
-			alignmentPositionsList = apl;
-		} else {
-			// this method keeps the observers
-			alignmentPositionsList.copyDataFromOtherAlignmentPositionsList(apl);
-		}
-		
-		// use the preferences: with offsets?
-		if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
-			alignmentPositionsList.generateStatistics(); // this sets the
-			// center of masses
-			// for each query
-			alignmentPositionsList.addOffsets();
-		} else {
-			//no offsets
-			alignmentPositionsList.resetOffsets();
-		}
+		if (apl != null) {
+			if (alignmentPositionsList == null) {
+				alignmentPositionsList = apl;
+			} else {
+				// this method keeps the observers
+				alignmentPositionsList
+						.copyDataFromOtherAlignmentPositionsList(apl);
+			}
 
-		if(!ComparativeAssemblyViewer.guiController.visualisationInitialized()) {
-		ComparativeAssemblyViewer.guiController.initVisualisation();
+			// use the preferences: with offsets?
+			if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
+				alignmentPositionsList.generateStatistics(); // this sets the
+				// center of masses
+				// for each query
+				alignmentPositionsList.addOffsets();
+			} else {
+				// no offsets
+				alignmentPositionsList.resetOffsets();
+			}
+
+			if (!ComparativeAssemblyViewer.guiController
+					.visualisationInitialized()) {
+				ComparativeAssemblyViewer.guiController.initVisualisation();
+			}
+			alignmentPositionsList
+					.notifyObservers(AlignmentPositionsList.NotifyEvent.CHANGE);
+		} else {
+			JOptionPane.showMessageDialog(ComparativeAssemblyViewer.guiController.getMainWindow(), "Sorry, no Matches to display.", "Error",
+					JOptionPane.ERROR_MESSAGE);
 		}
-		alignmentPositionsList
-				.notifyObservers(AlignmentPositionsList.NotifyEvent.CHANGE);
 	}
 
 	/**

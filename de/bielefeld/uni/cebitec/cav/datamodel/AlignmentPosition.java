@@ -125,6 +125,9 @@ public class AlignmentPosition implements Comparable {
 				- queryEnd;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
 	public int compareTo(Object o) {
 		int out = 0;
 
@@ -141,6 +144,41 @@ public class AlignmentPosition implements Comparable {
 		}
 
 		return out;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals( Object obj ) {
+		AlignmentPosition other = (AlignmentPosition) obj;
+		
+		if (this.target == other.target
+				&& this.queryStart == other.queryStart 
+				&& this.queryEnd == other.queryEnd
+				&& this.targetStart == other.targetStart
+				&& this.targetEnd == other.targetEnd) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * The target positions of this match are as close as 10 bases to the compared match.
+	 * @param obj other match
+	 * @return
+	 */
+	public boolean similarTargetPosition( Object obj ) {
+		AlignmentPosition other = (AlignmentPosition) obj;
+		
+		if (Math.abs(this.targetStart-other.targetStart)<10) {
+			return true;
+		}
+		if (Math.abs(this.targetStart-other.targetStart)<10) {
+			return true;
+		}
+		
+		return false;
 	}
 
 }

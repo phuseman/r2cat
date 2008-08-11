@@ -136,12 +136,11 @@ public class MatchDialog extends JDialog implements ActionListener,
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
 			startButton.setEnabled(true);
 			setCursor(null); // turn off the wait cursor
 			progress.append("Done!\n");
 			progressBar.setIndeterminate(false);
-			startButton.setText("Continue");
-			startButton.setActionCommand("ok");
 
 			return result;
 		}
@@ -150,11 +149,18 @@ public class MatchDialog extends JDialog implements ActionListener,
 			try {
 				result = this.get();
 				if (result!=null) {
+					if (result.size()==0) {
+						errorAlert("Sorry, no matches were found. Change the files and try again");
+						progressBar.setValue(0);
+					}
+					startButton.setText("Continue");
+					startButton.setActionCommand("ok");
+
 					ComparativeAssemblyViewer.dataModelController.setAlignmentsPositonsList(result);
 
 					MatchDialog.this.validate();
-					Thread.sleep(3000);
-					MatchDialog.this.dispose();
+//					Thread.sleep(3000);
+//					MatchDialog.this.dispose();
 				} else {
 					errorAlert("An error happened, change the files and try again");
 					progressBar.setValue(0);

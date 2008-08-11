@@ -231,6 +231,10 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 
 		if (drawGrid) {
 
+			if (drawingWidth <= 0) {
+				drawingWidth = this.getParent().getWidth() - 2 * border;
+			}
+			
 			Color last = g2d.getColor();
 			g2d.setColor(Color.LIGHT_GRAY);
 
@@ -238,6 +242,10 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 			// horizontal
 			double horizontalOffset = 0;
 
+			if (drawingWidth <= 0) {
+				drawingWidth = this.getParent().getWidth() - 2 * border;
+			}
+			
 			for (DNASequence q : ComparativeAssemblyViewer.dataModelController
 					.getAlignmentPositionsList().getQueries().values()) {
 				horizontalOffset = (q.getOffset() * AlignmentPositionDisplayer

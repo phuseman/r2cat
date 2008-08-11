@@ -168,7 +168,7 @@ public class QGramIndex {
 
 		tmparray=null;
 		this.reportProgress(0, "filling in the qgram occurrences took:"
-				+ t.restartTimer());
+				+ t.stopTimer());
 		indexGenerated = true;
 	}
 

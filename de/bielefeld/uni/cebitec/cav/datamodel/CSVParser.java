@@ -48,7 +48,8 @@ public class CSVParser {
 	public AlignmentPositionsList parse() {
 		String line;
 		String[] tokens;
-		int lineNumber=1;
+		int lineNumber = 1;
+		int errors = 0;
 
 		AlignmentPositionsList apl = new AlignmentPositionsList();
 
@@ -66,54 +67,70 @@ public class CSVParser {
 				if (tokens.length < 5) {
 					continue;
 				}
-				
-//				for (int i = 0; i < tokens.length; i++) {
-//					System.out.println(i + " " + tokens[i]);
-//				}
 
-				String queryId = tokens[0];
-				long queryLength = Long.parseLong(tokens[1]);
+				// for (int i = 0; i < tokens.length; i++) {
+				// System.out.println(i + " " + tokens[i]);
+				// }
 
-				String targetId = tokens[2];
-				long targetLength = Long.parseLong(tokens[3]);
-
-				DNASequence query = null;
-				DNASequence target = null;
-				
 				try {
-					query = apl.getQuery(queryId, queryLength);
-					target = apl.getTarget(targetId, targetLength);
-				} catch (Exception e) {
-					e.printStackTrace();
+
+					String queryId = tokens[0];
+					long queryLength = Long.parseLong(tokens[1]);
+
+					String targetId = tokens[2];
+					long targetLength = Long.parseLong(tokens[3]);
+
+					DNASequence query = null;
+					DNASequence target = null;
+
+					try {
+						query = apl.getQuery(queryId, queryLength);
+						target = apl.getTarget(targetId, targetLength);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					if (query == null) {
+						query = new DNASequence(queryId, queryLength);
+					}
+					if (target == null) {
+						target = new DNASequence(targetId, targetLength);
+					}
+
+					long queryStart = Long.parseLong(tokens[8]);
+					long queryEnd = Long.parseLong(tokens[9]);
+
+					long targetStart = Long.parseLong(tokens[10]);
+					long targetEnd = Long.parseLong(tokens[11]);
+
+					AlignmentPosition ap = new AlignmentPosition(target,
+							targetStart, targetEnd, query, queryStart, queryEnd);
+					apl.addAlignmentPosition(ap);
+
+				} catch (NumberFormatException e) {
+					errors++;
 				}
-
-				if (query == null) {
-					query = new DNASequence(queryId, queryLength);
-				}
-				if (target==null){
-					target = new DNASequence(targetId, targetLength);
-				}
-				
-				long queryStart = Long.parseLong(tokens[8]);
-				long queryEnd = Long.parseLong(tokens[9]);
-
-				long targetStart = Long.parseLong(tokens[10]);
-				long targetEnd = Long.parseLong(tokens[11]);
-
-				AlignmentPosition ap = new AlignmentPosition(target,
-						targetStart, targetEnd, query, queryStart, queryEnd);
-				apl.addAlignmentPosition(ap);
-
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.err.println("Parsing error in line " + lineNumber);
-			e.printStackTrace();
+			System.err.println(this.getClass().getName()
+					+ " Error reading line " + lineNumber + " : "
+					+ e.getCause());
 		}
 
 		apl.addOffsetsToTargets();
+
+		if (errors > 0) {
+			System.err.println(this.getClass().getName() + ": There were "
+					+ errors + " parse errors!");
+			System.err
+					.println("long integers are expected at positions 1,3,8-11");
+		}
 		
-		return apl;
+		if (apl.size()>0) {
+			return apl;
+		} else {
+			return null;
+		}
 	}
 
 }

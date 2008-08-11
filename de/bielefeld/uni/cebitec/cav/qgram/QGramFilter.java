@@ -263,6 +263,7 @@ public class QGramFilter {
 			e1.printStackTrace();
 		}
 		
+		reportProgress(100, result.size() + " hits found.");
 		return result;
 	}
 
@@ -730,21 +731,28 @@ public class QGramFilter {
 				targetStart, targetEnd, binVariance[bucketindex], bucketindex));
 
 		
-		//TODO:split hits if the go over two or more targets
 		
 		// due to the overlapping parallelograms some hits are recognised twice
 		// save match temporary to sort out duplicate matches
 		unsortedAlignmentPositions.put(bucketindex, ap);
-		
+		boolean alreadyAdded=false;
 		//TODO: merge hits, which are in the overlap part of two bins
-//		if (unsortedAlignmentPositions.containsKey(bucketindex+1)) {
-//			//TODO: merge
-//		} else if (unsortedAlignmentPositions.containsKey(bucketindex-1)) {
-//			//TODO: merge
-//		} else {
-			result.addAlignmentPosition(ap);
-//		}
+		if (unsortedAlignmentPositions.containsKey(bucketindex+1) ) {
+			if (ap.equals(unsortedAlignmentPositions.get(bucketindex+1))) {
+				alreadyAdded=true;
+			}
+			
+		} else if (unsortedAlignmentPositions.containsKey(bucketindex-1)) {
+			if (ap.equals(unsortedAlignmentPositions.get(bucketindex-1))) {
+				alreadyAdded=true;
+			}
+		}
 
+		//TODO:split hits if they go over two or more targets
+
+		if (!alreadyAdded) {
+			result.addAlignmentPosition(ap);
+		}
 		
 		
 
