@@ -60,6 +60,9 @@ public class DataModelController {
 			// center of masses
 			// for each query
 			alignmentPositionsList.addOffsets();
+		} else {
+			//no offsets
+			alignmentPositionsList.resetOffsets();
 		}
 
 		if(!ComparativeAssemblyViewer.guiController.visualisationInitialized()) {

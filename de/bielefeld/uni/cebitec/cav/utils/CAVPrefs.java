@@ -85,7 +85,7 @@ public class CAVPrefs {
 	 * @return
 	 */
 	public String getLastFile() {
-		return preferences.get("lastFile", "testdata/query.csv");
+		return preferences.get("lastFile", "");
 	}
 
 	/**

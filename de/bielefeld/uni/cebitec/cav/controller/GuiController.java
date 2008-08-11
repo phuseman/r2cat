@@ -34,7 +34,6 @@ import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisationActionListener;
 import de.bielefeld.uni.cebitec.cav.gui.MainMenu;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
 import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
-import de.bielefeld.uni.cebitec.cav.utils.SwiftExternal;
 
 public class GuiController {
 
@@ -62,10 +61,6 @@ public class GuiController {
 		// dataViews = new Vector<DataViewPlugin>();
 	}
 
-	public void createSwiftCall() {
-		// testing
-		SwiftExternal s = new SwiftExternal();
-	}
 
 	public void createMainWindow() {
 		mainWindow = new MainWindow(this);

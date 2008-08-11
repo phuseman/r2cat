@@ -39,12 +39,9 @@ import java.awt.geom.Point2D;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.controller.GuiController;
-import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
 
 /**
@@ -382,7 +379,7 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 		// SwingUtilities.calculateInnerArea(mainWindow.vplug, bounds);
 		// System.out.println(bounds);
 
-		// TODO fix the scroll issue
+		// FIXME fix the scroll issue
 		int dx = 0;
 		int dy = 0;
 		if (e.getWheelRotation() < 0) {

@@ -183,23 +183,7 @@ public class FastaFileReader {
 		return chararray;
 	}
 	
-	/**
-	 * Gives all reversed dna sequences of a fasta file as a char array. there are no
-	 * separators between sequences. The method getOffsetsArray() gives the
-	 * bounds.
-	 * 
-	 * @return char array containing all dna sequences of the fasta file
-	 * @throws IOException
-	 */
-	public char[] getReversedCharArray() throws IOException {
-		if (!initialized || chararray == null) {
-			this.scanContents(true);
-		}
-		//TODO implement!
-		//reverse(chararray)
-		return chararray;
-	}
-
+	
 	/**
 	 * Gives the bounds of the sequences in the char array from getCharArray().
 	 * For convenience the last entry is the size of the char array. This way it

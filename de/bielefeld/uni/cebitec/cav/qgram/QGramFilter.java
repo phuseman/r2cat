@@ -701,20 +701,16 @@ public class QGramFilter {
 //				+" Variance:"+binVariance[bucketindex]);
 //		
 
-		// to get the query sequence (only if the global queryNumber is set properly)
-		//query.getSequence(queryNumber).getId();
-//		to get the target sequence:
-//		qGramIndex.getSequenceAtPosition(position)
 
 		
-		// get the sequence objects
+		// get the sequence objects - global variable queryNumber has to be set!!
 		DNASequence dNASeqQuery = query.getSequence(queryNumber);
 		//since we take the mean as diagonal and not the correct value
 		//it can happen that targetStart is smaller than zero, so we cheat al little bit here:
 		DNASequence dNASeqTarget = qGramIndex.getSequenceAtApproximatePosition((int)targetStart);
 		
 		//for the index all targets are concatenated together.
-		// substract the offset here, to get the relative value
+		// Subtract the offset here, to get the relative value
 		targetStart-=dNASeqTarget.getOffset();
 		targetEnd-=dNASeqTarget.getOffset();
 		

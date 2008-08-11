@@ -45,7 +45,7 @@ public class QGramIndex {
 
 	private boolean indexGenerated = false;
 
-	private char[] input = null; //FIXME make local in generateIndex if not needed otherwise
+	private char[] input = null; //TODO make local in generateIndex if not needed otherwise
 	private QGramCoder coder;
 
 	private MatchDialog matchDialog;
