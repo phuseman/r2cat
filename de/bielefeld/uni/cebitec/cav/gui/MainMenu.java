@@ -154,8 +154,7 @@ optionsMenu.add(grid);
 	}
 
 	public void itemStateChanged(ItemEvent e) {
-		// TODO Auto-generated method stub
-
+		; // do nothing
 	}
 
 }

@@ -62,7 +62,6 @@ public class AlignmentPositionDisplayer extends Line2D.Double {
 		super();
 		this.alignmentPosition = alignmentPosition;
 		this.setPosition();
-//		TODO ComparativeAssemblyViewer.preferences.displayUnidirectional();
 	}
 
 	

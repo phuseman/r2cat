@@ -1,8 +1,6 @@
 package de.bielefeld.uni.cebitec.cav.qgram;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
@@ -40,7 +38,6 @@ public class QGramFilter {
 	private EpsilonZone eZone;
 	private QGramCoder coder = null;
 	
-	private BufferedWriter logWriter;
 	
 	private HashMap<Integer, AlignmentPosition> unsortedAlignmentPositions;
 	private AlignmentPositionsList result;
@@ -85,11 +82,6 @@ public class QGramFilter {
 		
 		
 		
-		try {
-			logWriter=new BufferedWriter(new FileWriter( new File("log.txt")));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		
 		
 	}
@@ -256,12 +248,6 @@ public class QGramFilter {
 		occurrenceTable=null;
 		
 		
-		try {
-			logWriter.flush();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		
 		reportProgress(100, result.size() + " hits found.");
 		return result;
@@ -621,36 +607,28 @@ public class QGramFilter {
 			binMean[bin] = 0;
 			binVariance[bin] = 0;
 		}
-		log("#-------------------reset-----------------------");
 	}
 	
-	private void log(String string) {
-		try {
-			logWriter.write(string+"\n");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	
 	/**
 	 * This remembers the matches of the filtering phase and adds them to an AlignmentPositionsList object.
+	 * If a match overlaps with the target boundaries it will be split in two matches.
+	 * If the same match is reported twice this will be filtered.
 	 * 
 	 * @param left was used by Kim. Here it is not needed, I take the computed mean value.
 	 * @param top highest index of the match in the query
 	 * @param bottom lowest index of the match in the query
 	 * @param bucketindex the bucketindex where the qgrams were counted
 	 * @param debugstring string which states in which method the match was reported.
-	 * either the normal way via update bin, or in checkandresetbin or in resetcountsandreportremainingbins.
+	 * either the normal way via updateBin(), checkAndResetBin() or resetCountsAndReportRemainingParalellograms().
+	 * this is only used for debugging.
 	 */
+	
 	private void reportMatch(int left, int top, int bottom, int bucketindex, String debugstring) {
 		
 		//left is an artifact from kims implementation it is not needed if we take the mean.
-		//take the mean instead of the left value
 		left = (int) binMean[bucketindex];
-		
-		
-		
+				
 		AlignmentPosition ap;
 		long targetStart=0;
 		long targetEnd=0;
@@ -689,7 +667,7 @@ public class QGramFilter {
 		}
 		
 		
-		
+	//debugging	
 //		System.out.println(debugstring
 //				+": bin:"+bucketindex
 //				+"  left:"+left
@@ -710,33 +688,36 @@ public class QGramFilter {
 		//it can happen that targetStart is smaller than zero, so we cheat al little bit here:
 		DNASequence dNASeqTarget = qGramIndex.getSequenceAtApproximatePosition((int)targetStart);
 		
+		//if the match is split over two targets we need this later
+		DNASequence dNASeqTarget_split = qGramIndex.getSequenceAtApproximatePosition((int)targetEnd);
+		
+		
 		//for the index all targets are concatenated together.
 		// Subtract the offset here, to get the relative value
 		targetStart-=dNASeqTarget.getOffset();
 		targetEnd-=dNASeqTarget.getOffset();
+		
 		
 
 		
 		ap = new AlignmentPosition(dNASeqTarget,
 				targetStart, targetEnd, dNASeqQuery, queryStart, queryEnd);
 
-//		System.out.println(dNASeqTarget.getId());
-//		System.out.println(ap);
 
 
 		//write output similar to the swift output
-		this.log(String.format("%s\t%d\t%s\t%d\tn/a\t%d\tn/a\tn/a\t%d\t%d\t%d\t%d\t%f\t%d\t***",
-				dNASeqQuery.getId(), dNASeqQuery.getSize(),
-				dNASeqTarget.getId(), dNASeqTarget.getSize(), Math.abs(top-bottom), queryStart, queryEnd,
-				targetStart, targetEnd, binVariance[bucketindex], bucketindex));
+//		System.out.println(String.format("%s\t%d\t%s\t%d\tn/a\t%d\tn/a\tn/a\t%d\t%d\t%d\t%d\t%f\t%d\t***",
+//				dNASeqQuery.getId(), dNASeqQuery.getSize(),
+//				dNASeqTarget.getId(), dNASeqTarget.getSize(), Math.abs(top-bottom), queryStart, queryEnd,
+//				targetStart, targetEnd, binVariance[bucketindex], bucketindex));
 
 		
 		
 		// due to the overlapping parallelograms some hits are recognised twice
 		// save match temporary to sort out duplicate matches
 		unsortedAlignmentPositions.put(bucketindex, ap);
+		
 		boolean alreadyAdded=false;
-		//TODO: merge hits, which are in the overlap part of two bins
 		if (unsortedAlignmentPositions.containsKey(bucketindex+1) ) {
 			if (ap.equals(unsortedAlignmentPositions.get(bucketindex+1))) {
 				alreadyAdded=true;
@@ -747,15 +728,58 @@ public class QGramFilter {
 				alreadyAdded=true;
 			}
 		}
+		//TODO: merge hits, which are in the overlap part of two bins and are not exactly the same
 
-		//TODO:split hits if they go over two or more targets
 
+		
+		//if the same hit was not entered before,
+		// check if the match overlaps to the next reference genome and split it.
 		if (!alreadyAdded) {
+			// check if the end of the hit lies in the next target: split the
+			// hits
+			if (targetEnd > dNASeqTarget.getSize()) {
+				// System.err.println("Need to split " + ap + " -> "
+				// + (targetEnd - dNASeqTarget.getSize())
+				// + " bases too long");
+
+				long overlap = targetEnd - dNASeqTarget.getSize();
+
+				long newQueryStart = 0;
+				long newQueryEnd = queryEnd;
+
+				//Distinguish between forward and backward matches:
+				if (ap.getQueryStart() <= ap.getQueryEnd()) {
+					// forward match
+
+					// do not change the order!!
+					newQueryStart = queryEnd - overlap;
+
+					queryEnd = queryEnd - overlap - 1;
+					targetEnd = targetEnd - overlap - 1;
+				} else {
+					// reverse complement match
+					newQueryStart = queryEnd + overlap;
+
+					queryEnd = queryEnd + overlap + 1;
+					targetEnd = targetEnd - overlap - 1;
+				}
+
+				// the first part of the match
+				ap = new AlignmentPosition(dNASeqTarget, targetStart,
+						targetEnd, dNASeqQuery, queryStart, queryEnd);
+
+				// the second split
+				AlignmentPosition ap_split = new AlignmentPosition(
+						dNASeqTarget_split, 0, overlap, dNASeqQuery,
+						newQueryStart, newQueryEnd);
+
+				result.addAlignmentPosition(ap_split);
+//				System.out.println(ap + " + " + ap_split);
+			}
+
+			// add the match to the result
 			result.addAlignmentPosition(ap);
 		}
-		
-		
-
 	}
 	
 

@@ -121,7 +121,7 @@ public class AlignmentTableModel extends AbstractTableModel implements Observer 
 	}
 
 	public void update(Observable o, Object arg) {
-		// TODO: maybe only update modified cells
+		// TODO maybe only update modified cells
 	}
 
 	// public void setValueAt(Object value, int row, int col) {

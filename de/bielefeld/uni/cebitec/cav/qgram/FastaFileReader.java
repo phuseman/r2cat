@@ -49,14 +49,11 @@ public class FastaFileReader {
 	public void scanContents(boolean createCharArray) throws IOException {
 		BufferedReader in = null;
 		int character = 0;
-		long offsetInFile = 0;
 
 		String lastSequenceId = "";
 		String lastSequenceDescription = "";
 		long lastSequenceLength = 0;
-		long lastOffsetInFile = 0;
 
-		String line = "";
 		String identLine = "";
 		long validCharCounter = 0;
 		long lastValidCharCounter = 0;
@@ -71,21 +68,16 @@ public class FastaFileReader {
 			}
 
 			nextchar: while ((character = in.read()) != -1) {
-				offsetInFile++;
 
 				// remove lines with comments
 				if (character == (int) '#') {
 					String comment = in.readLine();
-					offsetInFile += comment.length();
 					continue nextchar;
 				}
 
 				// read id and description
 				if (character == (int) '>') {
 					identLine = in.readLine();
-					offsetInFile += identLine.length();
-					lastOffsetInFile = offsetInFile;
-					// TODO: offset in file is buggy
 
 					if (!firstSequence) {
 						lastSequenceLength = validCharCounter
@@ -94,8 +86,7 @@ public class FastaFileReader {
 //								+ lastSequenceLength);
 
 						sequences.add(new DNASequence(source, lastSequenceId,
-								lastSequenceDescription, lastSequenceLength,
-								lastOffsetInFile));
+								lastSequenceDescription, lastSequenceLength));
 					} else {
 						firstSequence = false;
 					}
@@ -150,8 +141,7 @@ public class FastaFileReader {
 
 			// add last sequence
 			sequences.add(new DNASequence(source, lastSequenceId,
-					lastSequenceDescription, lastSequenceLength,
-					lastOffsetInFile));
+					lastSequenceDescription, lastSequenceLength));
 
 			// set the offset of each sequence object
 			for (DNASequence seq : sequences) {

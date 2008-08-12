@@ -166,11 +166,11 @@ public class MatchDialog extends JDialog implements ActionListener,
 					progressBar.setValue(0);
 				}
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//ignore
+				;
 			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//ignore
+				;
 			}
 		}
 	}
@@ -360,7 +360,7 @@ public class MatchDialog extends JDialog implements ActionListener,
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		// TODO Auto-generated method stub
+		; // do nothing
 
 	}
 
@@ -396,8 +396,7 @@ public class MatchDialog extends JDialog implements ActionListener,
 				tfQuery.setToolTipText(query.getCanonicalPath());
 				prefs.put("query", query.getCanonicalPath());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.err.println(e);
 			}
 		} else {
 			if (!silent) {
@@ -428,8 +427,7 @@ public class MatchDialog extends JDialog implements ActionListener,
 
 				prefs.put("target", target.getCanonicalPath());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.err.println(e);
 			}
 		} else {
 			if (!silent) {

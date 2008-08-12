@@ -28,7 +28,6 @@ import java.util.Observable;
 import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
-import de.bielefeld.uni.cebitec.cav.gui.AlignmentPositionDisplayer;
 
 /**
  * This class is a list of alignment positions.
@@ -38,7 +37,7 @@ import de.bielefeld.uni.cebitec.cav.gui.AlignmentPositionDisplayer;
  */
 public class AlignmentPositionsList extends Observable implements Serializable,
 		Iterable<AlignmentPosition> /*
-									 * TODO: maybe implement Externalizable to
+									 * TODO maybe implement Externalizable to
 									 * write out the alignments
 									 */{
 	/**

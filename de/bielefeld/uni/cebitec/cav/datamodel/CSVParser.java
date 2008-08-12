@@ -40,11 +40,25 @@ public class CSVParser {
 		try {
 			input = new BufferedReader(new FileReader(file));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Could not open file for parsing: " + file.getAbsolutePath());
 		}
 	}
 
+	/**
+	 * Parses the contents of a csv file into a AlignmentPositionsList.<br>
+	 * Tab is expected as field delimiter. Lines starting with # are ignored.
+	 * <br>
+	 * The parsed fields are expected at the following positions:
+	 * <br>0 Id/Name of the query/contig sequence
+	 * <br>1 Length of the query/contig sequence
+	 * <br>2 Id/Name of the target/reference sequence
+	 * <br>3 Length of the target/reference sequence
+	 * <br>8 query start position of this match
+	 * <br>9 query end position of this match
+	 * <br>10 target start position of this match
+	 * <br>11 target end position of this match
+	 * @return
+	 */
 	public AlignmentPositionsList parse() {
 		String line;
 		String[] tokens;

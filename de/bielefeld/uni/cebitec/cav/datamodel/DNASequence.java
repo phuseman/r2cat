@@ -4,7 +4,6 @@ import java.io.File;
 
 public class DNASequence implements Comparable {
 	private File file;
-	private long offsetInFile=0;
 
 	private String id=null;
 
@@ -32,12 +31,11 @@ public class DNASequence implements Comparable {
 		this.size = size;
 	}
 
-	public DNASequence(File file, String id, String description, long size, long offsetInFile ) {
+	public DNASequence(File file, String id, String description, long size) {
 		this.file = file;
 		this.id = id;
 		this.description=description;
 		this.size = size;
-		this.offsetInFile = offsetInFile;
 		
 	}
 	

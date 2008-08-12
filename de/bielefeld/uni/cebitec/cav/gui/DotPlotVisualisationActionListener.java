@@ -181,8 +181,7 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
 	 */
 	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-
+		; // do nothing at the moment
 	}
 
 	/*
@@ -328,8 +327,7 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 		// System.out.println(mainWindow.vplug.getAlignmentPositionTransform().createInverse());
 		//        
 		// } catch (NoninvertibleTransformException e1) {
-		// // TODO Auto-generated catch block
-		// e1.printStackTrace();
+		// ; // ignore
 		// }
 
 		// DEBUG
@@ -480,7 +478,7 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 	}
 
 	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
+		; // do nothing at the moment
 	}
 
 
