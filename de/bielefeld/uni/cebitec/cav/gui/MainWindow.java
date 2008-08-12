@@ -25,6 +25,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -42,7 +44,7 @@ import de.bielefeld.uni.cebitec.cav.controller.GuiController;
  * @author Peter Husemann
  * 
  */
-public class MainWindow extends JFrame implements ChangeListener{
+public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 
 	private static final long serialVersionUID = 3695451270541548008L;
 
@@ -117,7 +119,9 @@ public class MainWindow extends JFrame implements ChangeListener{
 
 		zoomValue = new JTextField(5);
 		zoomValue.setText("1.0");
+		zoomValue.addKeyListener(this);
 		zoomPanel.add(zoomValue);
+		
 
 		controls.add(zoomPanel);
 
@@ -165,5 +169,36 @@ public class MainWindow extends JFrame implements ChangeListener{
 			}
 		}
 	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		if (e.getKeyCode()==KeyEvent.VK_ENTER && e.getSource() == zoomValue) {
+			if (zoomSlider != null && zoomValue != null) {
+				try {
+				double zoom = Double.parseDouble(((JTextField)e.getSource()).getText());
+				zoomSlider.setValue((int)(zoom*20)) ;
+				zoomValue.setText(Double.toString(zoom));
+				if (dataViewPlugin != null) {
+					dataViewPlugin.setZoom(zoom);
+				}
+				} catch (NumberFormatException nfe) {
+					;
+				}
+			}
+		}
+
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		;
+	}
+
 
 }

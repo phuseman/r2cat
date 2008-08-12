@@ -249,7 +249,7 @@ public class QGramFilter {
 		
 		
 		
-		reportProgress(100, result.size() + " hits found.");
+		reportProgress(1, result.size() + " hits found.");
 		return result;
 	}
 
@@ -738,9 +738,9 @@ public class QGramFilter {
 			// check if the end of the hit lies in the next target: split the
 			// hits
 			if (targetEnd > dNASeqTarget.getSize()) {
-				// System.err.println("Need to split " + ap + " -> "
-				// + (targetEnd - dNASeqTarget.getSize())
-				// + " bases too long");
+//				 System.err.println("Need to split " + ap + " -> "
+//				 + (targetEnd - dNASeqTarget.getSize())
+//				 + " bases too long");
 
 				long overlap = targetEnd - dNASeqTarget.getSize();
 
@@ -774,11 +774,14 @@ public class QGramFilter {
 						newQueryStart, newQueryEnd);
 
 				result.addAlignmentPosition(ap_split);
+				
 //				System.out.println(ap + " + " + ap_split);
 			}
 
+
 			// add the match to the result
 			result.addAlignmentPosition(ap);
+			
 		}
 	}
 	

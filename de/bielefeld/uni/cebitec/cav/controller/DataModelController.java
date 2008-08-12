@@ -69,6 +69,10 @@ public class DataModelController {
 				alignmentPositionsList.resetOffsets();
 			}
 
+			// add the appropriate offsets for the targets.
+			alignmentPositionsList.addOffsetsToTargets();
+			
+			
 			if (!ComparativeAssemblyViewer.guiController
 					.visualisationInitialized()) {
 				ComparativeAssemblyViewer.guiController.initVisualisation();

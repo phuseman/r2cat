@@ -276,7 +276,7 @@ public class AlignmentPositionDisplayerList implements
 						maximumCountOfABucket = (long) histogram[i];
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {
-					System.err.println("\nHistogram bin should be smaller than "+ histogram.length + " but is " + i);
+					System.err.println(this.getClass()+":\nHistogram bin should be smaller than "+ histogram.length + " but is " + i);
 				}
 			}
 		}

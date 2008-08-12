@@ -253,7 +253,7 @@ public class QGramIndex {
 			if (position <= 0) {
 				out = sequences.get(0);
 			} else if (position >= inputLength) {
-				out = sequences.get(offsetsInInput.length - 1);
+				out = sequences.get(sequences.size() - 1);
 			}
 		}
 		return out;

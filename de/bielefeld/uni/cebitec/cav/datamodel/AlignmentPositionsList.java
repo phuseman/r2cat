@@ -288,7 +288,8 @@ public class AlignmentPositionsList extends Observable implements Serializable,
 	}
 
 	/**
-	 * Add offsets if there are multiple targets. TODO: sort by length
+	 * Add offsets if there are multiple targets. 
+	 * TODO: sort the targets by length when adding the offsets
 	 */
 	public void addOffsetsToTargets() {
 		long offset = 0;

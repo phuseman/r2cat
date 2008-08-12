@@ -50,7 +50,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent
  */
 public class DotPlotVisualisationActionListener implements ActionListener,
 		MouseListener, MouseMotionListener, KeyListener, 
-		MouseWheelListener {
+		MouseWheelListener  {
 
 	private Point pressedCoordinates = new Point();
 
