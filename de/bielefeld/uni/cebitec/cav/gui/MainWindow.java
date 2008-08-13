@@ -172,12 +172,13 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		// TODO Auto-generated method stub
+		; // not used
 		
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+		//change the zoom value if enter is pressed
 		if (e.getKeyCode()==KeyEvent.VK_ENTER && e.getSource() == zoomValue) {
 			if (zoomSlider != null && zoomValue != null) {
 				try {
@@ -197,7 +198,7 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		;
+		;// not used
 	}
 
 
