@@ -63,18 +63,21 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 
 		JMenuItem newMatch = new JMenuItem("Match new");
 		newMatch.setMnemonic(KeyEvent.VK_N);
-		newMatch.getAccessibleContext()
-				.setAccessibleDescription("Match files dialog");
+		newMatch.getAccessibleContext().setAccessibleDescription(
+				"Match files dialog");
 		newMatch.addActionListener(this);
+		newMatch.setActionCommand("match_new");
 		fileMenu.add(newMatch);
-		
-		
+
 		JMenuItem open = new JMenuItem("Open csv File");
 		open.setMnemonic(KeyEvent.VK_O);
 		open.getAccessibleContext()
 				.setAccessibleDescription("File open dialog");
+		open.setActionCommand("open_csv");
 		open.addActionListener(this);
 		fileMenu.add(open);
+		
+		fileMenu.add(new JMenuItem("Exit"));
 
 		this.add(fileMenu);
 
@@ -83,46 +86,70 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		optionsMenu.getAccessibleContext().setAccessibleDescription("Options");
 
 		JCheckBoxMenuItem reverted = new JCheckBoxMenuItem(
-				"Unidirectional Alignments", ComparativeAssemblyViewer.preferences.getDisplayUnidirectional());
+				"Show alignments unidirectional",
+				ComparativeAssemblyViewer.preferences
+						.getDisplayUnidirectional());
 		reverted.setMnemonic(KeyEvent.VK_U);
 		reverted.getAccessibleContext().setAccessibleDescription(
 				"Display the alignments reverted if necessary");
+		reverted.setActionCommand("unidirectional");
 		reverted.addActionListener(this);
 		optionsMenu.add(reverted);
 
 		JCheckBoxMenuItem offsets = new JCheckBoxMenuItem(
-		"Queries with offsets", ComparativeAssemblyViewer.preferences.getDisplayOffsets());
-offsets.setMnemonic(KeyEvent.VK_O);
-offsets.getAccessibleContext().setAccessibleDescription(
-		"Consecutive Queries vs. all queries start at zero");
-offsets.addActionListener(this);
-optionsMenu.add(offsets);
-		
+				"Show queries with offsets",
+				ComparativeAssemblyViewer.preferences.getDisplayOffsets());
+		offsets.setMnemonic(KeyEvent.VK_O);
+		offsets.getAccessibleContext().setAccessibleDescription(
+				"Consecutive Queries vs. all queries start at zero");
+		offsets.setActionCommand("query_offsets");
+		offsets.addActionListener(this);
+		optionsMenu.add(offsets);
 
-JCheckBoxMenuItem grid = new JCheckBoxMenuItem(
-		"Grid", ComparativeAssemblyViewer.preferences.getDisplayGrid());
-grid.setMnemonic(KeyEvent.VK_G);
-grid.getAccessibleContext().setAccessibleDescription(
-		"Display a grid between queries and targets");
-grid.addActionListener(this);
-optionsMenu.add(grid);
+		JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Show grid",
+				ComparativeAssemblyViewer.preferences.getDisplayGrid());
+		grid.setMnemonic(KeyEvent.VK_G);
+		grid.getAccessibleContext().setAccessibleDescription(
+				"Display a grid between queries and targets");
+		grid.setActionCommand("grid");
+		grid.addActionListener(this);
+		optionsMenu.add(grid);
 
 		this.add(optionsMenu);
 
+		JMenu windowMenu = new JMenu("Window");
+		windowMenu.setMnemonic(KeyEvent.VK_W);
+		windowMenu.getAccessibleContext().setAccessibleDescription(
+				"Open windows");
+
+		JMenuItem tableView = new JMenuItem("Show matches as table");
+		tableView.setMnemonic(KeyEvent.VK_T);
+		tableView.getAccessibleContext().setAccessibleDescription(
+				"Display a table with the matches");
+		tableView.setActionCommand("show_table");
+		tableView.addActionListener(this);
+		windowMenu.add(tableView);
+
+		this.add(windowMenu);
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().matches("Open csv File")) {
+		if (e.getActionCommand().matches("open_csv")) {
 			openFile();
-		}else if (e.getActionCommand().matches("Match new")) {
+		} else if (e.getActionCommand().matches("match_new")) {
 			guiController.showMatchDialog();
-		} else if (e.getActionCommand().matches("Unidirectional Alignments")) {
+		} else if (e.getActionCommand().matches("unidirectional")) {
 			guiController.displayUnidirectional();
-		} else if (e.getActionCommand().matches("Queries with offsets")) {
+		} else if (e.getActionCommand().matches("query_offsets")) {
 			guiController.displayWithOffsets();
-	} else if (e.getActionCommand().matches("Grid")) {
-		guiController.displayGrid(((JCheckBoxMenuItem)e.getSource()).getState());
-	} 
+		} else if (e.getActionCommand().matches("grid")) {
+			guiController.displayGrid(((JCheckBoxMenuItem) e.getSource())
+					.getState());
+		} else if (e.getActionCommand().matches("show_table")) {
+			ComparativeAssemblyViewer.guiController.showTableFrame();
+		} else if (e.getActionCommand().matches("Exit")) {
+			System.exit(0);
+		} 
 		
 
 	}

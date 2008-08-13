@@ -94,16 +94,21 @@ public class GuiController {
 	}
 
 	public void createTableFrame(AlignmentPositionsList alignmentPositionsList) {
-		tableFrame = new JFrame();
-		AlignmentTable at = new AlignmentTable(alignmentPositionsList);
-		JScrollPane tp = new JScrollPane(at);
-		tableFrame.add(tp);
-		tableFrame.pack();
-		tableFrame.setLocationByPlatform(true);
-
+		if (alignmentPositionsList != null) {
+			tableFrame = new JFrame();
+			AlignmentTable at = new AlignmentTable(alignmentPositionsList);
+			JScrollPane tp = new JScrollPane(at);
+			tableFrame.add(tp);
+			tableFrame.pack();
+			tableFrame.setLocationByPlatform(true);
+		}
 	}
 
 	public void showTableFrame() {
+		if (tableFrame == null) {
+			this.createTableFrame(ComparativeAssemblyViewer.dataModelController
+					.getAlignmentPositionsList());
+		}
 		if (tableFrame != null) {
 			tableFrame.setVisible(true);
 		}
