@@ -168,17 +168,6 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 
 		g2d.setStroke(normal);
 
-		// create displayer list if necessary
-		if (!alignmentPositionDisplayerList.isGenerated()) {
-			if (drawingWidth <= 0 || drawingHeight <= 0) {
-				drawingWidth = this.getParent().getWidth() - 2 * border;
-				drawingHeight = this.getParent().getHeight() - 2 * border;
-
-			}
-			alignmentPositionDisplayerList
-					.generateAlignmentPositionDisplayerList(drawingWidth,
-							drawingHeight);
-		}
 
 		// draw the alignments. the colors have a alpha channel, so it can be
 		// seen, when alignments are overlapping
@@ -231,10 +220,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 
 		if (drawGrid) {
 
-			if (drawingWidth <= 0) {
-				drawingWidth = this.getParent().getWidth() - 2 * border;
-			}
-			
+
 			Color last = g2d.getColor();
 			g2d.setColor(Color.LIGHT_GRAY);
 
@@ -373,7 +359,13 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		// apply to graphics context
 		g2d.transform(alignmentPositionTransform);
 
+		
+		// create displayer list if necessary
+		// must be done before drawGrid() because this needs the normalisation factors
+		createAlignmentPositionDisplayerList();
+
 		drawGrid(g2d);
+
 
 		if (antialiasing) {
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -391,7 +383,24 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 
 		drawCoordinateSystem(g2d);
 
+
 		g2d.dispose();
+	}
+
+	/**
+	 * Creates the list of AlignmentPositionDisplayers if necessary.
+	 */
+	private void createAlignmentPositionDisplayerList() {
+		if (!alignmentPositionDisplayerList.isGenerated()) {
+			if (drawingWidth <= 0 || drawingHeight <= 0) {
+				drawingWidth = this.getParent().getWidth() - 2 * border;
+				drawingHeight = this.getParent().getHeight() - 2 * border;
+
+			}
+			alignmentPositionDisplayerList
+					.generateAlignmentPositionDisplayerList(drawingWidth,
+							drawingHeight);
+		}
 	}
 
 	/**
