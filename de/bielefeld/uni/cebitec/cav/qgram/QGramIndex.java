@@ -218,6 +218,10 @@ public class QGramIndex {
 	public Vector<DNASequence> getSequences() {
 		return sequences;
 	}
+	
+	public DNASequence getSequence( int i) {
+		return sequences.get(i);
+	}
 
 	/**
 	 * Returns the Sequence object at a given position for which the index was
@@ -239,6 +243,18 @@ public class QGramIndex {
 
 		return null;
 	}
+	
+	public int getSequenceNumberAtPosition(int position) {
+
+		for (int j = 0; j < offsetsInInput.length - 1; j++) {
+			if (position >= offsetsInInput[j]
+					&& position < offsetsInInput[j + 1]) {
+				return j;
+			}
+		}
+
+		return -1;
+	}
 
 	/**
 	 * Same as getSequenceAtPosition(), but if the position is too large or too
@@ -254,6 +270,18 @@ public class QGramIndex {
 				out = sequences.get(0);
 			} else if (position >= inputLength) {
 				out = sequences.get(sequences.size() - 1);
+			}
+		}
+		return out;
+	}
+	
+	public int getSequenceNumberAtApproximatePosition(int position) {
+		int out = getSequenceNumberAtPosition(position);
+		if (out == -1) {
+			if (position <= 0) {
+				out = 0;
+			} else if (position >= inputLength) {
+				out = sequences.size() - 1;
 			}
 		}
 		return out;

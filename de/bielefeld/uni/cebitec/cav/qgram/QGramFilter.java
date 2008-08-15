@@ -626,7 +626,7 @@ public class QGramFilter {
 	
 	private void reportMatch(int left, int top, int bottom, int bucketindex, String debugstring) {
 		
-		//left is an artifact from kims implementation it is not needed if we take the mean.
+		//left is an artifact from kims implementation it is not needed if we take the mean diagonal.
 		left = (int) binMean[bucketindex];
 				
 		AlignmentPosition ap;
@@ -665,8 +665,6 @@ public class QGramFilter {
 			targetStart=(left - bottom);
 			targetEnd=(left - top);
 		}
-		
-		
 	//debugging	
 //		System.out.println(debugstring
 //				+": bin:"+bucketindex
@@ -684,21 +682,11 @@ public class QGramFilter {
 		
 		// get the sequence objects - global variable queryNumber has to be set!!
 		DNASequence dNASeqQuery = query.getSequence(queryNumber);
-		//since we take the mean as diagonal and not the correct value
-		//it can happen that targetStart is smaller than zero, so we cheat al little bit here:
-		DNASequence dNASeqTarget = qGramIndex.getSequenceAtApproximatePosition((int)targetStart);
-		
-		//if the match is split over two targets we need this later
-		DNASequence dNASeqTarget_split = qGramIndex.getSequenceAtApproximatePosition((int)targetEnd);
-		
-		
-		//for the index all targets are concatenated together.
-		// Subtract the offset here, to get the relative value
-		targetStart-=dNASeqTarget.getOffset();
-		targetEnd-=dNASeqTarget.getOffset();
-		
-		
 
+		//this will be filled later
+		DNASequence dNASeqTarget= null;
+		
+		
 		
 		ap = new AlignmentPosition(dNASeqTarget,
 				targetStart, targetEnd, dNASeqQuery, queryStart, queryEnd);
@@ -728,61 +716,103 @@ public class QGramFilter {
 				alreadyAdded=true;
 			}
 		}
-		//TODO: merge hits, which are in the overlap part of two bins and are not exactly the same
 
-
-		
-		//if the same hit was not entered before,
-		// check if the match overlaps to the next reference genome and split it.
+	
 		if (!alreadyAdded) {
-			// check if the end of the hit lies in the next target: split the
-			// hits
-			if (targetEnd > dNASeqTarget.getSize()) {
-//				 System.err.println("Need to split " + ap + " -> "
-//				 + (targetEnd - dNASeqTarget.getSize())
-//				 + " bases too long");
+			
+			//TODO: split correctly if the hit goes over more than two references
+//			qGramIndex.getSequences();
+			
+			
+			int firstTarget = qGramIndex.getSequenceNumberAtApproximatePosition((int)targetStart);
+			int lastTarget = qGramIndex.getSequenceNumberAtApproximatePosition((int)targetEnd);
 
-				long overlap = targetEnd - dNASeqTarget.getSize();
 
-				long newQueryStart = 0;
-				long newQueryEnd = queryEnd;
-
-				//Distinguish between forward and backward matches:
-				if (ap.getQueryStart() <= ap.getQueryEnd()) {
-					// forward match
-
-					// do not change the order!!
-					newQueryStart = queryEnd - overlap;
-
-					queryEnd = queryEnd - overlap - 1;
-					targetEnd = targetEnd - overlap - 1;
-				} else {
-					// reverse complement match
-					newQueryStart = queryEnd + overlap;
-
-					queryEnd = queryEnd + overlap + 1;
-					targetEnd = targetEnd - overlap - 1;
-				}
-
-				// the first part of the match
-				ap = new AlignmentPosition(dNASeqTarget, targetStart,
-						targetEnd, dNASeqQuery, queryStart, queryEnd);
-
-				// the second split
-				AlignmentPosition ap_split = new AlignmentPosition(
-						dNASeqTarget_split, 0, overlap, dNASeqQuery,
-						newQueryStart, newQueryEnd);
-
-				result.addAlignmentPosition(ap_split);
+			
+			if (firstTarget == lastTarget) { // match is in only one target
+				dNASeqTarget = qGramIndex.getSequence(firstTarget);
+				ap = new AlignmentPosition(dNASeqTarget, targetStart
+						- dNASeqTarget.getOffset(), targetEnd
+						- dNASeqTarget.getOffset(), dNASeqQuery, queryStart,
+						queryEnd);
+				result.addAlignmentPosition(ap);
 				
-//				System.out.println(ap + " + " + ap_split);
+			} else { // match spans over different targets
+				// -> split the matches
+				
+//				System.err.println(ap+" needs to be split in "+(lastTarget-firstTarget+1)+" parts");
+				
+				long tmpQueryStart=queryStart;
+				long tmpQueryEnd=queryEnd;
+				long sliceLength=0;
+				boolean forwardMatch=queryStart<=queryEnd;
+				
+				//split the match in several slices
+				for (int i = firstTarget; i <= lastTarget; i++) {
+					dNASeqTarget = qGramIndex.getSequence(i);
+
+					
+					//determine slice length
+					if (i == firstTarget) {
+						long thisTargetEnd=dNASeqTarget.getOffset()+dNASeqTarget.getSize()-1;
+						sliceLength=thisTargetEnd-targetStart;
+					} else if (i == lastTarget) {
+						sliceLength=targetEnd-dNASeqTarget.getOffset();
+					} else { // target in between
+						sliceLength=dNASeqTarget.getSize()-1;
+					}
+						
+					// determine endposition of this slice
+					if(forwardMatch) {
+						tmpQueryEnd=tmpQueryStart+sliceLength;
+					} else {
+						tmpQueryEnd=tmpQueryStart-sliceLength;
+					}
+
+					
+					if (i == firstTarget) {
+						ap = new AlignmentPosition(dNASeqTarget,
+								targetStart-dNASeqTarget.getOffset(),
+								dNASeqTarget.getSize()-1,
+								dNASeqQuery,
+								tmpQueryStart,
+								tmpQueryEnd);
+					} else if (i == lastTarget) {
+						ap = new AlignmentPosition(dNASeqTarget,
+								0,
+								targetEnd-dNASeqTarget.getOffset(),
+								dNASeqQuery,
+								tmpQueryStart,
+								tmpQueryEnd);
+					} else { // target in between
+					ap = new AlignmentPosition(dNASeqTarget,
+							0,
+							dNASeqTarget.getSize()-1,
+							dNASeqQuery,
+							tmpQueryStart,
+							tmpQueryEnd);
+					}
+					
+					result.addAlignmentPosition(ap);
+
+//					System.err.println(" " + ap
+//							+"\tqs:"+Math.abs(ap.getQueryEnd()-ap.getQueryStart())
+//							+"\tts:"+ (ap.getTargetEnd()-ap.getTargetStart())
+//							+"    query:"+dNASeqTarget);
+					
+					//shift the new start to the end of the next
+					if(forwardMatch) {
+						tmpQueryStart=tmpQueryEnd+1;
+					} else {
+						tmpQueryStart=tmpQueryEnd-1;
+					}
+
+					
+				}
 			}
 
 
-			// add the match to the result
-			result.addAlignmentPosition(ap);
-			
-		}
+		} // if not already added
 	}
 	
 

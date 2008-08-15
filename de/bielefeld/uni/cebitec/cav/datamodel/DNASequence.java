@@ -119,5 +119,9 @@ public class DNASequence implements Comparable {
 	public String getDescription() {
 		return description;
 	}
+	
+	public String toString() {
+		return String.format("%s (%d) %d", id, size,offset);
+	}
 
 }
