@@ -731,25 +731,21 @@ public class QGramFilter {
 
 	
 		if (!alreadyAdded) {
-			
-			//TODO: split correctly if the hit goes over more than two references
-//			qGramIndex.getSequences();
-			
-			
+			//get index of the target sequence where the start and the end is.
 			int firstTarget = qGramIndex.getSequenceNumberAtApproximatePosition((int)targetStart);
 			int lastTarget = qGramIndex.getSequenceNumberAtApproximatePosition((int)targetEnd);
 
-
-			
-			if (firstTarget == lastTarget) { // match is in only one target
+			// match is in only one target
+			if (firstTarget == lastTarget) { 
 				dNASeqTarget = qGramIndex.getSequence(firstTarget);
 				ap = new AlignmentPosition(dNASeqTarget, targetStart
 						- dNASeqTarget.getOffset(), targetEnd
 						- dNASeqTarget.getOffset(), dNASeqQuery, queryStart,
 						queryEnd);
+				ap.setVariance(binVariance[bucketindex]);
 				result.addAlignmentPosition(ap);
-				
-			} else { // match spans over different targets
+			// match spans over different targets	
+			} else { 
 				// -> split the matches
 				
 //				System.err.println(ap+" needs to be split in "+(lastTarget-firstTarget+1)+" parts");
@@ -805,9 +801,10 @@ public class QGramFilter {
 							tmpQueryEnd);
 					}
 					
-					//if the slice is bigger than q, add it
-					if(ap.size()>qGramIndex.getQLength()) {
-					result.addAlignmentPosition(ap);
+					// if the slice is bigger than q, add it
+					if (ap.size() > qGramIndex.getQLength()) {
+						ap.setVariance(binVariance[bucketindex]);
+						result.addAlignmentPosition(ap);
 					}
 
 //					System.err.println(" " + ap

@@ -16,6 +16,10 @@ public class AlignmentPosition implements Comparable {
 	private boolean selected = false;
 
 	private static AlignmentPositionsList parentList;
+	
+	private float variance=0;
+
+
 
 	/**
 	 * @param target
@@ -82,6 +86,14 @@ public class AlignmentPosition implements Comparable {
 	
 	public double getTargetCenter() {
 		return ((targetStart + targetEnd) / 2.) + target.getOffset();
+	}
+	
+	public float getVariance() {
+		return variance;
+	}
+
+	public void setVariance(float variance) {
+		this.variance = variance;
 	}
 
 	@Override
