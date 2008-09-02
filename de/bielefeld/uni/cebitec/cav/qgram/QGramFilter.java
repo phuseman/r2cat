@@ -681,8 +681,12 @@ public class QGramFilter {
 		// since we take the mean diagonal the target start or end are not "exact"
 		// it can happen that they are out of bounds
 		// fix this here
-		if(targetStart<0) {targetStart=0;}
-		if(targetEnd>qGramIndex.getInputLength()-1) {targetStart=qGramIndex.getInputLength()-1;}
+		if (targetStart < 0) {
+			targetStart = 0;
+		}
+		if (targetEnd > qGramIndex.getInputLength() - 1) {
+			targetEnd = qGramIndex.getInputLength() - 1;
+		}
 		
 
 		
