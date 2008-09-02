@@ -12,48 +12,76 @@ import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
 import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
+/**
+ * Filters a given target for highly similar regions with query sequences.
+ * For the filtering a qgram index is used.
+ * The Idea is based on <br>
+	 * K. Rasmussen, J. Stoye, and E. W. Myers.<br>
+	 * Efficient q-Gram Filters for Finding All epsilon-Matches over a Given
+	 * Length<br>
+	 * J. Comp. Biol., 13(2):296-308, 2006.<br>
+	 * 
+ * @author phuseman
+ */
 public class QGramFilter {
-
+	//qgram index for the target
 	private QGramIndex qGramIndex;
+	// for speed issues the two main compontents of the index are stored in this class
 	private int[] hashTable = null;
 	private int[] occurrenceTable = null;
 
+	//the query/queries
 	private FastaFileReader query;
+	
+	//global: number of the query which is actually matched against the target
 	private int queryNumber;
+	//char array of the sequences. one after each other.
 	private char[] querySequencesArray;
 	
+	
+	//global flag if we are matching in foreward or backward direction
 	private boolean reverseComplementDirection;
 
 
-	
+	//the target is divided in overlapping bins. for each bin we are storing different information:
+	//number of hits
 	private int[] binCounts;
+	//smallest query index
 	private int[] binMin;
+	//biggest query index
 	private int[] binMax;
+	//mean value of the matching diagonals
 	private float[] binMean;
+	//variance of the diagonals of the q-hits
 	private float[] binVariance;
 	
 
 
-
+	//	provides some bounds for the matching paralellograms
 	private EpsilonZone eZone;
+	//transformes the input into q-gram codes to find them in the index
 	private QGramCoder coder = null;
 	
 	
+	//because of the overlapping bins hits can be reported twice. the bucket number is
+	// then usually +-1. store all hits in a hashmap to check if there was one in a near bucket
 	private HashMap<Integer, AlignmentPosition> unsortedAlignmentPositions;
+	
+	//a list of all found matching regions
 	private AlignmentPositionsList result;
 	
 
 	
-	
-	private int code = 0; // buffer for the integer code of the actual qgram;
+	// buffer for the integer code of the actual qgram;
+	private int code = 0; 
 	// relative position inside one query sequence
 	private int relativeQueryPosition = 0;
 
 	
 	
-	// all this variables are instanceiated only once to be more space efficient
+	// all this variables are initialized only once to be more space efficient
 	
-	// variable names for matching according to kim
+	// variable names for the matching according to kim
 	// TODO give better / talking names
 	private int d = 0; // d
 	private int b0 = 0; // b0
@@ -73,27 +101,26 @@ public class QGramFilter {
 	
 
 	/**
-	 * @param target
-	 * @param query
+	 * Creates a filter from
+	 * @param target a Q-Gram Index of the Target
+	 * @param query and the query sequence(s)
 	 */
 	public QGramFilter(QGramIndex targetIndex, FastaFileReader query) {
 		this.qGramIndex = targetIndex;
 		this.query = query;
-		
-		
-		
-		
-		
 	}
 
+	
+	/**
+	 * Main Method is here for debugging. the matching can be tested without the gui.
+	 */
 	public static void main(String[] args) throws Exception {
-
 		CAVPrefs preferences = new CAVPrefs();
 		Preferences pref = CAVPrefs.getPreferences();
 		
 		
 		Timer t = Timer.getInstance();
-		t.startTimer();
+		t.startTimer();//total
 //debugging
 //		File query = new File("/homes/phuseman/compassemb/test/cur7111_min500contigs.fas");
 //		File target = new File("/homes/phuseman/compassemb/test/DSM7109_mod.fas");
@@ -149,7 +176,7 @@ public class QGramFilter {
 	public AlignmentPositionsList match() {
 
 		double errorrate = 0.08;
-		int minMatchLength = 450;// not the real minimal match lenght, can be smaller.
+		int minMatchLength = 450;// not the real minimal match length, can be smaller.
 
 		unsortedAlignmentPositions = new HashMap<Integer, AlignmentPosition>();
 		result = new AlignmentPositionsList();
@@ -165,7 +192,7 @@ public class QGramFilter {
 				errorrate);
 
 		while (!eZone.isValid()) {
-			errorrate -= 0.001; // reduce the errorrate if no paralelogram can
+			errorrate -= 0.001; // reduce the errorrate if no paralelogram-dimensions can
 			// be found
 			eZone.init(minMatchLength, qGramIndex.getQLength(), errorrate);
 		}
@@ -498,8 +525,8 @@ public class QGramFilter {
 
 	/**
 	 * Since only |Targetsize|/delta (roughly) bins are used we have to take care that the ones which are shared
-	 * do not produce hits which go through both areas.
-	 * 
+	 * do not produce hits which go through both areas.<br>
+	 * <code>
 	 *  
 	 * |\ d=|A|+j-i
 	 * | \
@@ -513,7 +540,7 @@ public class QGramFilter {
 	 * | x\   |x'\
 	 * B
 	 * j
-	 * 
+	 * </code>
 	 * 
 	 * Diagonals in the area x, where j>i, are projected to x'. So we have to clear the bins of region y
 	 * which end on the border of A, because there is no possibility to extend them.  
@@ -545,6 +572,10 @@ public class QGramFilter {
 		binCounts[b] = 0;
 	}
 
+	/**
+	 * After each query the bincounts are reseted and it will be checked if there are
+	 * any remaining high scoring parallelograms which have not been reported yet.
+	 */
 	private void resetCountsAndReportRemainingParalellograms() {
 		int top=0;
 		int bottom=0;
@@ -611,7 +642,7 @@ public class QGramFilter {
 	
 	/**
 	 * This remembers the matches of the filtering phase and adds them to an AlignmentPositionsList object.
-	 * If a match overlaps with the target boundaries it will be split in two matches.
+	 * If a match overlaps with the target boundaries it will be split in two (or several) matches.
 	 * If the same match is reported twice this will be filtered.
 	 * 
 	 * @param left was used by Kim. Here it is not needed, I take the computed mean value.
