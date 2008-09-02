@@ -325,7 +325,6 @@ public class QGramFilter {
 						// otherwise the hitting diagonals are wrong
 						j= startPos-endPos-relativeQueryPosition-eZone.getQGramSize()+1;
 					}
-					
 
 					// Algorithm 2 page 303 in Rasmussen2006
 					d = targetSize + j - i; // diagonal on the j-axis shifted by |Target| to obtain positive values
@@ -683,15 +682,15 @@ public class QGramFilter {
 		// get the sequence objects - global variable queryNumber has to be set!!
 		DNASequence dNASeqQuery = query.getSequence(queryNumber);
 
-		//this will be filled later
-		DNASequence dNASeqTarget= null;
+		DNASequence dNASeqTarget=qGramIndex.getSequenceAtApproximatePosition((int)targetStart);
 		
 		
 		
 		ap = new AlignmentPosition(dNASeqTarget,
 				targetStart, targetEnd, dNASeqQuery, queryStart, queryEnd);
-
-
+//debug
+//		System.out.println(ap);
+		
 
 		//write output similar to the swift output
 //		System.out.println(String.format("%s\t%d\t%s\t%d\tn/a\t%d\tn/a\tn/a\t%d\t%d\t%d\t%d\t%f\t%d\t***",

@@ -111,6 +111,9 @@ public class QGramIndex {
 					// count the q-grams
 					hashTable[code]++;
 				}
+				
+				assert(code >= -1);
+
 				// cache the code
 				codecache[i] = code;
 			}

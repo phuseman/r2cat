@@ -90,17 +90,30 @@ public class QGramCoder {
 	}
 
 	public int updateEncoding(char c) {
-		if (currentQLength < q) {
-			currentQLength++;
-		}
 
+		//if character is A,T,C,G (upper or lowercase) calculate code...
+		if (alphabet[c] != -1) {
 
-		currentEncoding %= divisor;
-		currentEncoding *= alphabetSize;
-		currentEncoding += charToCharcode(c);
+			currentEncoding %= divisor;
+			currentEncoding *= alphabetSize;
+			currentEncoding += alphabet[c];
 
-		if ((currentQLength >= q) && (currentEncoding < maxEncoding)) {
-			valid = true;
+			if (currentQLength < q) {
+				currentQLength++;
+			} else {
+				if((currentEncoding>=0) && (currentEncoding < maxEncoding)) {
+				valid = true;
+				} else {
+					System.err.println("Coder: Code too small/big: " + currentEncoding);
+				}
+			}
+
+		} else {//... else invalidate code
+			currentEncoding = 0;
+			currentQLength = 0;
+			valid = false;
+			numberOfInvalid++;
+//			 System.out.println(c);
 		}
 
 		if (valid) {
@@ -143,18 +156,7 @@ public class QGramCoder {
 		return this.updateEncoding(complement);
 	}
 	
-	private int charToCharcode(char c) {
-		if (alphabet[c] != -1) {
-			return alphabet[c];
-		} else {
-			currentEncoding = 0;
-			currentQLength = 0;
-			valid = false;
-			numberOfInvalid++;
-//			System.out.println(c);
-			return -1;
-		}
-	}
+
 
 	private char charcodeToChar(int charcode) {
 		char c = 'N';

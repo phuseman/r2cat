@@ -12,7 +12,7 @@ JARFILE := cav.jar
 all:$(OBJECTS)
 
 jar:all
-	jar cfm $(JARFILE) Manifest.txt `find . -iname '*.class'` images/
+	jar cvfm $(JARFILE) Manifest.txt `find . -iname '*.class'` images/*.png
 clean:
 	find . -iname '*.class' -print0 | xargs -0 rm -rvf
 startjar: jar

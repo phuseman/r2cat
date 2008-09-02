@@ -61,7 +61,6 @@ public class GuiController {
 		// dataViews = new Vector<DataViewPlugin>();
 	}
 
-
 	public void createMainWindow() {
 		mainWindow = new MainWindow(this);
 	}
@@ -126,20 +125,37 @@ public class GuiController {
 	}
 
 	public void displayWithOffsets() {
-		dotPlotVisualisation.getAlignmentPositionDisplayerList()
-				.toggleOffsets();
-		dotPlotVisualisation.repaint();
+		//TODO when no apl's are displayed and this method is called it shows the 
+		//wrong value after something is loaded...
+		if (ComparativeAssemblyViewer.dataModelController
+				.getAlignmentPositionsList() != null) {
+			dotPlotVisualisation.getAlignmentPositionDisplayerList()
+					.toggleOffsets();
+			dotPlotVisualisation.repaint();
+		}
 	}
 
 	public void displayUnidirectional() {
-		dotPlotVisualisation.getAlignmentPositionDisplayerList()
-				.switchReversed();
-		dotPlotVisualisation.repaint();
+		//TODO when no apl's are displayed and this method is called it shows the 
+		//wrong value after something is loaded...
+		if (ComparativeAssemblyViewer.dataModelController
+				.getAlignmentPositionsList() != null) {
+
+			dotPlotVisualisation.getAlignmentPositionDisplayerList()
+					.switchReversed();
+			dotPlotVisualisation.repaint();
+		}
 	}
 
 	public void displayGrid(boolean b) {
-		dotPlotVisualisation.drawGrid(b);
-		dotPlotVisualisation.repaint();
+		//TODO when no apl's are displayed and this method is called it shows the 
+		//wrong value after something is loaded...
+		if (ComparativeAssemblyViewer.dataModelController
+				.getAlignmentPositionsList() != null) {
+
+			dotPlotVisualisation.drawGrid(b);
+			dotPlotVisualisation.repaint();
+		}
 	}
 
 	public void showMatchDialog() {
@@ -161,7 +177,7 @@ public class GuiController {
 								.getAlignmentPositionsList());
 
 				this.setVisualisation(dotPlotVisualisation);
-				
+
 			}
 		}
 	}
