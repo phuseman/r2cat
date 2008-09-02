@@ -678,10 +678,19 @@ public class QGramFilter {
 //		
 
 
+		// since we take the mean diagonal the target start or end are not "exact"
+		// it can happen that they are out of bounds
+		// fix this here
+		if(targetStart<0) {targetStart=0;}
+		if(targetEnd>qGramIndex.getInputLength()-1) {targetStart=qGramIndex.getInputLength()-1;}
+		
+
+		
 		
 		// get the sequence objects - global variable queryNumber has to be set!!
 		DNASequence dNASeqQuery = query.getSequence(queryNumber);
 
+		
 		DNASequence dNASeqTarget=qGramIndex.getSequenceAtApproximatePosition((int)targetStart);
 		
 		
@@ -792,7 +801,10 @@ public class QGramFilter {
 							tmpQueryEnd);
 					}
 					
+					//if the slice is bigger than q, add it
+					if(ap.size()>qGramIndex.getQLength()) {
 					result.addAlignmentPosition(ap);
+					}
 
 //					System.err.println(" " + ap
 //							+"\tqs:"+Math.abs(ap.getQueryEnd()-ap.getQueryStart())
