@@ -85,9 +85,12 @@ public class AlignmentPositionsStatistics implements Observer {
 		this.resetStatistics();
 		
 		// go through all AlignmentPositions and collect the weighted centers and the total lengths for each query
+		double sizeFactor=0;
 		for (AlignmentPosition element : apl) {
-			element.getQuery().centerOfMass +=  element.getTargetCenter() * element.size();
-			element.getQuery().totalAlignmentLength += element.size();
+			//take the cubic size. long matches are weighted heavier this way.
+			sizeFactor=element.size() * element.size() * element.size();
+			element.getQuery().centerOfMass +=  element.getTargetCenter()* sizeFactor;
+			element.getQuery().totalAlignmentLength += sizeFactor;
 		}
 
 

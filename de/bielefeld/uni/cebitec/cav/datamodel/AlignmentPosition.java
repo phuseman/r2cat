@@ -18,6 +18,8 @@ public class AlignmentPosition implements Comparable {
 	private static AlignmentPositionsList parentList;
 	
 	private float variance=0;
+	
+	private int numberOfQHits=0;
 
 
 
@@ -191,6 +193,14 @@ public class AlignmentPosition implements Comparable {
 		}
 		
 		return false;
+	}
+
+	public int getNumberOfQHits() {
+		return numberOfQHits;
+	}
+
+	public void setNumberOfQHits(int numberOfQHits) {
+		this.numberOfQHits = numberOfQHits;
 	}
 
 }
