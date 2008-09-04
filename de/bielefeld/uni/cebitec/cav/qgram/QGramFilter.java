@@ -774,6 +774,7 @@ public class QGramFilter {
 						- dNASeqTarget.getOffset(), dNASeqQuery, queryStart,
 						queryEnd);
 				ap.setVariance(binVariance[bucketindex]);
+				ap.setNumberOfQHits(binCounts[bucketindex]);
 				result.addAlignmentPosition(ap);
 			// match spans over different targets	
 			} else { 
@@ -835,6 +836,7 @@ public class QGramFilter {
 					// if the slice is bigger than q, add it
 					if (ap.size() > qGramIndex.getQLength()) {
 						ap.setVariance(binVariance[bucketindex]);
+						ap.setNumberOfQHits(binCounts[bucketindex]);
 						result.addAlignmentPosition(ap);
 					}
 
