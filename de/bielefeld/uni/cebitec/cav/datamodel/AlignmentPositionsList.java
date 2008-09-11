@@ -421,9 +421,11 @@ public class AlignmentPositionsList extends Observable implements
 		String[] values;
 		DNASequence target;
 		DNASequence query;
+		int linenumber=0;
 
 		while (in.ready()) {
 			line = in.readLine();
+			linenumber++;
 			// each section begins with BEGIN_... ; jump to the appropriate code
 			// part to parse this.
 			//
@@ -432,15 +434,20 @@ public class AlignmentPositionsList extends Observable implements
 				// read every line until the end of this section
 				while (in.ready() && !line.matches("END_HITS")) {
 					line = in.readLine();
+					linenumber++;
 
 					// ignore comments
-					if (line.startsWith("#") || line.startsWith("\"#")) {
+					if (line.startsWith("#") || line.startsWith("\"#") || line.matches("END_HITS")) {
 						continue;
 					}
 
 					// split the tab seperated values...
 					values = line.split("\t");
-
+					// if a editor destroyed the tabs try out if spaces work
+					if(values.length==1) {
+						values = line.split(" +");
+					}
+					
 					if (values.length < 6) {
 						continue;
 					}
@@ -451,9 +458,11 @@ public class AlignmentPositionsList extends Observable implements
 						query = queries.get(values[0]);
 						if (query == null) {
 							query = new DNASequence(values[0]);
+							queries.put(query.getId(),query);
 						}
 						if (target == null) {
 							target = new DNASequence(values[3]);
+							targets.put(target.getId(),target);
 						}
 
 						long queryStart = Long.parseLong(values[1]);
@@ -462,16 +471,16 @@ public class AlignmentPositionsList extends Observable implements
 						long targetStart = Long.parseLong(values[4]);
 						long targetEnd = Long.parseLong(values[5]);
 
-						// set the size of a query/target at least to the max
+						//TODO set the size of a query/target at least to the max
 						// ending value.
 						// this is needed for drawing if the size information is
 						// missing
-						if (query.getSize() < queryEnd) {
-							query.setSize(queryEnd + 1);
-						}
-						if (target.getSize() < targetEnd) {
-							target.setSize(targetEnd + 1);
-						}
+//						if (query.getSize() < queryEnd) {
+//							query.setSize(queryEnd + 1);
+//						}
+//						if (target.getSize() < targetEnd) {
+//							target.setSize(targetEnd + 1);
+//						}
 
 						AlignmentPosition ap = new AlignmentPosition(target,
 								targetStart, targetEnd, query, queryStart,
@@ -485,7 +494,7 @@ public class AlignmentPositionsList extends Observable implements
 							ap.setNumberOfQHits(Integer.parseInt(values[7]));
 						}
 					} catch (NumberFormatException e) {
-						System.err.println(e.toString());
+						System.err.println("Expected a number on line "+linenumber+" ; " + e.toString());
 					}
 
 				}
@@ -503,6 +512,7 @@ public class AlignmentPositionsList extends Observable implements
 				}
 				while (in.ready() && !line.matches("END_TARGET")) {
 					line = in.readLine();
+					linenumber++;
 					if (line.startsWith("#") || line.startsWith("\"#")
 							|| line.matches("END_TARGET")) {
 						continue;
@@ -513,7 +523,7 @@ public class AlignmentPositionsList extends Observable implements
 					propertyValue = line.split("=");
 					if (propertyValue.length != 2) {
 						System.err
-								.println("Line ignored, to much or to less values for property:\n"
+								.println("Line "+linenumber+" ignored, to much or to less values for property:\n"
 										+ line);
 						continue;
 					}
@@ -536,8 +546,8 @@ public class AlignmentPositionsList extends Observable implements
 
 				// if this query was added in the hits section, update the
 				// values of old instance
-				if (targets.containsKey(query_id)) {
-					query = targets.get(query_id);
+				if (queries.containsKey(query_id)) {
+					query = queries.get(query_id);
 				} else {
 					// if not create a new one
 					query = new DNASequence(query_id);
@@ -545,6 +555,7 @@ public class AlignmentPositionsList extends Observable implements
 				}
 				while (in.ready() && !line.matches("END_QUERY")) {
 					line = in.readLine();
+					linenumber++;
 					if (line.startsWith("#") || line.startsWith("\"#")
 							|| line.matches("END_QUERY")) {
 						continue;
@@ -555,7 +566,7 @@ public class AlignmentPositionsList extends Observable implements
 					// lines
 					if (propertyValue.length != 2) {
 						System.err
-								.println("Line ignored, to much or to less values for property:\n"
+								.println("Line "+linenumber+" ignored, to much or to less values for property:\n"
 										+ line);
 						continue;
 					}
