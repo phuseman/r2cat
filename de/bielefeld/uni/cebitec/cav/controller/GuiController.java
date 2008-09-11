@@ -122,7 +122,7 @@ public class GuiController {
 	}
 
 	public void loadCSVFile() {
-		File csv = this.chooseFile(".csv", "comma separaded values");
+		File csv = this.chooseFile(true, ".csv", "comma separaded values");
 		if (csv != null) {
 			ComparativeAssemblyViewer.dataModelController
 			.setAlignmentsPositonsListFromCSV(csv);
@@ -198,7 +198,7 @@ public class GuiController {
 			return;
 		}
 		
-		File f = this.chooseFile(".r2c", "r2cat hits file");
+		File f = this.chooseFile(false,".r2c", "r2cat hits file");
 		if (f!=null) {
 			try {
 				if (! f.getName().endsWith(".r2c")) {
@@ -212,7 +212,7 @@ public class GuiController {
 	}
 	
 	public void loadHits() {
-		File f = this.chooseFile(".r2c", "r2cat hits file");
+		File f = this.chooseFile(true,".r2c", "r2cat hits file");
 		if (f!=null) {
 			try {
 				ComparativeAssemblyViewer.dataModelController.readAlignmentPositions(f);
@@ -223,7 +223,15 @@ public class GuiController {
 		
 	}
 	
-	public File chooseFile(String extension, String description) {
+	/**
+	 * Shows a dialog to select files for opening or saving data
+	 * 
+	 * @param open true means show open dialog; false show save dialog
+	 * @param extension extension to filter for. null or empty is all
+	 * @param description description of this kind of files
+	 * @return
+	 */
+	public File chooseFile(boolean open, String extension, String description) {
 		JFileChooser fileChooser = new JFileChooser();
 
 		if(extension !=null && !extension.isEmpty()) {
@@ -236,7 +244,13 @@ public class GuiController {
 		fileChooser.setCurrentDirectory(lastDir);
 		}
 		
-		int returnVal = fileChooser.showOpenDialog(mainWindow);
+		int returnVal;
+		
+		if (open) {
+		returnVal = fileChooser.showOpenDialog(mainWindow);
+		} else {
+			returnVal = fileChooser.showSaveDialog(mainWindow);
+		}
 
 		File file=null;
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
