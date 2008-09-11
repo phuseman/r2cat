@@ -21,13 +21,17 @@
 package de.bielefeld.uni.cebitec.cav.controller;
 
 import java.io.File;
+import java.io.IOException;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.gui.AlignmentTable;
+import de.bielefeld.uni.cebitec.cav.gui.CustomFileFilter;
 import de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin;
 import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisation;
 import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisationActionListener;
@@ -117,11 +121,12 @@ public class GuiController {
 		return mainWindow;
 	}
 
-	public void loadCSVFile(File file) {
-		ComparativeAssemblyViewer.preferences.setLastFile(file
-				.getAbsolutePath());
-		ComparativeAssemblyViewer.dataModelController
-				.setAlignmentsPositonsListFromCSV(file);
+	public void loadCSVFile() {
+		File csv = this.chooseFile(".csv", "comma separaded values");
+		if (csv != null) {
+			ComparativeAssemblyViewer.dataModelController
+			.setAlignmentsPositonsListFromCSV(csv);
+		}
 	}
 
 	public void displayWithOffsets() {
@@ -184,7 +189,69 @@ public class GuiController {
 
 	public boolean visualisationInitialized() {
 		return (dotPlotVisualisation != null);
-
 	}
+	
+	public void saveHits() {
+		File f = this.chooseFile(".r2c", "r2cat hits file");
+		if (f!=null) {
+			try {
+				if (! f.getName().endsWith(".r2c")) {
+					f = new File(f.getAbsolutePath()+".r2c");
+				}
+				ComparativeAssemblyViewer.dataModelController.writeAlignmentPositions(f);
+			} catch (IOException e) {
+				this.errorAlert("Unable to open file:"+ e);
+			}
+		}
+	}
+	
+	public void loadHits() {
+		File f = this.chooseFile(".r2c", "r2cat hits file");
+		if (f!=null) {
+			try {
+				ComparativeAssemblyViewer.dataModelController.readAlignmentPositions(f);
+			} catch (IOException e) {
+				this.errorAlert("Unable to open file:"+ e);
+			}
+		}
+		
+	}
+	
+	public File chooseFile(String extension, String description) {
+		JFileChooser fileChooser = new JFileChooser();
+
+		if(extension !=null && !extension.isEmpty()) {
+		fileChooser.addChoosableFileFilter(new CustomFileFilter(extension,description));
+		}
+		
+		File lastFile = new File(ComparativeAssemblyViewer.preferences.getLastFile());
+		File lastDir = lastFile.getParentFile();
+		if (lastDir != null){
+		fileChooser.setCurrentDirectory(lastDir);
+		}
+		
+		int returnVal = fileChooser.showOpenDialog(mainWindow);
+
+		File file=null;
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			file = fileChooser.getSelectedFile();
+			ComparativeAssemblyViewer.preferences.setLastFile(file
+					.getAbsolutePath());
+		}
+		
+		return file;
+	}
+	
+	/**
+	 * Pop up an error message
+	 * 
+	 * @param error
+	 *            Message
+	 */
+	private void errorAlert(String error) {
+		JOptionPane.showMessageDialog(mainWindow, error, "Error",
+				JOptionPane.ERROR_MESSAGE);
+	}
+
 
 }

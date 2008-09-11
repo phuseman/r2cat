@@ -28,7 +28,22 @@ import javax.swing.filechooser.FileFilter;
  * @author Peter Husemann
  * 
  */
-public class CSVFileFilter extends FileFilter {
+public class CustomFileFilter extends FileFilter {
+
+	private String extension="";
+	private String description="";
+	
+	
+	
+	/**
+	 * Creates a file filter for the use with JFileChooser.
+	 * @param extension the extension like .csv
+	 * @param description the description explaining this extension
+	 */
+	public CustomFileFilter(String extension, String description) {
+		this.extension = extension;
+		this.description = description;
+	}
 
 	@Override
 	public boolean accept(File f) {
@@ -36,7 +51,7 @@ public class CSVFileFilter extends FileFilter {
 			return true;
 		}
 
-		if (f.getName().endsWith(".csv")) {
+		if (f.getName().endsWith(extension)) {
 			return true;
 		} else {
 			return false;
@@ -46,6 +61,6 @@ public class CSVFileFilter extends FileFilter {
 	// The description of this filter
 	@Override
 	public String getDescription() {
-		return "comma-separated values (*.csv)";
+		 return description + " (*"+ extension +")";
 	}
 }

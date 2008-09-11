@@ -25,10 +25,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.io.File;
 
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -69,13 +67,34 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		newMatch.setActionCommand("match_new");
 		fileMenu.add(newMatch);
 
-		JMenuItem open = new JMenuItem("Open csv File");
+		JMenuItem open = new JMenuItem("Open project");
 		open.setMnemonic(KeyEvent.VK_O);
 		open.getAccessibleContext()
-				.setAccessibleDescription("File open dialog");
-		open.setActionCommand("open_csv");
+				.setAccessibleDescription("Opens a previously saved file containing the hits");
+		open.setActionCommand("open_project");
 		open.addActionListener(this);
 		fileMenu.add(open);
+
+		JMenuItem save = new JMenuItem("Save project");
+		save.setMnemonic(KeyEvent.VK_O);
+		save.getAccessibleContext()
+				.setAccessibleDescription("Save the computed hits");
+		save.setActionCommand("save_project");
+		save.addActionListener(this);
+		//save.setEnabled(false);
+		fileMenu.add(save);
+
+		
+		JMenuItem swift = new JMenuItem("Import SWIFT csv File");
+		swift.setMnemonic(KeyEvent.VK_O);
+		swift.getAccessibleContext()
+				.setAccessibleDescription("Import SWIFT csv File");
+		swift.setActionCommand("open_csv");
+		swift.addActionListener(this);
+		fileMenu.add(swift);
+
+		
+		
 		
 		fileMenu.add(new JMenuItem("Exit"));
 
@@ -135,9 +154,13 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().matches("open_csv")) {
-			openFile();
+			guiController.loadCSVFile();
 		} else if (e.getActionCommand().matches("match_new")) {
 			guiController.showMatchDialog();
+		} else if (e.getActionCommand().matches("open_project")) {
+			guiController.loadHits();
+		} else if (e.getActionCommand().matches("save_project")) {
+			guiController.saveHits();
 		} else if (e.getActionCommand().matches("unidirectional")) {
 			guiController.displayUnidirectional();
 		} else if (e.getActionCommand().matches("query_offsets")) {
@@ -154,31 +177,6 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 
 	}
 
-
-	/**
-	 * 
-	 */
-	private void openFile() {
-		JFileChooser fileChooser = new JFileChooser();
-
-		fileChooser.addChoosableFileFilter(new CSVFileFilter());
-
-		// disable all files filter
-		// fileChooser.setAcceptAllFileFilterUsed(false);
-		File lastFile = new File(ComparativeAssemblyViewer.preferences.getLastFile());
-		File lastDir = lastFile.getParentFile();
-		if (lastDir != null){
-		fileChooser.setCurrentDirectory(lastDir);
-		}
-		
-		int returnVal = fileChooser.showOpenDialog(this);
-
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File file = fileChooser.getSelectedFile();
-
-			guiController.loadCSVFile(file);
-		}
-	}
 
 	public void itemStateChanged(ItemEvent e) {
 		; // do nothing

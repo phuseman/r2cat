@@ -17,9 +17,10 @@ public class AlignmentPosition implements Comparable {
 
 	private static AlignmentPositionsList parentList;
 	
-	private float variance=0;
+	//-1 means not set
+	private float variance=-1;
 	
-	private int numberOfQHits=0;
+	private int numberOfQHits=-1;
 
 
 
@@ -117,6 +118,7 @@ public class AlignmentPosition implements Comparable {
 		this.alignmentModified();
 	}
 
+	//FIXME can be a problem when using multiple alignment positions lists
 	public static void setParentList(AlignmentPositionsList parentList) {
 		AlignmentPosition.parentList = parentList;
 	}

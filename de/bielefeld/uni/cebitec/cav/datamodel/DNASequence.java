@@ -120,8 +120,20 @@ public class DNASequence implements Comparable {
 		return description;
 	}
 	
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public String toString() {
 		return String.format("%s (%d) %d", id, size,offset);
+	}
+
+	public void setFile(File file) {
+		this.file = file;
+	}
+
+	public void setSize(long size) {
+		this.size = size;
 	}
 
 }

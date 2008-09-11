@@ -189,6 +189,7 @@ public class MatchDialog extends JDialog implements ActionListener,
 			startButton.setEnabled(true);
 			setCursor(null); // turn off the wait cursor
 			progress.append("Done!\n");
+			progress.setCaretPosition(progress.getDocument().getLength());
 			progressBar.setIndeterminate(false);
 
 			return result;

@@ -69,7 +69,10 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 	 * Calls the super constructor and initializes the window
 	 */
 	public MainWindow(GuiController guiController) {
-		super("Comparative Assembly Viewer");
+		super("r2-cat - Related Reference based Contig Arrangement Tool");
+		
+// in the future probably		
+//		super("meercat - multiple related reference contig arrangement tool");
 		this.guiController = guiController;
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		init();

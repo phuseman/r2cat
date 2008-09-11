@@ -21,6 +21,7 @@
 package de.bielefeld.uni.cebitec.cav.controller;
 
 import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JOptionPane;
 
@@ -58,31 +59,35 @@ public class DataModelController {
 						.copyDataFromOtherAlignmentPositionsList(apl);
 			}
 
-			// use the preferences: with offsets?
-			if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
-				alignmentPositionsList.generateStatistics(); // this sets the
-				// center of masses
-				// for each query
-				alignmentPositionsList.addOffsets();
-			} else {
-				// no offsets
-				alignmentPositionsList.resetOffsets();
-			}
-
-			// add the appropriate offsets for the targets.
-			alignmentPositionsList.addOffsetsToTargets();
-			
-			
-			if (!ComparativeAssemblyViewer.guiController
-					.visualisationInitialized()) {
-				ComparativeAssemblyViewer.guiController.initVisualisation();
-			}
-			alignmentPositionsList
-					.notifyObservers(AlignmentPositionsList.NotifyEvent.CHANGE);
+			this.postSetProcessing();
 		} else {
 			JOptionPane.showMessageDialog(ComparativeAssemblyViewer.guiController.getMainWindow(), "Sorry, no Matches to display.", "Error",
 					JOptionPane.ERROR_MESSAGE);
 		}
+	}
+
+	private void postSetProcessing() {
+		// use the preferences: with offsets?
+		if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
+			alignmentPositionsList.generateStatistics(); // this sets the
+			// center of masses
+			// for each query
+			alignmentPositionsList.addOffsets();
+		} else {
+			// no offsets
+			alignmentPositionsList.resetOffsets();
+		}
+
+		// add the appropriate offsets for the targets.
+		alignmentPositionsList.addOffsetsToTargets();
+		
+		
+		if (!ComparativeAssemblyViewer.guiController
+				.visualisationInitialized()) {
+			ComparativeAssemblyViewer.guiController.initVisualisation();
+		}
+		alignmentPositionsList
+				.notifyObservers(AlignmentPositionsList.NotifyEvent.CHANGE);
 	}
 
 	/**
@@ -104,4 +109,19 @@ public class DataModelController {
 	 */
 	public DataModelController() {
 	}
+	
+	public void writeAlignmentPositions(File f) throws IOException {
+		alignmentPositionsList.writeToFile(f);
+	}
+	
+	public void readAlignmentPositions(File f) throws IOException {
+		if (alignmentPositionsList == null) {
+			alignmentPositionsList = new AlignmentPositionsList();
+		}
+		
+		alignmentPositionsList.readFromFile(f);
+		this.postSetProcessing();
+		
+	}
+
 }
