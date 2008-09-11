@@ -192,6 +192,12 @@ public class GuiController {
 	}
 	
 	public void saveHits() {
+		AlignmentPositionsList apl = ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList();
+		if (apl==null || apl.isEmpty()) {
+			errorAlert("There is nothing to save!");
+			return;
+		}
+		
 		File f = this.chooseFile(".r2c", "r2cat hits file");
 		if (f!=null) {
 			try {

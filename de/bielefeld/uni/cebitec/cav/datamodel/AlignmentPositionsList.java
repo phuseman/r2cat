@@ -82,23 +82,6 @@ public class AlignmentPositionsList extends Observable implements
 
 	
 	
-	public static void main(String args[]) {
-//		CSVParser csvParser = new CSVParser(new File("/homes/phuseman/compassemb/query.csv"));
-		AlignmentPositionsList test = new AlignmentPositionsList() ;//= csvParser.parse();
-//
-		File file = new File("test.r2c");
-		
-		try {
-			test.readFromFile(file);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		
-		System.exit(0);
-	}
-	
 	/**
 	 * This method keeps the already registered observers and copies the new
 	 * data
