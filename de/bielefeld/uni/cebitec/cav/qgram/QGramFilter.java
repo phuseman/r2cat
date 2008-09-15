@@ -375,13 +375,11 @@ public class QGramFilter {
 				
 				//report and clean all parallelograms on the right end of the target
 				//explanation see comment on checkAndResetBin method
-				// original: if ( (j - e) % (delta - 1)) == 0) {
-				//means: the last possible j on the right side for that a hit is accounted to this bin.
+				//short: the last possible j on the right side for that a hit is accounted to this bin.
 				//
 				// I'm not 100% sure if e has to be added in reverse complement direction.
-				// but it seems to work.
-				if (( (reverseComplementDirection?(j + e):(j - e)) % (delta - 1)) == 0) {
-					b0 = (reverseComplementDirection?(j + e):(j - e)) >> z;
+				if ( ((j - e) % (delta - 1)) == 0) {
+					b0 = (j - e) >> z;
 					bm = b0 % numberOfBins;
 					checkAndResetBin(bm,  (b0 << z));
 				}
