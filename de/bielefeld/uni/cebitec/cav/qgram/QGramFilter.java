@@ -98,7 +98,6 @@ public class QGramFilter {
 	
 
 	
-	
 
 	/**
 	 * Creates a filter from
@@ -174,7 +173,6 @@ public class QGramFilter {
 	 * 
 	 */
 	public AlignmentPositionsList match() {
-
 		double errorrate = 0.08;
 		int minMatchLength = 450;// not the real minimal match length, can be smaller.
 
@@ -241,7 +239,7 @@ public class QGramFilter {
 
 		int total=(queriesOffsets[queriesOffsets.length-1])*2;
 		
-		// go through all queries
+//		// go through all queries
 		for (queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
 			progress=(2.*queriesOffsets[queryNumber])/total;
 			//match one query in forward direction
@@ -260,7 +258,7 @@ public class QGramFilter {
 //		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
 //		queryNumber = 66;
 //		matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
-//		queryNumber = 29;
+//		queryNumber = 67;
 //		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
 
 
@@ -374,11 +372,16 @@ public class QGramFilter {
 
 				}// for each occurrence of this code
 
-
+				
 				//report and clean all parallelograms on the right end of the target
 				//explanation see comment on checkAndResetBin method
-				if (((j - e) % (delta - 1)) == 0) {
-					b0 = (j - e) >> z;
+				// original: if ( (j - e) % (delta - 1)) == 0) {
+				//means: the last possible j on the right side for that a hit is accounted to this bin.
+				//
+				// I'm not 100% sure if e has to be added in reverse complement direction.
+				// but it seems to work.
+				if (( (reverseComplementDirection?(j + e):(j - e)) % (delta - 1)) == 0) {
+					b0 = (reverseComplementDirection?(j + e):(j - e)) >> z;
 					bm = b0 % numberOfBins;
 					checkAndResetBin(bm,  (b0 << z));
 				}
@@ -496,6 +499,7 @@ public class QGramFilter {
 				//compute the mean and the variance recursively
 				if(binCounts[b]>=1) {
 					int diagonal= hitPositionTarget-hitPositionQuery;
+					
 					//adjust the mean if in reverse direction
 					// diagonal for reverse complement is i + (|query|-j) == i-j +|query|
 					if(reverseComplementDirection) {
@@ -579,7 +583,10 @@ public class QGramFilter {
 	private void resetCountsAndReportRemainingParalellograms() {
 		int top=0;
 		int bottom=0;
+		int left=0;
 		int querySize = (int)query.getSequence(queryNumber).getSize();
+		int border=querySize/eZone.getDelta();
+		int borderoffset=qGramIndex.getInputLength();
 	
 		
 		//check parallelograms for hits and reset counters
@@ -590,29 +597,34 @@ public class QGramFilter {
 				bottom = binMin[bin];
 				
 				if (top-bottom > eZone.getWidth()) {//normally height
-					
-					int left = -(bin << eZone.getDeltaExponent()); 
+
 					/*
-					 * ^^^ this should be right, because all diagonals
+					 * the calculation from bin index to left value should be right, because all diagonals
 					 * of the area in x (where  j>i) are projected to x' with the modulo |Bins| operation.
 					 * all diagonals in area y, which have the same bin index like the ones in x,
 					 * are reported with the function checkAndResetBin, since they can not be extended.
 					 * So in the end, when j=|B| only the diagonals from area z and x remain.
 					 * 
 					 * 
-					 * |\ d=|A|+j-i
-					 * | \
-					 * |  \
-					 * |   \
-					 * |    \
-					 * |     \
-					 * |______\A i
+					 * |\ d=|A|+j-i   0
+					 * | \            -d
+					 * |  \           -2d
+					 * -|B|\          -|B|/d
+					 * |\   \         |A|- n*d 
+					 * | \   \
+					 *_|__\___\A i
 					 * |\  \  |\
 					 * | \  \y| \
 					 * | x\ z\|x'\
 					 * B
 					 * j
 					 */
+					//this is for area x
+					left = -(bin << eZone.getDeltaExponent());
+					if (bin>border) {
+						// and for area y |A|+|B| has to be added
+						left += borderoffset;
+					}
 
 					if(!reverseComplementDirection){
 						//normal direction
@@ -655,9 +667,26 @@ public class QGramFilter {
 	 */
 	
 	private void reportMatch(int left, int top, int bottom, int bucketindex, String debugstring) {
+		//debugging	
+//		System.out.println(debugstring
+//				+": bin:"+bucketindex
+//				+"  left:"+left
+//				+ " top:" +  top 
+//				+ " bottom:" + bottom 
+//				+ " (" + (top-bottom)+")"
+//				+ " hits:" + binCounts[bucketindex]
+//				+ " Mean:" + binMean[bucketindex]
+//				+ " (" + (left-binMean[bucketindex])+ ") "
+//				+" Variance:"+binVariance[bucketindex]);
+
+		//TODO: there is a problem when using the mean value.
+		//it can be distorted if there is a hit on the reverse strand going to the end of 
+		//a target and continuing on the beginning. some qhits are accounted to the wrong hit.
+		// this is probably a problem in the checkandresetbin method.
 		
+		// outdated:
 		//left is an artifact from kims implementation it is not needed if we take the mean diagonal.
-		left = (int) binMean[bucketindex];
+//		left = (int) binMean[bucketindex];
 				
 		AlignmentPosition ap;
 		long targetStart=0;
@@ -695,19 +724,6 @@ public class QGramFilter {
 			targetStart=(left - bottom);
 			targetEnd=(left - top);
 		}
-	//debugging	
-//		System.out.println(debugstring
-//				+": bin:"+bucketindex
-//				+"  left:"+left
-//				+ " top:" +  top 
-//				+ " bottom:" + bottom 
-//				+ " (" + (top-bottom)+")"
-//				+ " hits:" + binCounts[bucketindex]
-//				+ " Mean:" + binMean[bucketindex]
-//				+ " (" + (left-binMean[bucketindex])+ ") "
-//				+" Variance:"+binVariance[bucketindex]);
-//		
-
 
 		// since we take the mean diagonal the target start or end are not "exact"
 		// it can happen that they are out of bounds
