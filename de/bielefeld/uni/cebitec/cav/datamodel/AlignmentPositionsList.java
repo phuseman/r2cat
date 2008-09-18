@@ -312,7 +312,7 @@ public class AlignmentPositionsList extends Observable implements
 	public void writeToFile(File f) throws IOException {
 		BufferedWriter out = new BufferedWriter(new FileWriter(f));
 		
-		out.write("r2cat output\nWarning: Comments will be overwritten\n\n");
+		out.write("# r2cat output\n# Warning: Comments will be overwritten\n\n");
 		// write a section for each target
 		for (DNASequence target : targets.values()) {
 			out.write("BEGIN_TARGET "+ target.getId()+"\n");
