@@ -312,6 +312,7 @@ public class AlignmentPositionsList extends Observable implements
 	public void writeToFile(File f) throws IOException {
 		BufferedWriter out = new BufferedWriter(new FileWriter(f));
 		
+		out.write("r2cat output\nWarning: Comments will be overwritten\n\n");
 		// write a section for each target
 		for (DNASequence target : targets.values()) {
 			out.write("BEGIN_TARGET "+ target.getId()+"\n");
@@ -329,7 +330,11 @@ public class AlignmentPositionsList extends Observable implements
 		}
 
 //		write a section for all the queries
-		for (DNASequence query : queries.values()) {
+		Vector<DNASequence> queriesList = new Vector<DNASequence>();
+		queriesList.addAll(queries.values());
+		Collections.sort(queriesList);
+
+		for (DNASequence query : queriesList) {
 			out.write("BEGIN_QUERY "+ query.getId()+"\n");
 			if (query.getDescription()!=null && !query.getDescription().isEmpty()) {
 				out.write(" description="+ query.getDescription() +"\n");
