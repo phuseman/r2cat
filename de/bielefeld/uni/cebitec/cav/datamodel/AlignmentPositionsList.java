@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Observable;
 import java.util.Vector;
 
@@ -349,7 +350,6 @@ public class AlignmentPositionsList extends Observable implements
 			out.write("END_QUERY\n\n");
 		}
 
-		
 		//write the hit section
 		//each hit is represented by a line with tab seperated values.
 		// the order is written into the file too
@@ -359,7 +359,7 @@ public class AlignmentPositionsList extends Observable implements
 			// if the number of qhits is -1 (default) then variance an qhits are not set. leave them out.
 			if (ap.getNumberOfQHits() < 1 ) {
 				//in this case the input could be imported from swift. then the last two pieces of information are not available
-			out.write(String.format(
+			out.write(String.format((Locale)null,
 						"%s\t%d\t%d\t%s\t%d\t%d\n", 
 						ap.getQuery().getId(),
 						ap.getQueryStart(),
@@ -369,7 +369,7 @@ public class AlignmentPositionsList extends Observable implements
 						ap.getTargetEnd()));
 			} else {
 				//write the imported information as tab separated value line
-			out.write(String.format(
+			out.write(String.format((Locale)null, 
 					"%s\t%d\t%d\t%s\t%d\t%d\t%f\t%d\n", 
 					ap.getQuery().getId(),
 					ap.getQueryStart(),
