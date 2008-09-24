@@ -13,11 +13,18 @@ public class DNASequence implements Comparable {
 
 	private long offset = 0;
 	
-	protected double centerOfMass = 0;
+	protected double centerOfMass = -1;
+	public double centerOfMassFactor;
+
 	
 	protected double totalAlignmentLength = 0;
+	protected double reverseAlignmentLength = 0;
 	
 	private boolean marked = false;
+	
+	private boolean reverseComplement = false;
+
+
 
 	/**
 	 * @param id
@@ -134,6 +141,14 @@ public class DNASequence implements Comparable {
 
 	public void setSize(long size) {
 		this.size = size;
+	}
+
+	public boolean isReverseComplemented() {
+		return reverseComplement;
+	}
+
+	public void setReverseComplemented(boolean reverseComplement) {
+		this.reverseComplement = reverseComplement;
 	}
 
 }

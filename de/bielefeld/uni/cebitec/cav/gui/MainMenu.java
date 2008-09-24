@@ -162,9 +162,11 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		} else if (e.getActionCommand().matches("save_project")) {
 			guiController.saveHits();
 		} else if (e.getActionCommand().matches("unidirectional")) {
-			guiController.displayUnidirectional();
+			guiController.displayUnidirectional(((JCheckBoxMenuItem) e.getSource())
+					.getState());
 		} else if (e.getActionCommand().matches("query_offsets")) {
-			guiController.displayWithOffsets();
+			guiController.displayWithOffsets(((JCheckBoxMenuItem) e.getSource())
+					.getState());
 		} else if (e.getActionCommand().matches("grid")) {
 			guiController.displayGrid(((JCheckBoxMenuItem) e.getSource())
 					.getState());

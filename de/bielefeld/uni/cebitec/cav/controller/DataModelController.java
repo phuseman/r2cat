@@ -40,6 +40,7 @@ public class DataModelController {
 
 	public AlignmentPositionsList parseAlignmentPositionsFromCSV(File csvFile) {
 		CSVParser csvParser = new CSVParser(csvFile);
+		csvParser.setSwiftMode();
 		AlignmentPositionsList alignmentPositionsList = csvParser.parse();
 		return alignmentPositionsList;
 	}
@@ -68,10 +69,10 @@ public class DataModelController {
 
 	private void postSetProcessing() {
 		// use the preferences: with offsets?
+		alignmentPositionsList.generateStatistics(); // this sets the
+		// center of masses and if the contig should be reverse complemented for each query
+
 		if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
-			alignmentPositionsList.generateStatistics(); // this sets the
-			// center of masses
-			// for each query
 			alignmentPositionsList.addOffsets();
 		} else {
 			// no offsets
@@ -115,13 +116,9 @@ public class DataModelController {
 	}
 	
 	public void readAlignmentPositions(File f) throws IOException {
-		if (alignmentPositionsList == null) {
-			alignmentPositionsList = new AlignmentPositionsList();
-		}
-		
-		alignmentPositionsList.readFromFile(f);
-		this.postSetProcessing();
-		
+		AlignmentPositionsList apl = new AlignmentPositionsList();
+		apl.readFromFile(f);
+		this.setAlignmentsPositonsList(apl);
 	}
 
 }

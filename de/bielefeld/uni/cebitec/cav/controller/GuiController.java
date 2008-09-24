@@ -77,6 +77,9 @@ public class GuiController {
 			AlignmentPositionsList alignmentPositionsList) {
 		dotPlotVisualisation = new DotPlotVisualisation(alignmentPositionsList);
 
+		
+
+
 		DotPlotVisualisationActionListener dotPlotVisualisationListener = new DotPlotVisualisationActionListener(
 				this, dotPlotVisualisation);
 
@@ -86,8 +89,14 @@ public class GuiController {
 		dotPlotVisualisation
 				.addMouseWheelListener(dotPlotVisualisationListener);
 		dotPlotVisualisation.addKeyListener(dotPlotVisualisationListener);
-		dotPlotVisualisation.drawGrid(ComparativeAssemblyViewer.preferences
+		
+
+		// load the previous state from prefs
+		this.displayGrid(ComparativeAssemblyViewer.preferences
 				.getDisplayGrid());
+		this.displayUnidirectional(ComparativeAssemblyViewer.preferences
+				.getDisplayUnidirectional());
+		
 		return dotPlotVisualisation;
 	}
 
@@ -129,25 +138,32 @@ public class GuiController {
 		}
 	}
 
-	public void displayWithOffsets() {
-		//TODO when no apl's are displayed and this method is called it shows the 
-		//wrong value after something is loaded...
+	public void displayWithOffsets(boolean offsets) {
 		if (ComparativeAssemblyViewer.dataModelController
 				.getAlignmentPositionsList() != null) {
-			dotPlotVisualisation.getAlignmentPositionDisplayerList()
-					.toggleOffsets();
+			if (offsets) {
+				ComparativeAssemblyViewer.dataModelController
+				.getAlignmentPositionsList().addOffsets();
+			} else {
+				ComparativeAssemblyViewer.dataModelController
+				.getAlignmentPositionsList().resetOffsets();
+			}
+			ComparativeAssemblyViewer.preferences.setDisplayOffsets(offsets);
+			dotPlotVisualisation.getAlignmentPositionDisplayerList().regenerate();
 			dotPlotVisualisation.repaint();
 		}
 	}
 
-	public void displayUnidirectional() {
-		//TODO when no apl's are displayed and this method is called it shows the 
-		//wrong value after something is loaded...
+	public void displayUnidirectional(boolean unidirectional) {
 		if (ComparativeAssemblyViewer.dataModelController
 				.getAlignmentPositionsList() != null) {
 
 			dotPlotVisualisation.getAlignmentPositionDisplayerList()
-					.switchReversed();
+					.showReversedComplements(unidirectional);
+
+			ComparativeAssemblyViewer.preferences
+					.setDisplayUnidirectional(unidirectional);
+
 			dotPlotVisualisation.repaint();
 		}
 	}

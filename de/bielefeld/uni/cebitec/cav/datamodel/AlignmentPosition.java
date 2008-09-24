@@ -204,5 +204,9 @@ public class AlignmentPosition implements Comparable {
 	public void setNumberOfQHits(int numberOfQHits) {
 		this.numberOfQHits = numberOfQHits;
 	}
+	
+	public boolean isReverseHit() {
+		return queryStart > queryEnd;
+	}
 
 }

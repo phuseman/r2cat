@@ -153,7 +153,6 @@ public class AlignmentPositionsList extends Observable implements
 			// + sequence.getOffset());
 		}
 		queriesWithOffsets = true;
-		ComparativeAssemblyViewer.preferences.setDisplayOffsets(true);
 	}
 
 	/**
@@ -582,6 +581,21 @@ public class AlignmentPositionsList extends Observable implements
 		unmarkAllAlignments();
 		this.setChanged();
 	}
-
 	
+	public void writeContigsOrder(File f) throws IOException {
+		BufferedWriter out = new BufferedWriter(new FileWriter(f));
+
+		Vector<DNASequence> queriesList = new Vector<DNASequence>();
+		queriesList.addAll(queries.values());
+		Collections.sort(queriesList);
+
+		for (DNASequence query : queriesList) {
+			if (query.getCenterOfMass() >= 0) {
+				out.write(query.getId() + "\n");
+			}
+		}
+		out.close();
+	}
+
+
 }

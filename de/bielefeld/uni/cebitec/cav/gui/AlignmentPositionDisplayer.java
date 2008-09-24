@@ -46,7 +46,7 @@ public class AlignmentPositionDisplayer extends Line2D.Double {
 	// do not display the alignment -- not used at the moment
 	private boolean invisible = false;
 
-	// if the data say that the query begin position is behind the query end position: reverse it
+	
 	private boolean reversed = false;
 
 	public AlignmentPositionDisplayer(){
@@ -58,10 +58,21 @@ public class AlignmentPositionDisplayer extends Line2D.Double {
 	 * Sets the Data (AlignmentPosition) and computes the drawcoordinates
 	 * @param alignmentPosition
 	 */
-	public AlignmentPositionDisplayer(AlignmentPosition alignmentPosition) {
+	public AlignmentPositionDisplayer(AlignmentPosition alignmentPosition,
+			boolean reverseComplements) {
 		super();
 		this.alignmentPosition = alignmentPosition;
-		this.setPosition();
+		
+		
+		//if we should reverse the contigs and this contig seems to match on the reverse strand
+		// set the reversed position
+		if (reverseComplements && alignmentPosition.getQuery().isReverseComplemented()) {
+			this.setReversedPosition();
+			this.reversed = true;
+			} else {
+			this.setPosition();
+		}
+
 	}
 
 	
@@ -110,13 +121,18 @@ public class AlignmentPositionDisplayer extends Line2D.Double {
 		}
 	}
 
-	public void switchReversed() {
-		if (this.reversed
-				|| alignmentPosition.getQueryStart() < alignmentPosition
-						.getQueryEnd()) {
+	/**
+	 * Changes the coordinates such that a contig is displayed in the orientation of the matching
+	 * if flip is false.<br>
+	 * For true it displays the reverse complement of all hits in that contig if the contig was
+	 * marked as reverse complemented.
+	 * @param flip
+	 */
+	public void flipReversed(boolean flip) {
+		if (!flip) {
 			this.setPosition();
 			this.reversed = false;
-		} else {
+		} else if (alignmentPosition.getQuery().isReverseComplemented()) {
 			this.setReversedPosition();
 			this.reversed = true;
 		}

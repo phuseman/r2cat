@@ -24,7 +24,6 @@ import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.Vector;
 
-import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 
@@ -37,6 +36,8 @@ public class AlignmentPositionDisplayerList implements
 	private AlignmentPositionsList alignmentsPositions;
 
 	private Vector<AlignmentPositionDisplayer> alPosDispList;
+
+	private boolean reversedComplements = false;
 
 	/**
 	 * Defines the selection type.
@@ -88,21 +89,10 @@ public class AlignmentPositionDisplayerList implements
 
 			alPosDispList.clear();
 			for (AlignmentPosition ap : alignmentsPositions) {
-				alPosDispList.add(new AlignmentPositionDisplayer(ap));
+				alPosDispList.add(new AlignmentPositionDisplayer(ap,reversedComplements));
 			}
 
-			if (ComparativeAssemblyViewer.preferences
-					.getDisplayUnidirectional()) {
-				this.switchReversed();
-				// switchReversed would change the preferences.
-				// set it again to true
-				ComparativeAssemblyViewer.preferences
-						.setDisplayUnidirectional(true);
-			}
 		}
-	
-		//debug
-//		System.out.println("generate apdl: "+width+" "+heigth);
 
 	}
 
@@ -143,24 +133,6 @@ public class AlignmentPositionDisplayerList implements
 	 */
 	public Iterator<AlignmentPositionDisplayer> iterator() {
 		return alPosDispList.iterator();
-	}
-
-	/**
-	 * Switch between:<br>
-	 * <ul>
-	 * <li> displays all alignments in the direction as stored
-	 * <li> displays all alignments in one direction
-	 * </ul>
-	 * 
-	 */
-	public void switchReversed() {
-		for (AlignmentPositionDisplayer elem : alPosDispList) {
-			elem.switchReversed();
-		}
-		// switch preferences
-		ComparativeAssemblyViewer.preferences
-				.setDisplayUnidirectional(!ComparativeAssemblyViewer.preferences
-						.getDisplayUnidirectional());
 	}
 
 	/**
@@ -352,11 +324,7 @@ public class AlignmentPositionDisplayerList implements
 		return alignmentsPositions.size();
 	}
 
-	public void toggleOffsets() {
-		// call the appropriate method on the datamodel
-		alignmentsPositions.toggleOffsets();
-
-		// rescale sets the new positions including offsets or not
+	public void regenerate() {
 		for (AlignmentPositionDisplayer apd : alPosDispList) {
 			apd.rescale();
 		}
@@ -367,6 +335,25 @@ public class AlignmentPositionDisplayerList implements
 	 */
 	public void clear() {
 		alPosDispList.clear();
+	}
+
+	public boolean showReversedComplements() {
+		return reversedComplements;
+	}
+
+	/**
+	 * 
+	 * <ul>
+	 * <li> display all alignments in the direction as stored
+	 * <li> display all alignments reverse complemented if set so
+	 * </ul>
+	 * 
+	 */
+	public void showReversedComplements(boolean flip) {
+		this.reversedComplements  = flip;
+		for (AlignmentPositionDisplayer elem : alPosDispList) {
+			elem.flipReversed(flip);
+		}
 	}
 
 }

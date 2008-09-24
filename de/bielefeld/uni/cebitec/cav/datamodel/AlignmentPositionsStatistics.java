@@ -90,7 +90,12 @@ public class AlignmentPositionsStatistics implements Observer {
 			//take the cubic size. long matches are weighted heavier this way.
 			sizeFactor=element.size() * element.size() * element.size();
 			element.getQuery().centerOfMass +=  element.getTargetCenter()* sizeFactor;
-			element.getQuery().totalAlignmentLength += sizeFactor;
+			element.getQuery().centerOfMassFactor +=sizeFactor;
+
+			element.getQuery().totalAlignmentLength += element.size();
+			if (element.isReverseHit()) {
+				element.getQuery().reverseAlignmentLength+=element.size();
+			}
 		}
 
 
@@ -98,7 +103,12 @@ public class AlignmentPositionsStatistics implements Observer {
 		for (DNASequence query : apl.getQueries().values()) {
 			
 			//compute the center of mass for each contig/query
-			query.centerOfMass = query.centerOfMass / query.totalAlignmentLength; 
+			query.centerOfMass = query.centerOfMass / query.centerOfMassFactor; 
+			
+			//determine if the majority are foreward or backward hits
+			if ((query.reverseAlignmentLength / query.totalAlignmentLength)>0.5) {
+				query.setReverseComplemented(true);
+			}
 
 
 			// compute min and max query size
