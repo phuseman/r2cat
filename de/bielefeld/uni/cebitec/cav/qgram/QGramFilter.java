@@ -97,7 +97,17 @@ public class QGramFilter {
 	private double progress;
 	
 
-	
+	//debug
+//	public BufferedWriter logfile;
+//	
+//	private void log(String s) {
+//		try {
+//			logfile.write(s);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 
 	/**
 	 * Creates a filter from
@@ -107,6 +117,9 @@ public class QGramFilter {
 	public QGramFilter(QGramIndex targetIndex, FastaFileReader query) {
 		this.qGramIndex = targetIndex;
 		this.query = query;
+		
+		//debug
+//		try {logfile = new BufferedWriter(new FileWriter("log.csv"));}catch(IOException e) {;}
 	}
 
 	
@@ -152,13 +165,18 @@ public class QGramFilter {
 		t.stopTimer("reading the query fasta");
 
 		QGramFilter qf = new QGramFilter(qi, queryFasta);
-		qf.match();
+		AlignmentPositionsList apl = qf.match();
+
+//		apl.readFromFile();
+//		apl.generateStatistics();
+//		apl.addOffsets();
+//		apl.writeContigsOrder(new File("test.contigs"));
 
 		t.stopTimer("matching");
 
 		t.stopTimer("Total");
 		
-		
+//		qf.logfile.flush();
 		System.exit(0);
 	}
 
@@ -308,8 +326,11 @@ public class QGramFilter {
 		startPos--;
 		relativeQueryPosition = startPos-endPos;
 	}
-		
+	
+	
 
+		
+		
 	int offsetInQueries = startPos;
 
 	//if normal direction go from start to end,
@@ -351,19 +372,22 @@ public class QGramFilter {
 						j= startPos-endPos-relativeQueryPosition-eZone.getQGramSize()+1;
 					}
 
+					
+					// //debug
+//					if((bm>=190) && (bm<204)) {
+//						log(String.format("%d %d %d %d %d\n",i,j,(j-i),d,bm));
+//						}
+						
+					
 					// Algorithm 2 page 303 in Rasmussen2006
 					d = targetSize + j - i; // diagonal on the j-axis shifted by |Target| to obtain positive values
 					b0 = d >> z; // b0= d/2^z
 					bm = b0 % numberOfBins; // bucketindex
-
-					
-//					System.out.println("Updatebin( Bins[" + bm + "], j="
-//							+ j + ", d=" + (b0 << z) + ")");
 					updateBin(bm, i, j, (b0 << z));
 
-					// if bins are overlapping
-					// delta - 1 looks as bitstring like this: 0000..111111
-					// logical 'and' gives  the remainder of a division by delta
+					// if bins are overlapping:
+					// (delta - 1 looks as bitstring like this: 0000..111111
+					// logical 'and' gives  the remainder of a division by delta)
 					if ((d & (delta - 1)) < e) { 
 						//get previous bin
 						bm = (bm + numberOfBins - 1) % numberOfBins; // avoid negative value if bm=0
@@ -462,12 +486,11 @@ public class QGramFilter {
 					}
 				}
 				binCounts[b] = 0;
-			}
+			}//end report hit if more than w away
 	
 			
 			//start a new paralelogram and initialize mean and variance
 			if (binCounts[b] == 0) {
-	
 				binMin[b] = hitPositionQuery;
 				
 				//initial values for mean and variance of the hit-diagonal computation
@@ -479,21 +502,22 @@ public class QGramFilter {
 				if(reverseComplementDirection) {
 					binMean[b]+=querySize;
 				}
-				
-				
-			}
+			}// new parallelogram
+			
+			
 	
 			//if there was no hit on the same query position
 			// this avoids the counting of multiple hits on a homopolymer region, for example "aaaaaaaaaa"
 			if (binMax[b] < hitPositionQuery) {
+				//--------------main algorithm------
 				// enlarge the parallelogram
 				binMax[b] = hitPositionQuery;
 				//increase the q-hit counter for this parallelogram
 				binCounts[b]++;
-	
+				//------
 				
 				
-				
+				// mean and variance extension
 				//compute the mean and the variance recursively
 				if(binCounts[b]>=1) {
 					int diagonal= hitPositionTarget-hitPositionQuery;
@@ -504,7 +528,13 @@ public class QGramFilter {
 						diagonal+=querySize;
 					}
 					
-	
+
+					//TODO sometimes the diagonal of a hit position is quite far away from the mean.
+					// investigate this
+//if (Math.abs(binMean[b]-diagonal)>2*eZone.getDelta()) {
+//	this.log(String.format("%d %d %d %d %d %f %s\n",hitPositionTarget,hitPositionQuery,offsetDiagonal,diagonal,b,binMean[b],reverseComplementDirection));
+//}
+
 				//compute the mean and the variance for the diagonal values in a recursive fashion
 				//(see Musterklassifikation Skript 2006/07 Uni Bi.; Franz Kummert; Page 18
 				double factor= 1. / binCounts[b];
@@ -515,11 +545,6 @@ public class QGramFilter {
 	
 				binMean[b] = (float) ((1. - factor) * binMean[b] + factor
 						* diagonal);
-				
-	//debugging			
-//				if (b==1907) {
-//					log("i:" +i+ "\tj:" +j+ "\tn-j:" +(querySize-j)+ "\tdiag:" + (querySize-j+i) + "\tmean:" +binMean[b]+ "\tvar:" +binVariance[b]);
-//				}
 	
 				} // mean and variance computation
 			} // enlargement of one paralellogram
