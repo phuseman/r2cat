@@ -1,6 +1,6 @@
 package de.bielefeld.uni.cebitec.cav.datamodel;
 
-public class AlignmentPosition implements Comparable {
+public class AlignmentPosition implements Comparable<AlignmentPosition> {
 	private DNASequence target;
 
 	private long targetStart;
@@ -142,27 +142,6 @@ public class AlignmentPosition implements Comparable {
 	}
 
 	/* (non-Javadoc)
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	public int compareTo(Object o) {
-		int out = 0;
-
-		AlignmentPosition comp = (AlignmentPosition) o;
-
-		if (this.size() > comp.size()) {
-			out = -1;
-		} else {
-			out = 1;
-		}
-
-		if (this.getQuery().equals(comp.getQuery())) {
-			out = 0;
-		}
-
-		return out;
-	}
-	
-	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals( Object obj ) {
@@ -207,6 +186,22 @@ public class AlignmentPosition implements Comparable {
 	
 	public boolean isReverseHit() {
 		return queryStart > queryEnd;
+	}
+
+	@Override
+	public int compareTo(AlignmentPosition o) {
+		int out = 0;
+	
+		if (this.size() > o.size()) {
+			out = -1;
+		} else {
+			out = 1;
+		}
+	
+		if (this.getQuery().equals(o.getQuery())) {
+			out = 0;
+		}
+		return out;
 	}
 
 }

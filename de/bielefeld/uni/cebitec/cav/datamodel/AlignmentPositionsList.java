@@ -167,6 +167,7 @@ public class AlignmentPositionsList extends Observable implements
 	/**
 	 * Orders the query sequences by their center of mass.
 	 */
+	@SuppressWarnings("unchecked")
 	public void setInitialQueryOrder() {
 		checkStatistics();
 		if (!queryOrderDefined) {
@@ -666,11 +667,7 @@ public class AlignmentPositionsList extends Observable implements
 	public void writeContigsOrder(File f) throws IOException {
 		BufferedWriter out = new BufferedWriter(new FileWriter(f));
 
-		Vector<DNASequence> queriesList = new Vector<DNASequence>();
-		queriesList.addAll(queries.values());
-		Collections.sort(queriesList);
-
-		for (DNASequence query : queriesList) {
+		for (DNASequence query : queryOrder) {
 			if (query.getCenterOfMass() >= 0) {
 				out.write((query.isReverseComplemented() ? "-" : "+")
 						+ query.getId() + "\n");
@@ -685,12 +682,7 @@ public class AlignmentPositionsList extends Observable implements
 		HashMap<String, FastaFileReader> sequences = new HashMap<String, FastaFileReader>();
 		FastaFileReader fastaFile = null;
 
-		// get the sorted contigs
-		Vector<DNASequence> queriesList = new Vector<DNASequence>();
-		queriesList.addAll(queries.values());
-		Collections.sort(queriesList);
-
-		for (DNASequence query : queriesList) {
+		for (DNASequence query : queryOrder) {
 			String path = query.getFile().getAbsolutePath();
 			if (sequences.containsKey(path)) {
 				fastaFile = sequences.get(path);
