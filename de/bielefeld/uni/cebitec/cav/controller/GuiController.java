@@ -268,7 +268,7 @@ public class GuiController {
 	 * Gives a dialog to save the contigs in the displayed order and orientation
 	 * as fasta files.
 	 */
-	public void saveFasta() {
+	public void exportAsFasta() {
 		if (!ComparativeAssemblyViewer.dataModelController
 				.isAlignmentpositionsListReady()) {
 			errorAlert("There is nothing to save!");
@@ -283,8 +283,11 @@ public class GuiController {
 				if (!f.getName().endsWith(".fas")) {
 					f = new File(f.getAbsolutePath() + ".fas");
 				}
+			//	mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				ComparativeAssemblyViewer.dataModelController
 						.writeOrderOfContigsFasta(f);
+			//	mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				
 			} catch (IOException e) {
 				this.errorAlert("Unable to open file:" + e);
 			}

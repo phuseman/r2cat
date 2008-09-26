@@ -175,7 +175,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		} else if (e.getActionCommand().matches("save_project")) {
 			guiController.saveProject();
 		} else if (e.getActionCommand().matches("save_fasta")) {
-			guiController.saveFasta();
+			guiController.exportAsFasta();
 		} else if (e.getActionCommand().matches("reverted")) {
 			guiController.displayReverseComplements(((JCheckBoxMenuItem) e.getSource())
 					.getState());

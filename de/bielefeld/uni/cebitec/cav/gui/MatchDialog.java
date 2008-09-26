@@ -212,8 +212,6 @@ public class MatchDialog extends JDialog implements ActionListener,
 
 					
 					MatchDialog.this.validate();
-//					Thread.sleep(3000);
-//					MatchDialog.this.dispose();
 				} else {
 					errorAlert("An error happened, change the files and try again");
 					progressBar.setValue(0);

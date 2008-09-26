@@ -356,7 +356,7 @@ public class AlignmentPositionsList extends Observable implements
 		out
 				.write("# r2cat output\n# Warning: Comments will be overwritten\n\n");
 		// write a section for each target
-		for (DNASequence target : targets.values()) {
+		for (DNASequence target : targetOrder) {
 			out.write("BEGIN_TARGET " + target.getId() + "\n");
 			if (target.getDescription() != null
 					&& !target.getDescription().isEmpty()) {
@@ -373,11 +373,8 @@ public class AlignmentPositionsList extends Observable implements
 		}
 
 		// write a section for all the queries
-		Vector<DNASequence> queriesList = new Vector<DNASequence>();
-		queriesList.addAll(queries.values());
-		Collections.sort(queriesList);
 
-		for (DNASequence query : queriesList) {
+		for (DNASequence query : queryOrder) {
 			out.write("BEGIN_QUERY " + query.getId() + "\n");
 			if (query.getDescription() != null
 					&& !query.getDescription().isEmpty()) {
@@ -402,27 +399,30 @@ public class AlignmentPositionsList extends Observable implements
 		// the order is written into the file too
 		out.write("BEGIN_HITS\n");
 		out
-				.write("#query_id\tquery_start\tquery_end\ttarget_id\ttarget_start\ttarget_end\thit_variance\tq_hits\n");
+				.write("#query_id\tquery_start\tquery_end\ttarget_id\ttarget_start\ttarget_end\tq_hits\thit_variance\n");
 		for (AlignmentPosition ap : alignmentPositions) {
-			// if the number of qhits is -1 (default) then variance an qhits are
-			// not set. leave them out.
-			if (ap.getNumberOfQHits() < 1) {
+			
+			out.write(String.format((Locale) null,
+					"%s\t%d\t%d\t%s\t%d\t%d", ap.getQuery().getId(), ap
+							.getQueryStart(), ap.getQueryEnd(), ap
+							.getTarget().getId(), ap.getTargetStart(), ap
+							.getTargetEnd()));
+
+			// if the number of qhits is -1 (default); leave it out.
+			if (ap.getNumberOfQHits() >= 1) {
 				// in this case the input could be imported from swift. then the
 				// last two pieces of information are not available
 				out.write(String.format((Locale) null,
-						"%s\t%d\t%d\t%s\t%d\t%d\n", ap.getQuery().getId(), ap
-								.getQueryStart(), ap.getQueryEnd(), ap
-								.getTarget().getId(), ap.getTargetStart(), ap
-								.getTargetEnd()));
-			} else {
-				// write the imported information as tab separated value line
-				out.write(String.format((Locale) null,
-						"%s\t%d\t%d\t%s\t%d\t%d\t%f\t%d\n", ap.getQuery()
-								.getId(), ap.getQueryStart(), ap.getQueryEnd(),
-						ap.getTarget().getId(), ap.getTargetStart(), ap
-								.getTargetEnd(), ap.getVariance(), ap
-								.getNumberOfQHits()));
+						"\t%d", ap.getNumberOfQHits()));
 			}
+			
+			// if the diagonal variance is -1 (default); leave it out.
+
+			if(ap.getVariance()>=0) {
+				out.write(String.format((Locale) null,
+						"\t%f", ap.getNumberOfQHits()));
+			} 
+			out.write("\n");
 
 		}
 		out.write("END_HITS\n");
@@ -530,10 +530,13 @@ public class AlignmentPositionsList extends Observable implements
 						this.addAlignmentPosition(ap);
 
 						// set additional properties
-						if (values.length >= 8) {
-							ap.setVariance(Float.parseFloat(values[6]));
-							ap.setNumberOfQHits(Integer.parseInt(values[7]));
+						if (values.length >= 7) {
+							ap.setNumberOfQHits(Integer.parseInt(values[6]));
 						}
+						if (values.length >= 8) {
+							ap.setVariance(Float.parseFloat(values[7]));
+						}
+						
 					} catch (NumberFormatException e) {
 						System.err.println("Expected a number on line "
 								+ linenumber + " ; " + e.toString());
@@ -696,7 +699,6 @@ public class AlignmentPositionsList extends Observable implements
 				fastaFile.scanContents(true);
 				sequences.put(path, fastaFile);
 			}
-			System.out.println(query.getId());
 
 			if (fastaFile.containsId(query.getId())) {
 				if (!query.isReverseComplemented()) {
