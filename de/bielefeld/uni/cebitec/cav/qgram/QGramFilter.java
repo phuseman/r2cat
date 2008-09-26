@@ -136,16 +136,16 @@ public class QGramFilter {
 		CAVPrefs preferences = new CAVPrefs();
 		Preferences pref = CAVPrefs.getPreferences();
 		
-		
-		File test = new File("test_co.r2c");
-		AlignmentPositionsList apl2=new AlignmentPositionsList();
-		apl2.readFromFile(test);
-		apl2.generateNewStatistics();
-		apl2.writeContigsOrderFasta(new File("test.order"));
-		
-		System.exit(0);
-		
-		
+//		
+//		File test = new File("test_co.r2c");
+//		AlignmentPositionsList apl2=new AlignmentPositionsList();
+//		apl2.readFromFile(test);
+//		apl2.generateNewStatistics();
+//		apl2.writeContigsOrderFasta(new File("test.order"));
+//		
+//		System.exit(0);
+//		
+//		
 		
 		
 		
@@ -644,7 +644,7 @@ public class QGramFilter {
 		int bottom=0;
 		int left=0;
 		int querySize = (int)query.getSequence(queryNumber).getSize();
-		int border=querySize/eZone.getDelta();
+		int border=(querySize/eZone.getDelta())-1;
 		int borderoffset=qGramIndex.getInputLength();
 	
 		
@@ -737,10 +737,10 @@ public class QGramFilter {
 //				+ " bottom:" + bottom 
 //				+ " (" + (top-bottom)+")"
 //				+ " hits:" + binCounts[bucketindex]
-//				+ " Mean:" + binMean[bucketindex]
-//				+ " (" + (left-binMean[bucketindex])+ ") "
-//				+" Variance:"+binVariance[bucketindex]);
-
+////				+ " Mean:" + binMean[bucketindex]
+////				+ " (" + (left-binMean[bucketindex])+ ") "
+////				+" Variance:"+binVariance[bucketindex]
+//				                          );
 		//TODO: there is a problem when using the mean value.
 		//it can be distorted if there is a hit on the reverse strand going to the end of 
 		//a target and continuing on the beginning. some qhits are accounted to the wrong hit.
