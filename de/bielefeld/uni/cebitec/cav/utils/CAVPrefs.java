@@ -52,7 +52,7 @@ public class CAVPrefs {
 	 * 
 	 * @return
 	 */
-	public boolean getDisplayUnidirectional() {
+	public boolean getDisplayReverseComplements() {
 		return preferences.getBoolean("unidirectional", false);
 	}
 
@@ -60,7 +60,7 @@ public class CAVPrefs {
 	 *  Set preference: Should the viewer draw all alignments in one direction?
 	 * @param b true, false
 	 */
-	public void setDisplayUnidirectional(boolean b) {
+	public void setDisplayReverseComplements(boolean b) {
 		preferences.putBoolean("unidirectional", b);
 	}
 

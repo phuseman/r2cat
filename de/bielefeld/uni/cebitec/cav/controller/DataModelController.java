@@ -69,18 +69,19 @@ public class DataModelController {
 
 	private void postSetProcessing() {
 		// use the preferences: with offsets?
-		alignmentPositionsList.generateStatistics(); // this sets the
-		// center of masses and if the contig should be reverse complemented for each query
+		alignmentPositionsList.generateNewStatistics(); // this sets the
+		// center of masses and the reversed match length.
+		//this is needed for the next two methods:
+		alignmentPositionsList.setInitialQueryOrder();
+		alignmentPositionsList.setInitialQueryOrientation();
 
-		if (ComparativeAssemblyViewer.preferences.getDisplayOffsets()) {
-			alignmentPositionsList.addOffsets();
-		} else {
-			// no offsets
-			alignmentPositionsList.resetOffsets();
-		}
+		//recalculate the offsets
+		alignmentPositionsList.setQueryOffsets();
 
-		// add the appropriate offsets for the targets.
-		alignmentPositionsList.addOffsetsToTargets();
+		
+		// add offsets for the targets.
+		alignmentPositionsList.setInitialTargetsOffsets();
+		
 		
 		
 		if (!ComparativeAssemblyViewer.guiController
@@ -112,13 +113,36 @@ public class DataModelController {
 	}
 	
 	public void writeAlignmentPositions(File f) throws IOException {
+		if(isAlignmentpositionsListReady()) {
 		alignmentPositionsList.writeToFile(f);
+		}
 	}
 	
 	public void readAlignmentPositions(File f) throws IOException {
 		AlignmentPositionsList apl = new AlignmentPositionsList();
 		apl.readFromFile(f);
 		this.setAlignmentsPositonsList(apl);
+	}
+	
+	public void writeOrderOfContigs(File f) throws IOException {
+		if(isAlignmentpositionsListReady()) {
+			alignmentPositionsList.writeContigsOrder(f);
+		}
+	}
+
+	public void writeOrderOfContigsFasta(File f) throws IOException {
+		if(isAlignmentpositionsListReady()) {
+			alignmentPositionsList.writeContigsOrderFasta(f);
+		}
+	}
+
+	
+	public boolean isAlignmentpositionsListReady() {
+		if (alignmentPositionsList != null && !alignmentPositionsList.isEmpty()) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

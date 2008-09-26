@@ -207,7 +207,10 @@ public class MatchDialog extends JDialog implements ActionListener,
 					startButton.setActionCommand("ok");
 
 					ComparativeAssemblyViewer.dataModelController.setAlignmentsPositonsList(result);
+					ComparativeAssemblyViewer.guiController.setVisualisationNeedsUpdate();
 
+
+					
 					MatchDialog.this.validate();
 //					Thread.sleep(3000);
 //					MatchDialog.this.dispose();

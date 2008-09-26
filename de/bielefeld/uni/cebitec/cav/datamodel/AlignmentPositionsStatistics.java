@@ -105,11 +105,6 @@ public class AlignmentPositionsStatistics implements Observer {
 			//compute the center of mass for each contig/query
 			query.centerOfMass = query.centerOfMass / query.centerOfMassFactor; 
 			
-			//determine if the majority are foreward or backward hits
-			if ((query.reverseAlignmentLength / query.totalAlignmentLength)>0.5) {
-				query.setReverseComplemented(true);
-			}
-
 
 			// compute min and max query size
 			if (minQueryLen > query.getSize()) {

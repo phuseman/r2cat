@@ -93,10 +93,23 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		swift.addActionListener(this);
 		fileMenu.add(swift);
 
+		JMenuItem fastaExport = new JMenuItem("Export contigs as FASTA file");
+		fastaExport.setMnemonic(KeyEvent.VK_F);
+		fastaExport.getAccessibleContext()
+				.setAccessibleDescription("Save the contigs order and orientation in FASTA format");
+		fastaExport.setActionCommand("save_fasta");
+		fastaExport.addActionListener(this);
+		fileMenu.add(fastaExport);
+
 		
 		
-		
-		fileMenu.add(new JMenuItem("Exit"));
+		JMenuItem exit=new JMenuItem("Exit");
+		exit.setMnemonic(KeyEvent.VK_E);
+		exit.getAccessibleContext()
+				.setAccessibleDescription("Quit the program");
+		exit.setActionCommand("exit");
+		exit.addActionListener(this);
+		fileMenu.add(exit);
 
 		this.add(fileMenu);
 
@@ -105,13 +118,13 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		optionsMenu.getAccessibleContext().setAccessibleDescription("Options");
 
 		JCheckBoxMenuItem reverted = new JCheckBoxMenuItem(
-				"Show alignments unidirectional",
+				"Complemented contigs",
 				ComparativeAssemblyViewer.preferences
-						.getDisplayUnidirectional());
+						.getDisplayReverseComplements());
 		reverted.setMnemonic(KeyEvent.VK_U);
 		reverted.getAccessibleContext().setAccessibleDescription(
-				"Display the alignments reverted if necessary");
-		reverted.setActionCommand("unidirectional");
+				"Display the alignments reverse complemented if necessary");
+		reverted.setActionCommand("reverted");
 		reverted.addActionListener(this);
 		optionsMenu.add(reverted);
 
@@ -158,21 +171,23 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		} else if (e.getActionCommand().matches("match_new")) {
 			guiController.showMatchDialog();
 		} else if (e.getActionCommand().matches("open_project")) {
-			guiController.loadHits();
+			guiController.loadProject();
 		} else if (e.getActionCommand().matches("save_project")) {
-			guiController.saveHits();
-		} else if (e.getActionCommand().matches("unidirectional")) {
-			guiController.displayUnidirectional(((JCheckBoxMenuItem) e.getSource())
+			guiController.saveProject();
+		} else if (e.getActionCommand().matches("save_fasta")) {
+			guiController.saveFasta();
+		} else if (e.getActionCommand().matches("reverted")) {
+			guiController.displayReverseComplements(((JCheckBoxMenuItem) e.getSource())
 					.getState());
 		} else if (e.getActionCommand().matches("query_offsets")) {
-			guiController.displayWithOffsets(((JCheckBoxMenuItem) e.getSource())
+			guiController.displayOffsets(((JCheckBoxMenuItem) e.getSource())
 					.getState());
 		} else if (e.getActionCommand().matches("grid")) {
 			guiController.displayGrid(((JCheckBoxMenuItem) e.getSource())
 					.getState());
 		} else if (e.getActionCommand().matches("show_table")) {
 			ComparativeAssemblyViewer.guiController.showTableFrame();
-		} else if (e.getActionCommand().matches("Exit")) {
+		} else if (e.getActionCommand().matches("exit")) {
 			System.exit(0);
 		} 
 		

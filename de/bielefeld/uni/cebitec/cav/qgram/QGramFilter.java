@@ -96,6 +96,12 @@ public class QGramFilter {
 	private MatchDialog matchDialog;
 	private double progress;
 	
+	
+	//determines if the mean matching diagonal for each contig and variance should be computed
+	// it is faster without and the values are not really reliable to 
+	//serve as a measure of identity
+	private static final boolean computeMean=false;
+	
 
 	//debug
 //	public BufferedWriter logfile;
@@ -129,6 +135,19 @@ public class QGramFilter {
 	public static void main(String[] args) throws Exception {
 		CAVPrefs preferences = new CAVPrefs();
 		Preferences pref = CAVPrefs.getPreferences();
+		
+		
+		File test = new File("test_co.r2c");
+		AlignmentPositionsList apl2=new AlignmentPositionsList();
+		apl2.readFromFile(test);
+		apl2.generateNewStatistics();
+		apl2.writeContigsOrderFasta(new File("test.order"));
+		
+		System.exit(0);
+		
+		
+		
+		
 		
 		
 		Timer t = Timer.getInstance();
@@ -166,11 +185,6 @@ public class QGramFilter {
 
 		QGramFilter qf = new QGramFilter(qi, queryFasta);
 		AlignmentPositionsList apl = qf.match();
-
-//		apl.readFromFile();
-//		apl.generateStatistics();
-//		apl.addOffsets();
-//		apl.writeContigsOrder(new File("test.contigs"));
 
 		t.stopTimer("matching");
 
@@ -225,8 +239,11 @@ public class QGramFilter {
 
 		binMax = new int[binCounts.length]; // was bucketLastOccurrence
 		
+		
+		if (computeMean) {
 		binMean = new float[binCounts.length];
 		binVariance = new float[binCounts.length];
+		}
 
 		// get the query sequences
 		querySequencesArray = null;
@@ -489,24 +506,30 @@ public class QGramFilter {
 			}//end report hit if more than w away
 	
 			
-			//start a new paralelogram and initialize mean and variance
-			if (binCounts[b] == 0) {
-				binMin[b] = hitPositionQuery;
-				
-				//initial values for mean and variance of the hit-diagonal computation
-				binMean[b]=hitPositionTarget-hitPositionQuery; // == diagonal
-				binVariance[b]=0; // variance for one sample is 0
-				
-				//adjust the mean if in reverse direction
-				// diagonal for reverse complement is i + (|query|-j) == i-j +|query|
-				if(reverseComplementDirection) {
-					binMean[b]+=querySize;
-				}
-			}// new parallelogram
 			
-			
+			//====== start a new paralelogram and initialize mean and variance
+				if (binCounts[b] == 0) {
+					binMin[b] = hitPositionQuery;
+		
+					if (computeMean) {
+						// initial values for mean and variance of the hit-diagonal
+						// computation
+						binMean[b] = hitPositionTarget - hitPositionQuery; // ==
+						// diagonal
+						binVariance[b] = 0; // variance for one sample is 0
+		
+						// adjust the mean if in reverse direction
+						// diagonal for reverse complement is i + (|query|-j) == i-j
+						// +|query|
+						if (reverseComplementDirection) {
+							binMean[b] += querySize;
+						}
+					}
+				}// new parallelogram
+					
+					
 	
-			//if there was no hit on the same query position
+			// if there was no hit on the same query position
 			// this avoids the counting of multiple hits on a homopolymer region, for example "aaaaaaaaaa"
 			if (binMax[b] < hitPositionQuery) {
 				//--------------main algorithm------
@@ -517,36 +540,49 @@ public class QGramFilter {
 				//------
 				
 				
-				// mean and variance extension
-				//compute the mean and the variance recursively
-				if(binCounts[b]>=1) {
-					int diagonal= hitPositionTarget-hitPositionQuery;
-					
-					//adjust the mean if in reverse direction
-					// diagonal for reverse complement is i + (|query|-j) == i-j +|query|
-					if(reverseComplementDirection) {
-						diagonal+=querySize;
-					}
-					
-
-					//TODO sometimes the diagonal of a hit position is quite far away from the mean.
-					// investigate this
-//if (Math.abs(binMean[b]-diagonal)>2*eZone.getDelta()) {
-//	this.log(String.format("%d %d %d %d %d %f %s\n",hitPositionTarget,hitPositionQuery,offsetDiagonal,diagonal,b,binMean[b],reverseComplementDirection));
-//}
-
-				//compute the mean and the variance for the diagonal values in a recursive fashion
-				//(see Musterklassifikation Skript 2006/07 Uni Bi.; Franz Kummert; Page 18
-				double factor= 1. / binCounts[b];
+			//********* it seems to take longer if here is an additional if clause!
+			//********* if this is commented out the matching of one special file takes 16 seconds
+			//********* if computeMean is checked it takes 25 seconds
+			//********* and if the mean is computed it takes 22 seconds!!
+				//TODO find a good way to make this available
+//				if(computeMean) {
+//				// mean and variance extension
+//				//compute the mean and the variance of the matching diagonals recursively
+//				if(binCounts[b]>=1) {
+//					int diagonal= hitPositionTarget-hitPositionQuery;
+//					
+//					//adjust the mean if in reverse direction
+//					// diagonal for reverse complement is i + (|query|-j) == i-j +|query|
+//					if(reverseComplementDirection) {
+//						diagonal+=querySize;
+//					}
+//					
+//
+//					//TODO sometimes the diagonal of a hit position is quite far away from the mean.
+//					// investigate this
+////if (Math.abs(binMean[b]-diagonal)>2*eZone.getDelta()) {
+////	this.log(String.format("%d %d %d %d %d %f %s\n",hitPositionTarget,hitPositionQuery,offsetDiagonal,diagonal,b,binMean[b],reverseComplementDirection));
+////}
+//
+//					
+//				
+//
+//						//compute the mean and the variance for the diagonal values in a recursive fashion
+//						//(see Musterklassifikation Skript 2006/07 Uni Bi.; Franz Kummert; Page 18
+//						double factor= 1. / binCounts[b];
+//						
+//						//first update the variance because it depends on the mean value of the previous step
+//						binVariance[b] = (float) ((1. - factor) * (binVariance[b] + factor
+//								* ((diagonal - binMean[b]) * (diagonal - binMean[b]))));
+//						binMean[b] = (float) ((1. - factor) * binMean[b] + factor
+//								* diagonal);
+//					
+//					} // mean and variance computation
+//				}
+//				
+//				
+//				
 				
-				//first update the variance because it depends on the mean value of the previous step
-				binVariance[b] = (float) ((1. - factor) * (binVariance[b] + factor
-						* ((diagonal - binMean[b]) * (diagonal - binMean[b]))));
-	
-				binMean[b] = (float) ((1. - factor) * binMean[b] + factor
-						* diagonal);
-	
-				} // mean and variance computation
 			} // enlargement of one paralellogram
 		}
 
@@ -669,8 +705,11 @@ public class QGramFilter {
 			binCounts[bin] = 0;
 			binMin[bin] = 0;
 			binMax[bin] = 0;
+			
+			if(computeMean) {
 			binMean[bin] = 0;
 			binVariance[bin] = 0;
+			}
 		}
 	}
 	
@@ -812,7 +851,10 @@ public class QGramFilter {
 						- dNASeqTarget.getOffset(), targetEnd
 						- dNASeqTarget.getOffset(), dNASeqQuery, queryStart,
 						queryEnd);
+				
+				if(computeMean) {
 				ap.setVariance(binVariance[bucketindex]);
+				}
 				ap.setNumberOfQHits(binCounts[bucketindex]);
 				result.addAlignmentPosition(ap);
 			// match spans over different targets	
@@ -874,7 +916,9 @@ public class QGramFilter {
 					
 					// if the slice is bigger than q, add it
 					if (ap.size() > qGramIndex.getQLength()) {
+						if(computeMean) {
 						ap.setVariance(binVariance[bucketindex]);
+						}
 						ap.setNumberOfQHits(binCounts[bucketindex]);
 						result.addAlignmentPosition(ap);
 					}

@@ -26,12 +26,14 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 
 /**
  * Object for displaying an alignment between a query and a target sequence.
- * Alignment means in this case that a diagonal is drawn if there is a high similarity
- * between a certain query region and a certain target region.<br>
- * The object extends Line2D.Double which allows to be drawn with the draw function
- * of a graphics object. Additionally some geometrical functions are available.
+ * Alignment means in this case that a diagonal is drawn if there is a high
+ * similarity between a certain query region and a certain target region.<br>
+ * The object extends Line2D.Double which allows to be drawn with the draw
+ * function of a graphics object. Additionally some geometrical functions are
+ * available.
+ * 
  * @author Peter Husemann
- *
+ * 
  */
 public class AlignmentPositionDisplayer extends Line2D.Double {
 
@@ -46,96 +48,63 @@ public class AlignmentPositionDisplayer extends Line2D.Double {
 	// do not display the alignment -- not used at the moment
 	private boolean invisible = false;
 
-	
 	private boolean reversed = false;
 
-	public AlignmentPositionDisplayer(){
+	public AlignmentPositionDisplayer() {
 		;
 	}
-	
-	
+
 	/**
 	 * Sets the Data (AlignmentPosition) and computes the drawcoordinates
+	 * 
 	 * @param alignmentPosition
 	 */
-	public AlignmentPositionDisplayer(AlignmentPosition alignmentPosition,
-			boolean reverseComplements) {
+	public AlignmentPositionDisplayer(AlignmentPosition alignmentPosition) {
 		super();
 		this.alignmentPosition = alignmentPosition;
-		
-		
-		//if we should reverse the contigs and this contig seems to match on the reverse strand
-		// set the reversed position
-		if (reverseComplements && alignmentPosition.getQuery().isReverseComplemented()) {
-			this.setReversedPosition();
-			this.reversed = true;
-			} else {
-			this.setPosition();
+		this.setPosition(false, false);
+	}
+
+	/**
+	 * Sets the drawing coordinates for an alignment. These are scaled by
+	 * normalisation factors (x and y direction).
+	 */
+	private void setPosition(boolean withOffsets, boolean reversed) {
+		long xOffset = alignmentPosition.getTarget().getOffset();
+		long yOffset = 0;
+
+
+		if (withOffsets) {
+			yOffset = alignmentPosition.getQuery().getOffset();
 		}
 
-	}
+		if (reversed && alignmentPosition.getQuery().isReverseComplemented()) {
+			long alSize = alignmentPosition.getQuery().getSize();
 
-	
-	/**
-	 * Sets the drawing coordinates for an alignment. These are scaled by normalisation factors (x and y direction).
-	 */
-	private void setPosition() {
-		long xOffset = alignmentPosition.getTarget().getOffset();
-		long yOffset = alignmentPosition.getQuery().getOffset();
-		
-		
-		this.x1 = normalisationFactorX * (xOffset + alignmentPosition.getTargetStart());
-		this.y1 = -(normalisationFactorY * (yOffset + alignmentPosition
-				.getQueryStart()));
-		this.x2 = (normalisationFactorX * (xOffset + alignmentPosition.getTargetEnd()));
-		this.y2 = -(normalisationFactorY * (yOffset + alignmentPosition
-				.getQueryEnd()));
-	}
-
-	/**
-	 * This function reverses the direction of the query in this alignment.
-	 * This is usefull to draw all alignments in the same direction. 
-	 */
-	private void setReversedPosition() {
-		
-		long xOffset = alignmentPosition.getTarget().getOffset();
-
-		long yOffset = alignmentPosition.getQuery().getOffset();
-		long alSize = alignmentPosition.getQuery().getSize();
-
-
-		this.x1 = normalisationFactorX * (xOffset + alignmentPosition.getTargetStart());
-		this.y1 = -(normalisationFactorY * (yOffset + alSize - alignmentPosition
-				.getQueryStart()));
-		this.x2 = (normalisationFactorX * (xOffset + alignmentPosition.getTargetEnd()));
-		this.y2 = -(normalisationFactorY * (yOffset + alSize - alignmentPosition
-				.getQueryEnd()));
-		
-	}
-	
-	public void rescale() {
-		if (this.reversed) {
-			this.setReversedPosition();
+			this.reversed = reversed;
+			
+			this.x1 = normalisationFactorX
+					* (xOffset + alignmentPosition.getTargetStart());
+			this.y1 = -(normalisationFactorY * (yOffset + alSize - alignmentPosition
+					.getQueryStart()));
+			this.x2 = (normalisationFactorX * (xOffset + alignmentPosition
+					.getTargetEnd()));
+			this.y2 = -(normalisationFactorY * (yOffset + alSize - alignmentPosition
+					.getQueryEnd()));
 		} else {
-			this.setPosition();
+			this.x1 = normalisationFactorX
+					* (xOffset + alignmentPosition.getTargetStart());
+			this.y1 = -(normalisationFactorY * (yOffset + alignmentPosition
+					.getQueryStart()));
+			this.x2 = (normalisationFactorX * (xOffset + alignmentPosition
+					.getTargetEnd()));
+			this.y2 = -(normalisationFactorY * (yOffset + alignmentPosition
+					.getQueryEnd()));
 		}
 	}
 
-	/**
-	 * Changes the coordinates such that a contig is displayed in the orientation of the matching
-	 * if flip is false.<br>
-	 * For true it displays the reverse complement of all hits in that contig if the contig was
-	 * marked as reverse complemented.
-	 * @param flip
-	 */
-	public void flipReversed(boolean flip) {
-		if (!flip) {
-			this.setPosition();
-			this.reversed = false;
-		} else if (alignmentPosition.getQuery().isReverseComplemented()) {
-			this.setReversedPosition();
-			this.reversed = true;
-		}
+	public void rescale(boolean withOffsets, boolean reversed) {
+		this.setPosition(withOffsets, reversed);
 	}
 
 	/**
@@ -221,7 +190,6 @@ public class AlignmentPositionDisplayer extends Line2D.Double {
 			this.setSelected(true);
 		}
 	}
-
 
 	public boolean isReversed() {
 		return reversed;

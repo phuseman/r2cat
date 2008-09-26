@@ -218,7 +218,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 	 */
 	private void drawGrid(Graphics2D g2d) {
 
-		if (drawGrid) {
+		if (drawGrid && alignmentPositionDisplayerList.getDisplayOffsets()) {
 
 
 			Color last = g2d.getColor();
@@ -400,6 +400,10 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 			alignmentPositionDisplayerList
 					.generateAlignmentPositionDisplayerList(drawingWidth,
 							drawingHeight);
+		}
+		
+		if(alignmentPositionDisplayerList.needsRegeneration()) {
+			alignmentPositionDisplayerList.regenerate();
 		}
 	}
 

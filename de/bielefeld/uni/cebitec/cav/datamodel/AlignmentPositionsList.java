@@ -33,7 +33,7 @@ import java.util.Locale;
 import java.util.Observable;
 import java.util.Vector;
 
-import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
+import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 
 /**
  * This class is a list of alignment positions.
@@ -41,17 +41,20 @@ import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
  * @author Peter Husemann
  * 
  */
-public class AlignmentPositionsList extends Observable implements 
-		Iterable<AlignmentPosition> { 
+public class AlignmentPositionsList extends Observable implements
+		Iterable<AlignmentPosition> {
 	private Vector<AlignmentPosition> alignmentPositions;
 
 	private HashMap<String, DNASequence> targets;
+	private Vector<DNASequence> targetOrder;
+	private boolean targetOrderDefined = false;
 
 	private HashMap<String, DNASequence> queries;
+	private Vector<DNASequence> queryOrder;
+	private boolean queryOrderDefined = false;
+	private boolean queryOrientationDefined = false;
 
 	AlignmentPositionsStatistics statistics;
-
-	private boolean queriesWithOffsets = false;
 
 	public static enum NotifyEvent {
 		/**
@@ -76,13 +79,13 @@ public class AlignmentPositionsList extends Observable implements
 		alignmentPositions = new Vector<AlignmentPosition>();
 		targets = new HashMap<String, DNASequence>();
 		queries = new HashMap<String, DNASequence>();
+		targetOrder = new Vector<DNASequence>();
+		queryOrder = new Vector<DNASequence>();
 
 		// Collections.sort(targets);
 		// Collections.sort(queries);
 	}
 
-	
-	
 	/**
 	 * This method keeps the already registered observers and copies the new
 	 * data
@@ -91,9 +94,17 @@ public class AlignmentPositionsList extends Observable implements
 	 */
 	public void copyDataFromOtherAlignmentPositionsList(
 			AlignmentPositionsList other) {
-		this.alignmentPositions = other.getAlignmentPositions();
-		this.targets = other.getTargets();
-		this.queries = other.getQueries();
+		this.alignmentPositions = other.alignmentPositions;
+		this.targets = other.targets;
+		this.targetOrder = other.targetOrder;
+		this.queries = other.queries;
+		this.queryOrder = other.queryOrder;
+		
+		this.queryOrderDefined=other.queryOrderDefined;
+		this.queryOrientationDefined=other.queryOrientationDefined;
+		this.targetOrderDefined=other.targetOrderDefined;
+
+		
 		statistics = null; // will be recomputed
 		AlignmentPosition.setParentList(this);
 		unmarkAllAlignments();
@@ -107,9 +118,11 @@ public class AlignmentPositionsList extends Observable implements
 
 		if (!targets.containsKey(a.getTarget().getId())) {
 			targets.put(a.getTarget().getId(), a.getTarget());
+			targetOrder.add(a.getTarget());
 		}
 		if (!queries.containsKey(a.getQuery().getId())) {
 			queries.put(a.getQuery().getId(), a.getQuery());
+			queryOrder.add(a.getQuery());
 		}
 
 		this.setChanged();
@@ -136,44 +149,71 @@ public class AlignmentPositionsList extends Observable implements
 	}
 
 	/**
-	 * Orders the query sequences. Each one gets as offset the sum of the
-	 * lengths of the previous query sequences. This information can then be
-	 * used for drawing some kind of a synteny plot.
+	 * Add offsets if there are multiple targets. TODO: sort the targets by
+	 * length when adding the offsets
 	 */
-	public void addOffsets() {
-		Vector<DNASequence> queriesList = new Vector<DNASequence>();
-		queriesList.addAll(queries.values());
-		Collections.sort(queriesList);
-
-		long offset = 0;
-		for (DNASequence sequence : queriesList) {
-			sequence.setOffset(offset);
-			offset += sequence.getSize();
-			// System.out.println(sequence.getId() + " "+ sequence.getSize()+" "
-			// + sequence.getOffset());
+	public void setInitialTargetsOffsets() {
+		checkStatistics();
+		if (!targetOrderDefined) {
+			long offset = 0;
+			for (DNASequence target : targetOrder) {
+				target.setOffset(offset);
+				offset += target.getSize();
+			}
+			targetOrderDefined = true;
 		}
-		queriesWithOffsets = true;
 	}
 
 	/**
-	 * Removes the offsets which could be drawn.
+	 * Orders the query sequences by their center of mass.
 	 */
-	public void resetOffsets() {
-		for (DNASequence sequence : queries.values()) {
-			sequence.setOffset(0);
-		}
-		queriesWithOffsets = false;
-		ComparativeAssemblyViewer.preferences.setDisplayOffsets(false);
-	}
-
-	public void toggleOffsets() {
-		if (queriesWithOffsets == false) {
-			this.addOffsets();
-		} else {
-			this.resetOffsets();
+	public void setInitialQueryOrder() {
+		checkStatistics();
+		if (!queryOrderDefined) {
+			Collections.sort(queryOrder);
+			queryOrderDefined = true;
 		}
 	}
 
+
+	/**
+	 * Marks a contig as reverse complement if more than 50% of the matches (size not number) are on the reverse strand
+	 */
+	public void setInitialQueryOrientation() {
+		if(!queryOrientationDefined) {
+		this.checkStatistics();
+		for (DNASequence sequence : queryOrder) {
+			if (sequence.totalAlignmentLength == 0) {
+				continue;
+			}
+			if (sequence.reverseAlignmentLength / sequence.totalAlignmentLength > 0.5) {
+				sequence.setReverseComplemented(true);
+			} else {
+				sequence.setReverseComplemented(false);
+			}
+		}
+		queryOrientationDefined=true;
+		}
+	}
+
+	
+	/**
+	 * Each query gets as offset the sum of the lengths of the previous query
+	 * sequences. This information can then be used for drawing some kind of a
+	 * synteny plot. The order is derived from the queryOrder Vector
+	 */
+	public void setQueryOffsets() {
+		if (!queryOrderDefined) {
+			setInitialQueryOrder();
+		}
+		long offset = 0;
+		for (DNASequence sequence : queryOrder) {
+			sequence.setOffset(offset);
+			offset += sequence.getSize();
+		}
+	}
+
+	
 	protected Vector<AlignmentPosition> getAlignmentPositions() {
 		return alignmentPositions;
 	}
@@ -237,17 +277,30 @@ public class AlignmentPositionsList extends Observable implements
 	}
 
 	public AlignmentPositionsStatistics getStatistics() {
-		if (statistics == null) {
-			this.generateStatistics();
-		}
+		checkStatistics();
 		return statistics;
 	}
 
 	/**
-	 * Generates a Statistics Object which does some counting. The Statistics
-	 * Object sets the center of mass for each contig/query
+	 * Checks if there is a statistics object. If not it creates one. Thus after
+	 * this call there will be a statistics object!
+	 * 
+	 * @return
 	 */
-	public void generateStatistics() {
+	private boolean checkStatistics() {
+		if (statistics == null) {
+			this.generateNewStatistics();
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Generates a Statistics Object which does some counting. The Statistics
+	 * Object sets the center of mass for each contig/query and the total
+	 * alignment length as well as reversed alignment length
+	 */
+	public void generateNewStatistics() {
 		statistics = new AlignmentPositionsStatistics(this);
 	}
 
@@ -287,112 +340,105 @@ public class AlignmentPositionsList extends Observable implements
 	}
 
 	/**
-	 * Add offsets if there are multiple targets. 
-	 * TODO: sort the targets by length when adding the offsets
-	 */
-	public void addOffsetsToTargets() {
-		long offset = 0;
-		for (DNASequence target : targets.values()) {
-			target.setOffset(offset);
-			offset += target.getSize();
-		}
-	}
-
-
-	/**
 	 * Writes this list of alignment positions to a file.<br>
-	 * For each query and target object there is a section (BEGIN_QUERY ... END_QUERY and so on) writing additional information like
-	 * size, description, offset in the graph and so on.
-	 * After that there is a section where each matching region is listed on a line. The important informations
-	 * are separated by a tab character.
+	 * For each query and target object there is a section (BEGIN_QUERY ...
+	 * END_QUERY and so on) writing additional information like size,
+	 * description, offset in the graph and so on. After that there is a section
+	 * where each matching region is listed on a line. The important
+	 * informations are separated by a tab character.
 	 * 
 	 * @param f
 	 * @throws IOException
 	 */
 	public void writeToFile(File f) throws IOException {
 		BufferedWriter out = new BufferedWriter(new FileWriter(f));
-		
-		out.write("# r2cat output\n# Warning: Comments will be overwritten\n\n");
+
+		out
+				.write("# r2cat output\n# Warning: Comments will be overwritten\n\n");
 		// write a section for each target
 		for (DNASequence target : targets.values()) {
-			out.write("BEGIN_TARGET "+ target.getId()+"\n");
-			if (target.getDescription()!=null && !target.getDescription().isEmpty()) {
-				out.write(" description="+ target.getDescription() +"\n");
+			out.write("BEGIN_TARGET " + target.getId() + "\n");
+			if (target.getDescription() != null
+					&& !target.getDescription().isEmpty()) {
+				out.write(" description=" + target.getDescription() + "\n");
 			}
-			out.write(" size="+ target.getSize()+"\n");
-			if (target.getOffset()>0) {
-			out.write(" offset="+ target.getOffset()+"\n");
+			out.write(" size=" + target.getSize() + "\n");
+			if (target.getOffset() > 0) {
+				out.write(" offset=" + target.getOffset() + "\n");
 			}
-			if (target.getFile()!=null ) {
-				out.write(" file="+ target.getFile().getAbsolutePath() + "\n");
+			if (target.getFile() != null) {
+				out.write(" file=" + target.getFile().getAbsolutePath() + "\n");
 			}
 			out.write("END_TARGET\n\n");
 		}
 
-//		write a section for all the queries
+		// write a section for all the queries
 		Vector<DNASequence> queriesList = new Vector<DNASequence>();
 		queriesList.addAll(queries.values());
 		Collections.sort(queriesList);
 
 		for (DNASequence query : queriesList) {
-			out.write("BEGIN_QUERY "+ query.getId()+"\n");
-			if (query.getDescription()!=null && !query.getDescription().isEmpty()) {
-				out.write(" description="+ query.getDescription() +"\n");
+			out.write("BEGIN_QUERY " + query.getId() + "\n");
+			if (query.getDescription() != null
+					&& !query.getDescription().isEmpty()) {
+				out.write(" description=" + query.getDescription() + "\n");
 			}
-			out.write(" size="+ query.getSize()+"\n");
-			if (query.getOffset()>0) {
-			out.write(" offset="+ query.getOffset()+"\n");
+			out.write(" size=" + query.getSize() + "\n");
+			if (query.getOffset() > 0) {
+				out.write(" offset=" + query.getOffset() + "\n");
 			}
-			if (query.getFile()!=null) {
-				out.write(" file="+ query.getFile().getAbsolutePath() + "\n");
+			if (query.getFile() != null) {
+				out.write(" file=" + query.getFile().getAbsolutePath() + "\n");
+			}
+			if (query.isReverseComplemented()) {
+				out.write(" reverse_complement="
+						+ query.isReverseComplemented() + "\n");
 			}
 			out.write("END_QUERY\n\n");
 		}
 
-		//write the hit section
-		//each hit is represented by a line with tab seperated values.
+		// write the hit section
+		// each hit is represented by a line with tab seperated values.
 		// the order is written into the file too
 		out.write("BEGIN_HITS\n");
-		out.write("#query_id\tquery_start\tquery_end\ttarget_id\ttarget_start\ttarget_end\thit_variance\tq_hits\n");
+		out
+				.write("#query_id\tquery_start\tquery_end\ttarget_id\ttarget_start\ttarget_end\thit_variance\tq_hits\n");
 		for (AlignmentPosition ap : alignmentPositions) {
-			// if the number of qhits is -1 (default) then variance an qhits are not set. leave them out.
-			if (ap.getNumberOfQHits() < 1 ) {
-				//in this case the input could be imported from swift. then the last two pieces of information are not available
-			out.write(String.format((Locale)null,
-						"%s\t%d\t%d\t%s\t%d\t%d\n", 
-						ap.getQuery().getId(),
-						ap.getQueryStart(),
-						ap.getQueryEnd(),
-						ap.getTarget().getId(),
-						ap.getTargetStart(),
-						ap.getTargetEnd()));
+			// if the number of qhits is -1 (default) then variance an qhits are
+			// not set. leave them out.
+			if (ap.getNumberOfQHits() < 1) {
+				// in this case the input could be imported from swift. then the
+				// last two pieces of information are not available
+				out.write(String.format((Locale) null,
+						"%s\t%d\t%d\t%s\t%d\t%d\n", ap.getQuery().getId(), ap
+								.getQueryStart(), ap.getQueryEnd(), ap
+								.getTarget().getId(), ap.getTargetStart(), ap
+								.getTargetEnd()));
 			} else {
-				//write the imported information as tab separated value line
-			out.write(String.format((Locale)null, 
-					"%s\t%d\t%d\t%s\t%d\t%d\t%f\t%d\n", 
-					ap.getQuery().getId(),
-					ap.getQueryStart(),
-					ap.getQueryEnd(),
-					ap.getTarget().getId(),
-					ap.getTargetStart(),
-					ap.getTargetEnd(),
-					ap.getVariance(),
-					ap.getNumberOfQHits()));
+				// write the imported information as tab separated value line
+				out.write(String.format((Locale) null,
+						"%s\t%d\t%d\t%s\t%d\t%d\t%f\t%d\n", ap.getQuery()
+								.getId(), ap.getQueryStart(), ap.getQueryEnd(),
+						ap.getTarget().getId(), ap.getTargetStart(), ap
+								.getTargetEnd(), ap.getVariance(), ap
+								.getNumberOfQHits()));
 			}
 
 		}
 		out.write("END_HITS\n");
-		
+
 		out.close();
 	}
 
 	/**
 	 * This method reads the data which are saved by the writeToFile() method.
-	 * Every line starting with # will be ignored. every line wich is not between BEGIN_something and
-	 * END_something will be ignored too.
-	 *<br>
-	 * The odrder of the sections should play no role. e.g. BEGIN_HITS first or BEGIN_TARGET first. 
-	 * @param f file to read from
+	 * Every line starting with # will be ignored. every line wich is not
+	 * between BEGIN_something and END_something will be ignored too. <br>
+	 * The odrder of the sections should play no role. e.g. BEGIN_HITS first or
+	 * BEGIN_TARGET first.
+	 * 
+	 * @param f
+	 *            file to read from
 	 * @throws IOException
 	 */
 	public void readFromFile(File f) throws IOException {
@@ -400,7 +446,9 @@ public class AlignmentPositionsList extends Observable implements
 
 		this.alignmentPositions.clear();
 		this.targets.clear();
+		this.targetOrder.clear();
 		this.queries.clear();
+		this.queryOrder.clear();
 		statistics = null; // will be recomputed
 
 		String line;
@@ -408,7 +456,7 @@ public class AlignmentPositionsList extends Observable implements
 		String[] values;
 		DNASequence target;
 		DNASequence query;
-		int linenumber=0;
+		int linenumber = 0;
 
 		while (in.ready()) {
 			line = in.readLine();
@@ -424,17 +472,18 @@ public class AlignmentPositionsList extends Observable implements
 					linenumber++;
 
 					// ignore comments
-					if (line.startsWith("#") || line.startsWith("\"#") || line.matches("END_HITS")) {
+					if (line.startsWith("#") || line.startsWith("\"#")
+							|| line.matches("END_HITS")) {
 						continue;
 					}
 
-					// split the tab seperated values...
+					// split the tab separated values...
 					values = line.split("\t");
 					// if a editor destroyed the tabs try out if spaces work
-					if(values.length==1) {
+					if (values.length == 1) {
 						values = line.split(" +");
 					}
-					
+
 					if (values.length < 6) {
 						continue;
 					}
@@ -445,11 +494,15 @@ public class AlignmentPositionsList extends Observable implements
 						query = queries.get(values[0]);
 						if (query == null) {
 							query = new DNASequence(values[0]);
-							queries.put(query.getId(),query);
+							queries.put(query.getId(), query);
+							queryOrder.add(query);
+
+						
 						}
 						if (target == null) {
 							target = new DNASequence(values[3]);
-							targets.put(target.getId(),target);
+							targets.put(target.getId(), target);
+							targetOrder.add(target);
 						}
 
 						long queryStart = Long.parseLong(values[1]);
@@ -458,16 +511,17 @@ public class AlignmentPositionsList extends Observable implements
 						long targetStart = Long.parseLong(values[4]);
 						long targetEnd = Long.parseLong(values[5]);
 
-						//TODO set the size of a query/target at least to the max
+						// TODO set the size of a query/target at least to the
+						// max
 						// ending value.
 						// this is needed for drawing if the size information is
 						// missing
-//						if (query.getSize() < queryEnd) {
-//							query.setSize(queryEnd + 1);
-//						}
-//						if (target.getSize() < targetEnd) {
-//							target.setSize(targetEnd + 1);
-//						}
+						// if (query.getSize() < queryEnd) {
+						// query.setSize(queryEnd + 1);
+						// }
+						// if (target.getSize() < targetEnd) {
+						// target.setSize(targetEnd + 1);
+						// }
 
 						AlignmentPosition ap = new AlignmentPosition(target,
 								targetStart, targetEnd, query, queryStart,
@@ -481,7 +535,8 @@ public class AlignmentPositionsList extends Observable implements
 							ap.setNumberOfQHits(Integer.parseInt(values[7]));
 						}
 					} catch (NumberFormatException e) {
-						System.err.println("Expected a number on line "+linenumber+" ; " + e.toString());
+						System.err.println("Expected a number on line "
+								+ linenumber + " ; " + e.toString());
 					}
 
 				}
@@ -496,6 +551,7 @@ public class AlignmentPositionsList extends Observable implements
 					// if not create a new one
 					target = new DNASequence(target_id);
 					targets.put(target_id, target);
+					targetOrder.add(target);
 				}
 				while (in.ready() && !line.matches("END_TARGET")) {
 					line = in.readLine();
@@ -510,7 +566,9 @@ public class AlignmentPositionsList extends Observable implements
 					propertyValue = line.split("=");
 					if (propertyValue.length != 2) {
 						System.err
-								.println("Line "+linenumber+" ignored, to much or to less values for property:\n"
+								.println("Line "
+										+ linenumber
+										+ " ignored, to much or to less values for property:\n"
 										+ line);
 						continue;
 					}
@@ -522,6 +580,7 @@ public class AlignmentPositionsList extends Observable implements
 					} else if (propertyValue[0].matches(".+offset")) {
 						target.setOffset(Long.parseLong(propertyValue[1]));
 					} else if (propertyValue[0].matches(".+file")) {
+						// TODO use one file object for all targets
 						target.setFile(new File(propertyValue[1]));
 					}
 
@@ -539,6 +598,7 @@ public class AlignmentPositionsList extends Observable implements
 					// if not create a new one
 					query = new DNASequence(query_id);
 					queries.put(query_id, query);
+					queryOrder.add(query);
 				}
 				while (in.ready() && !line.matches("END_QUERY")) {
 					line = in.readLine();
@@ -553,7 +613,9 @@ public class AlignmentPositionsList extends Observable implements
 					// lines
 					if (propertyValue.length != 2) {
 						System.err
-								.println("Line "+linenumber+" ignored, to much or to less values for property:\n"
+								.println("Line "
+										+ linenumber
+										+ " ignored, to much or to less values for property:\n"
 										+ line);
 						continue;
 					}
@@ -565,7 +627,11 @@ public class AlignmentPositionsList extends Observable implements
 					} else if (propertyValue[0].matches(".+offset")) {
 						query.setOffset(Long.parseLong(propertyValue[1]));
 					} else if (propertyValue[0].matches(".+file")) {
+						// TODO use one file object for all targets
 						query.setFile(new File(propertyValue[1]));
+					} else if (propertyValue[0].matches(".+reverse_complement")) {
+						query.setReverseComplemented(Boolean
+								.parseBoolean(propertyValue[1]));
 					}
 				}
 
@@ -576,12 +642,24 @@ public class AlignmentPositionsList extends Observable implements
 			}
 		}
 
-		// postprocessing (don't know if thi is needed here...)
+		// postprocessing (don't know if this is needed here...)
 		AlignmentPosition.setParentList(this);
 		unmarkAllAlignments();
+		this.queryOrderDefined=true;
+		this.queryOrientationDefined=true;
+		this.targetOrderDefined=true;
 		this.setChanged();
 	}
-	
+
+	/**
+	 * Writes the order of contigs to a file. Each line is an identifier of a
+	 * contig. The orientation is given by a preceding + for forward and - for
+	 * reverse complement.
+	 * 
+	 * @param f
+	 *            file to write to
+	 * @throws IOException
+	 */
 	public void writeContigsOrder(File f) throws IOException {
 		BufferedWriter out = new BufferedWriter(new FileWriter(f));
 
@@ -591,11 +669,47 @@ public class AlignmentPositionsList extends Observable implements
 
 		for (DNASequence query : queriesList) {
 			if (query.getCenterOfMass() >= 0) {
-				out.write(query.getId() + "\n");
+				out.write((query.isReverseComplemented() ? "-" : "+")
+						+ query.getId() + "\n");
 			}
 		}
 		out.close();
 	}
 
+	public void writeContigsOrderFasta(File f) throws IOException {
+		BufferedWriter out = new BufferedWriter(new FileWriter(f));
+
+		HashMap<String, FastaFileReader> sequences = new HashMap<String, FastaFileReader>();
+		FastaFileReader fastaFile = null;
+
+		// get the sorted contigs
+		Vector<DNASequence> queriesList = new Vector<DNASequence>();
+		queriesList.addAll(queries.values());
+		Collections.sort(queriesList);
+
+		for (DNASequence query : queriesList) {
+			String path = query.getFile().getAbsolutePath();
+			if (sequences.containsKey(path)) {
+				fastaFile = sequences.get(path);
+			} else {
+				fastaFile = new FastaFileReader(new File(path));
+				fastaFile.scanContents(true);
+				sequences.put(path, fastaFile);
+			}
+			System.out.println(query.getId());
+
+			if (fastaFile.containsId(query.getId())) {
+				if (!query.isReverseComplemented()) {
+					out.write(">" + query.getId() + "\n");
+					fastaFile.writeSequence(query.getId(), out);
+				} else {
+					out.write(">" + query.getId() + " reverse complemented\n");
+					fastaFile
+							.writeReverseComplementSequence(query.getId(), out);
+				}
+			}
+		}
+		out.close();
+	}
 
 }

@@ -37,7 +37,11 @@ public class AlignmentPositionDisplayerList implements
 
 	private Vector<AlignmentPositionDisplayer> alPosDispList;
 
-	private boolean reversedComplements = false;
+	private boolean displayReversedComplements = false;
+
+	private boolean displayOffsets;
+	
+	private boolean needsRegeneration=false;
 
 	/**
 	 * Defines the selection type.
@@ -89,12 +93,13 @@ public class AlignmentPositionDisplayerList implements
 
 			alPosDispList.clear();
 			for (AlignmentPosition ap : alignmentsPositions) {
-				alPosDispList.add(new AlignmentPositionDisplayer(ap,reversedComplements));
+				alPosDispList.add(new AlignmentPositionDisplayer(ap));
 			}
 
 		}
 
 	}
+
 
 	/**
 	 * Rescales the {@link AlignmentPositionDisplayer}s to a given width and
@@ -118,13 +123,21 @@ public class AlignmentPositionDisplayerList implements
 
 		if (this.isGenerated()) {
 			for (AlignmentPositionDisplayer apd : alPosDispList) {
-				apd.rescale();
+				apd.rescale(displayOffsets,displayReversedComplements);
 			}
 		} else {
 			this.generateAlignmentPositionDisplayerList(width, heigth);
 		}
 
 	}
+	
+	public void regenerate() {
+		for (AlignmentPositionDisplayer apd : alPosDispList) {
+			apd.rescale(displayOffsets,displayReversedComplements);
+		}
+		needsRegeneration=false;
+	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -276,6 +289,16 @@ public class AlignmentPositionDisplayerList implements
 		}
 	}
 
+	
+	public boolean needsRegeneration() {
+		return needsRegeneration;
+	}
+
+	public void setNeedsRegeneration(boolean reg) {
+		this.needsRegeneration=reg;
+	}
+
+	
 	/**
 	 * Marks all alignments in a rectangle between a given top left and bottom
 	 * right point. the type of selection can be specified by the markOperation.
@@ -324,12 +347,6 @@ public class AlignmentPositionDisplayerList implements
 		return alignmentsPositions.size();
 	}
 
-	public void regenerate() {
-		for (AlignmentPositionDisplayer apd : alPosDispList) {
-			apd.rescale();
-		}
-	}
-	
 	/**
 	 * Removes all displayable elements
 	 */
@@ -337,9 +354,6 @@ public class AlignmentPositionDisplayerList implements
 		alPosDispList.clear();
 	}
 
-	public boolean showReversedComplements() {
-		return reversedComplements;
-	}
 
 	/**
 	 * 
@@ -350,10 +364,17 @@ public class AlignmentPositionDisplayerList implements
 	 * 
 	 */
 	public void showReversedComplements(boolean flip) {
-		this.reversedComplements  = flip;
-		for (AlignmentPositionDisplayer elem : alPosDispList) {
-			elem.flipReversed(flip);
-		}
+		this.needsRegeneration=true;
+		this.displayReversedComplements  = flip;
+	}
+
+	public void setDisplayOffsets(boolean displayOffsets) {
+		this.needsRegeneration=true;
+		this.displayOffsets=displayOffsets;
+	}
+
+	public boolean getDisplayOffsets() {
+		return displayOffsets;
 	}
 
 }

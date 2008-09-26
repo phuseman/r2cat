@@ -20,6 +20,7 @@
 package de.bielefeld.uni.cebitec.cav.qgram;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -167,9 +168,7 @@ public class FastaFileReader {
 	 * @throws IOException
 	 */
 	public char[] getCharArray() throws IOException {
-		if (!initialized || chararray == null) {
-			this.scanContents(true);
-		}
+		checkInitialisation();
 		return chararray;
 	}
 	
@@ -189,9 +188,7 @@ public class FastaFileReader {
 	 * @throws IOException
 	 */
 	public int[] getOffsetsArray() throws IOException {
-		if (!initialized || chararray == null) {
-			this.scanContents(true);
-		}
+		checkInitialisation();
 
 		int[] out = new int[offsetsInCharArray.size() + 1];
 
@@ -214,6 +211,95 @@ public class FastaFileReader {
 
 	public Vector<DNASequence> getSequences() {
 		return sequences;
+	}
+
+	
+	/**
+	 * Writes out the sequence of this fasta file which matches the given id.
+	 * @param id identifier of the fastasequence to write
+	 * @param output writer to put the sequence in.
+	 * @return true if the operation was successful
+	 * @throws IOException
+	 */
+	public boolean writeSequence(String id, BufferedWriter output) throws IOException {
+		checkInitialisation();
+		//go through all sequences and find the one with the same id
+		for (int i = 0; i < sequences.size(); i++) {
+			if(sequences.get(i).getId().matches(id)) {
+				output.write(chararray, (int)sequences.get(i).getOffset(), (int)sequences.get(i).getSize());
+				output.write('\n');
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
+
+	/**
+	 * Writes the reverse complement of sequence id to a file. there are no newlines etc.
+	 * @param id identifier of the sequence
+	 * @param output output writer
+	 * @return failure or success
+	 * @throws IOException
+	 */
+	public boolean writeReverseComplementSequence(String id, BufferedWriter output) throws IOException {
+		checkInitialisation();
+		//go through all sequences and find the one with the same id
+		for (int i = 0; i < sequences.size(); i++) {
+			if(sequences.get(i).getId().matches(id)) {
+				
+				int length=(int)sequences.get(i).getSize();
+				int offset=(int)sequences.get(i).getOffset();
+				
+				//translation map
+				char[] alphabetMap= new char[256];
+				alphabetMap['a']='t';
+				alphabetMap['A']='T';
+				alphabetMap['c']='g';
+				alphabetMap['C']='G';
+				alphabetMap['g']='c';
+				alphabetMap['G']='C';
+				alphabetMap['t']='a';
+				alphabetMap['T']='A';
+
+				char[] buffer = new char[length];
+				
+				int bi =0;
+				for (int j = offset+length-1; j>=offset; j-- , bi++) {
+					buffer[bi]= alphabetMap[chararray[j]];
+				}
+
+				output.write(buffer, 0, buffer.length);
+				output.write('\n');
+				buffer = null;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	
+	/**
+	 * Returnes if an id is among those in this fasta file
+	 * @param id id to search for
+	 * @return existent or not
+	 * @throws IOException
+	 */
+	public boolean containsId(String id) throws IOException {
+		checkInitialisation();
+		return offsetsInCharArray.containsKey(id);
+	}
+
+	/**
+	 * If the contents of the file were not read in, resume this.
+	 * @throws IOException
+	 */
+	private void checkInitialisation() throws IOException {
+		if (!initialized || chararray == null) {
+			this.scanContents(true);
+		}
 	}
 
 }
