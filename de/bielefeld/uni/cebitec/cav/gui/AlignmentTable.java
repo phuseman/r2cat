@@ -58,8 +58,8 @@ public class AlignmentTable extends JTable implements Observer {
 		this.setRowSelectionAllowed(true);
 
 		// these are only available in java 6
-		// this.setAutoCreateRowSorter(true);
-		// this.setFillsViewportHeight(true);
+		 this.setAutoCreateRowSorter(true);
+		 this.setFillsViewportHeight(true);
 	}
 
 	/*
@@ -85,9 +85,11 @@ public class AlignmentTable extends JTable implements Observer {
 
 				this.clearSelection();
 
+				int viewIndex;
 				for (int i = 0; i < apl.size(); i++) {
 					if (apl.getAlignmentPositionAt(i).isSelected()) {
-						this.addRowSelectionInterval(i, i);
+						viewIndex = this.convertRowIndexToView(i);
+						this.addRowSelectionInterval(viewIndex, viewIndex);
 					}
 				}
 				selectionByUpdate = false;
@@ -124,8 +126,10 @@ public class AlignmentTable extends JTable implements Observer {
 				DefaultListSelectionModel lsm = (DefaultListSelectionModel) e
 						.getSource();
 
+				int modelIndex;
 				for (int i = 0; i < apl.size(); i++) {
-					apl.getAlignmentPositionAt(i).setSelected(
+					modelIndex=this.convertRowIndexToModel(i);
+					apl.getAlignmentPositionAt(modelIndex).setSelected(
 							lsm.isSelectedIndex(i));
 				}
 				apl.notifyObservers(NotifyEvent.MARK);

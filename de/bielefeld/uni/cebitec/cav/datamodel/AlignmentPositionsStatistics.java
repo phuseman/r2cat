@@ -100,7 +100,7 @@ public class AlignmentPositionsStatistics implements Observer {
 
 
 		// go through all queries
-		for (DNASequence query : apl.getQueries().values()) {
+		for (DNASequence query : apl.getQueries()) {
 			
 			//compute the center of mass for each contig/query
 			query.centerOfMass = query.centerOfMass / query.centerOfMassFactor; 
@@ -123,7 +123,7 @@ public class AlignmentPositionsStatistics implements Observer {
 
 		
 		// same for all targets
-		for (DNASequence target : apl.getTargets().values()) {
+		for (DNASequence target : apl.getTargets()) {
 			if (minTargetLen > target.getSize()) {
 				minTargetLen = target.getSize();
 			}

@@ -3,7 +3,7 @@ OBJECTS := $(patsubst %.java,%.class,$(shell find . -iname '*.java'))
 
 JAVA := javac 
 
-JARFILE := cav.jar
+JARFILE := r2cat.jar
 
 .SUFFIXES: .java .class
 %.class:%.java

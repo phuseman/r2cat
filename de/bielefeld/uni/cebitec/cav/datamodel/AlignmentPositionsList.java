@@ -69,7 +69,11 @@ public class AlignmentPositionsList extends Observable implements
 		/**
 		 * This event is fired if there is a change on the data
 		 */
-		CHANGE
+		CHANGE,
+		/**
+		 * This event is fired if there is a change on the data
+		 */
+		ORDER_CHANGED_OR_CONTIG_REVERSED
 	};
 
 	/**
@@ -219,8 +223,8 @@ public class AlignmentPositionsList extends Observable implements
 		return alignmentPositions;
 	}
 
-	public HashMap<String, DNASequence> getQueries() {
-		return queries;
+	public Vector<DNASequence> getQueries() {
+		return queryOrder;
 	}
 
 	/**
@@ -248,8 +252,8 @@ public class AlignmentPositionsList extends Observable implements
 		}
 	}
 
-	public HashMap<String, DNASequence> getTargets() {
-		return targets;
+	public Vector<DNASequence> getTargets() {
+		return targetOrder;
 	}
 
 	/**
@@ -568,7 +572,7 @@ public class AlignmentPositionsList extends Observable implements
 					// property=value
 					// lines
 					propertyValue = line.split("=");
-					if (propertyValue.length != 2) {
+					if (propertyValue.length != 2 && !propertyValue[0].matches(".+description")) {
 						System.err
 								.println("Line "
 										+ linenumber
@@ -578,7 +582,8 @@ public class AlignmentPositionsList extends Observable implements
 					}
 
 					if (propertyValue[0].matches(".+description")) {
-						target.setDescription(propertyValue[1]);
+						int start= line.indexOf("=")+1;
+						target.setDescription(line.substring(start, line.length()-1));
 					} else if (propertyValue[0].matches(".+size")) {
 						target.setSize(Long.parseLong(propertyValue[1]));
 					} else if (propertyValue[0].matches(".+offset")) {
@@ -615,7 +620,7 @@ public class AlignmentPositionsList extends Observable implements
 					// read each line and process the
 					// property=value
 					// lines
-					if (propertyValue.length != 2) {
+					if (propertyValue.length != 2 && !propertyValue[0].matches(".+description")) {
 						System.err
 								.println("Line "
 										+ linenumber
@@ -625,7 +630,8 @@ public class AlignmentPositionsList extends Observable implements
 					}
 
 					if (propertyValue[0].matches(".+description")) {
-						query.setDescription(propertyValue[1]);
+						int start= line.indexOf("=")+1;
+						query.setDescription(line.substring(start, line.length()-1));
 					} else if (propertyValue[0].matches(".+size")) {
 						query.setSize(Long.parseLong(propertyValue[1]));
 					} else if (propertyValue[0].matches(".+offset")) {
@@ -693,6 +699,7 @@ public class AlignmentPositionsList extends Observable implements
 			}
 
 			if (fastaFile.containsId(query.getId())) {
+				//TODO write old description
 				if (!query.isReverseComplemented()) {
 					out.write(">" + query.getId() + "\n");
 					fastaFile.writeSequence(query.getId(), out);
@@ -704,6 +711,11 @@ public class AlignmentPositionsList extends Observable implements
 			}
 		}
 		out.close();
+	}
+
+	public void forceNotifyObservers(NotifyEvent change) {
+		this.setChanged();
+		this.notifyObservers(change);
 	}
 
 }

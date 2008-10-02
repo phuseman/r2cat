@@ -162,6 +162,16 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		tableView.addActionListener(this);
 		windowMenu.add(tableView);
 
+		JMenuItem sortQueries = new JMenuItem("Sort queries manually");
+		sortQueries.setMnemonic(KeyEvent.VK_Q);
+		sortQueries.getAccessibleContext().setAccessibleDescription(
+				"Display a table to sort the queries by hand");
+		sortQueries.setActionCommand("show_query_table");
+		sortQueries.addActionListener(this);
+		windowMenu.add(sortQueries);
+
+		
+		
 		this.add(windowMenu);
 	}
 
@@ -186,7 +196,9 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			guiController.displayGrid(((JCheckBoxMenuItem) e.getSource())
 					.getState());
 		} else if (e.getActionCommand().matches("show_table")) {
-			ComparativeAssemblyViewer.guiController.showTableFrame();
+			ComparativeAssemblyViewer.guiController.showAlignmentsPositionTableFrame();
+		} else if (e.getActionCommand().matches("show_query_table")) {
+			ComparativeAssemblyViewer.guiController.showQuerySortTable(ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList());
 		} else if (e.getActionCommand().matches("exit")) {
 			System.exit(0);
 		} 

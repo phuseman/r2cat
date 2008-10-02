@@ -30,6 +30,7 @@ import javax.swing.JScrollPane;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
+import de.bielefeld.uni.cebitec.cav.datamodel.DNASequenceTableModel;
 import de.bielefeld.uni.cebitec.cav.gui.AlignmentTable;
 import de.bielefeld.uni.cebitec.cav.gui.CustomFileFilter;
 import de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin;
@@ -38,6 +39,7 @@ import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisationActionListener;
 import de.bielefeld.uni.cebitec.cav.gui.MainMenu;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
 import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
+import de.bielefeld.uni.cebitec.cav.gui.SequenceOrderTable;
 
 public class GuiController {
 
@@ -118,7 +120,7 @@ public class GuiController {
 		}
 	}
 
-	public void createTableFrame(AlignmentPositionsList alignmentPositionsList) {
+	public void createAlignmentsPositionTableFrame(AlignmentPositionsList alignmentPositionsList) {
 		if (alignmentPositionsList != null) {
 			tableFrame = new JFrame();
 			AlignmentTable at = new AlignmentTable(alignmentPositionsList);
@@ -129,14 +131,31 @@ public class GuiController {
 		}
 	}
 
-	public void showTableFrame() {
+	public void showAlignmentsPositionTableFrame() {
 		if (tableFrame == null) {
-			this.createTableFrame(ComparativeAssemblyViewer.dataModelController
+			this.createAlignmentsPositionTableFrame(ComparativeAssemblyViewer.dataModelController
 					.getAlignmentPositionsList());
 		}
 		if (tableFrame != null) {
 			tableFrame.setVisible(true);
 		}
+	}
+	
+	public void showQuerySortTable(AlignmentPositionsList alignmentPositionsList) {
+		if (alignmentPositionsList != null) {
+			JFrame querySort = new JFrame();
+			SequenceOrderTable qso=new SequenceOrderTable(alignmentPositionsList.getQueries(),alignmentPositionsList);
+			DNASequenceTableModel model = (DNASequenceTableModel) qso.getModel() ;
+			model.setShowComplementColumn(true);
+			JScrollPane tp = new JScrollPane(qso);
+			querySort.add(tp);
+			querySort.pack();
+			querySort.setLocationByPlatform(true);
+			querySort.setVisible(true);
+
+			
+		}
+		
 	}
 
 	public void showMatchDialog() {

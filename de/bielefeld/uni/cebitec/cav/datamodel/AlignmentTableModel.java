@@ -124,9 +124,5 @@ public class AlignmentTableModel extends AbstractTableModel implements Observer 
 		// TODO maybe only update modified cells
 	}
 
-	// public void setValueAt(Object value, int row, int col) {
-	// rowData[row][col] = value;
-	// fireTableCellUpdated(row, col);
-	// }
 
 }

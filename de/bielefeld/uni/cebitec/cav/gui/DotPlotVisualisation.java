@@ -233,7 +233,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 			}
 			
 			for (DNASequence q : ComparativeAssemblyViewer.dataModelController
-					.getAlignmentPositionsList().getQueries().values()) {
+					.getAlignmentPositionsList().getQueries()) {
 				horizontalOffset = (q.getOffset() * AlignmentPositionDisplayer
 						.getNormalisationFactorY());
 				separator = new Line2D.Double(0, -horizontalOffset,
@@ -244,7 +244,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 			double verticalOffset = 0;
 			// vertical
 			for (DNASequence t : ComparativeAssemblyViewer.dataModelController
-					.getAlignmentPositionsList().getTargets().values()) {
+					.getAlignmentPositionsList().getTargets()) {
 				verticalOffset = (t.getOffset() * AlignmentPositionDisplayer
 						.getNormalisationFactorX());
 				separator = new Line2D.Double(verticalOffset, 0,
@@ -507,6 +507,9 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 				alignmentPositionDisplayerList.clear();
 				// reset histogramm so that it will be recomputed with repaint()
 				histogram = new double[0];
+				this.repaint();
+			} else if (action == NotifyEvent.ORDER_CHANGED_OR_CONTIG_REVERSED) {
+				alignmentPositionDisplayerList.regenerate();
 				this.repaint();
 			}
 
