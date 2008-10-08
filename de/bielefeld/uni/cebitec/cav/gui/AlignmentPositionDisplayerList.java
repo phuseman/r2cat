@@ -333,6 +333,7 @@ public class AlignmentPositionDisplayerList implements
 			}
 		}
 		if (alignmentsPositions.hasChanged()) {
+			alignmentsPositions.markQueriesWithSelectedAps();
 			alignmentsPositions
 					.notifyObservers(AlignmentPositionsList.NotifyEvent.MARK);
 		}

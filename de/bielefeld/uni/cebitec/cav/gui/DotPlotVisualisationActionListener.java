@@ -160,7 +160,12 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 				// remove nearest alignment
 				smallestap.setSelected(false);
 			}
+		} else {
+			// remove selection if too far away
+			dotPlotVisualisation.getAlignmentPositionDisplayerList()
+			.unmakAll();
 		}
+		ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().markQueriesWithSelectedAps();
 		ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().notifyObservers(
 				NotifyEvent.MARK);
 	}

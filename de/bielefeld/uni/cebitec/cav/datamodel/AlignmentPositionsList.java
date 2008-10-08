@@ -156,16 +156,35 @@ public class AlignmentPositionsList extends Observable implements
 	 * Add offsets if there are multiple targets. TODO: sort the targets by
 	 * length when adding the offsets
 	 */
-	public void setInitialTargetsOffsets() {
+	public void setInitialTargetOrder() {
 		checkStatistics();
 		if (!targetOrderDefined) {
-			long offset = 0;
-			for (DNASequence target : targetOrder) {
-				target.setOffset(offset);
-				offset += target.getSize();
-			}
-			targetOrderDefined = true;
+			setTargetOffsets();
+			this.setChanged();
 		}
+	}
+	
+	public void setTargetOffsets() {
+		long offset = 0;
+		for (DNASequence target : targetOrder) {
+			target.setOffset(offset);
+			offset += target.getSize();
+		}
+		targetOrderDefined = true;
+
+	}
+
+	public void moveTarget(int fromIndex, int toIndex) {
+		if (fromIndex != toIndex) {
+	
+			DNASequence swap = targetOrder.remove(fromIndex);
+			if (fromIndex < toIndex) {
+				toIndex--;
+			}
+			targetOrder.add(toIndex, swap);
+			this.setChanged();
+		}
+	
 	}
 
 	/**
@@ -176,12 +195,13 @@ public class AlignmentPositionsList extends Observable implements
 		checkStatistics();
 		if (!queryOrderDefined) {
 			Collections.sort(queryOrder);
+			this.setQueryOffsets();
 			queryOrderDefined = true;
+			this.setChanged();
 		}
 	}
-
-
-	/**
+	
+	 /**
 	 * Marks a contig as reverse complement if more than 50% of the matches (size not number) are on the reverse strand
 	 */
 	public void setInitialQueryOrientation() {
@@ -197,11 +217,18 @@ public class AlignmentPositionsList extends Observable implements
 				sequence.setReverseComplemented(false);
 			}
 		}
+		this.setChanged();
 		queryOrientationDefined=true;
 		}
 	}
-
 	
+	public void setQueryReverseComplemented(int index, boolean reverseComplemented) {
+		if(queryOrder.get(index).isReverseComplemented()!=reverseComplemented) {
+			queryOrder.get(index).setReverseComplemented(reverseComplemented);
+			this.setChanged();
+		}
+	}
+
 	/**
 	 * Each query gets as offset the sum of the lengths of the previous query
 	 * sequences. This information can then be used for drawing some kind of a
@@ -218,7 +245,17 @@ public class AlignmentPositionsList extends Observable implements
 		}
 	}
 
-	
+	public void moveQuery(int fromIndex, int toIndex) {
+		if (fromIndex != toIndex) {
+			DNASequence swap = queryOrder.remove(fromIndex);
+			if (fromIndex < toIndex) {
+				toIndex--;
+			}
+			queryOrder.add(toIndex, swap);
+			this.setChanged();
+		}
+	}
+
 	protected Vector<AlignmentPosition> getAlignmentPositions() {
 		return alignmentPositions;
 	}
@@ -320,11 +357,16 @@ public class AlignmentPositionsList extends Observable implements
 		}
 	}
 
-	/**
-	 * remove all markings
-	 */
+	public void markQuery(int index, boolean marked) {
+		if(queryOrder.get(index).isMarked() != marked) {
+			queryOrder.get(index).setMarked(marked);
+			this.setChanged();
+		}
+	}
+
+	
 	public void unmarkAllQueries() {
-		for (DNASequence query : queries.values()) {
+		for (DNASequence query : queryOrder) {
 			query.setMarked(false);
 		}
 	}
@@ -333,16 +375,8 @@ public class AlignmentPositionsList extends Observable implements
 		for (AlignmentPosition elem : alignmentPositions) {
 			elem.setSelected(false);
 		}
-		if (this.hasChanged()) {
-			this.notifyObservers(AlignmentPositionsList.NotifyEvent.MARK);
-		}
 	}
 
-	@Override
-	public void notifyObservers(Object arg) {
-		this.markQueriesWithSelectedAps();
-		super.notifyObservers(arg);
-	}
 
 	/**
 	 * Writes this list of alignment positions to a file.<br>
@@ -713,9 +747,5 @@ public class AlignmentPositionsList extends Observable implements
 		out.close();
 	}
 
-	public void forceNotifyObservers(NotifyEvent change) {
-		this.setChanged();
-		this.notifyObservers(change);
-	}
 
 }

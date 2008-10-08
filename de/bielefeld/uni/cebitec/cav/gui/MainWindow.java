@@ -69,7 +69,7 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 	 * Calls the super constructor and initializes the window
 	 */
 	public MainWindow(GuiController guiController) {
-		super("r2-cat - Related Reference based Contig Arrangement Tool");
+		super("r2cat - Related Reference based Contig Arrangement Tool");
 		
 // in the future probably		
 //		super("meercat - multiple related reference contig arrangement tool");

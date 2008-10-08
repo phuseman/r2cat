@@ -20,17 +20,20 @@
 
 package de.bielefeld.uni.cebitec.cav.controller;
 
+import java.awt.FlowLayout;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
-import de.bielefeld.uni.cebitec.cav.datamodel.DNASequenceTableModel;
+import de.bielefeld.uni.cebitec.cav.datamodel.SequenceOrderTableModel;
 import de.bielefeld.uni.cebitec.cav.gui.AlignmentTable;
 import de.bielefeld.uni.cebitec.cav.gui.CustomFileFilter;
 import de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin;
@@ -122,7 +125,7 @@ public class GuiController {
 
 	public void createAlignmentsPositionTableFrame(AlignmentPositionsList alignmentPositionsList) {
 		if (alignmentPositionsList != null) {
-			tableFrame = new JFrame();
+			tableFrame = new JFrame("Matching positions");
 			AlignmentTable at = new AlignmentTable(alignmentPositionsList);
 			JScrollPane tp = new JScrollPane(at);
 			tableFrame.add(tp);
@@ -143,12 +146,23 @@ public class GuiController {
 	
 	public void showQuerySortTable(AlignmentPositionsList alignmentPositionsList) {
 		if (alignmentPositionsList != null) {
-			JFrame querySort = new JFrame();
-			SequenceOrderTable qso=new SequenceOrderTable(alignmentPositionsList.getQueries(),alignmentPositionsList);
-			DNASequenceTableModel model = (DNASequenceTableModel) qso.getModel() ;
+			JFrame querySort = new JFrame("Query order");
+			querySort.setLayout(new FlowLayout());
+			SequenceOrderTable qso=new SequenceOrderTable(alignmentPositionsList);
+			SequenceOrderTableModel model = (SequenceOrderTableModel) qso.getModel() ;
 			model.setShowComplementColumn(true);
 			JScrollPane tp = new JScrollPane(qso);
 			querySort.add(tp);
+			
+			JPanel controlPanel = new JPanel();
+			JButton up = new JButton("Up");
+			controlPanel.add(up);
+			up.addActionListener(qso);
+			JButton down = new JButton("Down");
+			controlPanel.add(down);
+			down.addActionListener(qso);
+			
+			querySort.add(controlPanel);
 			querySort.pack();
 			querySort.setLocationByPlatform(true);
 			querySort.setVisible(true);
@@ -302,6 +316,9 @@ public class GuiController {
 				if (!f.getName().endsWith(".fas")) {
 					f = new File(f.getAbsolutePath() + ".fas");
 				}
+				
+				//TODO check if all files are existent
+				
 			//	mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				ComparativeAssemblyViewer.dataModelController
 						.writeOrderOfContigsFasta(f);

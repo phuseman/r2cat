@@ -44,41 +44,29 @@ public class ComparativeAssemblyViewer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
 		preferences = new CAVPrefs();
 		dataModelController = new DataModelController();
 		guiController = new GuiController();
 
 		clearPreferences(args);
-
-		//guiController.createSwiftCall();
-
-//		dataModelController.setAlignmentsPositonsListFromCSV(new File(preferences
-//				.getLastFile()));
-
+		
 		guiController.createMainWindow();
-
-
 		guiController.showMainWindow();
 
-//		//this should block until files are selected
-//		guiController.showMatchDialog();
-//		
-//		if(dataModelController
-//						.getAlignmentPositionsList() != null) {
-//		
-//		DataViewPlugin dotPlotVisualisation = guiController
-//				.createDotPlotVisualisation(dataModelController
-//						.getAlignmentPositionsList());
-//		
-//		guiController.setVisualisation(dotPlotVisualisation);
-//
-//		guiController.createTableFrame(dataModelController
-//				.getAlignmentPositionsList());
-//
-//		guiController.showTableFrame();
-//		guiController.showMainWindow();
+		
+		
+		
+		
+		//testing
+//		try {
+//			dataModelController.readAlignmentPositions(new File("/homes/phuseman/prog/ComparativeAssemblyViewer/dsm1709.r2c"));
+//			guiController.setVisualisationNeedsUpdate();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
 //		}
+//		guiController.showQuerySortTable(dataModelController.getAlignmentPositionsList());
+//		
 	}
 
 	private static void clearPreferences(String[] args) {

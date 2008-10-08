@@ -20,6 +20,7 @@
 
 package de.bielefeld.uni.cebitec.cav.gui;
 
+import java.awt.Rectangle;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -58,8 +59,8 @@ public class AlignmentTable extends JTable implements Observer {
 		this.setRowSelectionAllowed(true);
 
 		// these are only available in java 6
-		 this.setAutoCreateRowSorter(true);
-		 this.setFillsViewportHeight(true);
+		this.setAutoCreateRowSorter(true);
+		this.setFillsViewportHeight(true);
 	}
 
 	/*
@@ -85,11 +86,22 @@ public class AlignmentTable extends JTable implements Observer {
 
 				this.clearSelection();
 
+				boolean scrolledToFirstSelectedRow = false;
 				int viewIndex;
 				for (int i = 0; i < apl.size(); i++) {
 					if (apl.getAlignmentPositionAt(i).isSelected()) {
 						viewIndex = this.convertRowIndexToView(i);
 						this.addRowSelectionInterval(viewIndex, viewIndex);
+						if (!scrolledToFirstSelectedRow) {
+							Rectangle rect = this.getCellRect(viewIndex, 0,
+									false);
+							if (rect != null) {
+								this.scrollRectToVisible(rect);
+							}
+
+							scrolledToFirstSelectedRow = true;
+						}
+
 					}
 				}
 				selectionByUpdate = false;
@@ -99,7 +111,9 @@ public class AlignmentTable extends JTable implements Observer {
 				System.out.println("Elements hid; adjust table");
 				this.revalidate();
 			} else if (action == NotifyEvent.CHANGE) {
-//				System.out.println("Elements changed; adjust table");
+				// System.out.println("Elements changed; adjust table");
+				this.revalidate();
+			} else if (action == NotifyEvent.ORDER_CHANGED_OR_CONTIG_REVERSED) {
 				this.revalidate();
 			}
 		}
@@ -128,10 +142,11 @@ public class AlignmentTable extends JTable implements Observer {
 
 				int modelIndex;
 				for (int i = 0; i < apl.size(); i++) {
-					modelIndex=this.convertRowIndexToModel(i);
+					modelIndex = this.convertRowIndexToModel(i);
 					apl.getAlignmentPositionAt(modelIndex).setSelected(
 							lsm.isSelectedIndex(i));
 				}
+				apl.markQueriesWithSelectedAps();
 				apl.notifyObservers(NotifyEvent.MARK);
 			}
 

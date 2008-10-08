@@ -80,7 +80,7 @@ public class DataModelController {
 
 		
 		// add offsets for the targets.
-		alignmentPositionsList.setInitialTargetsOffsets();
+		alignmentPositionsList.setInitialTargetOrder();
 		
 		
 		
@@ -131,6 +131,7 @@ public class DataModelController {
 	}
 
 	public void writeOrderOfContigsFasta(File f) throws IOException {
+		//TODO check if all files are existent
 		if(isAlignmentpositionsListReady()) {
 			alignmentPositionsList.writeContigsOrderFasta(f);
 		}

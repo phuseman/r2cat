@@ -210,7 +210,7 @@ public class CSVParser {
 					+ e.getCause());
 		}
 
-		apl.setInitialTargetsOffsets();
+		apl.setInitialTargetOrder();
 
 		if (errors > 0) {
 			System.err.println(this.getClass().getName() + ": There were "
