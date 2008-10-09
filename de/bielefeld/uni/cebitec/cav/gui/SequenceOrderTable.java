@@ -60,6 +60,7 @@ public class SequenceOrderTable extends JTable implements Observer,
 
 		this.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.setColumnSelectionAllowed(false);
+		this.setAutoscrolls(true);
 		this.setRowSelectionAllowed(true);
 		this.setDragEnabled(true);
 		this.setDropMode(DropMode.INSERT_ROWS);
@@ -183,9 +184,9 @@ public class SequenceOrderTable extends JTable implements Observer,
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals("Up")) {
+		if (e.getActionCommand().equals("up")) {
 			this.moveSelectionUpDown(true);
-		} else if (e.getActionCommand().equals("Down")) {
+		} else if (e.getActionCommand().equals("down")) {
 			this.moveSelectionUpDown(false);
 		}
 

@@ -20,13 +20,15 @@
 
 package de.bielefeld.uni.cebitec.cav.controller;
 
-import java.awt.FlowLayout;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -130,6 +132,15 @@ public class GuiController {
 			AlignmentTable at = new AlignmentTable(alignmentPositionsList);
 			JScrollPane tp = new JScrollPane(at);
 			tableFrame.add(tp);
+			
+			
+			int width = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
+			int height = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
+
+			tableFrame.setPreferredSize(new Dimension(width/2,height));
+			tableFrame.setSize(new Dimension(width/2,height));
+
+			
 			tableFrame.pack();
 			tableFrame.setLocationByPlatform(true);
 		}
@@ -149,25 +160,35 @@ public class GuiController {
 	public void showQuerySortTable(AlignmentPositionsList alignmentPositionsList) {
 		if (alignmentPositionsList != null) {
 			JFrame querySort = new JFrame("Query order");
-			querySort.setLayout(new FlowLayout());
+			querySort.setLayout(new BorderLayout());
 			SequenceOrderTable qso = new SequenceOrderTable(
 					alignmentPositionsList);
 			SequenceOrderTableModel model = (SequenceOrderTableModel) qso
 					.getModel();
 			model.setShowComplementColumn(true);
 			JScrollPane tp = new JScrollPane(qso);
-			querySort.add(tp);
+			querySort.add(tp,BorderLayout.CENTER);
 
 			JPanel controlPanel = new JPanel();
-			JButton up = new JButton("Up");
+			controlPanel.add(new JLabel("Move one step towards sequence"));
+			JButton up = new JButton("start");
+			up.setActionCommand("up");
 			controlPanel.add(up);
 			up.addActionListener(qso);
-			JButton down = new JButton("Down");
+			JButton down = new JButton("end");
+			down.setActionCommand("down");
 			controlPanel.add(down);
 			down.addActionListener(qso);
 
-			querySort.add(controlPanel);
+			querySort.add(controlPanel,BorderLayout.SOUTH);
 			querySort.pack();
+			
+			int width = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
+			int height = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
+
+			querySort.setSize(new Dimension(width/3,height));
+
+			
 			querySort.setLocationByPlatform(true);
 			querySort.setVisible(true);
 

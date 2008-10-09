@@ -47,6 +47,9 @@ public class AlignmentTable extends JTable implements Observer {
 	private AlignmentPositionsList apl;
 
 	private boolean selectionByUpdate = false;
+	private boolean ignoreUpdate = false;
+	
+	
 
 	public AlignmentTable(AlignmentPositionsList apl) {
 		super(new AlignmentTableModel(apl));
@@ -71,6 +74,9 @@ public class AlignmentTable extends JTable implements Observer {
 	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
 	 */
 	public void update(Observable o, Object arg) {
+		if (ignoreUpdate) {
+			return;
+		}
 
 		if (arg == null) {
 			this.revalidate();
@@ -147,7 +153,9 @@ public class AlignmentTable extends JTable implements Observer {
 							lsm.isSelectedIndex(i));
 				}
 				apl.markQueriesWithSelectedAps();
+				this.ignoreUpdate = true;
 				apl.notifyObservers(NotifyEvent.MARK);
+				this.ignoreUpdate = false;
 			}
 
 		}
