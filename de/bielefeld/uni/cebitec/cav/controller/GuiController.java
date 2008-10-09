@@ -123,7 +123,8 @@ public class GuiController {
 		}
 	}
 
-	public void createAlignmentsPositionTableFrame(AlignmentPositionsList alignmentPositionsList) {
+	public void createAlignmentsPositionTableFrame(
+			AlignmentPositionsList alignmentPositionsList) {
 		if (alignmentPositionsList != null) {
 			tableFrame = new JFrame("Matching positions");
 			AlignmentTable at = new AlignmentTable(alignmentPositionsList);
@@ -136,24 +137,27 @@ public class GuiController {
 
 	public void showAlignmentsPositionTableFrame() {
 		if (tableFrame == null) {
-			this.createAlignmentsPositionTableFrame(ComparativeAssemblyViewer.dataModelController
-					.getAlignmentPositionsList());
+			this
+					.createAlignmentsPositionTableFrame(ComparativeAssemblyViewer.dataModelController
+							.getAlignmentPositionsList());
 		}
 		if (tableFrame != null) {
 			tableFrame.setVisible(true);
 		}
 	}
-	
+
 	public void showQuerySortTable(AlignmentPositionsList alignmentPositionsList) {
 		if (alignmentPositionsList != null) {
 			JFrame querySort = new JFrame("Query order");
 			querySort.setLayout(new FlowLayout());
-			SequenceOrderTable qso=new SequenceOrderTable(alignmentPositionsList);
-			SequenceOrderTableModel model = (SequenceOrderTableModel) qso.getModel() ;
+			SequenceOrderTable qso = new SequenceOrderTable(
+					alignmentPositionsList);
+			SequenceOrderTableModel model = (SequenceOrderTableModel) qso
+					.getModel();
 			model.setShowComplementColumn(true);
 			JScrollPane tp = new JScrollPane(qso);
 			querySort.add(tp);
-			
+
 			JPanel controlPanel = new JPanel();
 			JButton up = new JButton("Up");
 			controlPanel.add(up);
@@ -161,15 +165,14 @@ public class GuiController {
 			JButton down = new JButton("Down");
 			controlPanel.add(down);
 			down.addActionListener(qso);
-			
+
 			querySort.add(controlPanel);
 			querySort.pack();
 			querySort.setLocationByPlatform(true);
 			querySort.setVisible(true);
 
-			
 		}
-		
+
 	}
 
 	public void showMatchDialog() {
@@ -256,8 +259,8 @@ public class GuiController {
 	}
 
 	/**
-	 * Shows a dialog to save the actual displayed hits to a file. This one
-	 * can then be loaded with the loadProject() method.
+	 * Shows a dialog to save the actual displayed hits to a file. This one can
+	 * then be loaded with the loadProject() method.
 	 */
 	public void saveProject() {
 		if (!ComparativeAssemblyViewer.dataModelController
@@ -294,7 +297,7 @@ public class GuiController {
 				this.errorAlert("Unable to open file:" + e);
 			}
 		}
-	
+
 	}
 
 	/**
@@ -307,28 +310,67 @@ public class GuiController {
 			errorAlert("There is nothing to save!");
 			return;
 		}
-	
-		// TODO check if the files are there
-	
+
 		File f = this.chooseFile(false, ".fas", "fasta file");
 		if (f != null) {
-			try {
-				if (!f.getName().endsWith(".fas")) {
-					f = new File(f.getAbsolutePath() + ".fas");
+			this.exportAsFastaFile(f, false);
+		} else {
+			return;
+		}
+	}
+
+	private void exportAsFastaFile(File f, boolean ignoreMissingFiles) {
+		try {
+			if (!f.getName().endsWith(".fas")) {
+				f = new File(f.getAbsolutePath() + ".fas");
+			}
+
+			// TODO check if all files are existent
+
+			// mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			int contigsWritten = ComparativeAssemblyViewer.dataModelController
+					.writeOrderOfContigsFasta(f, ignoreMissingFiles);
+			 int totalContigs = ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().getQueries().size();
+			JOptionPane.showMessageDialog(getMainWindow(),
+					"Wrote " + contigsWritten 
+					+ (contigsWritten!=totalContigs?(" out of " + totalContigs):"")
+					+ " contigs into file:\n"+(f.getAbsolutePath()) ,
+					"File written", JOptionPane.INFORMATION_MESSAGE);
+			// mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+		} catch (IOException e) {
+			if (e.getClass() == SequenceNotFoundException.class) {
+				
+				SequenceNotFoundException seqNotFoundException = (SequenceNotFoundException)e;
+
+				Object[] options = { "Yes", "No, leave out missing sequences", "Abort" };
+				int n = JOptionPane.showOptionDialog(this.getMainWindow(),
+						e.getMessage()+"\nDo you want to select a file?",
+						"Sequence not found", JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.WARNING_MESSAGE, null,
+						options,
+						options[0]);
+				
+				switch (n) {
+				case JOptionPane.YES_OPTION:
+					seqNotFoundException.getDNASequence().setFile(this.chooseFile(true, ".fas", "Fasta file"));
+					this.exportAsFastaFile(f, ignoreMissingFiles);
+					break;
+				case JOptionPane.NO_OPTION:
+					this.exportAsFastaFile(f, true);
+					break;
+				case JOptionPane.CANCEL_OPTION:
+					return;
+
+				default:
+					return;
 				}
-				
-				//TODO check if all files are existent
-				
-			//	mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				ComparativeAssemblyViewer.dataModelController
-						.writeOrderOfContigsFasta(f);
-			//	mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				
-			} catch (IOException e) {
-				this.errorAlert("Unable to open file:" + e);
+
+			} else {
+				this.errorAlert(e.getMessage() + "\nNothing was saved");
 			}
 		}
-	
+
 	}
 
 	/**

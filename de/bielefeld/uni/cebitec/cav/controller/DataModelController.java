@@ -130,11 +130,12 @@ public class DataModelController {
 		}
 	}
 
-	public void writeOrderOfContigsFasta(File f) throws IOException {
+	public int writeOrderOfContigsFasta(File f, boolean ignoreMissingFiles) throws IOException {
 		//TODO check if all files are existent
 		if(isAlignmentpositionsListReady()) {
-			alignmentPositionsList.writeContigsOrderFasta(f);
+			return alignmentPositionsList.writeContigsOrderFasta(f, ignoreMissingFiles);
 		}
+		return 0;
 	}
 
 	

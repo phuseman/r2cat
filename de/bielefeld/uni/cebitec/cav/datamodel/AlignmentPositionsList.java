@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.Observable;
 import java.util.Vector;
 
+import de.bielefeld.uni.cebitec.cav.controller.SequenceNotFoundException;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 
 /**
@@ -103,12 +104,11 @@ public class AlignmentPositionsList extends Observable implements
 		this.targetOrder = other.targetOrder;
 		this.queries = other.queries;
 		this.queryOrder = other.queryOrder;
-		
-		this.queryOrderDefined=other.queryOrderDefined;
-		this.queryOrientationDefined=other.queryOrientationDefined;
-		this.targetOrderDefined=other.targetOrderDefined;
 
-		
+		this.queryOrderDefined = other.queryOrderDefined;
+		this.queryOrientationDefined = other.queryOrientationDefined;
+		this.targetOrderDefined = other.targetOrderDefined;
+
 		statistics = null; // will be recomputed
 		AlignmentPosition.setParentList(this);
 		unmarkAllAlignments();
@@ -163,7 +163,7 @@ public class AlignmentPositionsList extends Observable implements
 			this.setChanged();
 		}
 	}
-	
+
 	public void setTargetOffsets() {
 		long offset = 0;
 		for (DNASequence target : targetOrder) {
@@ -176,7 +176,7 @@ public class AlignmentPositionsList extends Observable implements
 
 	public void moveTarget(int fromIndex, int toIndex) {
 		if (fromIndex != toIndex) {
-	
+
 			DNASequence swap = targetOrder.remove(fromIndex);
 			if (fromIndex < toIndex) {
 				toIndex--;
@@ -184,7 +184,7 @@ public class AlignmentPositionsList extends Observable implements
 			targetOrder.add(toIndex, swap);
 			this.setChanged();
 		}
-	
+
 	}
 
 	/**
@@ -195,35 +195,38 @@ public class AlignmentPositionsList extends Observable implements
 		checkStatistics();
 		if (!queryOrderDefined) {
 			Collections.sort(queryOrder);
-			this.setQueryOffsets();
 			queryOrderDefined = true;
+			this.setQueryOffsets();
 			this.setChanged();
 		}
 	}
-	
-	 /**
-	 * Marks a contig as reverse complement if more than 50% of the matches (size not number) are on the reverse strand
+
+	/**
+	 * Marks a contig as reverse complement if more than 50% of the matches
+	 * (size not number) are on the reverse strand
 	 */
 	public void setInitialQueryOrientation() {
-		if(!queryOrientationDefined) {
-		this.checkStatistics();
-		for (DNASequence sequence : queryOrder) {
-			if (sequence.totalAlignmentLength == 0) {
-				continue;
+		if (!queryOrientationDefined) {
+			this.checkStatistics();
+			for (DNASequence sequence : queryOrder) {
+				if (sequence.totalAlignmentLength == 0) {
+					continue;
+				}
+				if (sequence.reverseAlignmentLength
+						/ sequence.totalAlignmentLength > 0.5) {
+					sequence.setReverseComplemented(true);
+				} else {
+					sequence.setReverseComplemented(false);
+				}
 			}
-			if (sequence.reverseAlignmentLength / sequence.totalAlignmentLength > 0.5) {
-				sequence.setReverseComplemented(true);
-			} else {
-				sequence.setReverseComplemented(false);
-			}
-		}
-		this.setChanged();
-		queryOrientationDefined=true;
+			this.setChanged();
+			queryOrientationDefined = true;
 		}
 	}
-	
-	public void setQueryReverseComplemented(int index, boolean reverseComplemented) {
-		if(queryOrder.get(index).isReverseComplemented()!=reverseComplemented) {
+
+	public void setQueryReverseComplemented(int index,
+			boolean reverseComplemented) {
+		if (queryOrder.get(index).isReverseComplemented() != reverseComplemented) {
 			queryOrder.get(index).setReverseComplemented(reverseComplemented);
 			this.setChanged();
 		}
@@ -358,13 +361,12 @@ public class AlignmentPositionsList extends Observable implements
 	}
 
 	public void markQuery(int index, boolean marked) {
-		if(queryOrder.get(index).isMarked() != marked) {
+		if (queryOrder.get(index).isMarked() != marked) {
 			queryOrder.get(index).setMarked(marked);
 			this.setChanged();
 		}
 	}
 
-	
 	public void unmarkAllQueries() {
 		for (DNASequence query : queryOrder) {
 			query.setMarked(false);
@@ -376,7 +378,6 @@ public class AlignmentPositionsList extends Observable implements
 			elem.setSelected(false);
 		}
 	}
-
 
 	/**
 	 * Writes this list of alignment positions to a file.<br>
@@ -440,27 +441,26 @@ public class AlignmentPositionsList extends Observable implements
 		out
 				.write("#query_id\tquery_start\tquery_end\ttarget_id\ttarget_start\ttarget_end\tq_hits\thit_variance\n");
 		for (AlignmentPosition ap : alignmentPositions) {
-			
-			out.write(String.format((Locale) null,
-					"%s\t%d\t%d\t%s\t%d\t%d", ap.getQuery().getId(), ap
-							.getQueryStart(), ap.getQueryEnd(), ap
-							.getTarget().getId(), ap.getTargetStart(), ap
+
+			out.write(String.format((Locale) null, "%s\t%d\t%d\t%s\t%d\t%d", ap
+					.getQuery().getId(), ap.getQueryStart(), ap.getQueryEnd(),
+					ap.getTarget().getId(), ap.getTargetStart(), ap
 							.getTargetEnd()));
 
 			// if the number of qhits is -1 (default); leave it out.
 			if (ap.getNumberOfQHits() >= 1) {
 				// in this case the input could be imported from swift. then the
 				// last two pieces of information are not available
-				out.write(String.format((Locale) null,
-						"\t%d", ap.getNumberOfQHits()));
+				out.write(String.format((Locale) null, "\t%d", ap
+						.getNumberOfQHits()));
 			}
-			
+
 			// if the diagonal variance is -1 (default); leave it out.
 
-			if(ap.getVariance()>=0) {
-				out.write(String.format((Locale) null,
-						"\t%f", ap.getNumberOfQHits()));
-			} 
+			if (ap.getVariance() >= 0) {
+				out.write(String.format((Locale) null, "\t%f", ap
+						.getNumberOfQHits()));
+			}
 			out.write("\n");
 
 		}
@@ -536,7 +536,6 @@ public class AlignmentPositionsList extends Observable implements
 							queries.put(query.getId(), query);
 							queryOrder.add(query);
 
-						
 						}
 						if (target == null) {
 							target = new DNASequence(values[3]);
@@ -575,7 +574,7 @@ public class AlignmentPositionsList extends Observable implements
 						if (values.length >= 8) {
 							ap.setVariance(Float.parseFloat(values[7]));
 						}
-						
+
 					} catch (NumberFormatException e) {
 						System.err.println("Expected a number on line "
 								+ linenumber + " ; " + e.toString());
@@ -606,7 +605,8 @@ public class AlignmentPositionsList extends Observable implements
 					// property=value
 					// lines
 					propertyValue = line.split("=");
-					if (propertyValue.length != 2 && !propertyValue[0].matches(".+description")) {
+					if (propertyValue.length != 2
+							&& !propertyValue[0].matches(".+description")) {
 						System.err
 								.println("Line "
 										+ linenumber
@@ -616,8 +616,9 @@ public class AlignmentPositionsList extends Observable implements
 					}
 
 					if (propertyValue[0].matches(".+description")) {
-						int start= line.indexOf("=")+1;
-						target.setDescription(line.substring(start, line.length()-1));
+						int start = line.indexOf("=") + 1;
+						target.setDescription(line.substring(start, line
+								.length() - 1));
 					} else if (propertyValue[0].matches(".+size")) {
 						target.setSize(Long.parseLong(propertyValue[1]));
 					} else if (propertyValue[0].matches(".+offset")) {
@@ -654,7 +655,8 @@ public class AlignmentPositionsList extends Observable implements
 					// read each line and process the
 					// property=value
 					// lines
-					if (propertyValue.length != 2 && !propertyValue[0].matches(".+description")) {
+					if (propertyValue.length != 2
+							&& !propertyValue[0].matches(".+description")) {
 						System.err
 								.println("Line "
 										+ linenumber
@@ -664,8 +666,9 @@ public class AlignmentPositionsList extends Observable implements
 					}
 
 					if (propertyValue[0].matches(".+description")) {
-						int start= line.indexOf("=")+1;
-						query.setDescription(line.substring(start, line.length()-1));
+						int start = line.indexOf("=") + 1;
+						query.setDescription(line.substring(start, line
+								.length() - 1));
 					} else if (propertyValue[0].matches(".+size")) {
 						query.setSize(Long.parseLong(propertyValue[1]));
 					} else if (propertyValue[0].matches(".+offset")) {
@@ -689,9 +692,9 @@ public class AlignmentPositionsList extends Observable implements
 		// postprocessing (don't know if this is needed here...)
 		AlignmentPosition.setParentList(this);
 		unmarkAllAlignments();
-		this.queryOrderDefined=true;
-		this.queryOrientationDefined=true;
-		this.targetOrderDefined=true;
+		this.queryOrderDefined = true;
+		this.queryOrientationDefined = true;
+		this.targetOrderDefined = true;
 		this.setChanged();
 	}
 
@@ -716,36 +719,147 @@ public class AlignmentPositionsList extends Observable implements
 		out.close();
 	}
 
-	public void writeContigsOrderFasta(File f) throws IOException {
-		BufferedWriter out = new BufferedWriter(new FileWriter(f));
-
+	/**
+	 * Writes all existing contigs of the query order vector, if the source fasta file is given.
+	 * Contigs are reverse complemented if the DNASequence object says so.
+	 * If no or wrong files are given, or Id's are not present then it throws a SequenceNotFoundException, which includes 
+	 * the DNASequence object. This can be caught and another file can be st.
+	 * If no sequences are available, then the output file is not written.
+	 * 
+	 * @param f the file to write the output to. If this file is not writable an IOException will be thrown.
+	 * @param ignoreMissingFiles if this is true, no SequenceNotFoundException will be thrown.
+	 * @return the number of contigs that have been written
+	 * @throws IOException if output is not writable. If some Id's are not present in the given files or if the given files do not exist
+	 * then a SequenceNotFoundException will be thrown.
+	 */
+	public int writeContigsOrderFasta(File f, boolean ignoreMissingFiles)
+			throws IOException {
 		HashMap<String, FastaFileReader> sequences = new HashMap<String, FastaFileReader>();
 		FastaFileReader fastaFile = null;
-
+		boolean anySequenceContained = false;
+		// ======================begin: check for files and id's
+		// check if all sequences and id's exist
 		for (DNASequence query : queryOrder) {
-			String path = query.getFile().getAbsolutePath();
-			if (sequences.containsKey(path)) {
-				fastaFile = sequences.get(path);
-			} else {
-				fastaFile = new FastaFileReader(new File(path));
-				fastaFile.scanContents(true);
-				sequences.put(path, fastaFile);
-			}
+			fastaFile = null;
 
-			if (fastaFile.containsId(query.getId())) {
-				//TODO write old description
-				if (!query.isReverseComplemented()) {
-					out.write(">" + query.getId() + "\n");
-					fastaFile.writeSequence(query.getId(), out);
-				} else {
-					out.write(">" + query.getId() + " reverse complemented\n");
-					fastaFile
-							.writeReverseComplementSequence(query.getId(), out);
+			// if the file was not set, check if the id is in another loaded
+			// file:
+			if (query.getFile() == null) {
+				for (FastaFileReader existingFastaFile : sequences.values()) {
+					if (existingFastaFile.containsId(query.getId())) {
+						// set the file if the id is present in another files
+						query.setFile(existingFastaFile.getSource());
+						fastaFile = existingFastaFile;
+						break;
+					}
 				}
 			}
-		}
-		out.close();
-	}
+			// if the file is still not set, throw an exception
+			if (query.getFile() == null) {
+				if (!ignoreMissingFiles) {
+					throw new SequenceNotFoundException(
+							"No fasta file given for sequence: "
+									+ query.getId() + ".", query);
+				} else {
+					continue;
+				}
+			}
 
+			// if the file is set, try to read a fastafile object for the
+			// specified path
+			// only if this has not happened before
+			String path = query.getFile().getAbsolutePath();
+			if (!sequences.containsKey(path)) {
+				try {
+					// try to open the file and scan the entries
+					fastaFile = new FastaFileReader(new File(path));
+					fastaFile.scanContents(true);
+					sequences.put(path, fastaFile);
+				} catch (IOException e) {
+					// if the opening of the file was not possible
+					if (!ignoreMissingFiles) {
+						throw new SequenceNotFoundException(
+								"The fasta file\n"
+								+ query.getFile().getAbsolutePath()
+								+ "\nfor sequence " 
+								+ query.getId()+
+								" could not be opened.",
+								e, query);
+					} else {
+						continue;
+					}
+				}// end file was not readable
+			} else {
+				// if the path was already loaded into a fastafile: get it;
+				fastaFile = sequences.get(path);
+			}
+
+			// check if the id is really included in the fastafile:
+			if (!fastaFile.containsId(query.getId())) {
+				// the id does not occur in fastaFile!
+				// check if it is included in any other file:
+				for (FastaFileReader existingFastaFile : sequences.values()) {
+					if (existingFastaFile.containsId(query.getId())) {
+						// set the file if the id is present in another files
+						query.setFile(existingFastaFile.getSource());
+						fastaFile = existingFastaFile;
+						break;
+					}
+				}
+			}
+
+			// if there is still no sequence, throw exeption
+			if (fastaFile.containsId(query.getId())) {
+				anySequenceContained = true;
+			} else {
+				if (!ignoreMissingFiles) {
+					throw new SequenceNotFoundException("Sequence "
+							+ query.getId() + "\nwas not found in its associated fasta file:\n"
+							+ fastaFile.getSource().getAbsolutePath(), query);
+				} else {
+					continue;
+				}
+			} // throw if id is not contained in any fastafile
+		}
+		fastaFile = null;
+		// ======================end: check for files and id's
+
+		int contigsWritten=0;
+		// ======================begin: write the existing id's into the file
+		// it seems that all id's are present in the files
+		// then write the output:
+		if (anySequenceContained) {
+			BufferedWriter out = new BufferedWriter(new FileWriter(f));
+			for (DNASequence query : queryOrder) {
+				if(query.getFile()==null) {
+					continue;
+				}
+				String path = query.getFile().getAbsolutePath();
+				if (sequences.containsKey(path)) {
+					fastaFile = sequences.get(path);
+					if (fastaFile.containsId(query.getId())) {
+						contigsWritten++;
+						// TODO write the former description
+						if (!query.isReverseComplemented()) {
+							out.write(">" + query.getId() + "\n");
+							fastaFile.writeSequence(query.getId(), out);
+						} else {
+							out.write(">" + query.getId()
+									+ " reverse complemented\n");
+							fastaFile.writeReverseComplementSequence(query
+									.getId(), out);
+						}
+					}
+				}
+			}
+			out.close();
+		} // end writing files
+		
+		
+		//this is only true if at least one contig has been written
+		return contigsWritten;
+	}
+	
+	
 
 }
