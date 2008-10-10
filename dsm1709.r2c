@@ -2,13 +2,11 @@
 # Warning: Comments will be overwritten
 
 BEGIN_TARGET DSM7109
- description=a+b+=c
  size=2366079
  file=/homes/phuseman/compassemb/test/DSM7109.fas
 END_TARGET
 
 BEGIN_QUERY cur7111_c00187.x
- description= size=10
  size=78053
  file=/homes/phuseman/compassemb/test/cur7111_min500.fas
  reverse_complement=true

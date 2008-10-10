@@ -400,7 +400,7 @@ public class AlignmentPositionsList extends Observable implements
 			out.write("BEGIN_TARGET " + target.getId() + "\n");
 			if (target.getDescription() != null
 					&& !target.getDescription().isEmpty()) {
-				out.write(" description=" + target.getDescription() + "\n");
+				out.write(" description=\"" + target.getDescription() + "\"\n");
 			}
 			out.write(" size=" + target.getSize() + "\n");
 			if (target.getOffset() > 0) {
@@ -418,7 +418,7 @@ public class AlignmentPositionsList extends Observable implements
 			out.write("BEGIN_QUERY " + query.getId() + "\n");
 			if (query.getDescription() != null
 					&& !query.getDescription().isEmpty()) {
-				out.write(" description=" + query.getDescription() + "\n");
+				out.write(" description=\"" + query.getDescription() + "\"\n");
 			}
 			out.write(" size=" + query.getSize() + "\n");
 			if (query.getOffset() > 0) {
@@ -534,12 +534,14 @@ public class AlignmentPositionsList extends Observable implements
 						if (query == null) {
 							query = new DNASequence(values[0]);
 							queries.put(query.getId(), query);
+							//TODO take the order of the queries section!!
 							queryOrder.add(query);
 
 						}
 						if (target == null) {
 							target = new DNASequence(values[3]);
 							targets.put(target.getId(), target);
+							//TODO take the order of the targets section!!
 							targetOrder.add(target);
 						}
 
@@ -617,8 +619,14 @@ public class AlignmentPositionsList extends Observable implements
 
 					if (propertyValue[0].matches(".+description")) {
 						int start = line.indexOf("=") + 1;
+						if (line.charAt(start)=='"') {
+							//remove quotation (if present)
+							target.setDescription(line.substring(start+1, line
+									.length() - 2));
+						} else {
 						target.setDescription(line.substring(start, line
 								.length() - 1));
+						}
 					} else if (propertyValue[0].matches(".+size")) {
 						target.setSize(Long.parseLong(propertyValue[1]));
 					} else if (propertyValue[0].matches(".+offset")) {
@@ -667,8 +675,14 @@ public class AlignmentPositionsList extends Observable implements
 
 					if (propertyValue[0].matches(".+description")) {
 						int start = line.indexOf("=") + 1;
-						query.setDescription(line.substring(start, line
+						if (line.charAt(start)=='"') {
+							//remove quotation (if present)
+							query.setDescription(line.substring(start+1, line
+									.length() - 2));
+						} else {
+							query.setDescription(line.substring(start, line
 								.length() - 1));
+						}
 					} else if (propertyValue[0].matches(".+size")) {
 						query.setSize(Long.parseLong(propertyValue[1]));
 					} else if (propertyValue[0].matches(".+offset")) {
@@ -824,6 +838,9 @@ public class AlignmentPositionsList extends Observable implements
 		fastaFile = null;
 		// ======================end: check for files and id's
 
+		
+		
+		
 		int contigsWritten=0;
 		// ======================begin: write the existing id's into the file
 		// it seems that all id's are present in the files
@@ -841,11 +858,18 @@ public class AlignmentPositionsList extends Observable implements
 						contigsWritten++;
 						// TODO write the former description
 						if (!query.isReverseComplemented()) {
-							out.write(">" + query.getId() + "\n");
+							out.write(">" + query.getId());
+							if(query.getDescription()!=null && !query.getId().equals("")) {
+								out.write(" " + query.getDescription());
+							}
+							out.write("\n");
 							fastaFile.writeSequence(query.getId(), out);
 						} else {
-							out.write(">" + query.getId()
-									+ " reverse complemented\n");
+							out.write(">" + query.getId()+ " reverse complemented");
+							if(query.getDescription()!=null && !query.getId().equals("")) {
+								out.write(" " +query.getDescription());
+							}
+							out.write("\n");
 							fastaFile.writeReverseComplementSequence(query
 									.getId(), out);
 						}

@@ -248,6 +248,8 @@ public class SequenceOrderTable extends JTable implements Observer,
 			// observer method
 			// of the apl and set the status to not changed otherwise
 			model.finishReordering();
+			
+			boolean scrolledToFirstSelectedRow=false;
 
 			// restore old selection
 			this.clearSelection();
@@ -259,7 +261,18 @@ public class SequenceOrderTable extends JTable implements Observer,
 					row++;
 				}
 				this.addRowSelectionInterval(row, row);
+				if (!scrolledToFirstSelectedRow) {
+					Rectangle rect = this.getCellRect(row, 0,
+							false);
+					if (rect != null) {
+						this.scrollRectToVisible(rect);
+					}
+
+					scrolledToFirstSelectedRow = true;
+				}
 			}
+			
+
 
 		}
 
