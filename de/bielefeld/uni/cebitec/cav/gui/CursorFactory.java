@@ -24,6 +24,9 @@ import java.awt.Cursor;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.net.URL;
+
+import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 
 /**
  * @author Peter Husemann
@@ -68,13 +71,13 @@ public class CursorFactory {
 		// Load the desired image for the cursor
 		Image cursorImage = null;
 		if (cursor == CursorType.normal) {
-			cursorImage = toolkit.getImage("images/selectioncursor.png");
+			cursorImage = toolkit.getImage(getUrl("/images/selectioncursor.png"));
 		} else if (cursor == CursorType.add) {
-			cursorImage = toolkit.getImage("images/selectioncursor_add.png");
+			cursorImage = toolkit.getImage(getUrl("/images/selectioncursor_add.png"));
 		} else if (cursor == CursorType.remove) {
-			cursorImage = toolkit.getImage("images/selectioncursor_remove.png");
+			cursorImage = toolkit.getImage(getUrl("/images/selectioncursor_remove.png"));
 		} else if (cursor == CursorType.toggle) { 
-			cursorImage = toolkit.getImage("images/selectioncursor_toggle.png");
+			cursorImage = toolkit.getImage(getUrl("/images/selectioncursor_toggle.png"));
 		}
 
 		// Create the desired hotspot for the cursor
@@ -92,6 +95,12 @@ public class CursorFactory {
 		} else {
 			return new Cursor(Cursor.DEFAULT_CURSOR);
 		}
+	}
+	
+	private static URL getUrl(String resource) {
+		URL url = ComparativeAssemblyViewer.class.getResource(resource);
+		return url;
+
 	}
 
 }

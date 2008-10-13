@@ -22,8 +22,11 @@ package de.bielefeld.uni.cebitec.cav.controller;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -74,6 +77,16 @@ public class GuiController {
 
 	public void createMainWindow() {
 		mainWindow = new MainWindow(this);
+		URL url = ComparativeAssemblyViewer.class.getResource("/images/icon.png"); 
+		if (url!=null) {
+		Image image = Toolkit.getDefaultToolkit().getImage(url);
+//		     while ( !Toolkit.getDefaultToolkit().prepareImage( image, -1, -1, mainWindow ) ) {
+//		       try {
+//		         Thread.sleep( 100 );
+//		       } catch ( Exception e ) {}
+//		     }
+		     mainWindow.setIconImage( image );
+		}
 	}
 
 	public void showMainWindow() {
@@ -141,6 +154,7 @@ public class GuiController {
 			tableFrame.setSize(new Dimension(width/2,height));
 
 			
+			tableFrame.setIconImage(mainWindow.getIconImage());
 			tableFrame.pack();
 			tableFrame.setLocationByPlatform(true);
 		}
@@ -188,7 +202,7 @@ public class GuiController {
 
 			querySort.setSize(new Dimension(width/3,height));
 
-			
+			querySort.setIconImage(mainWindow.getIconImage());
 			querySort.setLocationByPlatform(true);
 			querySort.setVisible(true);
 
