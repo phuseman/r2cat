@@ -5,15 +5,26 @@ JAVA := javac
 
 JARFILE := r2cat.jar
 
+DATE=`date "+%Y%m%d"`
+
+INSTALLPATH := /vol/bioapps/share/r2cat/
+
 .SUFFIXES: .java .class
 %.class:%.java
 	$(JAVA) $<
 
 all:$(OBJECTS)
 
-jar:all
+jar:$(JARFILE)
+
+$(JARFILE):all
 	jar cvfm $(JARFILE) Manifest.txt `find . -iname '*.class'` images/*.png
 clean:
 	find . -iname '*.class' -print0 | xargs -0 rm -rvf
-startjar: jar
+startjar:$(JARFILE)
 	java -jar $(JARFILE)
+
+install:$(JARFILE)
+	cp -v $(JARFILE) $(INSTALLPATH)/$(DATE)_$(JARFILE)
+	chmod 644 $(INSTALLPATH)/$(DATE)_$(JARFILE)
+	ln -sfv $(INSTALLPATH)/$(DATE)_$(JARFILE) $(INSTALLPATH)/$(JARFILE)

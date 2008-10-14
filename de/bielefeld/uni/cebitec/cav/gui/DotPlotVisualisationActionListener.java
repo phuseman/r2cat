@@ -21,6 +21,7 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -49,8 +50,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent
  * 
  */
 public class DotPlotVisualisationActionListener implements ActionListener,
-		MouseListener, MouseMotionListener, KeyListener, 
-		MouseWheelListener  {
+		MouseListener, MouseMotionListener, KeyListener, MouseWheelListener {
 
 	private Point pressedCoordinates = new Point();
 
@@ -162,12 +162,12 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 			}
 		} else {
 			// remove selection if too far away
-			dotPlotVisualisation.getAlignmentPositionDisplayerList()
-			.unmakAll();
+			dotPlotVisualisation.getAlignmentPositionDisplayerList().unmakAll();
 		}
-		ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().markQueriesWithSelectedAps();
-		ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().notifyObservers(
-				NotifyEvent.MARK);
+		ComparativeAssemblyViewer.dataModelController
+				.getAlignmentPositionsList().markQueriesWithSelectedAps();
+		ComparativeAssemblyViewer.dataModelController
+				.getAlignmentPositionsList().notifyObservers(NotifyEvent.MARK);
 	}
 
 	/*
@@ -356,81 +356,68 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 	 *            mouse wheel event
 	 */
 	private void changeDataViewPluginZoom(MouseWheelEvent e) {
-		// TODO: Zooming has to be fixed!
 		double zoomStep = 0.25;
 
-		SwingUtilities.convertMouseEvent((JComponent) e.getSource(), e,
-				dotPlotVisualisation);
-
-		vplugVisualRectangle = dotPlotVisualisation.getVisibleRect();
+		Rectangle oldViewport = dotPlotVisualisation.getVisibleRect();
+		Dimension oldDimension = dotPlotVisualisation.getSize();
 
 		double newZoomValue = dotPlotVisualisation.getZoom()
 				+ (zoomStep * -e.getWheelRotation());
-
-		// change the slider and the textfield accordingly
-		guiController.getMainWindow().zoomSlider.setValue((int) (newZoomValue * 20));
-		guiController.getMainWindow().zoomValue.setText(Double
-				.toString(((int) (newZoomValue * 20) / 20.)));
-
-		// Rectangle bounds = new Rectangle();
-		// SwingUtilities.calculateInnerArea(mainWindow.vplug, bounds);
-		// System.out.println(bounds);
-
 		// set zoom
 		dotPlotVisualisation.setZoom(newZoomValue);
 
-		// SwingUtilities.calculateInnerArea(mainWindow.vplug, bounds);
-		// System.out.println(bounds);
+		Rectangle newViewport = dotPlotVisualisation.getVisibleRect();
+		Dimension newDimension = dotPlotVisualisation.getSize();
 
-		// FIXME fix the scroll issue
-		int dx = 0;
-		int dy = 0;
+		double factorWidth = newDimension.getWidth()
+				/ (double) oldDimension.getWidth();
+		double factorHeight = newDimension.getHeight()
+				/ (double) oldDimension.getHeight();
+
+		Rectangle oldViewportScaled = new Rectangle(
+				(int) (oldViewport.x * factorWidth),
+				(int) (oldViewport.y * factorHeight),
+				(int) (oldViewport.width * factorWidth),
+				(int) (oldViewport.height * factorHeight));
+
+		double dx = 0;
+		double dy = 0;
 		if (e.getWheelRotation() < 0) {
-			dx = (int) ((e.getX() - vplugVisualRectangle.getCenterX()) * zoomStep);
-			dy = (int) ((e.getY() - vplugVisualRectangle.getCenterY()) * zoomStep);
+			// zoom in: try to keep the point of the mouse pointer where it is.
 
-			dx += (int) ((vplugVisualRectangle.getCenterX() * zoomStep) / 2);
-			dy += (int) ((vplugVisualRectangle.getCenterY() * zoomStep) / 2);
-
+			// translate the coordinates to the right compontent
+			SwingUtilities.convertMouseEvent((JComponent) e.getSource(), e,
+					dotPlotVisualisation);
+			// set the origin of the viewport to the scaled mouse point
+			newViewport.setLocation((int) (e.getX() * factorWidth), (int) (e
+					.getY() * factorHeight));
+			// ...and move back the distance from the mouse point to the old
+			dx -= e.getX() - oldViewport.getMinX();
+			dy -= e.getY() - oldViewport.getMinY();
 		} else {
-			// scroll out
-			dx -= (int) ((vplugVisualRectangle.getCenterX() * zoomStep) / 2);
-			dy -= (int) ((vplugVisualRectangle.getCenterY() * zoomStep) / 2);
+			// zoom out: keep the center of the new rectangle in the middle
 
+			// base movement of the origin of the new rectangle
+			dx = oldViewportScaled.getMinX() - oldViewport.getMinX();
+			dy = oldViewportScaled.getMinY() - oldViewport.getMinY();
+
+			// and adjustment to the center of the scaled rectangle
+			dx += (oldViewportScaled.getWidth() - oldViewport.getWidth()) / 2.;
+			dy += (oldViewportScaled.getHeight() - oldViewport.getHeight()) / 2.;
 		}
 
-		// dx += (int)((vplugVisualRectangle.x * zoomStep) / 2);
-		// dy += (int)((vplugVisualRectangle.y * zoomStep) / 2);
-		// vplugVisualRectangle.width = (int) (vplugVisualRectangle.width *
-		// (1.-zoomStep));
-		// vplugVisualRectangle.height = (int) (vplugVisualRectangle.height *
-		// (1.-zoomStep));
+		// translate the rectangle
+		newViewport.translate((int) dx, (int) dy);
+		// and move the viewport accordingly
+		((JPanel) e.getSource()).scrollRectToVisible(newViewport);
+		Object test = e.getSource();
 
-		// vplugVisualRectangle.width -= 1;
-		// vplugVisualRectangle.height-= 1;
+		// change the slider and the textfield
+		guiController.getMainWindow().zoomSlider
+				.setValue((int) (newZoomValue * 20));
+		guiController.getMainWindow().zoomValue.setText(Double
+				.toString(((int) (newZoomValue * 20) / 20.)));
 
-		// System.out.println(dx + " " + dy + " " + vplugVisualRectangle);
-		vplugVisualRectangle.translate(dx, dy);
-
-		//
-		// vplugVisualRectangle.setFrameFromCenter(vplugVisualRectangle.getCenterX()+dx,
-		// vplugVisualRectangle.getCenterY()+dy,
-		// 1,//vplugVisualRectangle.x ,
-		// 1//vplugVisualRectangle.y
-		// );
-		//	
-
-		// Debugging
-		// System.out.println(dx + " " + dy + " " + vplugVisualRectangle);
-		//
-		// ((JPanel) e.getSource()).scrollRectToVisible(vplugVisualRectangle);
-		//
-		// mainWindow.vplug.getGraphics().drawLine(
-		// (int) vplugVisualRectangle.getCenterX(),
-		// (int) vplugVisualRectangle.getCenterY(), e.getX(), e.getY());
-		// mainWindow.vplug.getGraphics().drawRect(vplugVisualRectangle.x,
-		// vplugVisualRectangle.y, vplugVisualRectangle.width,
-		// vplugVisualRectangle.height);
 	}
 
 	/*
@@ -485,6 +472,5 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 	public void keyTyped(KeyEvent e) {
 		; // do nothing at the moment
 	}
-
 
 }

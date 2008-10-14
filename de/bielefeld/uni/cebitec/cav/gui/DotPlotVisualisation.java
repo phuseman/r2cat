@@ -32,14 +32,11 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.util.Observable;
-import java.util.Observer;
 
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
@@ -56,8 +53,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent
  * @author Peter Husemann
  * 
  */
-public class DotPlotVisualisation extends JPanel implements Observer,
-		ComponentListener, DataViewPlugin {
+public class DotPlotVisualisation extends DataViewPlugin {
 
 	// constants
 	// transparent black
@@ -108,7 +104,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 	 * Turns on buffering, sets the background and some settings.
 	 */
 	public DotPlotVisualisation() {
-		super(true); // double buffering
+		super(); // double buffering
 		this.setDoubleBuffered(true);
 
 		this.setBackground(Color.WHITE);
@@ -168,7 +164,6 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 
 		g2d.setStroke(normal);
 
-
 		// draw the alignments. the colors have a alpha channel, so it can be
 		// seen, when alignments are overlapping
 		for (AlignmentPositionDisplayer apd : alignmentPositionDisplayerList) {
@@ -220,7 +215,6 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 
 		if (drawGrid && alignmentPositionDisplayerList.getDisplayOffsets()) {
 
-
 			Color last = g2d.getColor();
 			g2d.setColor(Color.LIGHT_GRAY);
 
@@ -231,7 +225,7 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 			if (drawingWidth <= 0) {
 				drawingWidth = this.getParent().getWidth() - 2 * border;
 			}
-			
+
 			for (DNASequence q : ComparativeAssemblyViewer.dataModelController
 					.getAlignmentPositionsList().getQueries()) {
 				horizontalOffset = (q.getOffset() * AlignmentPositionDisplayer
@@ -359,13 +353,12 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		// apply to graphics context
 		g2d.transform(alignmentPositionTransform);
 
-		
 		// create displayer list if necessary
-		// must be done before drawGrid() because this needs the normalisation factors
+		// must be done before drawGrid() because this needs the normalisation
+		// factors
 		createAlignmentPositionDisplayerList();
 
 		drawGrid(g2d);
-
 
 		if (antialiasing) {
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -382,7 +375,6 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 		drawHistogram(g2d);
 
 		drawCoordinateSystem(g2d);
-
 
 		g2d.dispose();
 	}
@@ -401,8 +393,8 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 					.generateAlignmentPositionDisplayerList(drawingWidth,
 							drawingHeight);
 		}
-		
-		if(alignmentPositionDisplayerList.needsRegeneration()) {
+
+		if (alignmentPositionDisplayerList.needsRegeneration()) {
 			alignmentPositionDisplayerList.regenerate();
 		}
 	}
@@ -503,7 +495,8 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 				// be a new object to keep the observers (table and
 				// visualisation)
 				// ut one has to
-				// empty diagonal line segments, so that they will be generated on the next draw call
+				// empty diagonal line segments, so that they will be generated
+				// on the next draw call
 				alignmentPositionDisplayerList.clear();
 				// reset histogramm so that it will be recomputed with repaint()
 				histogram = new double[0];
@@ -524,26 +517,27 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 	 * @see de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin#setZoom(double)
 	 */
 	public void setZoom(double zoom) {
-		if (zoom <= 0) {
-			this.repaint();
-			return;
-		} else {
-			this.zoom = zoom;
+		if (zoom != this.zoom) {
+			if (zoom <= 0) {
+				this.repaint();
+				return;
+			} else {
+				this.zoom = zoom;
+				if (this.getParent() != null && this.getParent().isVisible()) {
+					// get the dimension of the parent container
+					Rectangle innerArea = new Rectangle();
+					SwingUtilities.calculateInnerArea(((JComponent) this
+							.getParent()), innerArea);
+					// calculate the new dimension of this component
+					Dimension d = new Dimension(
+							(int) ((innerArea.width) * zoom),
+							(int) ((innerArea.height) * zoom));
 
-			if (this.getParent() != null && this.getParent().isVisible()) {
-				// get the dimension of the parent container
-				Rectangle innerArea = new Rectangle();
-				SwingUtilities.calculateInnerArea(((JComponent) this
-						.getParent()), innerArea);
+					this.setSize(d);
+					this.revalidate();
+				}
 
-				// calculate the new dimension of this component
-				Dimension d = new Dimension((int) ((innerArea.width) * zoom),
-						(int) ((innerArea.height) * zoom));
-
-				this.setSize(d);
-				this.revalidate();
 			}
-
 		}
 	}
 
@@ -667,7 +661,8 @@ public class DotPlotVisualisation extends JPanel implements Observer,
 	}
 
 	/**
-	 * @param drawGrid the drawGrid to set
+	 * @param drawGrid
+	 *            the drawGrid to set
 	 */
 	public void drawGrid(boolean drawGrid) {
 		ComparativeAssemblyViewer.preferences.setDisplayGrid(drawGrid);

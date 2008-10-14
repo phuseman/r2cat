@@ -5,9 +5,11 @@ import java.awt.event.ComponentListener;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.JPanel;
+
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 
-public interface DataViewPlugin extends Observer,
+public abstract class DataViewPlugin extends JPanel implements Observer,
 ComponentListener {
 
 	/**
@@ -32,7 +34,13 @@ ComponentListener {
 	 *            value to zoom in.
 	 */
 	public abstract void setZoom(double zoom);
-	
+
+	/**
+	 * Gets the actual zoom factor
+	 * @return zoom value
+	 */
+	public abstract double getZoom();
+
 	/** Implement a method which visualizes alignments somehow */
 	public abstract void paintComponent(Graphics g);
 

@@ -21,7 +21,6 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -44,24 +43,23 @@ import de.bielefeld.uni.cebitec.cav.controller.GuiController;
  * @author Peter Husemann
  * 
  */
-public class MainWindow extends JFrame implements ChangeListener, KeyListener{
+public class MainWindow extends JFrame implements ChangeListener, KeyListener {
 
 	private static final long serialVersionUID = 3695451270541548008L;
 
 	private boolean centerWindow = true;
 
 	private JPanel controls;
-	
-	private DataViewPlugin  dataViewPlugin = null;
 
-	protected JScrollPane drawing;
+	private DataViewPlugin dataViewPlugin = null;
+
+	private JScrollPane drawing;
 
 	protected JTextField zoomValue;
 
 	protected JSlider zoomSlider;
 
-
-	protected MainMenu menuBar;
+	private MainMenu menuBar;
 
 	private GuiController guiController;
 
@@ -70,9 +68,10 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 	 */
 	public MainWindow(GuiController guiController) {
 		super("r2cat - Related Reference based Contig Arrangement Tool");
-		
-// in the future probably		
-//		super("meercat - multiple related reference contig arrangement tool");
+
+		// in the future probably
+		// super("meercat - multiple related reference contig arrangement
+		// tool");
 		this.guiController = guiController;
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		init();
@@ -105,7 +104,6 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 					(height - windowsize.height) / 2 + bounds.y);
 		}
 
-
 		controls = new JPanel();
 		controls.setBorder(BorderFactory.createEtchedBorder());
 
@@ -124,7 +122,6 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 		zoomValue.setText("1.0");
 		zoomValue.addKeyListener(this);
 		zoomPanel.add(zoomValue);
-		
 
 		controls.add(zoomPanel);
 
@@ -149,16 +146,16 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 	 */
 	public void setVisualisation(DataViewPlugin dataViewPlugin) {
 		this.addComponentListener(dataViewPlugin);
-		this.dataViewPlugin=dataViewPlugin;
+		this.dataViewPlugin = dataViewPlugin;
 
-		drawing.setViewportView( (Component) dataViewPlugin);
+		drawing.setViewportView(dataViewPlugin);
 		drawing.setVisible(true);
 		drawing.validate();
 	}
 
-	
 	/**
-	 * Changes the zoom level when the zoom slider is moved
+	 * Changes the zoom level of the visualization when the zoom slider is moved
+	 * 
 	 * @param e
 	 */
 	public void stateChanged(ChangeEvent e) {
@@ -166,9 +163,52 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 				&& e.getSource().equals(zoomSlider)) {
 			double zoom = 1.;
 			zoom = zoomSlider.getValue() / 20.;
-			zoomValue.setText(Double.toString(zoom));
-			if (dataViewPlugin != null) {
-				dataViewPlugin.setZoom(zoom);
+
+			if (dataViewPlugin.getZoom() != zoom) {
+				zoomValue.setText(Double.toString(zoom));
+				if (dataViewPlugin != null) {
+
+					Rectangle oldViewport = dataViewPlugin.getVisibleRect();
+					Dimension oldDimension = dataViewPlugin.getSize();
+
+					// set zoom
+					dataViewPlugin.setZoom(zoom);
+
+					Rectangle newViewport = dataViewPlugin.getVisibleRect();
+					Dimension newDimension = dataViewPlugin.getSize();
+
+					double factorWidth = newDimension.getWidth()
+							/ (double) oldDimension.getWidth();
+					double factorHeight = newDimension.getHeight()
+							/ (double) oldDimension.getHeight();
+
+					Rectangle oldViewportScaled = new Rectangle(
+							(int) (oldViewport.x * factorWidth),
+							(int) (oldViewport.y * factorHeight),
+							(int) (oldViewport.width * factorWidth),
+							(int) (oldViewport.height * factorHeight));
+
+
+					// zoom: keep the center of the new rectangle in the middle
+
+					// base movement of the origin of the new rectangle
+					double dx = oldViewportScaled.getMinX()
+							- oldViewport.getMinX();
+					double dy = oldViewportScaled.getMinY()
+							- oldViewport.getMinY();
+
+					// and adjustment to the center of the scaled rectangle
+					dx += (oldViewportScaled.getWidth() - oldViewport
+							.getWidth()) / 2.;
+					dy += (oldViewportScaled.getHeight() - oldViewport
+							.getHeight()) / 2.;
+
+					// translate the rectangle
+					newViewport.translate((int) dx, (int) dy);
+
+					// and move the viewport accordingly
+					dataViewPlugin.scrollRectToVisible(newViewport);
+				}
 			}
 		}
 	}
@@ -176,21 +216,20 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 	@Override
 	public void keyPressed(KeyEvent e) {
 		; // not used
-		
+
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		//change the zoom value if enter is pressed
-		if (e.getKeyCode()==KeyEvent.VK_ENTER && e.getSource() == zoomValue) {
+		// change the zoom value if enter is pressed
+		if (e.getKeyCode() == KeyEvent.VK_ENTER && e.getSource() == zoomValue) {
 			if (zoomSlider != null && zoomValue != null) {
 				try {
-				double zoom = Double.parseDouble(((JTextField)e.getSource()).getText());
-				zoomSlider.setValue((int)(zoom*20)) ;
-				zoomValue.setText(Double.toString(zoom));
-				if (dataViewPlugin != null) {
-					dataViewPlugin.setZoom(zoom);
-				}
+					double zoom = Double.parseDouble(((JTextField) e
+							.getSource()).getText());
+					zoomSlider.setValue((int) (zoom * 20));
+					zoomValue.setText(Double.toString(zoomSlider.getValue()/20.));
+					//the zoomSlider will fire an event and set the zoom
 				} catch (NumberFormatException nfe) {
 					;
 				}
@@ -203,6 +242,5 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener{
 	public void keyTyped(KeyEvent e) {
 		;// not used
 	}
-
 
 }
