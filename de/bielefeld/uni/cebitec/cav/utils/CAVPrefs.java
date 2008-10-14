@@ -53,7 +53,7 @@ public class CAVPrefs {
 	 * @return
 	 */
 	public boolean getDisplayReverseComplements() {
-		return preferences.getBoolean("unidirectional", false);
+		return preferences.getBoolean("unidirectional", true);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class CAVPrefs {
 	 * @return
 	 */
 	public boolean getDisplayOffsets() {
-		return preferences.getBoolean("offsets", false);
+		return preferences.getBoolean("offsets", true);
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class CAVPrefs {
 	 * @return
 	 */
 	public boolean getDisplayGrid() {
-		return preferences.getBoolean("grid", false);
+		return preferences.getBoolean("grid", true);
 	}
 
 	/**
