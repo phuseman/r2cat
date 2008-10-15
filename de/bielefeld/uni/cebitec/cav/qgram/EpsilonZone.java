@@ -23,7 +23,7 @@
 //
  *   adapted from swift: epsilonzone.*pp by
  *   Peter Husemann
- *   phuseman ät cebitec.uni-bielefeld.de                                     *
+ *   phuseman  a t  cebitec.uni-bielefeld.de                               *
 
  ***************************************************************************/
 package de.bielefeld.uni.cebitec.cav.qgram;
