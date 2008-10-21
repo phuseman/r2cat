@@ -1,29 +1,10 @@
-<h1>r2cat</h1>
-Table of contents:</br>
-<a href="#descr">Description</a></br>
-<a href="#usage">Usage</a></br>
-
-<h2><a name="descr">Description</a></h2>
-With the help of next generation sequencing technologies it is feasible
-to generate a lot of reads for a given genome. However, the assembly
-usually ends up in a set of contigs with gaps between them.
-If a similar reference genome is known it the contigs can be mapped onto
-this and the size of the gaps can be estimated. This way, it is possible
-to design specific primer sequences to fill the gaps and finish the
-assembly.
-
-This is the tool r2cat, which maps contigs onto a
-reference genome using a q-gram filter.
-The contigs are ordered by a simple procedure and the result is visualized.
-It is planned to incorporate the information of multiple references to
-compute a more reliable order of the contigs.
-
-<h2>Starting the application</h2>
-You can start r2cat with the java web start framework. 
-Just click on this link <a href="r2cat.jnlp">r2cat</a>
-
-<h2><a name="usage">Usage</a></h2>
+<h2><a name="workflow">Workflow</a></h2>
 This should describe a typical usecase for this program.
-The prerequisits are that you have sequenced a genome with a roche 454 sequencer or probably Illumina sequencer. The resulting reads are already assembled to contigs with a suitable assembler.
+The prerequisites are that you have sequenced a genome with a Roche 454 sequencer or probably Illumina sequencer. The resulting reads are already assembled to contigs with a suitable assembler.
 Let us assume that you have a multiple <a href="http://en.wikipedia.org/wiki/FASTA_format" target="_blank">FASTA</a> file containing all contigs and another FASTA file which contains the sequence of a reference genome. This can consist of multiple replicons.
-Start the program and choose "match new" from the menu. Select the two fasta files, the contigs are the queries and the reference genome is the target for this search. Click on match and the program tries to find areas between contigs and reference, which have less than 8% differences. After the matching has finished click on continue and you can see the matches as dot plot. The contigs are ordered (and stacked) along the y axis with a simple ordering approach. The ordering can be manually be adjusted from the window menu.
+Start the program and choose "match new" from the menu. Select the two FASTA files, the contigs are the queries and the reference genome is the target for this search. Click on match and the program tries to find areas between contigs and reference, which have less than 8% differences. The matching has been tested with medium size prokaryotic genomes. After the matching has finished click on continue and you can see the matches as dot plot. The contigs are ordered (and stacked) along the y axis with a simple ordering approach. The ordering can be manually be adjusted from the window menu.
+
+At this point you might want to save the matches and the order with "save project" from the file menu. All the matching information and the order of the contigs are then save to a file. This file can be edited manually or by other programs. Each reference and contig has a section specifying its lenght and associated file and other information. After that all matching regions are given in a tab separated table.
+Any saved project can be loaded at any time.
+
+After the matching and ordering of the contigs a FASTA sequence of this layout can be produced, if the original fasta file is present. Select export as fasta from the menu and select a file to write the results to. In the resulting file the contigs are in the order which is displayed and they are reversed if necessary.

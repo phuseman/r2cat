@@ -1,0 +1,26 @@
+<h1>r2cat</h1>
+Table of contents:</br>
+<a href="#intro">Description</a></br>
+<a href="#descr">Description</a></br>
+<a href="#usage">Usage</a></br>
+<a href="howto.html">Workflow</a></br>
+
+<h2><a name="intro">Introduction</a></h2>
+With the help of next generation sequencing technologies it is feasible
+to generate a lot of reads for a given genome. However, the assembly
+usually ends up in a set of contigs with gaps between them.
+If a similar reference genome is known it the contigs can be mapped onto
+this and the size of the gaps can be estimated. This way, it is possible
+to design specific primer sequences to fill the gaps and finish the
+assembly.
+
+<h2><a name="descr">Description</a></h2>
+This is the tool r2cat, which maps contigs onto a
+reference genome using a q-gram filter.
+The contigs are ordered by a simple procedure and the result is visualized.
+It is planned to incorporate the information of multiple references to
+compute a more reliable order of the contigs.
+
+<h2>Starting the application</h2>
+You can start r2cat with the java web start framework. 
+Just click on this link <a href="r2cat.jnlp">r2cat</a>
