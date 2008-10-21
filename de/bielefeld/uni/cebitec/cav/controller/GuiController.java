@@ -44,6 +44,7 @@ import de.bielefeld.uni.cebitec.cav.gui.CustomFileFilter;
 import de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin;
 import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisation;
 import de.bielefeld.uni.cebitec.cav.gui.DotPlotVisualisationActionListener;
+import de.bielefeld.uni.cebitec.cav.gui.HelpFrame;
 import de.bielefeld.uni.cebitec.cav.gui.MainMenu;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
 import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
@@ -77,7 +78,8 @@ public class GuiController {
 
 	public void createMainWindow() {
 		mainWindow = new MainWindow(this);
-		URL url = ComparativeAssemblyViewer.class.getResource("/images/icon.png"); 
+		URL url = Thread.currentThread().getContextClassLoader().getResource("images/icon.png");
+
 		if (url!=null) {
 		Image image = Toolkit.getDefaultToolkit().getImage(url);
 //		     while ( !Toolkit.getDefaultToolkit().prepareImage( image, -1, -1, mainWindow ) ) {
@@ -212,11 +214,27 @@ public class GuiController {
 
 	public void showMatchDialog() {
 		MatchDialog matchDialog = new MatchDialog(mainWindow);
+		matchDialog.setIconImage(mainWindow.getIconImage());
 		if (matchDialog != null) {
 			matchDialog.pack();
 			matchDialog.setLocationByPlatform(true);
 			matchDialog.setVisible(true);
 		}
+	}
+	
+	public void showHelpFrame() {
+		HelpFrame help = new HelpFrame();
+		help.setIconImage(mainWindow.getIconImage());
+		help.pack();
+		help.setSize(800, 600);
+		help.setLocationByPlatform(true);
+		help.setVisible(true);
+	}
+	
+	public void showAbout() {
+		JOptionPane.showMessageDialog(mainWindow, "This tool was developed by\n" +
+				"Peter Husemann\n" +
+				"phuseman at cebitec dot uni-bielefeld.de","About",JOptionPane.PLAIN_MESSAGE);
 	}
 
 	public MainWindow getMainWindow() {

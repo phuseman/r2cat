@@ -170,9 +170,36 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		sortQueries.addActionListener(this);
 		windowMenu.add(sortQueries);
 
-		
-		
 		this.add(windowMenu);
+		
+		
+		
+		JMenu helpMenu = new JMenu("Help");
+		helpMenu.setMnemonic(KeyEvent.VK_H);
+		helpMenu.getAccessibleContext().setAccessibleDescription(
+				"Get help");
+		
+		JMenuItem help = new JMenuItem("Show help");
+		help.setMnemonic(KeyEvent.VK_E);
+		help.getAccessibleContext().setAccessibleDescription(
+				"Display a window with helping contents");
+		help.setActionCommand("show_help");
+		help.addActionListener(this);
+		helpMenu.add(help);
+
+		JMenuItem about = new JMenuItem("About");
+		about.setMnemonic(KeyEvent.VK_A);
+		about.getAccessibleContext().setAccessibleDescription(
+				"Display who wrote this program");
+		about.setActionCommand("show_about");
+		about.addActionListener(this);
+		helpMenu.add(about);
+
+		
+
+		this.add(helpMenu);
+
+		
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -199,9 +226,13 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			ComparativeAssemblyViewer.guiController.showAlignmentsPositionTableFrame();
 		} else if (e.getActionCommand().matches("show_query_table")) {
 			ComparativeAssemblyViewer.guiController.showQuerySortTable(ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList());
+		} else if (e.getActionCommand().matches("show_help")) {
+			ComparativeAssemblyViewer.guiController.showHelpFrame();
+		} else if (e.getActionCommand().matches("show_about")) {
+			ComparativeAssemblyViewer.guiController.showAbout();
 		} else if (e.getActionCommand().matches("exit")) {
 			System.exit(0);
-		} 
+		}
 		
 
 	}

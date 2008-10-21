@@ -18,7 +18,7 @@ all:$(OBJECTS)
 jar:$(JARFILE)
 
 $(JARFILE):all
-	jar cvfm $(JARFILE) Manifest.txt `find . -iname '*.class'` images/*.png
+	jar cvfm $(JARFILE) Manifest.txt `find . -iname '*.class'` images/*.png extra/* 
 	jarsigner -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(JARFILE) r2cat
 clean:
 	find . -iname '*.class' -print0 | xargs -0 rm -rvf

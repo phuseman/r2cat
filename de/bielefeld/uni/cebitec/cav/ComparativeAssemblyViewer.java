@@ -55,8 +55,6 @@ public class ComparativeAssemblyViewer {
 
 		
 		
-		
-		
 		//testing
 //		try {
 //			dataModelController.readAlignmentPositions(new File("/homes/phuseman/prog/ComparativeAssemblyViewer/dsm1709.r2c"));
