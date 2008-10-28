@@ -101,15 +101,26 @@ public class MatchDialog extends JDialog implements ActionListener,
 			progress.append("Opening target file " + target.getName() + " (" + target.length()+ ")");
 			t.startTimer();
 			FastaFileReader targetFasta = new FastaFileReader(target);
-			targetFasta.scanContents(true);
+			boolean targetIsFasta = targetFasta.scanContents(true);
 			progress.append(" ..."+t.stopTimer()+"\n");
+			
+			if(!targetIsFasta) {
+				progress.append("Error: Target file contains no id line (>idtag ...)");
+				setEndMatching();
+				return null;
+			}
 
 			
 			progress.append("Opening query file"+ query.getName() + " (" + query.length()+ ")");
 			t.startTimer();
 			FastaFileReader queryFasta = new FastaFileReader(query);
-			queryFasta.scanContents(true);
+			boolean queryIsFasta = queryFasta.scanContents(true);
 			progress.append(" ..."+t.stopTimer()+"\n");
+			if(!queryIsFasta) {
+				progress.append("Error: Query file contains no id line (>idtag ...)");
+				setEndMatching();
+				return null;
+			}
 
 			
 			// check if targets and queries might be switched
@@ -186,13 +197,18 @@ public class MatchDialog extends JDialog implements ActionListener,
 				e.printStackTrace();
 			}
 			
+			progress.append("Done!\n");
+
+			setEndMatching();
+			return result;
+		}
+		
+		private void setEndMatching() {
 			startButton.setEnabled(true);
 			setCursor(null); // turn off the wait cursor
-			progress.append("Done!\n");
 			progress.setCaretPosition(progress.getDocument().getLength());
 			progressBar.setIndeterminate(false);
 
-			return result;
 		}
 
 		public void done() {

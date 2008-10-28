@@ -47,7 +47,13 @@ public class FastaFileReader {
 		sequences = new Vector<DNASequence>();
 	}
 
-	public void scanContents(boolean createCharArray) throws IOException {
+	/**
+	 * Scans the contents of the file. Returns if a line ">id" was present
+	 * @param createCharArray
+	 * @return boolean Id's were found
+	 * @throws IOException
+	 */
+	public boolean scanContents(boolean createCharArray) throws IOException {
 		BufferedReader in = null;
 		int character = 0;
 
@@ -59,6 +65,8 @@ public class FastaFileReader {
 		long validCharCounter = 0;
 		long lastValidCharCounter = 0;
 		boolean firstSequence = true;
+		boolean idsFound=false;
+		
 		StringBuilder sb = new StringBuilder();
 		offsetsInCharArray = new HashMap<String, Integer>();
 		try {
@@ -79,6 +87,10 @@ public class FastaFileReader {
 				// read id and description
 				if (character == (int) '>') {
 					identLine = in.readLine();
+					
+					if(identLine.matches("^.+$")) {
+						idsFound=true;
+					}
 
 					if (!firstSequence) {
 						lastSequenceLength = validCharCounter
@@ -132,6 +144,7 @@ public class FastaFileReader {
 
 			} // end: read the whole file
 
+			if (idsFound) {
 			if (createCharArray) {
 				sb.trimToSize();
 				chararray = sb.toString().toCharArray();
@@ -152,11 +165,18 @@ public class FastaFileReader {
 			}
 
 			initialized = true;
+			}
+			
+			
+			
+			
 		} finally {
 			if (in != null) {
 				in.close();
 			}
 		}
+		
+		return idsFound;
 	}
 
 	/**
