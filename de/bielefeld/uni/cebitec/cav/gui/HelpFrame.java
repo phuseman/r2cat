@@ -19,15 +19,21 @@
  ***************************************************************************/
 package de.bielefeld.uni.cebitec.cav.gui;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Vector;
 
+import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -37,22 +43,59 @@ import javax.swing.text.html.HTMLDocument;
  * @author phuseman
  * 
  */
-public class HelpFrame extends JFrame implements HyperlinkListener, ActionListener {
+public class HelpFrame extends JFrame implements HyperlinkListener,
+		ActionListener {
 
+	private Vector<URL> history;
+	private int historyIndex = 0;
 	private JEditorPane editorpane;
+
+	private URL mainPage;
+
+	private JButton back;
+	private JButton forw;
+	private JButton home;
 
 	public HelpFrame() {
 		super("Help");
+		history = new Vector<URL>();
+
+		JPanel all = new JPanel(new BorderLayout());
 
 		editorpane = new JEditorPane();
 		editorpane.setEditable(false);
 		editorpane.addHyperlinkListener(this);
 
-		URL url = Thread.currentThread().getContextClassLoader().getResource(
-				"extra/howto.html");
+		mainPage = Thread.currentThread().getContextClassLoader().getResource(
+				"extra/help.html");
 
-		this.setPage(url);
-		this.getContentPane().add(new JScrollPane(editorpane));
+		all.add(new JScrollPane(editorpane), BorderLayout.CENTER);
+
+		back = new JButton("<");
+		back.setActionCommand("history_back");
+		back.addActionListener(this);
+		back.setEnabled(false);
+
+		forw = new JButton(">");
+		forw.setActionCommand("history_forward");
+		forw.addActionListener(this);
+		forw.setEnabled(false);
+
+		home = new JButton("Home");
+		home.setActionCommand("home");
+		home.addActionListener(this);
+
+		JPanel controlPanel = new JPanel(new FlowLayout());
+		controlPanel.add(back);
+		controlPanel.add(home);
+		controlPanel.add(forw);
+
+		all.add(controlPanel, BorderLayout.SOUTH);
+
+		this.getContentPane().add(all);
+
+		this.setPage(mainPage);
+
 	}
 
 	@Override
@@ -74,16 +117,25 @@ public class HelpFrame extends JFrame implements HyperlinkListener, ActionListen
 						e.printStackTrace();
 					}
 				} else {
-				JOptionPane.showMessageDialog(this, url.toExternalForm(),
-						"Please open this url:",
-						JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(this, url.toExternalForm(),
+							"Please open this url:",
+							JOptionPane.INFORMATION_MESSAGE);
 				}
 			} else {
-				editorpane.setPage(url);
-				if (editorpane.getDocument().getClass() == HTMLDocument.class) {
-					URL base = new URL(url.toExternalForm());
-					((HTMLDocument) editorpane.getDocument()).setBase(base);
+				if (history.size() > 50) {
+					history.remove(0);
 				}
+				if (history.isEmpty() || url != history.lastElement()) {
+					history.add(url);
+					historyIndex = history.size() - 1;
+					forw.setEnabled(false);
+					if (history.size() > 1) {
+						back.setEnabled(true);
+					}
+				}
+
+				editorpane.setPage(url);
+				setBase();
 			}
 
 		} catch (IOException ioe) {
@@ -92,9 +144,63 @@ public class HelpFrame extends JFrame implements HyperlinkListener, ActionListen
 
 	}
 
+	public void historyBack() {
+		historyIndex--;
+		if (historyIndex <= 0) {
+			historyIndex = 0;
+			back.setEnabled(false);
+		}
+		this.setPageToHistoryIndex(historyIndex);
+		forw.setEnabled(true);
+	}
+
+	public void historyForward() {
+		historyIndex++;
+		if (historyIndex >= history.size() - 1) {
+			historyIndex = history.size() - 1;
+			forw.setEnabled(false);
+		}
+		this.setPageToHistoryIndex(historyIndex);
+		back.setEnabled(true);
+	}
+
+	private void setPageToHistoryIndex(int index) {
+		if (index >= 0 && index < history.size()) {
+			try {
+				editorpane.setPage(history.get(index));
+				this.setBase();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	/**
+	 * This is necessary so that images inside a jar file are found.
+	 */
+	private void setBase() {
+		if (editorpane.getDocument().getClass() == HTMLDocument.class) {
+			URL base;
+			try {
+				base = new URL(editorpane.getPage().toExternalForm());
+				((HTMLDocument) editorpane.getDocument()).setBase(base);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
+		if (e.getActionCommand().equals("history_back")) {
+			this.historyBack();
+		} else if (e.getActionCommand().equals("history_forward")) {
+			this.historyForward();
+		} else if (e.getActionCommand().equals("home")) {
+			this.setPage(mainPage);
+		}
 	}
 }
