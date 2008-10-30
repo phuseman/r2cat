@@ -274,6 +274,13 @@ public class FastaFileReader {
 				
 				//translation map
 				char[] alphabetMap= new char[256];
+				
+				
+				// all characters other than a t c g are not changed. 
+				for (int j = 0; j < alphabetMap.length; j++) {
+					alphabetMap[j]= (char) j;
+				}
+				// a t c g are mapped to the reverse complement
 				alphabetMap['a']='t';
 				alphabetMap['A']='T';
 				alphabetMap['c']='g';
