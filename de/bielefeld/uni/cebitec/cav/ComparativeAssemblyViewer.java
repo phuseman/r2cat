@@ -1,5 +1,7 @@
 package de.bielefeld.uni.cebitec.cav;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.prefs.BackingStoreException;
 
 import de.bielefeld.uni.cebitec.cav.controller.DataModelController;
@@ -49,22 +51,39 @@ public class ComparativeAssemblyViewer {
 		guiController = new GuiController();
 
 		clearPreferences(args);
-		
+
 		guiController.createMainWindow();
 		guiController.showMainWindow();
 
-		
-		
-		//testing
-//		try {
-//			dataModelController.readAlignmentPositions(new File("/homes/phuseman/prog/ComparativeAssemblyViewer/dsm1709.r2c"));
-//			guiController.setVisualisationNeedsUpdate();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		guiController.showQuerySortTable(dataModelController.getAlignmentPositionsList());
-//		
+		if (args.length >= 1 && args[0].endsWith(".r2c")) {
+			File initialFile = new File(args[0]);
+			try {
+				if (!initialFile.exists()) {
+					//try the current working directory
+					initialFile = new File(System.getProperty("user.dir")
+							+ args[0]);
+				}
+
+				if (initialFile.canRead()) {
+					dataModelController.readAlignmentPositions(initialFile);
+					guiController.setVisualisationNeedsUpdate();
+				}
+			} catch (IOException e) {
+				System.err.println("Cannot open file: " + initialFile.getName());
+			}
+		}
+
+		// testing
+		// try {
+		// dataModelController.readAlignmentPositions(new
+		// File("/homes/phuseman/prog/ComparativeAssemblyViewer/dsm1709.r2c"));
+		// guiController.setVisualisationNeedsUpdate();
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		// guiController.showQuerySortTable(dataModelController.getAlignmentPositionsList());
+		//		
 	}
 
 	private static void clearPreferences(String[] args) {
