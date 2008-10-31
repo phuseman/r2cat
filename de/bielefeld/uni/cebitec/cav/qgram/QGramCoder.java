@@ -21,6 +21,8 @@ package de.bielefeld.uni.cebitec.cav.qgram;
 
 
 /**
+ * This class can code q-grams of dna sequences into integers.
+ * 
  * @author phuseman
  * 
  */
@@ -43,9 +45,11 @@ public class QGramCoder {
 	
 	private int numberOfInvalid=0;
 
+	/**
+	 * Creates an instance of a coder.
+	 * @param q Length of the q-grams
+	 */
 	public QGramCoder(int q) {
-		
-		
 		//create alphabet map
 		alphabet = new int[256];
 		for (int i = 0; i < alphabet.length; i++) {
@@ -89,6 +93,18 @@ public class QGramCoder {
 		this.reset();
 	}
 
+	
+	/**
+	 * Updates the encoding such that the last character is omitted and the new character is c.
+	 * Like a stream coder.
+	 * 
+	 * Valid q-grams consist only of a,c,g,t or the uppercase letters. They are treaded as equivalent.
+	 * If there is any other letter or the qgram has not reached the necessary size than -1 is returned
+	 * to show that there is no code vor a valid qgram.
+	 * 
+	 * @param c next character.
+	 * @return code or -1 if the qgram is not valid.
+	 */
 	public int updateEncoding(char c) {
 
 		//if character is A,T,C,G (upper or lowercase) calculate code...
@@ -123,6 +139,11 @@ public class QGramCoder {
 		}
 	}
 
+	/**
+	 * Genereates a code for the reverse complement if the order of the chars is reversed too.
+	 * @param c character to reverse complement
+	 * @return
+	 */
 	public int updateEncodingComplement(char c) {
 		char complement;
 		switch(c){
@@ -151,6 +172,7 @@ public class QGramCoder {
 				complement='C';
 				break;
 			default:
+				// do nothing if ther is no reverse complement
 				complement=c;
 		}
 		return this.updateEncoding(complement);
@@ -158,28 +180,12 @@ public class QGramCoder {
 	
 
 
-	private char charcodeToChar(int charcode) {
-		char c = 'N';
-		switch (charcode) {
-		case 0:
-			c = 'a';
-			break;
-		case 1:
-			c = 'c';
-			break;
-		case 2:
-			c = 'g';
-			break;
-		case 3:
-			c = 't';
-			break;
-
-		default:
-			break;
-		}
-		return c;
-	}
-
+	/**
+	 * For debugging purposes. Gives the character sequence of a given integer code.
+	 * 
+	 * @param qGramCode integer code
+	 * @return character sequence
+	 */
 	public String decodeQgramCode(int qGramCode) {
 		if (qGramCode < 0) {return "invalid";}
 		if (qGramCode > this.numberOfPossibleQGrams()) {return "codenumber too big";};
@@ -196,6 +202,38 @@ public class QGramCoder {
 
 
 
+	/**
+	 * Necessary for decoding. Gives the charcode of a character
+	 * @param charcode
+	 * @return
+	 */
+	private char charcodeToChar(int charcode) {
+		char c = 'N';
+		switch (charcode) {
+		case 0:
+			c = 'a';
+			break;
+		case 1:
+			c = 'c';
+			break;
+		case 2:
+			c = 'g';
+			break;
+		case 3:
+			c = 't';
+			break;
+	
+		default:
+			break;
+		}
+		return c;
+	}
+
+
+	/**
+	 * Gives the last updated encoding. Or -1 if the encoding was not valid.
+	 * @return
+	 */
 	public int getCurrentEncoding() {
 		if (valid) {
 			return currentEncoding;
@@ -204,6 +242,10 @@ public class QGramCoder {
 		}
 	}
 
+
+	/**
+	 * Reset the coder. This is necessary if another sequence should be coded.
+	 */
 	public void reset() {
 		currentEncoding = 0;
 		currentQLength = 0;
@@ -211,6 +253,11 @@ public class QGramCoder {
 		valid=false;
 	}
 
+	/**
+	 * Gives the highest code that could be generated. Which is the same as the number of different q-grams that can be coded.
+	 * 
+	 * @return the number of possible q-grams of length q.
+	 */
 	public int numberOfPossibleQGrams() {
 		return (int) maxEncoding;
 	}
