@@ -35,6 +35,7 @@ import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.controller.SequenceNotFoundException;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
+import de.bielefeld.uni.cebitec.mureCola.MureCola;
 
 /**
  * This class is a list of alignment positions.
@@ -195,6 +196,8 @@ public class AlignmentPositionsList extends Observable implements
 		checkStatistics();
 		if (!queryOrderDefined) {
 			Collections.sort(queryOrder);
+//			MureCola layouter = new MureCola(this);
+//			changeQuerys(layouter.createLayout());
 			queryOrderDefined = true;
 			this.setQueryOffsets();
 			this.setChanged();
@@ -246,6 +249,11 @@ public class AlignmentPositionsList extends Observable implements
 			sequence.setOffset(offset);
 			offset += sequence.getSize();
 		}
+	}
+	
+	public void changeQuerys(Vector<DNASequence> sequences) {
+		assert sequences.containsAll(queryOrder);
+		this.queryOrder = sequences;
 	}
 
 	public void moveQuery(int fromIndex, int toIndex) {
