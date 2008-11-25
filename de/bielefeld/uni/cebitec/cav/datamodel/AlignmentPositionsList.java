@@ -35,7 +35,6 @@ import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.controller.SequenceNotFoundException;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
-import de.bielefeld.uni.cebitec.mureCola.MureCola;
 
 /**
  * This class is a list of alignment positions.
