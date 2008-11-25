@@ -29,3 +29,6 @@ install:$(JARFILE)
 	cp -v $(JARFILE) $(INSTALLPATH)/$(DATE)_$(JARFILE)
 	chmod 644 $(INSTALLPATH)/$(DATE)_$(JARFILE)
 	ln -sfv $(INSTALLPATH)/$(DATE)_$(JARFILE) $(INSTALLPATH)/$(JARFILE)
+
+install_techfak:$(JARFILE)
+	scp $(JARFILE) techfak:/vol/bibidev/r2cat/data/r2cat/
