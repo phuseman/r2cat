@@ -23,6 +23,7 @@ package de.bielefeld.uni.cebitec.cav.qgram;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Vector;
 import java.util.prefs.Preferences;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
@@ -83,13 +84,18 @@ public class QGramFilter {
 	private QGramCoder coder = null;
 	
 	
-	//because of the overlapping bins hits can be reported twice. the bucket number is
-	// then usually +-1. store all hits in a hashmap to check if there was one in a near bucket
-	private HashMap<Integer, AlignmentPosition> unsortedAlignmentPositions;
 	
-	//a list of all found matching regions
+	//a list of all found matching regions -- final result
 	private AlignmentPositionsList result;
-	
+
+	//in overlapping bins hits can be reported twice. the bucket number is
+	// then usually +-1. 
+	// here we store store all hits in a hashmap. the key is the bucket index.
+	// we can then check if there was a overlapping/too similar hit in bucket+-1.
+	// since there can be many hits for one bucket we need a list instead of a single AlignmentPositions.
+	// I chose a vector because it is simple to use. 
+	private HashMap<Integer, Vector<AlignmentPosition>> temporaryResults;
+
 
 	
 	// buffer for the integer code of the actual qgram;
@@ -228,8 +234,8 @@ public class QGramFilter {
 		double errorrate = 0.08;
 		int minMatchLength = 450;// not the real minimal match length, can be smaller.
 
-		unsortedAlignmentPositions = new HashMap<Integer, AlignmentPosition>();
 		result = new AlignmentPositionsList();
+		temporaryResults = new HashMap<Integer, Vector<AlignmentPosition>>();
 		
 		hashTable = qGramIndex.getHashTable();
 		occurrenceTable = qGramIndex.getOccurrenceTable();
@@ -299,9 +305,14 @@ public class QGramFilter {
 			progress=(2.*queriesOffsets[queryNumber])/total;
 			//match one query in forward direction
 			matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
+			generateResultFromTemporary();
+			
 			progress=((2.*queriesOffsets[queryNumber])+(queriesOffsets[queryNumber+1]-queriesOffsets[queryNumber]))/total;
 			//and reversed
 			matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
+			generateResultFromTemporary();
+
+			
 		}// for each query
 		
 		//debugging:
@@ -328,12 +339,179 @@ public class QGramFilter {
 		occurrenceTable=null;
 		
 		
-		
 		reportProgress(1, result.size() + " hits found.");
+		
 		return result;
 	}
 
-	
+	//TODO return the number of hits found
+	private void generateResultFromTemporary() {
+
+		long targetStart = 0;
+		long targetEnd = 0;
+		long queryStart = 0;
+		long queryEnd = 0;
+
+		int qhits = 0;
+		float variance = 0;
+
+		DNASequence dNASeqQuery;
+		DNASequence dNASeqTarget;
+
+		
+		//temporary results is a hashmap of vectors of alignment positions.
+		// go through all of these to assemble the final result.
+		for (Vector<AlignmentPosition> partialResults : temporaryResults
+				.values()) {
+			for (AlignmentPosition ap : partialResults) {
+				targetStart = ap.getTargetStart();
+				targetEnd = ap.getTargetEnd();
+				queryStart = ap.getQueryStart();
+				queryEnd = ap.getQueryEnd();
+
+				qhits = ap.getNumberOfQHits();
+				variance = ap.getVariance();
+
+				dNASeqQuery = ap.getQuery();
+
+				// get index of the target sequence where the start and the end
+				// is.
+				int firstTarget = qGramIndex
+						.getSequenceNumberAtApproximatePosition((int) targetStart);
+				int lastTarget = qGramIndex
+						.getSequenceNumberAtApproximatePosition((int) targetEnd);
+
+				// match is in only one target
+				if (firstTarget == lastTarget) {
+					dNASeqTarget = qGramIndex.getSequence(firstTarget);
+					ap = new AlignmentPosition(dNASeqTarget, targetStart
+							- dNASeqTarget.getOffset(), targetEnd
+							- dNASeqTarget.getOffset(), dNASeqQuery,
+							queryStart, queryEnd);
+
+					if (computeMean) {
+						ap.setVariance(variance);
+					}
+					ap.setNumberOfQHits(qhits);
+					result.addAlignmentPosition(ap);
+					// match spans over different targets
+				} else {
+					// -> split the matches
+
+					// System.err.println(ap+" needs to be split in
+					// "+(lastTarget-firstTarget+1)+" parts");
+
+					long tmpQueryStart = queryStart;
+					long tmpQueryEnd = queryEnd;
+					long sliceLength = 0;
+					boolean forwardMatch = queryStart <= queryEnd;
+
+					// split the match in several slices
+					for (int i = firstTarget; i <= lastTarget; i++) {
+						dNASeqTarget = qGramIndex.getSequence(i);
+
+						// determine slice length
+						if (i == firstTarget) {
+							long thisTargetEnd = dNASeqTarget.getOffset()
+									+ dNASeqTarget.getSize() - 1;
+							sliceLength = thisTargetEnd - targetStart;
+						} else if (i == lastTarget) {
+							sliceLength = targetEnd - dNASeqTarget.getOffset();
+						} else { // target in between
+							sliceLength = dNASeqTarget.getSize() - 1;
+						}
+
+						// determine endposition of this slice
+						if (forwardMatch) {
+							tmpQueryEnd = tmpQueryStart + sliceLength;
+						} else {
+							tmpQueryEnd = tmpQueryStart - sliceLength;
+						}
+
+						if (i == firstTarget) {
+							ap = new AlignmentPosition(dNASeqTarget,
+									targetStart - dNASeqTarget.getOffset(),
+									dNASeqTarget.getSize() - 1, dNASeqQuery,
+									tmpQueryStart, tmpQueryEnd);
+						} else if (i == lastTarget) {
+							ap = new AlignmentPosition(dNASeqTarget, 0,
+									targetEnd - dNASeqTarget.getOffset(),
+									dNASeqQuery, tmpQueryStart, tmpQueryEnd);
+						} else { // target in between
+							ap = new AlignmentPosition(dNASeqTarget, 0,
+									dNASeqTarget.getSize() - 1, dNASeqQuery,
+									tmpQueryStart, tmpQueryEnd);
+						}
+
+						// if the slice is bigger than q, add it
+						if (ap.size() > qGramIndex.getQLength()) {
+							if (computeMean) {
+								ap.setVariance(variance);
+							}
+							// FIXME: set the number of qhits to the appropriate
+							// fraction of that part
+							ap.setNumberOfQHits(qhits);
+							result.addAlignmentPosition(ap);
+						}
+
+						// System.err.println(" " + ap
+						// +"\tqs:"+Math.abs(ap.getQueryEnd()-ap.getQueryStart())
+						// +"\tts:"+ (ap.getTargetEnd()-ap.getTargetStart())
+						// +" query:"+dNASeqTarget);
+
+						// shift the new start to the end of the next
+						if (forwardMatch) {
+							tmpQueryStart = tmpQueryEnd + 1;
+						} else {
+							tmpQueryStart = tmpQueryEnd - 1;
+						}
+
+					}
+				}
+
+			}
+		}
+		
+		//since all results have been added to results this can be cleared.
+		// to avoid interferences for the next query this has to be cleared!
+		temporaryResults.clear();
+	}
+
+
+	/**
+	 * FIXME UNFINISHED!!
+	 * Try to find the real target start and end position instead of the bucket positions
+	 */
+	private void adjustTargetCoordinates(AlignmentPosition ap) {
+		QGramCoder targetCoordsCoder= new QGramCoder(qGramIndex.getQLength());
+		//TODO implement this
+		
+		for (AlignmentPosition alignmPos : result) {
+			coder.reset();
+			int start=0;
+			
+			if (! alignmPos.isReverseHit()) {
+				// do forward search
+				start = (int) alignmPos.getQueryStart();
+
+				code=-1;
+				while (code==-1) {
+					code = coder.updateEncoding(querySequencesArray[start++]);
+					}
+				if (code != -1) {
+					for (int occOffset = hashTable[code]; occOffset < hashTable[code + 1]; occOffset++) {
+						System.out.println(occurrenceTable[occOffset]);
+					}
+				}
+			} else {
+				// TODO: do backward search
+
+			}
+		}
+		
+	}
+
+
 	/**
 	 * Do the matching for one query specified by starting and ending position. (all queries are stored
 	 * in one array (querySequencesArray). The appropriate offset are stored in the queriesOffsets array.
@@ -470,9 +648,6 @@ public class QGramFilter {
 
 	//after each query and each direction:
 	resetCountsAndReportRemainingParalellograms();
-	
-	unsortedAlignmentPositions.clear();
-
 	}
 
 	/**
@@ -761,14 +936,6 @@ public class QGramFilter {
 ////				+ " (" + (left-binMean[bucketindex])+ ") "
 ////				+" Variance:"+binVariance[bucketindex]
 //				                          );
-		//TODO: there is a problem when using the mean value.
-		//it can be distorted if there is a hit on the reverse strand going to the end of 
-		//a target and continuing on the beginning. some qhits are accounted to the wrong hit.
-		// this is probably a problem in the checkandresetbin method.
-		
-		// outdated:
-		//left is an artifact from kims implementation it is not needed if we take the mean diagonal.
-//		left = (int) binMean[bucketindex];
 				
 		AlignmentPosition ap;
 		long targetStart=0;
@@ -778,7 +945,7 @@ public class QGramFilter {
 
 		
 		if (!reverseComplementDirection) {
-			// normal hit; go from left (mean) to the hit position
+			// normal hit; go from left to the hit position
 			/*              left
 			 * _____________|__________________ A
 			 * |             \
@@ -791,7 +958,7 @@ public class QGramFilter {
 			targetStart=(left + bottom);
 			targetEnd=(left + top);
 		} else {
-			/* reverse complement hit; go from right (mean) to the hit position
+			/* reverse complement hit; go from right to the hit position
 			 * 
 			 *               right
 			 * _____________|__________________ A
@@ -806,16 +973,6 @@ public class QGramFilter {
 			targetStart=(left - bottom);
 			targetEnd=(left - top);
 		}
-
-		// since we take the mean diagonal the target start or end are not "exact"
-		// it can happen that they are out of bounds
-		// fix this here
-		if (targetStart < 0) {
-			targetStart = 0;
-		}
-		if (targetEnd > qGramIndex.getInputLength() - 1) {
-			targetEnd = qGramIndex.getInputLength() - 1;
-		}
 		
 
 		
@@ -828,142 +985,192 @@ public class QGramFilter {
 		
 		
 		
-		ap = new AlignmentPosition(dNASeqTarget,
-				targetStart, targetEnd, dNASeqQuery, queryStart, queryEnd);
-//debug
-//		System.out.println(ap);
-		
-
-		//write output similar to the swift output
-//		System.out.println(String.format("%s\t%d\t%s\t%d\tn/a\t%d\tn/a\tn/a\t%d\t%d\t%d\t%d\t%f\t%d\t***",
-//				dNASeqQuery.getId(), dNASeqQuery.getSize(),
-//				dNASeqTarget.getId(), dNASeqTarget.getSize(), Math.abs(top-bottom), queryStart, queryEnd,
-//				targetStart, targetEnd, binVariance[bucketindex], bucketindex));
-
-		
-		
+		ap = new AlignmentPosition(dNASeqTarget, targetStart, targetEnd,
+				dNASeqQuery, queryStart, queryEnd);
 		// due to the overlapping parallelograms some hits are recognised twice
 		// save match temporary to sort out duplicate matches
-		unsortedAlignmentPositions.put(bucketindex, ap);
+
+		ap.setNumberOfQHits(binCounts[bucketindex]);
+		if (computeMean) {
+			ap.setVariance(binVariance[bucketindex]);
+		}
+
 		
-		boolean alreadyAdded=false;
-		if (unsortedAlignmentPositions.containsKey(bucketindex+1) ) {
-			if (ap.equals(unsortedAlignmentPositions.get(bucketindex+1))) {
-				alreadyAdded=true;
+		
+		// check if a too similar hit (i.e. overlapping) was already added and
+		// merge these if necessary.
+		boolean alreadyAdded = false;
+
+		Vector<AlignmentPosition> sameBucket = new Vector<AlignmentPosition>();
+		AlignmentPosition existing;
+
+		// check if there are matches belonging to bucket +1
+		if (temporaryResults.containsKey(bucketindex + 1)) {
+			// if so go through all and check if they are "the same" (i.e.
+			// overlapping)
+			sameBucket = temporaryResults.get(bucketindex + 1);
+			for (int i = 0; i < sameBucket.size(); i++) {
+				existing = sameBucket.get(i);
+				alreadyAdded = checkForSameMatch(ap, existing);
+
+				if (alreadyAdded) {
+					// if they are overlapping, extend the one stored
+					existing = extendAlignmentPosition(existing, ap);
+					temporaryResults.get(bucketindex + 1).set(i, existing);
+					break;
+				}
 			}
-			
-		} else if (unsortedAlignmentPositions.containsKey(bucketindex-1)) {
-			if (ap.equals(unsortedAlignmentPositions.get(bucketindex-1))) {
-				alreadyAdded=true;
+			// do the same for -1
+			// check if there are matches belonging to bucket -1
+		} else if (temporaryResults.containsKey(bucketindex - 1)) {
+			sameBucket = temporaryResults.get(bucketindex - 1);
+			// if so go through all and check if they are "the same" (i.e.
+			// overlapping)
+			for (int i = 0; i < sameBucket.size(); i++) {
+				existing = sameBucket.get(i);
+				alreadyAdded = checkForSameMatch(ap, existing);
+
+				if (alreadyAdded) {
+					// if they are overlapping, extend the one stored
+					existing = extendAlignmentPosition(existing, ap);
+					temporaryResults.get(bucketindex - 1).set(i, existing);
+					break;
+				}
 			}
 		}
 
-	
 		if (!alreadyAdded) {
-			//get index of the target sequence where the start and the end is.
-			int firstTarget = qGramIndex.getSequenceNumberAtApproximatePosition((int)targetStart);
-			int lastTarget = qGramIndex.getSequenceNumberAtApproximatePosition((int)targetEnd);
-
-			// match is in only one target
-			if (firstTarget == lastTarget) { 
-				dNASeqTarget = qGramIndex.getSequence(firstTarget);
-				ap = new AlignmentPosition(dNASeqTarget, targetStart
-						- dNASeqTarget.getOffset(), targetEnd
-						- dNASeqTarget.getOffset(), dNASeqQuery, queryStart,
-						queryEnd);
-				
-				if(computeMean) {
-				ap.setVariance(binVariance[bucketindex]);
-				}
-				ap.setNumberOfQHits(binCounts[bucketindex]);
-				result.addAlignmentPosition(ap);
-			// match spans over different targets	
-			} else { 
-				// -> split the matches
-				
-//				System.err.println(ap+" needs to be split in "+(lastTarget-firstTarget+1)+" parts");
-				
-				long tmpQueryStart=queryStart;
-				long tmpQueryEnd=queryEnd;
-				long sliceLength=0;
-				boolean forwardMatch=queryStart<=queryEnd;
-				
-				//split the match in several slices
-				for (int i = firstTarget; i <= lastTarget; i++) {
-					dNASeqTarget = qGramIndex.getSequence(i);
-
-					
-					//determine slice length
-					if (i == firstTarget) {
-						long thisTargetEnd=dNASeqTarget.getOffset()+dNASeqTarget.getSize()-1;
-						sliceLength=thisTargetEnd-targetStart;
-					} else if (i == lastTarget) {
-						sliceLength=targetEnd-dNASeqTarget.getOffset();
-					} else { // target in between
-						sliceLength=dNASeqTarget.getSize()-1;
-					}
-						
-					// determine endposition of this slice
-					if(forwardMatch) {
-						tmpQueryEnd=tmpQueryStart+sliceLength;
-					} else {
-						tmpQueryEnd=tmpQueryStart-sliceLength;
-					}
-
-					
-					if (i == firstTarget) {
-						ap = new AlignmentPosition(dNASeqTarget,
-								targetStart-dNASeqTarget.getOffset(),
-								dNASeqTarget.getSize()-1,
-								dNASeqQuery,
-								tmpQueryStart,
-								tmpQueryEnd);
-					} else if (i == lastTarget) {
-						ap = new AlignmentPosition(dNASeqTarget,
-								0,
-								targetEnd-dNASeqTarget.getOffset(),
-								dNASeqQuery,
-								tmpQueryStart,
-								tmpQueryEnd);
-					} else { // target in between
-					ap = new AlignmentPosition(dNASeqTarget,
-							0,
-							dNASeqTarget.getSize()-1,
-							dNASeqQuery,
-							tmpQueryStart,
-							tmpQueryEnd);
-					}
-					
-					// if the slice is bigger than q, add it
-					if (ap.size() > qGramIndex.getQLength()) {
-						if(computeMean) {
-						ap.setVariance(binVariance[bucketindex]);
-						}
-						ap.setNumberOfQHits(binCounts[bucketindex]);
-						result.addAlignmentPosition(ap);
-					}
-
-//					System.err.println(" " + ap
-//							+"\tqs:"+Math.abs(ap.getQueryEnd()-ap.getQueryStart())
-//							+"\tts:"+ (ap.getTargetEnd()-ap.getTargetStart())
-//							+"    query:"+dNASeqTarget);
-					
-					//shift the new start to the end of the next
-					if(forwardMatch) {
-						tmpQueryStart=tmpQueryEnd+1;
-					} else {
-						tmpQueryStart=tmpQueryEnd-1;
-					}
-
-					
-				}
+			// if the match was not already added, put it into the temporary
+			// results
+			if (!temporaryResults.containsKey(bucketindex)) {
+				temporaryResults.put(bucketindex,
+						new Vector<AlignmentPosition>());
 			}
+			temporaryResults.get(bucketindex).add(ap);
 
+		}
 
-		} // if not already added
+			
 	}
 	
 
+	private AlignmentPosition extendAlignmentPosition(
+			AlignmentPosition existing, AlignmentPosition ap) {
+
+		long queryStart = 0;
+		long queryEnd = 0;
+		long targetStart = 0;
+		long targetEnd = 0;
+		int qhits = 0;
+		float variance = 0;
+
+		
+		if (!existing.isReverseHit()) {
+			if(existing.getQueryStart()<=ap.getQueryStart()) {
+				queryStart=existing.getQueryStart();
+				targetStart=existing.getTargetStart();
+			} else {
+				queryStart=ap.getQueryStart();
+				targetStart=ap.getTargetStart();
+			}
+			if(existing.getQueryEnd()>=ap.getQueryEnd()) {
+				queryEnd=existing.getQueryEnd();
+				targetEnd=existing.getTargetEnd();
+			} else {
+				queryEnd=ap.getQueryEnd();
+				targetEnd=ap.getTargetEnd();
+			}
+		} else {
+			if(existing.getQueryStart()>=ap.getQueryStart()) {
+				queryStart=existing.getQueryStart();
+				targetStart=existing.getTargetStart();
+			} else {
+				queryStart=ap.getQueryStart();
+				targetStart=ap.getTargetStart();
+			}
+			if(existing.getQueryEnd()<=ap.getQueryEnd()) {
+				queryEnd=existing.getQueryEnd();
+				targetEnd=existing.getTargetEnd();
+			} else {
+				queryEnd=ap.getQueryEnd();
+				targetEnd=ap.getTargetEnd();
+			}
+		}
+		
+		
+		
+		AlignmentPosition merged = new AlignmentPosition(existing.getTarget(),targetStart,targetEnd,existing.getQuery(),queryStart,queryEnd);
+		//todo find better. weighted by length
+		merged.setNumberOfQHits(Math.max(existing.getNumberOfQHits(), ap.getNumberOfQHits()));
+		
+		if(computeMean) {
+			merged.setVariance((float)((existing.getVariance()+ap.getVariance())/2.));
+		}
+		
+		
+		System.out.println("Merge:\n "+ existing +"\n+"+ ap + "\n=" + merged);
+
+		return merged;
+	}
+
+
+	/**
+	 * Checks if the two alignment positions are basically the same
+	 * @param a first
+	 * @param b second match
+	 * @return if they are overlapping and thus the same, or not.
+	 */
+	private boolean checkForSameMatch(AlignmentPosition a, AlignmentPosition b) {
+
+		//Sanity check; hits are in same direction
+		if ((!a.isReverseHit() && b.isReverseHit())
+				|| (a.isReverseHit() && !b.isReverseHit())) {
+			System.out.println(a+" "+b +" are NOT the same, matches on opposite strand");
+			return false;
+		}
+
+		boolean reversed = a.isReverseHit();
+		
+		long aDiagonal = a.getTargetStart();
+		long bDiagonal = b.getTargetStart();
+		
+		if (!reversed) {
+			aDiagonal -= a.getQuerySmallerIndex();
+			bDiagonal -= b.getQuerySmallerIndex();
+		} else {
+			aDiagonal += a.getQuerySmallerIndex();
+			bDiagonal += b.getQuerySmallerIndex();
+		}
+			
+		
+//		Sanity check: same diagonal
+		if (	Math.abs(aDiagonal-bDiagonal) > eZone.getDelta() ) {
+			System.out.println(a+" "+b +" are NOT the same, too far away: |" +
+					aDiagonal + " - " + bDiagonal + "|=" + Math.abs(aDiagonal-bDiagonal));
+					return false;
+		}
+		
+
+		
+		//make sure that a is always the first match
+		if (a.getQuerySmallerIndex() > b.getQuerySmallerIndex()) {
+			AlignmentPosition tmp = a;
+			a = b;
+			b=tmp;
+		}
+		
+		if (a.getQueryLargerIndex() < b.getQuerySmallerIndex()) {
+			System.out.println(a+" "+b +" are NOT the same, they overlap");
+			return false;
+			
+			
+		}
+
+		
+		System.out.println(a+" "+b +" are the same");
+		return true;
+
+	}
 	
 	/**
 	 * Registers the Match Dialog, to pass progress changes to it.
