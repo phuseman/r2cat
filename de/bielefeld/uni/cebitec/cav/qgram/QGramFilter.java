@@ -299,20 +299,26 @@ public class QGramFilter {
 
 
 		int total=(queriesOffsets[queriesOffsets.length-1])*2;
+		int newMatchesForward=0;
+		int newMatchesReversed=0;
 		
 //		// go through all queries
 		for (queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
 			progress=(2.*queriesOffsets[queryNumber])/total;
 			//match one query in forward direction
 			matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
-			generateResultFromTemporary();
+			newMatchesForward=generateResultFromTemporary();
 			
 			progress=((2.*queriesOffsets[queryNumber])+(queriesOffsets[queryNumber+1]-queriesOffsets[queryNumber]))/total;
 			//and reversed
 			matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
-			generateResultFromTemporary();
-
+			newMatchesReversed=generateResultFromTemporary();
 			
+			if((newMatchesForward+newMatchesReversed)>0) {
+				this.reportProgress(progress, "Matches found: " + newMatchesForward + " forward, " + newMatchesReversed +" reversed");
+			} else {
+				this.reportProgress(progress, "**** No matches found for " + query.getSequence(queryNumber).getId() + " ****");
+			}
 		}// for each query
 		
 		//debugging:
@@ -338,14 +344,21 @@ public class QGramFilter {
 		hashTable=null;
 		occurrenceTable=null;
 		
-		
-		reportProgress(1, result.size() + " hits found.");
+		reportProgress(1, "\n===================\n"+ result.size() + " matches found in total.");
 		
 		return result;
 	}
 
-	//TODO return the number of hits found
-	private void generateResultFromTemporary() {
+	/**
+	 * Puts all results from the temporaryResults Variable into the
+	 * AlignmentPositionsList result. If there are Matches spanning over
+	 * multiple targets, these are separated.
+	 * 
+	 * @return the number of new matches.
+	 */
+	private int generateResultFromTemporary() {
+
+		int newMatches = 0;
 
 		long targetStart = 0;
 		long targetEnd = 0;
@@ -358,8 +371,7 @@ public class QGramFilter {
 		DNASequence dNASeqQuery;
 		DNASequence dNASeqTarget;
 
-		
-		//temporary results is a hashmap of vectors of alignment positions.
+		// temporary results is a hashmap of vectors of alignment positions.
 		// go through all of these to assemble the final result.
 		for (Vector<AlignmentPosition> partialResults : temporaryResults
 				.values()) {
@@ -394,6 +406,7 @@ public class QGramFilter {
 					}
 					ap.setNumberOfQHits(qhits);
 					result.addAlignmentPosition(ap);
+					newMatches++;
 					// match spans over different targets
 				} else {
 					// -> split the matches
@@ -452,6 +465,8 @@ public class QGramFilter {
 							// fraction of that part
 							ap.setNumberOfQHits(qhits);
 							result.addAlignmentPosition(ap);
+							newMatches++;
+
 						}
 
 						// System.err.println(" " + ap
@@ -471,16 +486,18 @@ public class QGramFilter {
 
 			}
 		}
-		
-		//since all results have been added to results this can be cleared.
+
+		// since all results have been added to results this can be cleared.
 		// to avoid interferences for the next query this has to be cleared!
 		temporaryResults.clear();
+
+		return newMatches;
 	}
 
 
 	/**
-	 * FIXME UNFINISHED!!
-	 * Try to find the real target start and end position instead of the bucket positions
+	 * FIXME UNFINISHED!! Try to find the real target start and end position
+	 * instead of the bucket positions
 	 */
 	private void adjustTargetCoordinates(AlignmentPosition ap) {
 		QGramCoder targetCoordsCoder= new QGramCoder(qGramIndex.getQLength());
@@ -1054,86 +1071,181 @@ public class QGramFilter {
 	}
 	
 
-	private AlignmentPosition extendAlignmentPosition(
-			AlignmentPosition existing, AlignmentPosition ap) {
+	/**
+	 * Takes two Matches and merges them together. Check before, if the matches
+	 * belong to the same diagonal (checkForSameMatches()).
+	 * 
+	 * For overlapping matches the number of qgrams is estimated. That means
+	 * that the number of qgrams occuring in both matches is estimated and
+	 * substracted from the sum of both counts.
+	 * 
+	 * @param fst
+	 *            First Match
+	 * @param snd
+	 *            Second Match
+	 * @return the combination of both matches. i.e. from the smallest to the
+	 *         highest position relative to the query.
+	 */
+	private AlignmentPosition extendAlignmentPosition(AlignmentPosition fst,
+			AlignmentPosition snd) {
 
 		long queryStart = 0;
 		long queryEnd = 0;
 		long targetStart = 0;
 		long targetEnd = 0;
 		int qhits = 0;
-		float variance = 0;
 
-		
-		if (!existing.isReverseHit()) {
-			if(existing.getQueryStart()<=ap.getQueryStart()) {
-				queryStart=existing.getQueryStart();
-				targetStart=existing.getTargetStart();
+		// calculate the position of the merged match
+
+		// distinguis between forward and reverse hits
+		if (!fst.isReverseHit()) {
+			// check which match has the smallest query position
+			if (fst.getQueryStart() <= snd.getQueryStart()) {
+				queryStart = fst.getQueryStart();
+				targetStart = fst.getTargetStart();
 			} else {
-				queryStart=ap.getQueryStart();
-				targetStart=ap.getTargetStart();
+				queryStart = snd.getQueryStart();
+				targetStart = snd.getTargetStart();
 			}
-			if(existing.getQueryEnd()>=ap.getQueryEnd()) {
-				queryEnd=existing.getQueryEnd();
-				targetEnd=existing.getTargetEnd();
+			// check which hit has the highest query position
+			if (fst.getQueryEnd() >= snd.getQueryEnd()) {
+				queryEnd = fst.getQueryEnd();
+				targetEnd = fst.getTargetEnd();
 			} else {
-				queryEnd=ap.getQueryEnd();
-				targetEnd=ap.getTargetEnd();
+				queryEnd = snd.getQueryEnd();
+				targetEnd = snd.getTargetEnd();
 			}
 		} else {
-			if(existing.getQueryStart()>=ap.getQueryStart()) {
-				queryStart=existing.getQueryStart();
-				targetStart=existing.getTargetStart();
+			// remember: for a reverse hit queryStart > queryEnd
+			// check which hit has the highest query position
+			if (fst.getQueryStart() >= snd.getQueryStart()) {
+				queryStart = fst.getQueryStart();
+				targetStart = fst.getTargetStart();
 			} else {
-				queryStart=ap.getQueryStart();
-				targetStart=ap.getTargetStart();
+				queryStart = snd.getQueryStart();
+				targetStart = snd.getTargetStart();
 			}
-			if(existing.getQueryEnd()<=ap.getQueryEnd()) {
-				queryEnd=existing.getQueryEnd();
-				targetEnd=existing.getTargetEnd();
+			// check which match has the smallest query position
+			if (fst.getQueryEnd() <= snd.getQueryEnd()) {
+				queryEnd = fst.getQueryEnd();
+				targetEnd = fst.getTargetEnd();
 			} else {
-				queryEnd=ap.getQueryEnd();
-				targetEnd=ap.getTargetEnd();
+				queryEnd = snd.getQueryEnd();
+				targetEnd = snd.getTargetEnd();
 			}
 		}
-		
-		
-		
-		AlignmentPosition merged = new AlignmentPosition(existing.getTarget(),targetStart,targetEnd,existing.getQuery(),queryStart,queryEnd);
-		//todo find better. weighted by length
-		merged.setNumberOfQHits(Math.max(existing.getNumberOfQHits(), ap.getNumberOfQHits()));
-		
-		if(computeMean) {
-			merged.setVariance((float)((existing.getVariance()+ap.getVariance())/2.));
-		}
-		
-		
-		System.out.println("Merge:\n "+ existing +"\n+"+ ap + "\n=" + merged);
 
+		// create ne AlignmentPosition
+		AlignmentPosition merged = new AlignmentPosition(fst.getTarget(),
+				targetStart, targetEnd, fst.getQuery(), queryStart, queryEnd);
+
+		// calculate a new estimation for the number of qhits:
+		if (merged.size() == fst.size() || merged.size() == snd.size()) {
+			// if the merged match was not extended, take maximum qhit number
+			qhits = Math.max(fst.getNumberOfQHits(), snd.getNumberOfQHits());
+			// System.out.println("one is the same, take maximum");
+		} else {
+			// determine the lower ap
+			AlignmentPosition lower = snd;
+			AlignmentPosition upper = fst;
+			if (fst.getQuerySmallerIndex() <= snd.getQuerySmallerIndex()) {
+				lower = fst;
+				upper = snd;
+			}
+
+			// System.out.println("check for overlap");
+
+			if (lower.getQueryLargerIndex() >= upper.getQuerySmallerIndex()) {
+				if (lower.getQueryLargerIndex() <= upper.getQueryLargerIndex()) {
+					// they overlap
+
+					// this is the total number of counted qgrams for both
+					int totalNumberOfQGrams = lower.getNumberOfQHits()
+							+ upper.getNumberOfQHits();
+
+					// this is the overlap (in query positions) from both
+					// matches.
+					long overlap = lower.getQueryLargerIndex()
+							- upper.getQuerySmallerIndex();
+					// for this size of an overlap ther can be a maximum of this
+					// hits:
+					int maximumNumberOfQHitsInOverlap = (int) overlap
+							- qGramIndex.getQLength() + 1;
+
+					// if this maximum is less than the number of qhits of one
+					// query, substract only this number
+					int smallerQCount = Math.min(lower.getNumberOfQHits(),
+							upper.getNumberOfQHits());
+
+					// thus the estimated number of qgrams in the overlap part
+					// is:
+					int estimatedNumberOfSameQGrams = Math.min(smallerQCount,
+							maximumNumberOfQHitsInOverlap);
+
+					// qhits from the first + qhits from the second - the qhits
+					// in the overlapping part.
+					qhits = totalNumberOfQGrams - estimatedNumberOfSameQGrams;
+
+					// debug
+					// System.out.println("overlap: est same qG:"+
+					// estimatedNumberOfSameQGrams +" ;overlap is " + overlap);
+
+				} else {
+					// one is included in the other one
+					// take the bigger number
+					qhits = Math.max(fst.getNumberOfQHits(), snd
+							.getNumberOfQHits());
+
+					// debug
+					// System.out.println("inclusion:" + qhits);
+				}
+			}
+		}
+		merged.setNumberOfQHits(qhits);
+
+		if (computeMean) {
+			merged
+					.setVariance((float) ((fst.getVariance() + snd
+							.getVariance()) / 2.));
+		}
+
+		// debugging:
+		// System.out.println("a " + existing + " " +
+		// existing.getNumberOfQHits());
+		// System.out.println("b " +ap + " " + ap.getNumberOfQHits());
+		//		System.out.println("m " +merged + " " + merged.getNumberOfQHits());
 		return merged;
 	}
 
 
 	/**
-	 * Checks if the two alignment positions are basically the same
-	 * @param a first
-	 * @param b second match
-	 * @return if they are overlapping and thus the same, or not.
+	 * Checks if the two alignment positions are basically the same, that means
+	 * that the lie on the same diagonal and possibly overlap or include each
+	 * other.
+	 * 
+	 * @param a
+	 *            first
+	 * @param b
+	 *            second match
+	 * @return if they are overlapping or including each other and thus
+	 *         basically the same, or not.
 	 */
 	private boolean checkForSameMatch(AlignmentPosition a, AlignmentPosition b) {
 
-		//Sanity check; hits are in same direction
+		// Sanity check; hits are in same direction
 		if ((!a.isReverseHit() && b.isReverseHit())
 				|| (a.isReverseHit() && !b.isReverseHit())) {
-			System.out.println(a+" "+b +" are NOT the same, matches on opposite strand");
+			// debug
+			// System.out.println(a+" "+b +" are NOT the same, matches on
+			// opposite strand");
 			return false;
 		}
 
 		boolean reversed = a.isReverseHit();
-		
+
 		long aDiagonal = a.getTargetStart();
 		long bDiagonal = b.getTargetStart();
-		
+
 		if (!reversed) {
 			aDiagonal -= a.getQuerySmallerIndex();
 			bDiagonal -= b.getQuerySmallerIndex();
@@ -1141,33 +1253,42 @@ public class QGramFilter {
 			aDiagonal += a.getQuerySmallerIndex();
 			bDiagonal += b.getQuerySmallerIndex();
 		}
-			
-		
-//		Sanity check: same diagonal
-		if (	Math.abs(aDiagonal-bDiagonal) > eZone.getDelta() ) {
-			System.out.println(a+" "+b +" are NOT the same, too far away: |" +
-					aDiagonal + " - " + bDiagonal + "|=" + Math.abs(aDiagonal-bDiagonal));
-					return false;
-		}
-		
 
-		
-		//make sure that a is always the first match
+		// Sanity check: same diagonal
+		if (Math.abs(aDiagonal - bDiagonal) > eZone.getDelta()) {
+			// debug
+			// System.out.println(a+" "+b +" are NOT the same, too far away: |"
+			// +
+			// aDiagonal + " - " + bDiagonal + "|=" +
+			// Math.abs(aDiagonal-bDiagonal));
+			return false;
+		}
+
+		// make sure that a is always the first match
 		if (a.getQuerySmallerIndex() > b.getQuerySmallerIndex()) {
 			AlignmentPosition tmp = a;
 			a = b;
-			b=tmp;
-		}
-		
-		if (a.getQueryLargerIndex() < b.getQuerySmallerIndex()) {
-			System.out.println(a+" "+b +" are NOT the same, they overlap");
-			return false;
-			
-			
+			b = tmp;
 		}
 
-		
-		System.out.println(a+" "+b +" are the same");
+		// if the second one starts after the first one had ended, they do not
+		// overlap
+		// and are thus different matches!
+		if (a.getQueryLargerIndex() < b.getQuerySmallerIndex()) {
+
+			// debug
+			// System.out.println(a+" "+b +" are NOT the same, they do not
+			// overlap");
+			return false;
+
+		}
+
+		// if the matches are on the same diagonal and the end of the first one
+		// comes after
+		// the start of the second, than they are overlapping or included.
+		// debug
+		//
+		// System.out.println(a+" "+b +" are the same");
 		return true;
 
 	}
