@@ -107,9 +107,6 @@ public class EpsilonZone {
 		return true;
 	}
 
-	// public boolean init(int minimumMatchLength, int gramSize, double
-	// epsilon);
-
 	/**
 	 * For details see:<br>
 	 * K. Rasmussen, J. Stoye, and E. W. Myers.<br>
@@ -190,9 +187,9 @@ public class EpsilonZone {
 	}
 
 	/**
-	 * The paralellograms can have the dimensions w x (e + delta).
-	 * Delta should be greater than e and a power of two, in order to use bitoperations when determining the bucket boundaries.
-	 * this funcion gives the exponent of 2, where 2^x is just above e
+	 * The parallelograms can have the dimensions w x (e + delta).
+	 * Delta should be greater than e and a power of two, in order to use bit-operations when determining the bucket boundaries.
+	 * this function gives the exponent of 2, where 2^x is just above e
 	 * @return
 	 */
 	public int getDeltaExponent() {

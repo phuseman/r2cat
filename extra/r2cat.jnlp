@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- JNLP File for r2cat -->
 
-<jnlp spec="1.0+"
+<jnlp spec="6.0+"
       codebase="file:///homes/phuseman/prog/ComparativeAssemblyViewer/" 
       href="r2cat.jnlp">
    <information>

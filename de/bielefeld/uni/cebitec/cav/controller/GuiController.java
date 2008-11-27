@@ -79,6 +79,8 @@ public class GuiController {
 	public void createMainWindow() {
 		mainWindow = new MainWindow(this);
 		URL url = Thread.currentThread().getContextClassLoader().getResource("images/icon.png");
+	//	URL url = ComparativeAssemblyViewer.class.getResource("/images/icon.png");
+		
 
 		if (url!=null) {
 		Image image = Toolkit.getDefaultToolkit().getImage(url);

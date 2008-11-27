@@ -1,10 +1,15 @@
 <h2><a name="workflow">Workflow</a></h2>
+<p>
 This should describe a typical usecase for this program.
+</p><p>
 The prerequisites are that you have sequenced a genome with a Roche 454 sequencer or probably Illumina sequencer. The resulting reads are already assembled to contigs with a suitable assembler.
-Let us assume that you have a multiple <a href="http://en.wikipedia.org/wiki/FASTA_format" target="_blank">FASTA</a> file containing all contigs and another FASTA file which contains the sequence of a reference genome. This can consist of multiple replicons.
-Start the program and choose "match new" from the menu. Select the two FASTA files, the contigs are the queries and the reference genome is the target for this search. Click on match and the program tries to find areas between contigs and reference, which have less than 8% differences. The matching has been tested with medium size prokaryotic genomes. After the matching has finished click on continue and you can see the matches as dot plot. The contigs are ordered (and stacked) along the y axis with a simple ordering approach. The ordering can be manually be adjusted from the window menu.
-
-At this point you might want to save the matches and the order with "save project" from the file menu. All the matching information and the order of the contigs are then save to a file. This file can be edited manually or by other programs. Each reference and contig has a section specifying its lenght and associated file and other information. After that all matching regions are given in a tab separated table.
-Any saved project can be loaded at any time.
-
-After the matching and ordering of the contigs a FASTA sequence of this layout can be produced, if the original fasta file is present. Select export as fasta from the menu and select a file to write the results to. In the resulting file the contigs are in the order which is displayed and they are reversed if necessary.
+</p><p>
+Let us assume that you have a multiple <a href="http://en.wikipedia.org/wiki/FASTA_format" target="_blank">FASTA</a> file containing all contigs and another FASTA file which contains the sequence of a reference genome. This can consist of multiple replicons. The matching procedure works well on medium size prokaryotic genomes.
+</p><p>
+Start the program and choose "match new" from the menu. Select the two FASTA files, the contigs are the queries and the reference genome is the target for this search. Click on "match" and the program tries to find areas between contigs and reference, which have less than 8% differences. After the matching has finished click on "continue" and you can see the matches as dot plot. The contigs are ordered (and stacked) along the y axis with a simple ordering approach. The ordering can be manually be adjusted from the "window menu".
+</p><p>
+At this point, you might want to save the matches and the order with "save project" from the "file menu". All the matching information and the order of the contigs are then saved to a file. This file can be edited manually or by other programs. Each reference and contig has a section specifying its length and the associated file as well as other information. After that, all matching regions are given in a tab separated table.
+A saved project can then be loaded without the time consuming process of matching.
+</p><p>
+After the matching and ordering of the contigs, a FASTA sequence of this layout can be produced if the original fasta file is present. Select "export as fasta" from the menu and select a file to write the results to. In the resulting file the contigs are in the order which is displayed and they are reversed if necessary.
+</p>
