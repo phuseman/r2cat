@@ -990,7 +990,16 @@ public class QGramFilter {
 			targetStart=(left - bottom);
 			targetEnd=(left - top);
 		}
-		
+
+		// it can happen that on a circular chromosome the hit began on
+		// the end of the target resulting in a negative target start.
+		if(targetStart < 0) {
+			//make the query shorter / add the part which is too much
+			queryStart-=targetStart;
+			//and set the start to 0
+			targetStart=0;
+		}
+
 
 		
 		
