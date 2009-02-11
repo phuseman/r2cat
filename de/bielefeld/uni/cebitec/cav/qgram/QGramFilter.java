@@ -150,7 +150,7 @@ public class QGramFilter {
 		this.qGramIndex = targetIndex;
 		this.query = query;
 		
-		//debug
+//		//debug
 //		try {logfile = new BufferedWriter(new FileWriter("log.csv"));}catch(IOException e) {;}
 	}
 
@@ -216,7 +216,6 @@ public class QGramFilter {
 
 		t.stopTimer("Total");
 		
-//		qf.logfile.flush();
 		System.exit(0);
 	}
 
@@ -302,7 +301,7 @@ public class QGramFilter {
 		int newMatchesForward=0;
 		int newMatchesReversed=0;
 		
-//		// go through all queries
+////		// go through all queries
 		for (queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
 			progress=(2.*queriesOffsets[queryNumber])/total;
 			//match one query in forward direction
@@ -332,6 +331,8 @@ public class QGramFilter {
 //		matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
 //		queryNumber = 67;
 //		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
+//		queryNumber = 10;
+//		matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
 
 
 		// remove references so that the garbage collector can free the space
@@ -582,6 +583,17 @@ public class QGramFilter {
 		
 			// if the code is valid process each occurrence position
 			if (code != -1) {
+				
+				//j is the hitposition in the query
+				if (!reverseComplementDirection) { //forward
+					j = relativeQueryPosition-eZone.getQGramSize();
+				} else  {
+					// for the reverse complement we have to consider the position of the reversed string.
+					// otherwise the hitting diagonals are wrong
+					j= startPos-endPos-relativeQueryPosition-eZone.getQGramSize()+1;
+				}
+
+				
 				for (int occOffset = hashTable[code]; occOffset < hashTable[code + 1]; occOffset++) {
 					
 					i = occurrenceTable[occOffset]; //hitposition in target
@@ -595,14 +607,6 @@ public class QGramFilter {
 //					System.out.println();
 
 					
-					//j is the hitposition in the query
-					if (!reverseComplementDirection) { //forward
-						j = relativeQueryPosition-eZone.getQGramSize();
-					} else  {
-						// for the reverse complement we have to consider the position of the reversed string.
-						// otherwise the hitting diagonals are wrong
-						j= startPos-endPos-relativeQueryPosition-eZone.getQGramSize()+1;
-					}
 
 					
 					// //debug
@@ -616,6 +620,12 @@ public class QGramFilter {
 					b0 = d >> z; // b0= d/2^z
 					bm = b0 % numberOfBins; // bucketindex
 					updateBin(bm, i, j, (b0 << z));
+					
+// debug
+//					if((bm==186) || (bm==187)) {
+//						log(String.format("%d %d %d %d %d\n",i,j,(j-i),d,bm));
+//					}
+
 
 					// if bins are overlapping:
 					// (delta - 1 looks as bitstring like this: 0000..111111
@@ -637,6 +647,7 @@ public class QGramFilter {
 				if ( ((j - e) % (delta - 1)) == 0) {
 					b0 = (j - e) >> z;
 					bm = b0 % numberOfBins;
+					
 					checkAndResetBin(bm,  (b0 << z));
 				}
 
@@ -753,8 +764,8 @@ public class QGramFilter {
 				
 				
 			//********* it seems to take longer if here is an additional if clause!
-			//********* if this is commented out the matching of one special file takes 16 seconds
-			//********* if computeMean is checked it takes 25 seconds
+			//********* if this is commented out the matching of one particular file takes 16 seconds
+			//********* if the if clause is checked (computeMean=false)  it takes 25 seconds
 			//********* and if the mean is computed it takes 22 seconds!!
 				//TODO find a good way to make this available
 //				if(computeMean) {
@@ -941,7 +952,7 @@ public class QGramFilter {
 	 */
 	
 	private void reportMatch(int left, int top, int bottom, int bucketindex, String debugstring) {
-		//debugging	
+//		//debugging	
 //		System.out.println(debugstring
 //				+": bin:"+bucketindex
 //				+"  left:"+left
@@ -991,14 +1002,6 @@ public class QGramFilter {
 			targetEnd=(left - top);
 		}
 
-		// it can happen that on a circular chromosome the hit began on
-		// the end of the target resulting in a negative target start.
-		if(targetStart < 0) {
-			//make the query shorter / add the part which is too much
-			queryStart-=targetStart;
-			//and set the start to 0
-			targetStart=0;
-		}
 
 
 		
@@ -1073,6 +1076,9 @@ public class QGramFilter {
 						new Vector<AlignmentPosition>());
 			}
 			temporaryResults.get(bucketindex).add(ap);
+			
+//			//debugging
+//			System.out.println(ap);
 
 		}
 
