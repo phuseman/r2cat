@@ -197,7 +197,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 
 		
 //FIXME improve the content of the help and uncomment this
-//		this.add(helpMenu);
+		this.add(helpMenu);
 
 		
 	}

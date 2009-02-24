@@ -320,24 +320,25 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 	 * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
 	 */
 	public void mouseMoved(MouseEvent e) {
-		// SwingUtilities.convertMouseEvent((JComponent) e.getSource(), e,
-		// mainWindow.vplug);
-		//        
-		// Point2D.Double point = new Point2D.Double();
-		// try {
-		// mainWindow.vplug.getAlignmentPositionTransform().inverseTransform(
-		// e.getPoint(), point);
-		// //
-		// //
-		// System.out.println(mainWindow.vplug.getAlignmentPositionTransform().createInverse());
-		//        
-		// } catch (NoninvertibleTransformException e1) {
-		// ; // ignore
-		// }
+//		 SwingUtilities.convertMouseEvent((JComponent) e.getSource(), e,
+//		 dotPlotVisualisation);
 
-		// DEBUG
-		// mainWindow.vplug.setToolTipText(convertMouseEventToCanvasPoint(e)
-		// .toString());
+		 
+//		 Point2D.Double point = new Point2D.Double();
+//		 try {
+//			 dotPlotVisualisation.getAlignmentPositionTransform().inverseTransform(
+//		 e.getPoint(), point);
+//		 //
+//		 //
+////		 System.out.println(dotPlotVisualisation.getAlignmentPositionTransform().createInverse());
+//		        
+//		 } catch (NoninvertibleTransformException e1) {
+//		 ; // ignore
+//		 }
+
+//		 DEBUG
+//		 dotPlotVisualisation.setToolTipText(convertMouseEventToCanvasPoint(e)
+//		 .toString());
 	}
 
 	/*
