@@ -24,6 +24,8 @@ public class DNASequence implements Comparable {
 	
 	private boolean reverseComplement = false;
 
+	private boolean repetitive = false;
+
 
 
 	/**
@@ -132,7 +134,7 @@ public class DNASequence implements Comparable {
 	}
 
 	public String toString() {
-		return String.format("%s (%d) %d", id, size,offset);
+		return String.format("%s size:%d offs:%d", id, size,offset);
 	}
 
 	public void setFile(File file) {
@@ -149,6 +151,25 @@ public class DNASequence implements Comparable {
 
 	public void setReverseComplemented(boolean reverseComplement) {
 		this.reverseComplement = reverseComplement;
+	}
+
+	/**
+	 * This method should be used by the {@link AlignmentPositionsStatistics} object only.
+	 * Set a marker for repetitiveness if one hit covers 95 percent of this contig and matches several times on a reference genome
+	 * @param b is repetitive or not
+	 */
+	public void setRepetitive(boolean b) {
+		this.repetitive =b;
+		
+	}
+	/**
+	 * Tells whether or not this contig is repetitive. the {@link AlignmentPositionsStatistics} object will set this property.
+	 * 
+	 * @return
+	 */
+	public boolean isRepetitive() {
+		return this.repetitive;
+		
 	}
 
 }

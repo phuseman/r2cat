@@ -35,9 +35,11 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ProgressMonitor;
 
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
+import de.bielefeld.uni.cebitec.cav.datamodel.ContigSorter;
 import de.bielefeld.uni.cebitec.cav.datamodel.SequenceOrderTableModel;
 import de.bielefeld.uni.cebitec.cav.gui.AlignmentTable;
 import de.bielefeld.uni.cebitec.cav.gui.CustomFileFilter;
@@ -481,6 +483,35 @@ public class GuiController {
 	private void errorAlert(String error) {
 		JOptionPane.showMessageDialog(mainWindow, error, "Error",
 				JOptionPane.ERROR_MESSAGE);
+	}
+
+	/**
+	 * This method sorts the contigs with the contig sorter (in the background with a thread). During the sorting a progess bar is displayed.
+	 * When the thread finishes it has to call sortContigsDone(), to update the gui and the datamodel.
+	 */
+	public void sortContigs() {
+		ContigSorter sorter = new ContigSorter(ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList());
+
+		ProgressMonitor progress = new ProgressMonitor(mainWindow,"Sorting contigs",null,0,100);
+	
+		if (progress!=null) {
+		sorter.register(progress);
+		}
+		sorter.register(this);
+		
+		//if the sorting is not done in a thread, the gui blocks
+		Thread t = new Thread(sorter);
+		t.start();
+	}
+	/**
+	 * The thread in the sortContigs methhod calls this to say it is ready.
+	 * @param sorter
+	 */
+	public void sortContigsDone(ContigSorter sorter) {
+		ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().changeQueryOrder(sorter.getQueryOrder());
+		this.setVisualisationNeedsUpdate();
+		dotPlotVisualisation.repaint();
+
 	}
 
 }

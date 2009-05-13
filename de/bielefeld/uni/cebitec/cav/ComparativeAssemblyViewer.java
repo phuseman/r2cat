@@ -74,15 +74,18 @@ public class ComparativeAssemblyViewer {
 		}
 
 		// testing
-		// try {
-		// dataModelController.readAlignmentPositions(new
-		// File("/homes/phuseman/prog/ComparativeAssemblyViewer/dsm1709.r2c"));
-		// guiController.setVisualisationNeedsUpdate();
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// guiController.showQuerySortTable(dataModelController.getAlignmentPositionsList());
+		 try {
+			 File last = new File(preferences.getLastFile());
+			 if(last.exists() && last.canRead()) {
+		 dataModelController.readAlignmentPositions(new
+		 File(preferences.getLastFile()));
+		 guiController.setVisualisationNeedsUpdate();
+			 }
+		 } catch (IOException e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+		 }
+//		 guiController.showQuerySortTable(dataModelController.getAlignmentPositionsList());
 		//		
 	}
 

@@ -300,6 +300,7 @@ public class QGramFilter {
 		int total=(queriesOffsets[queriesOffsets.length-1])*2;
 		int newMatchesForward=0;
 		int newMatchesReversed=0;
+		Vector<String> unmatchedQueries= new Vector<String>();
 		
 ////		// go through all queries
 		for (queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
@@ -317,6 +318,7 @@ public class QGramFilter {
 				this.reportProgress(progress, "Matches found: " + newMatchesForward + " forward, " + newMatchesReversed +" reversed");
 			} else {
 				this.reportProgress(progress, "**** No matches found for " + query.getSequence(queryNumber).getId() + " ****");
+				unmatchedQueries.add(query.getSequence(queryNumber).getId() +" (" + query.getSequence(queryNumber).getSize() +")");
 			}
 		}// for each query
 		
@@ -345,7 +347,20 @@ public class QGramFilter {
 		hashTable=null;
 		occurrenceTable=null;
 		
-		reportProgress(1, "\n===================\n"+ result.size() + " matches found in total.");
+		if(!unmatchedQueries.isEmpty()) {
+			StringBuffer list = new StringBuffer();
+		list.append("!!!! The following queries could NOT be matched !!!!\n");
+		for (String query : unmatchedQueries) {
+			list.append(query + "\n");
+		}
+		list.append("!!!! The queries above could NOT be matched !!!!");
+		reportProgress(1, list.toString());
+		}
+		
+		
+		reportProgress(1, "\n===================\n"+ result.size() + " matches found in total." +
+				(!unmatchedQueries.isEmpty()?
+						"\n"+(unmatchedQueries.size()+" queries were NOT matched."):"")+"");
 		
 		return result;
 	}

@@ -250,9 +250,19 @@ public class AlignmentPositionsList extends Observable implements
 		}
 	}
 	
-	public void changeQuerys(Vector<DNASequence> sequences) {
+	public void changeQueryOrder(Vector<DNASequence> sequences) {
 		assert sequences.containsAll(queryOrder);
 		this.queryOrder = sequences;
+		queryOrderDefined = true;
+		this.setQueryOffsets();
+		queryOrientationDefined=false;
+		this.setInitialQueryOrientation();
+//		this.setInitialQueryOrder();
+	}
+	
+	public void calculateNewOrderFromCenterOfMassValues() {
+		queryOrderDefined = false;
+		this.setInitialQueryOrder();
 	}
 
 	public void moveQuery(int fromIndex, int toIndex) {
@@ -299,6 +309,10 @@ public class AlignmentPositionsList extends Observable implements
 		}
 	}
 
+	/**
+	 * Gets the Vector containing all targets
+	 * @return
+	 */
 	public Vector<DNASequence> getTargets() {
 		return targetOrder;
 	}
@@ -350,7 +364,7 @@ public class AlignmentPositionsList extends Observable implements
 	/**
 	 * Generates a Statistics Object which does some counting. The Statistics
 	 * Object sets the center of mass for each contig/query and the total
-	 * alignment length as well as reversed alignment length
+	 * alignment length as well as reversed alignment length and checks if a match is repeating.
 	 */
 	public void generateNewStatistics() {
 		statistics = new AlignmentPositionsStatistics(this);
@@ -865,14 +879,20 @@ public class AlignmentPositionsList extends Observable implements
 						contigsWritten++;
 						// TODO write the former description
 						if (!query.isReverseComplemented()) {
-							out.write(">" + query.getId());
+							out.write(">" 
+									// debugging: append index of contig
+//									+ queryOrder.indexOf(query)+"_"
+									+query.getId());
 							if(query.getDescription()!=null && !query.getId().equals("")) {
 								out.write(" " + query.getDescription());
 							}
 							out.write("\n");
 							fastaFile.writeSequence(query.getId(), out);
 						} else {
-							out.write(">" + query.getId()+ " reverse complemented");
+							out.write(">"
+									//debugging append index of contig
+//									+ queryOrder.indexOf(query)+"_"
+									+ query.getId()+ " reverse complemented");
 							if(query.getDescription()!=null && !query.getId().equals("")) {
 								out.write(" " +query.getDescription());
 							}

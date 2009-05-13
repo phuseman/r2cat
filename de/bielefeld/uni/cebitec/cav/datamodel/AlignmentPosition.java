@@ -22,7 +22,7 @@ public class AlignmentPosition implements Comparable<AlignmentPosition> {
 	
 	private int numberOfQHits=-1;
 
-
+private int repeatCount=0;
 
 	/**
 	 * @param target
@@ -203,5 +203,22 @@ public class AlignmentPosition implements Comparable<AlignmentPosition> {
 		}
 		return out;
 	}
+
+	/**
+	 * This method is called from the alignmentpositionstatistics object, if it found that a match is repeating.
+	 */
+	protected void addRepeat() {
+		this.repeatCount++;
+	}
+	
+	/**
+	 * Gives the number of times this match is repeated. Make sure that this property was computed with a {@link AlignmentPositionsStatistics} Object.
+	 * @return
+	 */
+	public int getRepeatCount() {
+		return this.repeatCount;
+	}
+	
+	
 
 }

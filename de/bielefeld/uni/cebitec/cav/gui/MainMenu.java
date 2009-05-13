@@ -146,6 +146,15 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		grid.setActionCommand("grid");
 		grid.addActionListener(this);
 		optionsMenu.add(grid);
+		
+		JMenuItem sortQueriesAuto = new JMenuItem("Sort queries");
+		sortQueriesAuto.setMnemonic(KeyEvent.VK_Q);
+		sortQueriesAuto.getAccessibleContext().setAccessibleDescription(
+				"Sort the queries based on the most matches on their reference");
+		sortQueriesAuto.setActionCommand("sort_queries");
+		sortQueriesAuto.addActionListener(this);
+		optionsMenu.add(sortQueriesAuto);
+
 
 		this.add(optionsMenu);
 
@@ -154,7 +163,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		windowMenu.getAccessibleContext().setAccessibleDescription(
 				"Open windows");
 
-		JMenuItem tableView = new JMenuItem("Show matches as table");
+		JMenuItem tableView = new JMenuItem("Show matches");
 		tableView.setMnemonic(KeyEvent.VK_T);
 		tableView.getAccessibleContext().setAccessibleDescription(
 				"Display a table with the matches");
@@ -162,13 +171,14 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		tableView.addActionListener(this);
 		windowMenu.add(tableView);
 
-		JMenuItem sortQueries = new JMenuItem("Sort queries manually");
+		JMenuItem sortQueries = new JMenuItem("Show queries/contigs");
 		sortQueries.setMnemonic(KeyEvent.VK_Q);
 		sortQueries.getAccessibleContext().setAccessibleDescription(
-				"Display a table to sort the queries by hand");
+				"Display a table to sort the queries manually");
 		sortQueries.setActionCommand("show_query_table");
 		sortQueries.addActionListener(this);
 		windowMenu.add(sortQueries);
+
 
 		this.add(windowMenu);
 		
@@ -226,7 +236,9 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			ComparativeAssemblyViewer.guiController.showAlignmentsPositionTableFrame();
 		} else if (e.getActionCommand().matches("show_query_table")) {
 			ComparativeAssemblyViewer.guiController.showQuerySortTable(ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList());
-		} else if (e.getActionCommand().matches("show_help")) {
+	} else if (e.getActionCommand().matches("sort_queries")) {
+		ComparativeAssemblyViewer.guiController.sortContigs();
+	} else if (e.getActionCommand().matches("show_help")) {
 			ComparativeAssemblyViewer.guiController.showHelpFrame();
 		} else if (e.getActionCommand().matches("show_about")) {
 			ComparativeAssemblyViewer.guiController.showAbout();
@@ -234,7 +246,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			System.exit(0);
 		}
 		
-
+		
 	}
 
 

@@ -90,6 +90,8 @@ public class MatchDialog extends JDialog implements ActionListener,
 	class QGramMatcherTask extends SwingWorker<AlignmentPositionsList, String> {
 		@Override
 		protected AlignmentPositionsList doInBackground() {
+			try {
+			
 			progressBar.setValue(0);
 			progressBar.setIndeterminate(true);
 			progress.setText("");
@@ -201,6 +203,15 @@ public class MatchDialog extends JDialog implements ActionListener,
 
 			setEndMatching();
 			return result;
+			
+			//Catch if the memory is exhausted. If so display a message and return
+			} catch (OutOfMemoryError e) {
+				errorAlert("The heap memory was exhausted.\nTry to start this program with '-Xmx400m'.");
+				progress.append(e.toString());
+				setEndMatching();
+				
+				return null;
+			}
 		}
 		
 		private void setEndMatching() {
@@ -229,7 +240,7 @@ public class MatchDialog extends JDialog implements ActionListener,
 					
 					MatchDialog.this.validate();
 				} else {
-					errorAlert("An error happened, change the files and try again");
+					errorAlert("An error happened, no results have been created.");
 					progressBar.setValue(0);
 				}
 			} catch (InterruptedException e) {

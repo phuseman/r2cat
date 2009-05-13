@@ -222,7 +222,7 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener {
 	@Override
 	public void keyReleased(KeyEvent e) {
 		// change the zoom value if enter is pressed
-		if (e.getKeyCode() == KeyEvent.VK_ENTER && e.getSource() == zoomValue) {
+		if ( (e.getKeyCode() == KeyEvent.VK_ENTER) && e.getSource() == zoomValue) {
 			if (zoomSlider != null && zoomValue != null) {
 				try {
 					double zoom = Double.parseDouble(((JTextField) e
