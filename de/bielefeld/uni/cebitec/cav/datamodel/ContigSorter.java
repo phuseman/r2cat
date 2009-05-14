@@ -227,15 +227,6 @@ public class ContigSorter implements Runnable {
 	}
 
 	/**
-	 * Registers the ProgressMonitor, to pass progress changes to it.
-	 * 
-	 * @param matchDialog
-	 */
-	public void register(ProgressMonitor progress) {
-		this.progress = progress;
-	}
-
-	/**
 	 * If a MatchDialog is registered the output will be written in its
 	 * textfield. Otherwise on the command line.
 	 * 
@@ -266,6 +257,15 @@ public class ContigSorter implements Runnable {
 	public void register(GuiController guiController) {
 		this.guiController = guiController;
 
+	}
+
+	/**
+	 * Registers the ProgressMonitor, to pass progress changes to it.
+	 * 
+	 * @param matchDialog
+	 */
+	public void register(ProgressMonitor progress) {
+		this.progress = progress;
 	}
 
 }
