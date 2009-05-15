@@ -71,7 +71,7 @@ public class ComparativeAssemblyViewer {
 			} catch (IOException e) {
 				System.err.println("Cannot open file: " + initialFile.getName());
 			}
-		}
+		} else {
 
 		// testing
 		 try {
@@ -86,7 +86,8 @@ public class ComparativeAssemblyViewer {
 		 e.printStackTrace();
 		 }
 //		 guiController.showQuerySortTable(dataModelController.getAlignmentPositionsList());
-		//		
+		//	
+	}	
 	}
 
 	private static void clearPreferences(String[] args) {
