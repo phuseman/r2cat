@@ -80,8 +80,11 @@ public class TreebasedContigSorter {
 	protected double maximumWeight = 0;
 
 
-	// debugging
+	
 	protected NeatoWriter neato;
+	
+	//debugging
+//	private BufferedWriter csvWriter;
 
 	
 	/**
@@ -99,6 +102,13 @@ public class TreebasedContigSorter {
 		this.contigsToReferencesMatches = matchesToReferenceGenomes;
 		this.numberOfContigs = getNumberOfInvolvedContigs();
 		neato = null;
+		
+//		try {
+//			csvWriter=new BufferedWriter(new FileWriter(new File("/homes/phuseman/compassemb/treebased/distances.csv")));
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 	
 
@@ -114,9 +124,7 @@ public class TreebasedContigSorter {
 	public TreebasedContigSorter(
 			Vector<AlignmentPositionsList> matchesToReferenceGenomes,
 			File graphOutput) {
-		this.contigsToReferencesMatches = matchesToReferenceGenomes;
-		this.numberOfContigs = getNumberOfInvolvedContigs();
-
+		this(matchesToReferenceGenomes);
 		neato = new NeatoWriter(graphOutput);
 
 	}
@@ -251,8 +259,15 @@ public class TreebasedContigSorter {
 					treeDistance);
 		}
 		
-		
+
 		//debugging
+//		try {
+//			csvWriter.flush();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
 //		try {
 //			writeWeightMatrix(new File("/homes/phuseman/compassemb/treebased/log.csv"));
 //		} catch (IOException e) {
@@ -386,8 +401,35 @@ public class TreebasedContigSorter {
 	
 				//calculate the distance of the two projected contigs...
 				distance = first.distance(second);
+				
+//				//debug
+//				// write the distance if the contigs are 'adjacent'
+//				try {
+//					first.ap.getQuery().getId();
+//					String a = first.ap.getQuery().getId();
+//					if(a.indexOf("_")!=-1) {
+//					a = a.substring(0, a.indexOf("_"));
+//					}
+//					String b = second.ap.getQuery().getId();
+//					if(b.indexOf("_")!=-1) {
+//					b = b.substring(0, b.indexOf("_"));
+//					}
+//
+//					int aNumber = Integer.parseInt(a);
+//					int bNumber = Integer.parseInt(b);
+//					
+//					if(Math.abs(aNumber - bNumber)<2) {
+//					csvWriter.write(((Integer)distance).toString()+"\n");
+//					}
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				//debug
+				
+				
 				// ...to get a weight factor...
-				distanceWeight = scorefunction(distance, treeDistance);
+				distanceWeight = scorefunctionGumbel(distance, treeDistance);
 				//... that is multiplied with the "quality" of the matches
 				// and added to the weight matrix.
 				adjacencyWeightMatrix[i][j] += (distanceWeight
@@ -545,7 +587,7 @@ public class TreebasedContigSorter {
 		private double scorefunctionGumbel(double distance, double treeDistance) {
 			// hard coded :(  parameters for Gumble distribution
 			double z = 0; // center
-			double beta = 2000. * treeDistance;// width
+			double beta = 1000. * treeDistance;// width
 	
 			z = Math.exp(-(distance / beta));
 	

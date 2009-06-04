@@ -80,9 +80,9 @@ public class TreebasedContigSorterProject {
 //							 "/homes/phuseman/compassemb/treebased/Corynebacterium_kroppenstedtii_DSM44385_454AllContigs.rtc"));
 							// assembled genome against all
 							// "/homes/phuseman/compassemb/treebased/Corynebacterium_kroppenstedtii_DSM44385.rtc"));
-							 "/homes/phuseman/compassemb/treebased/Corynebacterium_urealyticum_DSM_7109_454AllContigs.rtc"));
+						 "/homes/phuseman/compassemb/treebased/Corynebacterium_urealyticum_DSM_7109_454AllContigs.rtc"));
 							// "/homes/phuseman/compassemb/treebased/Corynebacterium_urealyticum_DSM_7109.rtc"));
-							// "/homes/phuseman/compassemb/treebased/Corynebacterium_aurimucosum_454AllContigs.rtc"));
+//							 "/homes/phuseman/compassemb/treebased/Corynebacterium_aurimucosum_454AllContigs.rtc"));
 							// "/homes/phuseman/compassemb/treebased/Corynebacterium_aurimucosum.rtc"));
 							//"/homes/phuseman/compassemb/treebased/Corynebacterium_urealyticum_DSM_7111_454AllContigs.rtc"));
 
