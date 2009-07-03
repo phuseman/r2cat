@@ -402,8 +402,23 @@ public class TreebasedContigSorter {
 				//calculate the distance of the two projected contigs...
 				distance = first.distance(second);
 				
-//				//debug
-//				// write the distance if the contigs are 'adjacent'
+				
+				
+				// ...to get a weight factor...
+//				distanceWeight = scorefunctionGumbel(distance, treeDistance);
+				distanceWeight = scorefunction(distance, treeDistance);
+				//... that is multiplied with the "quality" of the matches
+				// and added to the weight matrix.
+				adjacencyWeightMatrix[i][j] += (distanceWeight
+						* (double) first.qhits * (double) second.qhits);
+	
+				assert (adjacencyWeightMatrix[i][j] < 0);
+	
+				
+				
+				
+				//debug
+				// write the distance if the contigs are 'adjacent'
 //				try {
 //					first.ap.getQuery().getId();
 //					String a = first.ap.getQuery().getId();
@@ -417,26 +432,28 @@ public class TreebasedContigSorter {
 //
 //					int aNumber = Integer.parseInt(a);
 //					int bNumber = Integer.parseInt(b);
-//					
-//					if(Math.abs(aNumber - bNumber)<2) {
-//					csvWriter.write(((Integer)distance).toString()+"\n");
+//
+//					if ((aNumber == 26 && bNumber == 52) 
+//							|| (aNumber == 52 && bNumber == 26)) {
+//						if ((distanceWeight
+//						* (double) first.qhits * (double) second.qhits) > 10.) {
+//						System.out.println(treeDistance+" " +first.ap.getTarget().getId() + " " + first.ap + " " + second.ap  ); 
+//						}
 //					}
-//				} catch (IOException e) {
+//					
+////					if(Math.abs(aNumber - bNumber)<2) {
+////					csvWriter.write(((Integer)distance).toString()+"\n");
+////					}
+//				} catch (Exception e) {
 //					// TODO Auto-generated catch block
 //					e.printStackTrace();
 //				}
 //				//debug
+
 				
 				
-				// ...to get a weight factor...
-				distanceWeight = scorefunctionGumbel(distance, treeDistance);
-				//... that is multiplied with the "quality" of the matches
-				// and added to the weight matrix.
-				adjacencyWeightMatrix[i][j] += (distanceWeight
-						* (double) first.qhits * (double) second.qhits);
-	
-				assert (adjacencyWeightMatrix[i][j] < 0);
-	
+				
+				
 				if (adjacencyWeightMatrix[i][j] > maximumWeight) {
 					maximumWeight = adjacencyWeightMatrix[i][j];
 				}
@@ -514,6 +531,7 @@ public class TreebasedContigSorter {
 		 * @return scorefactor for this connection
 		 */
 		private double scorefunction(double distance, double treeDistance) {
+			double weightingFactorForLostFragments = 0.1; //lost fragment factor
 			
 			double averageInsertionSizeDeviation = 10000.;
 			double averageLostFragmentSize = 2000.;
@@ -536,9 +554,10 @@ public class TreebasedContigSorter {
 			double lostFragmentScore = (1./averageLostFragmentDeviation*sqrt2pi)
 			*Math.exp( lostFragmentExponent );
 			
-			double score=(insertionDeletionScore+lostFragmentScore)/2.;
+			double score=((1-weightingFactorForLostFragments)*insertionDeletionScore
+					+ weightingFactorForLostFragments* lostFragmentScore);
 			
-	//		System.out.println(String.format("%f %f %f", distance, treeDistance, score));
+//			System.out.println(String.format("%f %f %f", distance, treeDistance, score));
 			
 			return score;
 		}
@@ -662,7 +681,7 @@ public class TreebasedContigSorter {
 			e = freeConnections.poll();
 
 			if ((usedContigs[e.i] == null || usedContigs[e.j] == null)
-					&& e.score > 1.) {
+					&& e.score > 0.1) {
 				
 				incorporatedEdges.add(e);
 				// if the contigs are not used yet, incorporate them
