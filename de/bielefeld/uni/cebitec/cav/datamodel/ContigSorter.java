@@ -20,15 +20,12 @@
 
 package de.bielefeld.uni.cebitec.cav.datamodel;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Vector;
-import java.util.prefs.Preferences;
 
 import javax.swing.ProgressMonitor;
 
 import de.bielefeld.uni.cebitec.cav.controller.GuiController;
-import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
 
 /**
  * Sorts the contigs based on their hits with a sliding window approach. The idea
@@ -62,26 +59,6 @@ public class ContigSorter implements Runnable {
 		this.apl = apl;
 	}
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) throws Exception {
-		CAVPrefs preferences = new CAVPrefs();
-		Preferences pref = CAVPrefs.getPreferences();
-
-		AlignmentPositionsList list = new AlignmentPositionsList();
-		list.readFromFile(new File(preferences.getLastFile()));
-
-		ContigSorter sorter = new ContigSorter(list);
-
-		ProgressMonitor prog = new ProgressMonitor(null, "Sorting", null, 0,
-				100);
-		prog.setMillisToDecideToPopup(0);
-		sorter.register(prog);
-
-		sorter.sort();
-
-	}
 
 	/**
 	 * An array of the reference genome size is created. This is used as a
@@ -109,7 +86,8 @@ public class ContigSorter implements Runnable {
 			int bestIndex = getIndexOfHighestWindowCountFromHistogram((int) query
 					.getSize());
 
-			apl.getQueries().get(i).setCenterOfMass(bestIndex);
+			apl.getQueries().get(i).setSortKey(bestIndex);
+			
 
 			this.resetHistogram();
 			reportProgress(((double) i / apl.getQueries().size()));

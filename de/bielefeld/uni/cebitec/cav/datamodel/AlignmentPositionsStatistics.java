@@ -87,12 +87,9 @@ public class AlignmentPositionsStatistics implements Observer {
 
 		this.resetStatistics();
 
-		// go through all AlignmentPositions and collect the weighted centers
-		// and the total lengths for each query
-		double sizeFactor = 0;
 
 		
-		///// detect repeats
+		/////***** detect repeats*****
 		Vector<AlignmentPosition> sortedPositions = apl.getAlignmentPositions();
 		// sort by contig id's and then by contig start position of a match.
 		// this way it is easier to detect repeating matches (next for loop)
@@ -137,14 +134,8 @@ public class AlignmentPositionsStatistics implements Observer {
 		}
 		
 
-		
-		//calculate the center of mass (or in this case cubic center of mass)
+		//get statistics about the size of the forward and backward alignments
 		for (AlignmentPosition element : apl) {
-			// take the cubic size. long matches are weighted heavier this way.
-			sizeFactor = element.size() * element.size() * element.size();
-			element.getQuery().centerOfMass += element.getTargetCenter()
-					* sizeFactor;
-			element.getQuery().centerOfMassFactor += sizeFactor;
 
 			element.getQuery().totalAlignmentLength += element.size();
 			if (element.isReverseHit()) {
@@ -159,11 +150,8 @@ public class AlignmentPositionsStatistics implements Observer {
 			}
 		}
 
-		// go through all queries
+		// go through all queries, determining minimal and maximal lengths, as well as the total size
 		for (DNASequence query : apl.getQueries()) {
-
-			// compute the center of mass for each contig/query
-			query.centerOfMass = query.centerOfMass / query.centerOfMassFactor;
 
 			// compute min and max query size
 			if (minQueryLen > query.getSize()) {

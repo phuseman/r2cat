@@ -13,8 +13,6 @@ public class DNASequence implements Comparable {
 
 	private long offset = 0;
 	
-	protected double centerOfMass = -1;
-	public double centerOfMassFactor;
 
 	
 	protected double totalAlignmentLength = 0;
@@ -25,6 +23,9 @@ public class DNASequence implements Comparable {
 	private boolean reverseComplement = false;
 
 	private boolean repetitive = false;
+
+	//how to order the sequences. a smaller numer = earlier
+	private int sortKey;
 
 
 
@@ -48,38 +49,38 @@ public class DNASequence implements Comparable {
 		
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
 	public int compareTo(Object o) {
 		int out = 0;
-		if (centerOfMass > ((DNASequence) o).getCenterOfMass()) {
+		
+		//first sort by the sortkey
+		if (sortKey > ((DNASequence) o).sortKey) {
 			out = 1;
 		} else {
 			out = -1;
 		}
 
+		// if the sort keys are the same, sort by by size
+		if (sortKey == ((DNASequence) o).sortKey) {
+			if (size > ((DNASequence) o).size) {
+				out = 1;
+			} else {
+				out = -1;
+			}
+		}
+		
+		//if the ids of the sequences are equal, say they are the same
 		if (id.equals(((DNASequence) o).getId())
-				|| centerOfMass == ((DNASequence) o).getCenterOfMass()) {
+				|| this.sortKey == ((DNASequence) o).sortKey) {
 			out = 0;
 		}
 
 		return out;
 	}
-//	public int compareTo(Object o) {
-//		int out = 0;
-//		if (size > ((DNASequence) o).getSize()) {
-//			out = -1;
-//		} else {
-//			out = 1;
-//		}
-//
-//		if (id.equals(((DNASequence) o).getId())
-//				|| size == ((DNASequence) o).getSize()) {
-//			out = 0;
-//		}
-//
-//		return out;
-//	}
-//
-//	
+
+	
 	public File getFile() {
 		return file;
 	}
@@ -109,13 +110,6 @@ public class DNASequence implements Comparable {
 		this.marked = marked;
 	}
 
-	public double getCenterOfMass() {
-		return centerOfMass;
-	}
-
-	public void setCenterOfMass(double centerOfMass) {
-		this.centerOfMass = centerOfMass;
-	}
 
 	public double getTotalAlignmentLength() {
 		return totalAlignmentLength;
@@ -172,4 +166,12 @@ public class DNASequence implements Comparable {
 		
 	}
 
+	public void setSortKey(int sortKey) {
+		this.sortKey = sortKey;
+	}
+
+	public int getSortKey() {
+		return this.sortKey;
+	}
+	
 }

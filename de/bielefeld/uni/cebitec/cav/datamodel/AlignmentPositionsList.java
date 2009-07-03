@@ -27,6 +27,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -166,6 +167,18 @@ public class AlignmentPositionsList extends Observable implements
 
 	public void setTargetOffsets() {
 		long offset = 0;
+		
+		Collections.sort(targetOrder, new Comparator<DNASequence>() {
+			public int compare(DNASequence a, DNASequence b) {
+				if (a.getSize()==b.getSize()) {
+					return 0;
+				} else {
+					return a.getSortKey()<b.getSize() ? -1 : 1 ;
+				}
+			}
+		});
+
+		
 		for (DNASequence target : targetOrder) {
 			target.setOffset(offset);
 			offset += target.getSize();
@@ -195,8 +208,6 @@ public class AlignmentPositionsList extends Observable implements
 		checkStatistics();
 		if (!queryOrderDefined) {
 			Collections.sort(queryOrder);
-//			MureCola layouter = new MureCola(this);
-//			changeQuerys(layouter.createLayout());
 			queryOrderDefined = true;
 			this.setQueryOffsets();
 			this.setChanged();
@@ -260,7 +271,7 @@ public class AlignmentPositionsList extends Observable implements
 //		this.setInitialQueryOrder();
 	}
 	
-	public void calculateNewOrderFromCenterOfMassValues() {
+	public void calculateNewOrderFromSortKeyValues() {
 		queryOrderDefined = false;
 		this.setInitialQueryOrder();
 	}
@@ -746,10 +757,8 @@ public class AlignmentPositionsList extends Observable implements
 		BufferedWriter out = new BufferedWriter(new FileWriter(f));
 
 		for (DNASequence query : queryOrder) {
-			if (query.getCenterOfMass() >= 0) {
 				out.write((query.isReverseComplemented() ? "-" : "+")
 						+ query.getId() + "\n");
-			}
 		}
 		out.close();
 	}
