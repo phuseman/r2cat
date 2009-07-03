@@ -9,7 +9,6 @@ import java.util.List;
 import javax.imageio.spi.RegisterableService;
 import javax.imageio.spi.ServiceRegistry;
 
-import org.freehep.graphicsio.exportchooser.AbstractExportFileType;
 import org.freehep.util.Service;
 
 /**
@@ -28,7 +27,6 @@ public class ExportFileTypeRegistry {
     private static final Collection categories = new ArrayList(2);
     static {
         categories.add(ExportFileType.class);
-        categories.add(AbstractExportFileType.class);
         categories.add(RegisterableService.class);
     }
 

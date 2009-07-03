@@ -90,18 +90,18 @@ public class ImageExportFileType extends AbstractExportFileType {
 
 	public static ImageExportFileType getInstance(String format) {
 		format = format.toLowerCase();
-//		if (format.equals(ImageConstants.GIF.toLowerCase()))
-//			return exportFileType("org.freehep.graphicsio.gif.GIFExportFileType");
+		if (format.equals(ImageConstants.GIF.toLowerCase()))
+			return exportFileType("org.freehep.graphicsio.gif.GIFExportFileType");
 		if (format.equals(ImageConstants.PNG.toLowerCase()))
 			return exportFileType("org.freehep.graphicsio.png.PNGExportFileType");
 		if (format.equals(ImageConstants.JPG.toLowerCase()))
 			return exportFileType("org.freehep.graphicsio.jpg.JPGExportFileType");
-//		if (format.equals(ImageConstants.RAW.toLowerCase()))
-//			return exportFileType("org.freehep.graphicsio.raw.RawExportFileType");
-//		if (format.equals(ImageConstants.BMP.toLowerCase()))
-//			return exportFileType("org.freehep.graphicsio.bmp.BMPExportFileType");
-//		if (format.equals(ImageConstants.WBMP.toLowerCase()))
-//			return exportFileType("org.freehep.graphicsio.wbmp.WBMPExportFileType");
+		if (format.equals(ImageConstants.RAW.toLowerCase()))
+			return exportFileType("org.freehep.graphicsio.raw.RawExportFileType");
+		if (format.equals(ImageConstants.BMP.toLowerCase()))
+			return exportFileType("org.freehep.graphicsio.bmp.BMPExportFileType");
+		if (format.equals(ImageConstants.WBMP.toLowerCase()))
+			return exportFileType("org.freehep.graphicsio.wbmp.WBMPExportFileType");
 		return null;
 	}
 

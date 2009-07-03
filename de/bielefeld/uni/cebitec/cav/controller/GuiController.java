@@ -516,9 +516,10 @@ public class GuiController {
 
 	}
 
-	public void exportImages() {
+	public void exportAlignmentPositionsListAsImage() {
 		ExportDialog export=new ExportDialog("r2cat",true);
-		export.showExportDialog(mainWindow, "Export to file", dotPlotVisualisation, "exportfile");
+		export.removeUninterestingFileTypes(); //hack to remove some bitmat formats
+		export.showExportDialog(mainWindow, "Export view to file", dotPlotVisualisation, "export_r2cat_view");
 	}
 
 }

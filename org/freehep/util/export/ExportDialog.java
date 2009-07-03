@@ -58,6 +58,24 @@ public class ExportDialog extends JOptionPane
    {
       exportTypeList.addElement(fileType);
    }
+   
+   /**
+ * Quick hack to remove file types which are nor very interesting for r2cat
+ */
+public void removeUninterestingFileTypes() {
+
+		for (int i = 0; i < exportTypeList.size(); i++) {
+			if (exportTypeList.get(i) instanceof ExportFileType) {
+				String descr = ((ExportFileType) exportTypeList.get(i))
+						.getDescription();
+				if (descr.contains("BMP") || descr.contains("GIF")
+						|| descr.contains("JPEG")) {
+					exportTypeList.remove(i);
+				}
+
+			}
+		}
+	}
       
    public void addAllExportFileTypes()
    {
