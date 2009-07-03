@@ -67,6 +67,9 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		newMatch.setActionCommand("match_new");
 		fileMenu.add(newMatch);
 
+		fileMenu.addSeparator();
+		
+		
 		JMenuItem open = new JMenuItem("Open project");
 		open.setMnemonic(KeyEvent.VK_O);
 		open.getAccessibleContext()
@@ -83,25 +86,39 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		save.addActionListener(this);
 		//save.setEnabled(false);
 		fileMenu.add(save);
-
 		
-		JMenuItem swift = new JMenuItem("Import SWIFT csv File");
-		swift.setMnemonic(KeyEvent.VK_O);
-		swift.getAccessibleContext()
-				.setAccessibleDescription("Import SWIFT csv File");
-		swift.setActionCommand("open_csv");
-		swift.addActionListener(this);
-		fileMenu.add(swift);
+		fileMenu.addSeparator();
+
+
+		//outdated... no need to import swift files
+		//TODO: probably change this to import various formats like blast, mummer, blat and so on...
+//		JMenuItem swift = new JMenuItem("Import SWIFT csv File");
+//		swift.setMnemonic(KeyEvent.VK_O);
+//		swift.getAccessibleContext()
+//				.setAccessibleDescription("Import SWIFT csv File");
+//		swift.setActionCommand("open_csv");
+//		swift.addActionListener(this);
+//		fileMenu.add(swift);
 
 		JMenuItem fastaExport = new JMenuItem("Export contigs as FASTA file");
 		fastaExport.setMnemonic(KeyEvent.VK_F);
 		fastaExport.getAccessibleContext()
-				.setAccessibleDescription("Save the contigs order and orientation in FASTA format");
+				.setAccessibleDescription("Save the contigs in the displayed order and orientation in FASTA format");
 		fastaExport.setActionCommand("save_fasta");
 		fastaExport.addActionListener(this);
 		fileMenu.add(fastaExport);
 
 		
+		JMenuItem imageExport = new JMenuItem("Export image");
+		imageExport.getAccessibleContext()
+				.setAccessibleDescription("Exports the viewport as image (vector or bitmap)");
+		imageExport.setActionCommand("export_image");
+		imageExport.addActionListener(this);
+		fileMenu.add(imageExport);
+
+		
+		fileMenu.addSeparator();
+
 		
 		JMenuItem exit=new JMenuItem("Exit");
 		exit.setMnemonic(KeyEvent.VK_E);
@@ -146,6 +163,8 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		grid.setActionCommand("grid");
 		grid.addActionListener(this);
 		optionsMenu.add(grid);
+		
+		optionsMenu.addSeparator();
 		
 		JMenuItem sortQueriesAuto = new JMenuItem("Sort queries");
 		sortQueriesAuto.setMnemonic(KeyEvent.VK_Q);
@@ -244,7 +263,9 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			ComparativeAssemblyViewer.guiController.showAbout();
 		} else if (e.getActionCommand().matches("exit")) {
 			System.exit(0);
-		}
+		} else if (e.getActionCommand().matches("export_image")) {
+		guiController.exportImages();
+	}
 		
 		
 	}

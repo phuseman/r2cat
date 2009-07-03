@@ -37,6 +37,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ProgressMonitor;
 
+import org.freehep.util.export.ExportDialog;
+
 import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.ContigSorter;
@@ -512,6 +514,11 @@ public class GuiController {
 		this.setVisualisationNeedsUpdate();
 		dotPlotVisualisation.repaint();
 
+	}
+
+	public void exportImages() {
+		ExportDialog export=new ExportDialog("r2cat",true);
+		export.showExportDialog(mainWindow, "Export to file", dotPlotVisualisation, "exportfile");
 	}
 
 }
