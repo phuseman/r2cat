@@ -20,12 +20,15 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URL;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -331,7 +334,31 @@ public class PSGraphics2D extends AbstractVectorGraphicsIO implements
         // as this class definition. It is simply copied into the
         // output file.
         os.println("%%BeginProlog");
-        copyResourceTo(this, "PSProlog.txt", os);
+
+        BufferedReader br = null;
+        try {
+        	URL prolog = getClass().getResource("/extra/PSProlog.txt");
+//        	URL prolog = Thread.currentThread().getContextClassLoader().getResource("PSProlog.txt");
+        	
+        	br = new BufferedReader(new InputStreamReader(prolog.openStream()));
+            String s;
+            while ((s = br.readLine()) != null) {
+                os.println(s);
+            }
+            os.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (br != null)
+                    br.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    
+
+        
         os.println("%%EndProlog");
         os.println();
 

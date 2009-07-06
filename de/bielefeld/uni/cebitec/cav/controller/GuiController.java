@@ -27,6 +27,8 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -519,7 +521,11 @@ public class GuiController {
 	public void exportAlignmentPositionsListAsImage() {
 		ExportDialog export=new ExportDialog("r2cat",true);
 		export.removeUninterestingFileTypes(); //hack to remove some bitmat formats
-		export.showExportDialog(mainWindow, "Export view to file", dotPlotVisualisation, "export_r2cat_view");
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmm");
+		java.util.Date date = new java.util.Date();
+
+		export.showExportDialog(mainWindow, "Export view to file", dotPlotVisualisation, "r2catExport"+dateFormat.format(date));
 	}
 
 }
