@@ -31,13 +31,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ProgressMonitor;
+import javax.swing.filechooser.FileFilter;
 
 import org.freehep.util.export.ExportDialog;
 
@@ -55,6 +55,7 @@ import de.bielefeld.uni.cebitec.cav.gui.MainMenu;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
 import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
 import de.bielefeld.uni.cebitec.cav.gui.SequenceOrderTable;
+import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
 public class GuiController {
 
@@ -311,7 +312,7 @@ public class GuiController {
 	}
 
 	public void loadCSVFile() {
-		File csv = this.chooseFile(true, ".csv", "comma separaded values");
+	File csv = this.chooseFile("Import matches from csv file", true, new CustomFileFilter(".csv", "comma separaded values"));
 		if (csv != null) {
 			ComparativeAssemblyViewer.dataModelController
 					.setAlignmentsPositonsListFromCSV(csv);
@@ -330,7 +331,7 @@ public class GuiController {
 			return;
 		}
 
-		File f = this.chooseFile(false, ".r2c", "r2cat hits file");
+		File f = this.chooseFile("Save project data to file", false, new CustomFileFilter(".r2c", "r2cat hits file"));
 		if (f != null) {
 			try {
 				if (!f.getName().endsWith(".r2c")) {
@@ -348,7 +349,7 @@ public class GuiController {
 	 * Shows a dialog to load a project file
 	 */
 	public void loadProject() {
-		File f = this.chooseFile(true, ".r2c", "r2cat hits file");
+		File f = this.chooseFile("Load project data from file", true, new CustomFileFilter(".r2c", "r2cat hits file"));
 		if (f != null) {
 			try {
 				ComparativeAssemblyViewer.dataModelController
@@ -372,7 +373,7 @@ public class GuiController {
 			return;
 		}
 
-		File f = this.chooseFile(false, ".fas", "fasta file");
+		File f = this.chooseFile("Export contig order and orientation to FASTA", false, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
 		if (f != null) {
 			this.exportAsFastaFile(f, false);
 		} else {
@@ -414,7 +415,7 @@ public class GuiController {
 				
 				switch (n) {
 				case JOptionPane.YES_OPTION:
-					seqNotFoundException.getDNASequence().setFile(this.chooseFile(true, ".fas", "Fasta file"));
+				seqNotFoundException.getDNASequence().setFile(this.chooseFile("Choose a new file",true, new CustomFileFilter(".fas,.fna,.fasta", "Fasta file")));
 					this.exportAsFastaFile(f, ignoreMissingFiles);
 					break;
 				case JOptionPane.NO_OPTION:
@@ -434,50 +435,29 @@ public class GuiController {
 
 	}
 
+	
 	/**
-	 * Shows a dialog to select files for opening or saving data
-	 * 
-	 * @param open
-	 *            true means show open dialog; false show save dialog
-	 * @param extension
-	 *            extension to filter for. null or empty is all
-	 * @param description
-	 *            description of this kind of files
-	 * @return
+	 * Chooses a file for opening or saving data
+	 * @param dialogTitle Title of the dialog to show
+	 * @param openDialog true:display open dialog; false=display save dialog
+	 * @param filter A file filter to restrict the files shown. Use the CustomFileFilter
+	 * @return The selected File or null, if aborted
 	 */
-	public File chooseFile(boolean open, String extension, String description) {
-		JFileChooser fileChooser = new JFileChooser();
-
-		if (extension != null && !extension.isEmpty()) {
-			fileChooser.addChoosableFileFilter(new CustomFileFilter(extension,
-					description));
-		}
-
+	private File chooseFile(String dialogTitle, boolean openDialog,
+			FileFilter filter) {
 		File lastFile = new File(ComparativeAssemblyViewer.preferences
 				.getLastFile());
 		File lastDir = lastFile.getParentFile();
-		if (lastDir != null) {
-			fileChooser.setCurrentDirectory(lastDir);
+
+		lastFile = MiscFileUtils.chooseFile(mainWindow, dialogTitle, lastDir,
+				openDialog, filter);
+		if (lastFile != null) {
+			ComparativeAssemblyViewer.preferences.setLastFile(lastFile.getAbsolutePath());
 		}
-
-		int returnVal;
-
-		if (open) {
-			returnVal = fileChooser.showOpenDialog(mainWindow);
-		} else {
-			returnVal = fileChooser.showSaveDialog(mainWindow);
-		}
-
-		File file = null;
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			file = fileChooser.getSelectedFile();
-			ComparativeAssemblyViewer.preferences.setLastFile(file
-					.getAbsolutePath());
-		}
-
-		return file;
+		return lastFile;
 	}
 
+	
 	/**
 	 * Pop up an error message
 	 * 
@@ -527,5 +507,6 @@ public class GuiController {
 
 		export.showExportDialog(mainWindow, "Export view to file", dotPlotVisualisation, "r2catExport"+dateFormat.format(date));
 	}
+	
 
 }

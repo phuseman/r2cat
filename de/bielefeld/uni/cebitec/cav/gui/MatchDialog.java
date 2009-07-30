@@ -38,7 +38,6 @@ import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -55,6 +54,7 @@ import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 import de.bielefeld.uni.cebitec.cav.qgram.QGramFilter;
 import de.bielefeld.uni.cebitec.cav.qgram.QGramIndex;
 import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
+import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 /**
@@ -376,32 +376,14 @@ public class MatchDialog extends JDialog implements ActionListener,
 	 * @return The selected file or directory. null if cancelled.
 	 */
 	private File chooseFile(File prevFile, String dialogTitle) {
-		JFileChooser fileChooser = new JFileChooser();
-
-		if (dialogTitle != null) {
-			fileChooser.setDialogTitle(dialogTitle);
-		}
-
 		
+
 		if (prevFile != null && prevFile.getParentFile().exists()) {
-			fileChooser.setCurrentDirectory(prevFile.getParentFile());
+			lastDir=prevFile.getParentFile();
 		}
-
-		if (lastDir != null && lastDir.getParentFile().exists()) {
-			fileChooser.setCurrentDirectory(lastDir);
-		}
-
 		
-		// disable all files filter
-		// fileChooser.setAcceptAllFileFilterUsed(false);
-
-		int returnVal = fileChooser.showOpenDialog(this);
-
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			return fileChooser.getSelectedFile();
-		} else {
-			return null;
-		}
+		return MiscFileUtils.chooseFile(this, dialogTitle, lastDir, true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
+		
 	}
 
 	public void actionPerformed(ActionEvent e) {

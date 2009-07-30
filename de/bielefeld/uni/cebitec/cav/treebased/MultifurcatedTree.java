@@ -22,6 +22,7 @@ package de.bielefeld.uni.cebitec.cav.treebased;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -473,10 +474,14 @@ public class MultifurcatedTree {
 	/**
 	 * parse a newick tree. First clean the string (remove white spaces etc.)
 	 * 
-	 * @param input
+	 * @param newichTreeString
 	 *            the string containing a newick tree.
 	 */
-	public MultifurcatedTree(String input) throws Exception {
+	public MultifurcatedTree(String newichTreeString) throws Exception {
+		constructTreeFromString(newichTreeString);
+	}
+
+	private void constructTreeFromString(String input)throws Exception {
 		input = input.replaceAll("\\s", "");
 		if (input.indexOf(';') < 0) {
 			// error
@@ -496,41 +501,24 @@ public class MultifurcatedTree {
 	 *            the file to read the tree from
 	 * @return the tree
 	 */
-	public static MultifurcatedTree readTree(String file) throws Exception {
-		return new MultifurcatedTree(readTreeString(file));
-	}
 
-	/**
-	 * Reads the tree string from the given file
-	 * 
-	 * @param file
-	 *            the file to read the tree from
-	 * @return a string containing the tree
-	 */
-	public static String readTreeString(String file) {
-		// input tree
-		File inFile = new File(file);
-		String readString = "";
-		if (!inFile.exists() && !inFile.canRead()) {
-			System.out.println("Can not open file " + inFile.getAbsolutePath()
-					+ "!");
-			System.exit(1);
-		}
+	public MultifurcatedTree(File phylogeneticTreeFile) throws IOException, Exception{
+		StringBuilder readString =  new StringBuilder();
 		// parse the file
-		try {
-			BufferedReader in = new BufferedReader(new FileReader(inFile));
+			BufferedReader in = new BufferedReader(new FileReader(phylogeneticTreeFile));
 			String line;
 			while ((line = in.readLine()) != null) {
 				if (line.length() > 0 && line.charAt(0) != '#') {
-					readString += line;
+					readString.append(line);
 				}
 			}
 			in.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return readString;
+			
+			
+			constructTreeFromString(readString.toString());
 	}
+	
+	
 
 	public String toString(boolean printEdgeLength) {
 		if (root != null)

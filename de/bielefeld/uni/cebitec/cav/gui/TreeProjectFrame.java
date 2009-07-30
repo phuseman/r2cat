@@ -1,0 +1,1056 @@
+/***************************************************************************
+ *   Copyright (C) 2009 by Peter Husemann                                  *
+ *   phuseman  a t  cebitec.uni-bielefeld.de                               *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+package de.bielefeld.uni.cebitec.cav.gui;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Vector;
+
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import de.bielefeld.uni.cebitec.cav.treebased.MultifurcatedTree;
+import de.bielefeld.uni.cebitec.cav.treebased.TreebasedContigSorterProject;
+import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
+
+/**
+ * 
+ * @author phuseman
+ */
+public class TreeProjectFrame extends javax.swing.JFrame {
+	public class ReferenceSelection extends JPanel implements ActionListener,
+			FocusListener, KeyListener {
+		private JTextField tfReference;
+		private JButton buReference;
+		private String initialText = "Enter a path to a reference genome in FASTA format";
+
+		public ReferenceSelection() {
+			tfReference = new JTextField(initialText);
+			tfReference.addKeyListener(this);
+			tfReference.addFocusListener(this);
+
+			buReference = new JButton("Remove");
+			buReference.addActionListener(this);
+
+			init();
+		}
+
+		public String getInitialText() {
+			return initialText;
+		}
+
+		public boolean hasInitialText() {
+			return this.tfReference.getText().equals(initialText);
+		}
+
+		public String getFile() {
+			if(this.tfReference.getText().matches(initialText)) {
+				return "";
+			} else {
+				return this.tfReference.getText();
+			}
+			
+		}
+
+		public ReferenceSelection(File f) {
+			tfReference = new JTextField(f.getAbsolutePath());
+			tfReference.setCaretPosition(tfReference.getText().length());
+			tfReference.addKeyListener(this);
+			tfReference.addFocusListener(this);
+
+			buReference = new JButton("Remove");
+			buReference.addActionListener(this);
+
+			init();
+		}
+
+		private void init() {
+			buReference.setMaximumSize(new java.awt.Dimension(116, 26));
+			buReference.setMinimumSize(new java.awt.Dimension(116, 26));
+
+			javax.swing.GroupLayout referencePanelLayout = new javax.swing.GroupLayout(
+					this);
+			this.setLayout(referencePanelLayout);
+			referencePanelLayout
+					.setHorizontalGroup(referencePanelLayout
+							.createParallelGroup(
+									javax.swing.GroupLayout.Alignment.LEADING)
+							.addGroup(
+									javax.swing.GroupLayout.Alignment.TRAILING,
+									referencePanelLayout
+											.createSequentialGroup()
+											.addContainerGap()
+											.addComponent(
+													tfReference,
+													javax.swing.GroupLayout.DEFAULT_SIZE,
+													465, Short.MAX_VALUE)
+											.addPreferredGap(
+													javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+											.addComponent(
+													buReference,
+													javax.swing.GroupLayout.PREFERRED_SIZE,
+													121,
+													javax.swing.GroupLayout.PREFERRED_SIZE)
+											.addContainerGap()));
+			referencePanelLayout
+					.setVerticalGroup(referencePanelLayout
+							.createParallelGroup(
+									javax.swing.GroupLayout.Alignment.LEADING)
+							.addGroup(
+									referencePanelLayout
+											.createParallelGroup(
+													javax.swing.GroupLayout.Alignment.BASELINE)
+											.addComponent(
+													tfReference,
+													javax.swing.GroupLayout.PREFERRED_SIZE,
+													javax.swing.GroupLayout.DEFAULT_SIZE,
+													javax.swing.GroupLayout.PREFERRED_SIZE)
+											.addComponent(
+													buReference,
+													javax.swing.GroupLayout.PREFERRED_SIZE,
+													21,
+													javax.swing.GroupLayout.PREFERRED_SIZE)));
+
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			references.remove(this);
+			setReferenceSelectionFromVector();
+		}
+
+		private boolean checkFile(String file) {
+			if (file.matches(initialText)) {
+				return true;
+			}
+			File f = new File(file);
+			if (f != null && !f.isDirectory() && f.canRead()) {
+				return true;
+			} else {
+				return false;
+			}
+
+		}
+
+		@Override
+		public void focusGained(FocusEvent e) {
+			if (((JTextField) e.getSource()).getText().equalsIgnoreCase(
+					initialText)) {
+				tfReference.selectAll();
+			}
+		}
+
+		@Override
+		public void focusLost(FocusEvent e) {
+			// if(!checkFile(((JTextField) e.getSource()).getText())) {
+			// errorAlert("FocusFile is not readable.");
+			// }
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				File file = new File(((JTextField) e.getSource()).getText());
+
+				// if the string is not a file, or cannot be read, issue an
+				// error
+				if (file == null || !file.canRead()) {
+					errorAlert("Sorry, the given file is not readable.");
+					// if the string is a directory, open a dialog to specify a
+					// file in that directory
+				} else if (file.isDirectory()) {
+					File referenceFastaFile = MiscFileUtils.chooseFile(this,
+							"Select a FASTA file containing one reference genome",
+							file,true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
+					if (referenceFastaFile != null
+							&& referenceFastaFile.canRead()) {
+						lastDir=referenceFastaFile.getParentFile();
+						tfReference.setText(referenceFastaFile
+								.getAbsolutePath());
+						setReferenceSelectionFromVector();
+					}
+					// if it is a file that can be read, enter it into the
+					// textfield
+				} else if (file.canRead()) {
+					setReferenceSelectionFromVector();
+				}
+
+			}
+
+		}
+
+		@Override
+		public void keyTyped(KeyEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+			// TODO Auto-generated method stub
+
+		}
+
+	}
+
+	// class TreebasedContigSorterTask extends SwingWorker<File, String> {
+	// @Override
+	// protected File doInBackground() {
+	// try {
+	//			
+	// progressBar.setValue(0);
+	// progressBar.setIndeterminate(true);
+	// progress.setText("");
+	//
+	// Timer t = Timer.getInstance();
+	// t.startTimer();
+	//
+	// try {
+	// progress.append("Opening target file " + target.getName() + " (" +
+	// target.length()+ ")");
+	// t.startTimer();
+	// FastaFileReader targetFasta = new FastaFileReader(target);
+	// boolean targetIsFasta = targetFasta.scanContents(true);
+	// progress.append(" ..."+t.stopTimer()+"\n");
+	//			
+	// if(!targetIsFasta) {
+	// progress.append("Error: Target file contains no id line (>idtag ...)");
+	// setEndMatching();
+	// return null;
+	// }
+	//
+	//			
+	// progress.append("Opening query file"+ query.getName() + " (" +
+	// query.length()+ ")");
+	// t.startTimer();
+	// FastaFileReader queryFasta = new FastaFileReader(query);
+	// boolean queryIsFasta = queryFasta.scanContents(true);
+	// progress.append(" ..."+t.stopTimer()+"\n");
+	// if(!queryIsFasta) {
+	// progress.append("Error: Query file contains no id line (>idtag ...)");
+	// setEndMatching();
+	// return null;
+	// }
+	//
+	//			
+	// // check if targets and queries might be switched
+	// double averageTargetSize = 0;
+	// for (DNASequence seq : targetFasta.getSequences()) {
+	// averageTargetSize += seq.getSize();
+	// }
+	// averageTargetSize /= targetFasta.getSequences().size();
+	//
+	// double averageQuerySize = 0;
+	// for (DNASequence seq : queryFasta.getSequences()) {
+	// averageQuerySize += seq.getSize();
+	// }
+	// averageQuerySize /= queryFasta.getSequences().size();
+	//
+	// String warningMsg = "";
+	// if (averageQuerySize > averageTargetSize) {
+	// warningMsg = "The queries are bigger than the target sequences on
+	// average.";
+	// } else if (targetFasta.getSequences().size() > queryFasta
+	// .getSequences().size()) {
+	// warningMsg = "There are more targets than queries.";
+	// }
+	//
+	// // if there is an error, display dialog
+	// if (!warningMsg.equals("")) {
+	// progressBar.setIndeterminate(false);
+	// int warningAnswer = -1;
+	// warningMsg += "\nThis can lead to problems during the matching phase\n"
+	// + "and in the visualization.";
+	// Object[] options = { "I know, continue!",
+	// "Switch sequences" };
+	// warningAnswer = JOptionPane.showOptionDialog(
+	// MatchDialog.this, warningMsg,
+	// "Target and queries switched?",
+	// JOptionPane.YES_NO_OPTION,
+	// JOptionPane.WARNING_MESSAGE, null, options,
+	// options[1]);
+	// if (warningAnswer == 1) {
+	// // switch query <-> target
+	// FastaFileReader tmp;
+	// tmp = queryFasta;
+	// queryFasta = targetFasta;
+	// targetFasta = tmp;
+	// }// else just continue
+	// progressBar.setIndeterminate(true);
+	//
+	// }
+	//			 
+	//			
+	//				
+	//				
+	// progress.append("Generating q-Gram Index\n");
+	// t.startTimer();
+	// QGramIndex qi = new QGramIndex();
+	// qi.register(MatchDialog.this);
+	// qi.generateIndex(targetFasta);
+	// progress.append(" Generating q-Gram Index took: "+t.stopTimer()+"\n");
+	//
+	// System.gc();
+	//
+	//			
+	// progressBar.setIndeterminate(false);
+	//
+	// progress.append("Matching:\n");
+	// t.startTimer();
+	// QGramFilter qf = new QGramFilter(qi, queryFasta);
+	// qf.register(MatchDialog.this);
+	// result = qf.match();
+	// progress.append("Matching took: "+t.stopTimer()+"\n");
+	//
+	// progress.append("Total time: "+t.stopTimer()+"\n");
+	// progressBar.setValue(100);
+	// } catch (IOException e) {
+	// e.printStackTrace();
+	// }
+	//			
+	// progress.append("Done!\n");
+	//
+	// setEndMatching();
+	// return result;
+	//			
+	// //Catch if the memory is exhausted. If so display a message and return
+	// } catch (OutOfMemoryError e) {
+	// errorAlert("The heap memory was exhausted.\nTry to start this program
+	// with '-Xmx400m'.");
+	// progress.append(e.toString());
+	// setEndMatching();
+	//				
+	// return null;
+	// }
+	// }
+	//		
+	// private void setEndMatching() {
+	// startButton.setEnabled(true);
+	// setCursor(null); // turn off the wait cursor
+	// progress.setCaretPosition(progress.getDocument().getLength());
+	// progressBar.setIndeterminate(false);
+	//
+	// }
+	//
+	// public void done() {
+	// try {
+	// result = this.get();
+	// if (result!=null) {
+	// if (result.size()==0) {
+	// errorAlert("Sorry, no matches were found. Change the files and try
+	// again");
+	// progressBar.setValue(0);
+	// }
+	// startButton.setText("Continue");
+	// startButton.setActionCommand("ok");
+	//
+	// ComparativeAssemblyViewer.dataModelController.setAlignmentsPositonsList(result);
+	// ComparativeAssemblyViewer.guiController.setVisualisationNeedsUpdate();
+	//
+	//
+	//					
+	// MatchDialog.this.validate();
+	// } else {
+	// errorAlert("An error happened, no results have been created.");
+	// progressBar.setValue(0);
+	// }
+	// } catch (InterruptedException e) {
+	// //ignore
+	// ;
+	// } catch (ExecutionException e) {
+	// //ignore
+	// ;
+	// }
+	// }
+	// }
+	//
+
+	private Vector<ReferenceSelection> references;
+
+	private File lastDir;
+
+	/** Creates new form TreeProjectFrame */
+	public TreeProjectFrame() {
+		references = new Vector<ReferenceSelection>();
+		references.add(new ReferenceSelection());
+		initComponents();
+	}
+
+	private void setReferenceSelectionFromVector() {
+		referenceGenomesFilesPanel.removeAll();
+
+		Vector<ReferenceSelection> croppedList = new Vector<ReferenceSelection>();
+
+		for (int i = 0; i < references.size(); i++) {
+			if (!references.get(i).hasInitialText()) {
+				croppedList.add(references.get(i));
+			}
+		}
+
+		croppedList.add(new ReferenceSelection());
+
+		references = croppedList;
+
+		// go through the vector and add each reference panel to the list of
+		// panels
+		for (int i = 0; i < references.size(); i++) {
+			referenceGenomesFilesPanel.add(references.get(i));
+		}
+
+		referenceGenomesFilesPanel.revalidate();
+		referenceGenomesFilesPanel.repaint();
+
+		// TODO request focus from the last component. below does not work...
+		// referenceGenomesFilesPanel.getComponent(referenceGenomesFilesPanel.getComponentCount()-1).requestFocusInWindow();
+	}
+
+	/**
+	 * This method is called from within the constructor to initialize the form.
+	 * WARNING: Do NOT modify this code. The content of this method is always
+	 * regenerated by the Form Editor.
+	 */
+	@SuppressWarnings("unchecked")
+	// <editor-fold defaultstate="collapsed" desc="Generated
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        projectDirPanel = new javax.swing.JPanel();
+        tfProjectdir = new javax.swing.JTextField();
+        buProjectDir = new javax.swing.JButton();
+        contigPanel = new javax.swing.JPanel();
+        buContigs = new javax.swing.JButton();
+        tfContigs = new javax.swing.JTextField();
+        phylogeneticTreePanel = new javax.swing.JPanel();
+        tfPhylogeneticTree = new javax.swing.JTextField();
+        buPhylogeneticTree = new javax.swing.JButton();
+        phylogeneticTreeLabel = new javax.swing.JLabel();
+        progressPanel = new javax.swing.JPanel();
+        progressScrollPane = new javax.swing.JScrollPane();
+        progress = new javax.swing.JTextArea();
+        runButton = new javax.swing.JButton();
+        progressBar = new javax.swing.JProgressBar();
+        saveButton = new javax.swing.JButton();
+        loadButton = new javax.swing.JButton();
+        referenceGenomesPanel = new javax.swing.JPanel();
+        buReferences = new javax.swing.JButton();
+        referenceGenomesScrollPane = new javax.swing.JScrollPane();
+        referenceGenomesFilesPanel = new javax.swing.JPanel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Phylogenetic Comparative Assembly");
+        setMinimumSize(new java.awt.Dimension(600, 400));
+        setName("Phylogenetic Comparative Assembly"); // NOI18N
+
+        projectDirPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Project Directory"));
+
+        tfProjectdir.setText("Project Directory");
+        tfProjectdir.setToolTipText("Select a directory where several files can be stored");
+
+        buProjectDir.setText("Select Dir");
+        buProjectDir.setToolTipText("Select a directory where several files can be stored");
+        buProjectDir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addProjectDir(evt);
+            }
+        });
+
+        javax.swing.GroupLayout projectDirPanelLayout = new javax.swing.GroupLayout(projectDirPanel);
+        projectDirPanel.setLayout(projectDirPanelLayout);
+        projectDirPanelLayout.setHorizontalGroup(
+            projectDirPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(projectDirPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(tfProjectdir, javax.swing.GroupLayout.DEFAULT_SIZE, 509, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(buProjectDir, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        projectDirPanelLayout.setVerticalGroup(
+            projectDirPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(projectDirPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(tfProjectdir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(buProjectDir, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        contigPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Contigs"));
+
+        buContigs.setText("Select Contigs");
+        buContigs.setToolTipText("Select a FASTA file containing the contigs");
+        buContigs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addContigsFile(evt);
+            }
+        });
+
+        tfContigs.setText("Contigs");
+        tfContigs.setToolTipText("Select a FASTA file containing the contigs");
+
+        javax.swing.GroupLayout contigPanelLayout = new javax.swing.GroupLayout(contigPanel);
+        contigPanel.setLayout(contigPanelLayout);
+        contigPanelLayout.setHorizontalGroup(
+            contigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(contigPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(tfContigs, javax.swing.GroupLayout.DEFAULT_SIZE, 507, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(buContigs, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        contigPanelLayout.setVerticalGroup(
+            contigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(contigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(tfContigs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(buContigs, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        phylogeneticTreePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Phylogenetic Tree (optional)"));
+
+        tfPhylogeneticTree.setText("Phylogenetic tree in Newick format");
+        tfPhylogeneticTree.setToolTipText("Enter the path to a phylogenetic tree in Newick format");
+
+        buPhylogeneticTree.setText("Select Tree");
+        buPhylogeneticTree.setToolTipText("Enter the path to a phylogenetic tree in Newick format");
+        buPhylogeneticTree.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addPhylogeneticTree(evt);
+            }
+        });
+
+        phylogeneticTreeLabel.setFont(new java.awt.Font("Dialog", 0, 12));
+        phylogeneticTreeLabel.setText("Note: The species name must be the name of the above files, without ending.");
+
+        javax.swing.GroupLayout phylogeneticTreePanelLayout = new javax.swing.GroupLayout(phylogeneticTreePanel);
+        phylogeneticTreePanel.setLayout(phylogeneticTreePanelLayout);
+        phylogeneticTreePanelLayout.setHorizontalGroup(
+            phylogeneticTreePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, phylogeneticTreePanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(phylogeneticTreePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(phylogeneticTreeLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 503, Short.MAX_VALUE)
+                    .addComponent(tfPhylogeneticTree, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 503, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(buPhylogeneticTree, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        phylogeneticTreePanelLayout.setVerticalGroup(
+            phylogeneticTreePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(phylogeneticTreePanelLayout.createSequentialGroup()
+                .addGroup(phylogeneticTreePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(tfPhylogeneticTree, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(buPhylogeneticTree, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addComponent(phylogeneticTreeLabel))
+        );
+
+        progressPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Progress"));
+
+        progress.setColumns(20);
+        progress.setEditable(false);
+        progress.setLineWrap(true);
+        progress.setRows(5);
+        progress.setTabSize(2);
+        progress.setWrapStyleWord(true);
+        progressScrollPane.setViewportView(progress);
+
+        runButton.setText("Run");
+        runButton.setToolTipText("<html>\nRuns the Phylogenetic Comparative Assembly algorithm to devise a layout graph for the contigs.<br />\nThe layout as well as the matchings are saved in the project directory.\n</html>");
+        runButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                runAlgorithm(evt);
+            }
+        });
+
+        saveButton.setText("Save");
+        saveButton.setToolTipText("Saves a the given information to a file");
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveProject(evt);
+            }
+        });
+
+        loadButton.setText("Load");
+        loadButton.setToolTipText("Load a treecat project from file");
+        loadButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadProject(evt);
+            }
+        });
+
+        javax.swing.GroupLayout progressPanelLayout = new javax.swing.GroupLayout(progressPanel);
+        progressPanel.setLayout(progressPanelLayout);
+        progressPanelLayout.setHorizontalGroup(
+            progressPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, progressPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(progressPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(progressBar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE)
+                    .addComponent(progressScrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(progressPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(runButton)
+                    .addComponent(saveButton)
+                    .addComponent(loadButton))
+                .addContainerGap())
+        );
+        progressPanelLayout.setVerticalGroup(
+            progressPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(progressPanelLayout.createSequentialGroup()
+                .addGroup(progressPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(progressScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
+                    .addGroup(progressPanelLayout.createSequentialGroup()
+                        .addComponent(runButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
+                        .addComponent(loadButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(saveButton)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        referenceGenomesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Reference Genomes"));
+
+        buReferences.setText("Add Reference");
+        buReferences.setToolTipText("<html>Click here to add another reference genome.<br />\nPlease give each reference genome in a seperate file.</html>");
+        buReferences.setPreferredSize(new java.awt.Dimension(116, 26));
+        buReferences.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addReferenceFile(evt);
+            }
+        });
+
+        referenceGenomesScrollPane.setBorder(null);
+        referenceGenomesScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        referenceGenomesScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        referenceGenomesScrollPane.setHorizontalScrollBar(null);
+
+        referenceGenomesFilesPanel.setLayout(new java.awt.GridLayout(0, 1, 0, 2));
+        referenceGenomesScrollPane.setViewportView(referenceGenomesFilesPanel);
+        setReferenceSelectionFromVector();
+
+        javax.swing.GroupLayout referenceGenomesPanelLayout = new javax.swing.GroupLayout(referenceGenomesPanel);
+        referenceGenomesPanel.setLayout(referenceGenomesPanelLayout);
+        referenceGenomesPanelLayout.setHorizontalGroup(
+            referenceGenomesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(referenceGenomesPanelLayout.createSequentialGroup()
+                .addContainerGap(531, Short.MAX_VALUE)
+                .addComponent(buReferences, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+            .addComponent(referenceGenomesScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 677, Short.MAX_VALUE)
+        );
+        referenceGenomesPanelLayout.setVerticalGroup(
+            referenceGenomesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(referenceGenomesPanelLayout.createSequentialGroup()
+                .addComponent(buReferences, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(referenceGenomesScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(phylogeneticTreePanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(referenceGenomesPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progressPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(contigPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(projectDirPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(projectDirPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(contigPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(referenceGenomesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(phylogeneticTreePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(progressPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+	private void addContigsFile(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addContigsFile
+		File f = MiscFileUtils.chooseFile(this,
+				"Select a multi FASTA file that contains the contigs", lastDir, true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
+		if (f != null && f.canRead()) {
+			lastDir=f.getParentFile();
+			tfContigs.setText(f.getAbsolutePath());
+			tfContigs.setCaretPosition(tfContigs.getText().length());
+		}
+	}// GEN-LAST:event_addContigsFile
+
+	private void addProjectDir(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addProjectDir
+		File dir = MiscFileUtils.chooseDir(this,"Select a project directory", lastDir);
+		if (dir != null && dir.isDirectory() && dir.canWrite()) {
+			lastDir=dir;
+			tfProjectdir.setText(dir.getAbsolutePath());
+			tfProjectdir.setCaretPosition(tfProjectdir.getText().length());
+		}
+	}// GEN-LAST:event_addProjectDir
+
+	private void addPhylogeneticTree(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addPhylogeneticTree
+		File f = MiscFileUtils.chooseFile(this,"Select phylogenetic tree in Newick format", lastDir, true, new CustomFileFilter(".newick,.txt,.tree,.phylip", "Newick Tree"));
+		if (f != null && f.canRead()) {
+			lastDir=f.getParentFile();
+			tfPhylogeneticTree.setText(f.getAbsolutePath());
+			tfPhylogeneticTree.setCaretPosition(tfPhylogeneticTree.getText()
+					.length());
+		}
+	}// GEN-LAST:event_addPhylogeneticTree
+
+	private void addReferenceFile(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addReferenceFile
+		File f = MiscFileUtils.chooseFile(this,
+				"Select a FASTA file containing one reference genome",
+				lastDir,true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
+		if (f != null && f.canRead()) {
+			lastDir=f.getParentFile();
+			references.add(new ReferenceSelection(f));
+			setReferenceSelectionFromVector();
+		}
+
+	}// GEN-LAST:event_addReferenceFile
+
+	private void runAlgorithm(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_runAlgorithm
+		progressBar.setValue(0);
+		progressBar.setIndeterminate(true);
+		progress.setText("");
+
+		progress.append("Checking files.");
+
+		File projectDir = new File(tfProjectdir.getText());
+
+		File contigs = new File(tfContigs.getText());
+
+		Vector<File> referenceFiles = new Vector<File>();
+		for (ReferenceSelection refSel : references) {
+			referenceFiles.add(new File(refSel.getFile()));
+		}
+
+		MultifurcatedTree phylogeneticTree = null;
+		try {
+			File treeFile = new File(tfPhylogeneticTree.getText());
+			if (treeFile.exists() && treeFile.canRead()) {
+				phylogeneticTree = new MultifurcatedTree(treeFile);
+			} else {
+				phylogeneticTree = null;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		TreebasedContigSorterProject tscp = new TreebasedContigSorterProject(
+				contigs, referenceFiles, projectDir, phylogeneticTree);
+
+	}// GEN-LAST:event_runAlgorithm
+
+	private void loadProject(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_loadProject
+		File load = MiscFileUtils.chooseFile(this, "Select a treecat project file to load", lastDir,true, new CustomFileFilter(".rtc","treecat project"));
+		if(load!=null && load.canRead()) {
+		try {
+			loadProjectFromFile(load);
+		} catch (IOException e) {
+			errorAlert("Could not open file.");
+		}
+		} else {
+			errorAlert("Could not open file.");
+		}
+	}// GEN-LAST:event_loadProject
+
+	private void saveProject(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_saveProject
+		
+		File save = MiscFileUtils.chooseFile(this, "Select a tree project file to save", lastDir,false, new CustomFileFilter(".rtc","treecat project"));
+		
+		if(save!=null) {
+			if(!save.exists() || save.canWrite()) {
+				try {
+					writeProjectToFile(save);
+				} catch (IOException e) {
+					errorAlert("Could not write to file");
+				}
+			} else {
+				errorAlert("Could not write to file");
+			}
+			
+		}
+		
+		
+	}// GEN-LAST:event_saveProject
+
+	private void writeProjectToFile(File f) throws IOException {
+		BufferedWriter out = new BufferedWriter(new FileWriter(f));
+
+		out.write("# treecat project: Treebased contig arrangement\n"
+		+"# rtc - r treecat file\n"
+		+ "# contains key=value pairs\n\n");
+		out.write("# directory where to cache the matchings between contigs and references\n");
+		out.write("projectdir=\"");
+		if(new File(tfProjectdir.getText()).exists()) {
+			out.write(tfProjectdir.getText());
+		}
+		out.write("\"\n");
+
+
+		out.write("\n# phylogenetic tree of the species. the names have to be the same as the reference\n");
+		out.write("newicktreefile=\"");
+		if(new File(tfPhylogeneticTree.getText()).exists()) {
+			out.write(tfPhylogeneticTree.getText());
+		}
+		out.write("\"\n");
+
+		out.write("\n# contigs in multiple fasta format\n");
+		out.write("contigs=\"");
+		if(new File(tfContigs.getText()).exists()) {
+			out.write(tfContigs.getText());
+		}
+		out.write("\"\n");
+
+		out.write("\n# reference genomes. one entry per genome.\n");
+		for (int i = 0; i < references.size(); i++) {
+			if(new File(references.get(i).getFile()).exists()) {
+				out.write("reference=\"");
+				out.write(references.get(i).getFile());
+				out.write("\"\n");
+			}
+		}
+		out.close();
+	}
+	
+	
+	private void loadProjectFromFile(File f) throws IOException {
+		BufferedReader in = new BufferedReader(new FileReader(f));
+		String line;
+		String[] propertyValue;
+		String value;
+
+		String projectDirectoryFileString = "";
+		String contigsFileString = "";
+		Vector<File> referenceFileStrings = new Vector<File>();
+		String phylogeneticTreeFileString = "";
+
+		String currentWorkingDirectory = f.getParent();
+
+		while (in.ready()) {
+			line = in.readLine();
+
+			// ignore comments
+			if (line.startsWith("#") || line.startsWith("\"#")
+					|| line.isEmpty()) {
+				continue;
+			}
+
+			// split at the = sign into the pair property=value.
+			propertyValue = line.split("=");
+
+			// skip if more than one '=' sign
+			if (propertyValue.length != 2) {
+				continue;
+			}
+
+			// remove trailing and leading whitespaces
+			value = propertyValue[1].trim();
+			// remove trailing quotation marks
+			if (value.charAt(0) == '"'
+					&& value.charAt(value.length() - 1) == '"') {
+				value = value.substring(1, value.length() - 1);
+			}
+
+			// check different keywords:
+			// ********************contigs*********************
+			if (propertyValue[0].matches("contigs")) {
+				if( value.isEmpty()) {continue;}
+				if (contigsFileString.isEmpty()) {
+					File file = new File(value);
+
+					// if not existant, try relative path
+					if (!file.exists()) {
+						file = new File(currentWorkingDirectory
+								+ File.separator + value);
+					}
+
+					if (file.exists()&& file.isFile()) {
+						contigsFileString = file.getAbsolutePath();
+					} else {
+						progress
+								.append("Specified contig file could not be found: "
+										+ file.getAbsoluteFile()+"\n");
+					}
+
+				} else { // contigs were already specified
+					progress
+							.append("A contig file was given more often than once. Using first occurrence.\n");
+				}
+
+			}
+
+			// ********************reference*********************
+			if (propertyValue[0].matches("reference")) {
+				if( value.isEmpty()) {continue;}
+
+				File file = new File(value);
+				// if not existant, try relative path
+				if (!file.exists()) {
+					file = new File(currentWorkingDirectory + File.separator
+							+ value);
+				}
+
+				if (file.exists() && file.isFile()) {
+					referenceFileStrings.add(file);
+				} else {
+					progress
+							.append("Specified reference file could not be found: "
+									+ file.getAbsoluteFile()+"\n");
+				}
+				
+
+			}
+
+			// ********************newicktree*********************
+			if (propertyValue[0].matches("newicktreefile")) {
+				if( value.isEmpty()) {continue;}
+				if (phylogeneticTreeFileString.isEmpty()) {
+					File file = new File(value);
+
+					// if not existant, try relative path
+					if (!file.exists()) {
+						file = new File(currentWorkingDirectory
+								+ File.separator + value);
+					}
+
+					if (file.exists() && file.isFile()) {
+						phylogeneticTreeFileString = file.getAbsolutePath();
+					} else {
+						progress
+								.append("Specified newick file could not be found: "
+										+ file.getAbsoluteFile()+"\n");
+					}
+
+				} else { // contigs were already specified
+					progress
+							.append("A newick file was given more often than once. Using first occurrence.\n");
+				}
+
+			}
+
+			// ********************projectdir*********************
+			if (propertyValue[0].matches("projectdir")) {
+				if( value.isEmpty()) {continue;}
+
+				if (projectDirectoryFileString.isEmpty()) {
+					File dir = new File(value);
+					if (dir.isDirectory() && dir.canWrite()) {
+						projectDirectoryFileString = dir.getAbsolutePath();
+					} else {
+						progress
+								.append("Project Directory not present or not writable: "
+										+ dir +"\n");
+					}
+				} else {
+					progress
+							.append("A project was given more often than once. Using first occurrence.\n");
+				}
+			}
+
+		} // file has been parsed completely
+
+		tfProjectdir.setText(projectDirectoryFileString);
+		tfContigs.setText(contigsFileString);
+		tfPhylogeneticTree.setText(phylogeneticTreeFileString);
+
+		references.clear();
+		for (File file : referenceFileStrings) {
+			references.add(new ReferenceSelection(file));
+		}
+
+		setReferenceSelectionFromVector();
+
+	}
+
+	/**
+	 * @param args
+	 *            the command line arguments
+	 */
+	public static void main(String args[]) {
+		java.awt.EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				new TreeProjectFrame().setVisible(true);
+			}
+		});
+	}
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton buContigs;
+    private javax.swing.JButton buPhylogeneticTree;
+    private javax.swing.JButton buProjectDir;
+    private javax.swing.JButton buReferences;
+    private javax.swing.JPanel contigPanel;
+    private javax.swing.JButton loadButton;
+    private javax.swing.JLabel phylogeneticTreeLabel;
+    private javax.swing.JPanel phylogeneticTreePanel;
+    private javax.swing.JTextArea progress;
+    private javax.swing.JProgressBar progressBar;
+    private javax.swing.JPanel progressPanel;
+    private javax.swing.JScrollPane progressScrollPane;
+    private javax.swing.JPanel projectDirPanel;
+    private javax.swing.JPanel referenceGenomesFilesPanel;
+    private javax.swing.JPanel referenceGenomesPanel;
+    private javax.swing.JScrollPane referenceGenomesScrollPane;
+    private javax.swing.JButton runButton;
+    private javax.swing.JButton saveButton;
+    private javax.swing.JTextField tfContigs;
+    private javax.swing.JTextField tfPhylogeneticTree;
+    private javax.swing.JTextField tfProjectdir;
+    // End of variables declaration//GEN-END:variables
+
+	/**
+	 * Pop up an error message
+	 * 
+	 * @param error
+	 *            Message
+	 */
+	private void errorAlert(String error) {
+		JOptionPane.showMessageDialog(this, error, "Error",
+				JOptionPane.ERROR_MESSAGE);
+	}
+
+}

@@ -30,18 +30,19 @@ import javax.swing.filechooser.FileFilter;
  */
 public class CustomFileFilter extends FileFilter {
 
-	private String extension="";
+	private String[] extensions;
 	private String description="";
 	
 	
 	
 	/**
 	 * Creates a file filter for the use with JFileChooser.
-	 * @param extension the extension like .csv
-	 * @param description the description explaining this extension
+	 * @param extension a string giving all extensions seperated by comma. i.e. ".fna,.fas"
+	 * @param description a name of this file type
 	 */
-	public CustomFileFilter(String extension, String description) {
-		this.extension = extension;
+	public CustomFileFilter(String extensionString, String description) {
+		
+		this.extensions=extensionString.split(",");
 		this.description = description;
 	}
 
@@ -51,16 +52,23 @@ public class CustomFileFilter extends FileFilter {
 			return true;
 		}
 
-		if (f.getName().endsWith(extension)) {
-			return true;
-		} else {
-			return false;
+		for (int i = 0; i < extensions.length; i++) {
+			if (f.getName().endsWith(extensions[i])) {
+				return true;
+			}
 		}
+			return false;
 	}
 
 	// The description of this filter
 	@Override
 	public String getDescription() {
-		 return description + " (*"+ extension +")";
+		String out=description + " (";
+		
+		for (int i = 0; i < extensions.length; i++) {
+			out += "*" + extensions[i]+", ";
+		}
+		out = out.substring(0, out.length()-2);
+		 return out +")";
 	}
 }
