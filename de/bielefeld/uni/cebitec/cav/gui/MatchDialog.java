@@ -53,6 +53,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 import de.bielefeld.uni.cebitec.cav.qgram.QGramFilter;
 import de.bielefeld.uni.cebitec.cav.qgram.QGramIndex;
+import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
@@ -62,7 +63,7 @@ import de.bielefeld.uni.cebitec.cav.utils.Timer;
  * 
  */
 public class MatchDialog extends JDialog implements ActionListener,
-		PropertyChangeListener {
+		PropertyChangeListener, AbstractProgressReporter{
 
 	private Preferences prefs;
 
@@ -497,17 +498,15 @@ public class MatchDialog extends JDialog implements ActionListener,
 	}
 
 	
-	/**
-	 * Set the achieved progress with optional message
-	 * @param message
-	 * @param percentDone
-	 */
-	public void setProgress( double percentDone, String message) {
+	@Override
+	public void reportProgress(double percentDone, String comment) {
+		if(percentDone>=0 && percentDone<=1) {
 		progressBar.setValue((int) (percentDone*100.));
-			if (message != null && !message.equals("")) {
-				progress.append(message+"\n");
-				progress.setCaretPosition(progress.getDocument().getLength());
-			}
 		}
+		if (comment != null && !comment.isEmpty()) {
+			progress.append(comment+"\n");
+			progress.setCaretPosition(progress.getDocument().getLength());
+		}
+	}
 
 }

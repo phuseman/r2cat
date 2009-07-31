@@ -28,12 +28,15 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
+import de.bielefeld.uni.cebitec.cav.gui.TreeProjectFrame.TreebasedContigSorterTask;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 import de.bielefeld.uni.cebitec.cav.qgram.QGramFilter;
 import de.bielefeld.uni.cebitec.cav.qgram.QGramIndex;
 import de.bielefeld.uni.cebitec.cav.treebased.MultifurcatedTree.Node;
 import de.bielefeld.uni.cebitec.cav.treebased.MultifurcatedTree.NodeVisitor;
+import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
+import de.bielefeld.uni.cebitec.cav.utils.SimpleProgressReporter;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 /**
@@ -67,6 +70,9 @@ public class TreebasedContigSorterProject {
 	//the sorter instance
 	private TreebasedContigSorter treebasedSorter = null;
 	private MultifurcatedTree phylogeneticTree;
+	private AbstractProgressReporter progressReporter;
+	
+	private double maxProgress;
 
 	/**
 	 * Main method to try with a hard coded file.
@@ -75,16 +81,19 @@ public class TreebasedContigSorterProject {
 	 */
 	public static void main(String[] args) {
 		TreebasedContigSorterProject project = new TreebasedContigSorterProject();
+		
+		project.register(new SimpleProgressReporter());
+		try {
 		try {
 			
 			boolean projectParsed=project.readProject(new File(
 					// contigs
 //					 "/homes/phuseman/compassemb/treebased/Corynebacterium_aurimucosum_454AllContigs.rtc"));
-//			 "/homes/phuseman/compassemb/treebased/Corynebacterium_urealyticum_DSM_7109_454AllContigs.rtc"));
+			 "/homes/phuseman/compassemb/treebased/Corynebacterium_urealyticum_DSM_7109_454AllContigs.rtc"));
 //			"/homes/phuseman/compassemb/treebased/Corynebacterium_kroppenstedtii_DSM44385_454AllContigs.rtc"));
 //
 //			new assembly project from eva
-			"/homes/phuseman/compassemb/treebased/Corynebacterium_urealyticum_DSM_7111_454AllContigs.rtc"));
+//			"/homes/phuseman/compassemb/treebased/Corynebacterium_urealyticum_DSM_7111_454AllContigs.rtc"));
 //
 			//
 							// assembled genome against all
@@ -119,6 +128,9 @@ public class TreebasedContigSorterProject {
 		t.stopTimer("sorting");
 
 		System.out.println("Done");
+		} catch( Exception e) {
+			System.err.println(e.getMessage());
+		}
 	}
 
 	/**
@@ -135,9 +147,9 @@ public class TreebasedContigSorterProject {
 	 * generateMatches() and sortContigs() have to be called.
 	 * 
 	 * @param configFile
-	 * @throws IOException
+	 * @throws Exception
 	 */
-	public TreebasedContigSorterProject(File configFile) throws IOException {
+	public TreebasedContigSorterProject(File configFile) throws Exception {
 		this();
 		this.readProject(configFile);
 	}
@@ -155,6 +167,8 @@ public class TreebasedContigSorterProject {
 		this.references=references;
 		this.projectDir=projectDir;
 		this.phylogeneticTree=phylogeneticTree;
+		
+
 
 	}
 	
@@ -205,7 +219,7 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 	 * @return boolean if it was successfull to parse the file.
 	 * @throws IOException if something is wrong with the file
 	 */
-	public boolean readProject(File f) throws IOException {
+	public boolean readProject(File f) throws IOException, Exception {
 		BufferedReader in = new BufferedReader(new FileReader(f));
 		phylogeneticTree = null;
 		String line;
@@ -323,14 +337,11 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 		}
 
 
-		//generate the phylogenetic pairwise distances of the species
-		generateTreeDistances();
-		
 		//check if all necessary information is given.
 		return checkProject();
 	}
 
-	private void generateTreeDistances() {
+	private void generateTreeDistances() throws Exception{
 		
 		// fill helping hash map which contains the names of the references and the distance to the contigs genome
 		if (phylogeneticTree != null && contigs != null) {
@@ -361,7 +372,7 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 		}
 	}
 	
-	private boolean checkProject() {
+	private boolean checkProject() throws Exception {
 		// sanity checks
 		boolean projectOK = true;
 		
@@ -408,7 +419,7 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 	 * 
 	 */
 	public HashMap<String, Double> getTreeDistances(String contigsLeafLabel,
-			MultifurcatedTree phylogeneticTree) {
+			MultifurcatedTree phylogeneticTree)  throws Exception {
 		HashMap<String, Double> contigToRefDist = new HashMap<String, Double>();
 
 		// traverse tree to get edge weights
@@ -492,7 +503,14 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 	 * 
 	 * @return if it was successful.
 	 */
-	public boolean generateMatches() {
+	public boolean generateMatches()  throws Exception {
+		//TODO handel special, if there is no tree!
+		generateTreeDistances();
+		
+		maxProgress = references.size() + 3.; // progress for reading the contigs file
+		// after that for each reference and for the sorting itself.
+		Timer t = Timer.getInstance();
+		
 		boolean success = true;
 
 		//don't know if this works, should set the workind directory to the project dir.
@@ -500,7 +518,12 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 
 		FastaFileReader contigsFasta = new FastaFileReader(contigs);
 		try {
+			reportProgress(0., "Reading contigs file");
+			t.startTimer();
 			contigsFasta.scanContents(true);
+			reportProgress(1./maxProgress, "...took "+t.stopTimer());
+
+			
 		} catch (IOException e) {
 			error("Could not open contigs for reading:\n"
 					+ contigs.getName());
@@ -515,13 +538,14 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 		// for all reference files
 		// check if there are chached matches
 		for (int i = 0; i < references.size(); i++) {
+		
 
 			File output = new File(projectDir + File.separator
 					+ MiscFileUtils.getFileNameWithoutExtension(contigs) + "--"
 					+ MiscFileUtils.getFileNameWithoutExtension(references.get(i)) + ".r2c");
 
 			if (output.exists()) {
-				progress(output.getName()
+				reportProgress((i+2)/maxProgress, output.getName()
 						+ " was cached.\nUsing cached version.");
 				AlignmentPositionsList cache = new AlignmentPositionsList();
 				try {
@@ -546,8 +570,8 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 				}
 				continue;
 			} else {
-				progress("Matching contigs against: "
-						+ MiscFileUtils.getFileNameWithoutExtension(references.get(i)));
+				t.startTimer();
+				reportProgress((i+2)/maxProgress, "Matching contigs to reference "+ MiscFileUtils.getFileNameWithoutExtension(references.get(i)));
 
 				try {
 					reference = new FastaFileReader(references.get(i));
@@ -565,10 +589,18 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 				qi.generateIndex(reference);
 
 				QGramFilter qf = new QGramFilter(qi, contigsFasta);
+				
+				if(progressReporter!=null && progressReporter instanceof TreebasedContigSorterTask) {
+					qf.register(((TreebasedContigSorterTask) progressReporter).showSecondLevelProgressMonitor("Matching to "+ MiscFileUtils.getFileNameWithoutExtension(references.get(i)))); 
+					}
 				AlignmentPositionsList apl = qf.match();
+				
+				reportProgress((i+3)/maxProgress, "...took "+t.stopTimer());
+
 
 				try {
 					apl.writeToFile(output);
+					reportProgress((i+3)/maxProgress, "Cached matches in " + output.getName());
 				} catch (IOException e) {
 					error("Could not write the match results to a file. "
 									+ e.getLocalizedMessage());
@@ -644,11 +676,28 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 	/**
 	 * Sort the contigs, or create a layout graph from the matches.
 	 */
-	public void sortContigs() {
+	public File sortContigs()  throws Exception {
+		File output=null;
+		
+		//FIXME this is done earlier, since the generate matches functions is somehow dependant.
+		// fix this and implement that a tree can be omitted!!
+		if(phylogeneticTree!=null) {
+			//generate the phylogenetic pairwise distances of the species
+			generateTreeDistances();
+			}
+
+		Timer t = Timer.getInstance();
+		
+		reportProgress((maxProgress-1)/maxProgress, "Sorting contigs");
+		t.startTimer();
+		
 		if (!contigsToReferencesMatchesList.isEmpty()) {
+			
+			output=new File(projectDir + File.separator
+					+ MiscFileUtils.getFileNameWithoutExtension(contigs)+ "_LayoutGraph.neato");
+			
 			treebasedSorter = new TreebasedContigSorter(
-					contigsToReferencesMatchesList, new File(projectDir + File.separator
-							+ MiscFileUtils.getFileNameWithoutExtension(contigs)+ "_LayoutGraph.neato"));
+					contigsToReferencesMatchesList, output);
 
 			//set the tree weights. if these are not given, all distances are set to 1.
 			treebasedSorter.setTreeWeights(contigsToReferencesTreeDistanceList);
@@ -667,17 +716,37 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 		} else {
 			error("No matches found, can't sort contigs.");
 		}
+		
+		reportProgress(1., "...took "+ t.stopTimer());
+		return output;
 	}
 
 	
-public void error(String error) {
-	System.err.println(error);
+public void error(String error) throws Exception {
+	throw new Exception(error);
 }
 
-public void progress(String p) {
-	System.out.println(p);
+
+/**
+ * Registers the a progress reporter, to pass progress changes to it.
+ * 
+ * @param matchDialog
+ */
+public void register(AbstractProgressReporter progressReporter) {
+	this.progressReporter=progressReporter;
 }
 
+/**
+ * If a progress reporter is registered progress changes are shown with is.
+ * @param percentDone how far are we?
+ * @param s explaining sentence
+ */
+public void reportProgress(double percentDone, String s) {
+	if (progressReporter != null) {
+		progressReporter.reportProgress(percentDone, s);
+	}
+
+}
 	public class LeafCollector<T> implements NodeVisitor<Node<T>> {
 		private Vector<Node<T>> leaves;
 

@@ -185,7 +185,7 @@
                       <Component id="tfPhylogeneticTree" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="buPhylogeneticTree" alignment="3" min="-2" pref="21" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="13" max="32767" attributes="0"/>
+                  <EmptySpace pref="14" max="32767" attributes="0"/>
                   <Component id="phylogeneticTreeLabel" min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -249,10 +249,10 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="progressScrollPane" alignment="1" pref="132" max="32767" attributes="0"/>
+                      <Component id="progressScrollPane" alignment="1" pref="126" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="runButton" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="48" max="32767" attributes="0"/>
+                          <EmptySpace pref="42" max="32767" attributes="0"/>
                           <Component id="loadButton" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="saveButton" min="-2" max="-2" attributes="0"/>
@@ -277,6 +277,9 @@
                 <Property name="rows" type="int" value="5"/>
                 <Property name="tabSize" type="int" value="2"/>
                 <Property name="wrapStyleWord" type="boolean" value="true"/>
+                <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
+                  <Insets value="[5, 5, 5, 5]"/>
+                </Property>
               </Properties>
             </Component>
           </SubComponents>
@@ -291,6 +294,9 @@
           </Events>
         </Component>
         <Component class="javax.swing.JProgressBar" name="progressBar">
+          <Properties>
+            <Property name="stringPainted" type="boolean" value="true"/>
+          </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="saveButton">
           <Properties>

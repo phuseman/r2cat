@@ -45,6 +45,7 @@ public class ProgressMonitorReporter extends ProgressMonitor implements Abstract
 	 */
 	@Override
 	public void reportProgress(double percentDone, String comment) {
+		//the comment is not used here
 		if(percentDone>=0 && percentDone <=1) {
 			this.setProgress((int) (percentDone*100));
 		}

@@ -20,34 +20,43 @@
 
 package de.bielefeld.uni.cebitec.cav.gui;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 
 import de.bielefeld.uni.cebitec.cav.treebased.MultifurcatedTree;
 import de.bielefeld.uni.cebitec.cav.treebased.TreebasedContigSorterProject;
+import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
+import de.bielefeld.uni.cebitec.cav.utils.ProgressMonitorReporter;
+import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 /**
  * 
  * @author phuseman
  */
-public class TreeProjectFrame extends javax.swing.JFrame {
+public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChangeListener {
 	public class ReferenceSelection extends JPanel implements ActionListener,
 			FocusListener, KeyListener {
 		private JTextField tfReference;
@@ -148,15 +157,17 @@ public class TreeProjectFrame extends javax.swing.JFrame {
 			setReferenceSelectionFromVector();
 		}
 
-		private boolean checkFile(String file) {
-			if (file.matches(initialText)) {
-				return true;
-			}
-			File f = new File(file);
-			if (f != null && !f.isDirectory() && f.canRead()) {
-				return true;
+		public void markNonexistingFiles() {
+			if (hasInitialText()) {
+				tfReference.setBackground(Color.WHITE);
 			} else {
-				return false;
+				File f = new File(tfReference.getText());
+				if (f != null && f.isFile() && f.canRead()) {
+					tfReference.setBackground(Color.WHITE);
+				} else {
+					tfReference.setBackground(Color.RED);
+				}
+
 			}
 
 		}
@@ -222,6 +233,89 @@ public class TreeProjectFrame extends javax.swing.JFrame {
 
 	}
 
+	public class  TreebasedContigSorterTask extends SwingWorker<File, String> implements AbstractProgressReporter{
+
+		TreebasedContigSorterProject tcsp;
+		ProgressMonitorReporter secondLevelProgressMonitor;
+		
+		public TreebasedContigSorterTask(TreebasedContigSorterProject tscp) {
+			this.tcsp=tscp;
+			tscp.register(this);
+		}
+
+		@Override
+		protected File doInBackground() throws Exception {
+			Timer t = Timer.getInstance();
+			t.startTimer();
+			
+			t.startTimer();
+			publish("Generating matches");
+			tcsp.generateMatches();
+			publish(t.stopTimer());
+			
+			t.startTimer();
+			publish("Constructing layout graph");
+			File result = tcsp.sortContigs();
+			publish(t.stopTimer());
+			
+			
+			publish("Total time: " + t.stopTimer());
+			
+			return result;
+		}
+
+		@Override
+		protected void done() {
+			try {
+				progress.append("The layout graph has been written to\n"+ get().getAbsolutePath() + "\n");
+				progress.append("The graph can be displayed using neato of the GraphViz package:\n" +
+						"neato -Tps -o graph.ps "+ get().getName() + "\n");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+
+		@Override
+		protected void process(List<String> chunks) {
+		     for (String comment : chunks) {
+	             progress.append(comment + "\n");
+	         }
+             progress.setCaretPosition(progress.getDocument().getLength());
+
+		}
+
+		@Override
+		public void reportProgress(double percentDone, String comment) {
+			if(percentDone>=0 && percentDone<=1) {
+				setProgress((int) (percentDone*100.));
+			}
+			if (comment != null && !comment.isEmpty()) {
+				publish(comment);
+			}
+		}
+		
+
+		/**
+		 * Returns a progress monitor that implements the {@link AbstractProgressReporter}.
+		 * It can be used to display the progress while matching with another progressbar.
+		 * @param title string to display in the window
+		 * @return returns an ProgressMonitor, that only displays the progres from 0-100.
+		 */
+		public ProgressMonitorReporter showSecondLevelProgressMonitor(String title) {
+			secondLevelProgressMonitor = new ProgressMonitorReporter(TreeProjectFrame.this,title,null);
+			
+			return secondLevelProgressMonitor;
+
+		}
+
+		
+	}
+	
 	// class TreebasedContigSorterTask extends SwingWorker<File, String> {
 	// @Override
 	// protected File doInBackground() {
@@ -394,9 +488,35 @@ public class TreeProjectFrame extends javax.swing.JFrame {
 	// }
 	//
 
+	
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		// these events are generated by the SwingWorker thread
+		if (evt.getPropertyName().matches("progress")) {
+			progressBar.setValue((Integer) evt.getNewValue());
+		} else if (evt.getPropertyName().matches("state")) {
+			if ((SwingWorker.StateValue) evt.getNewValue() == SwingWorker.StateValue.STARTED) {
+				progress.append("\nStarting algorithm\n");
+				progress.setCaretPosition(progress.getDocument().getLength());
+				progressBar.setValue(0);
+				progressBar.setIndeterminate(false);
+			} else if ((SwingWorker.StateValue) evt.getNewValue() == SwingWorker.StateValue.DONE) {
+				progressBar.setValue(100);
+				progressBar.setIndeterminate(false);
+				progress.append("\nDone.");
+				progress.setCaretPosition(progress.getDocument().getLength());
+
+			}
+		}
+
+	}
+
+	
+	
 	private Vector<ReferenceSelection> references;
 
 	private File lastDir;
+
 
 	/** Creates new form TreeProjectFrame */
 	public TreeProjectFrame() {
@@ -423,6 +543,7 @@ public class TreeProjectFrame extends javax.swing.JFrame {
 		// go through the vector and add each reference panel to the list of
 		// panels
 		for (int i = 0; i < references.size(); i++) {
+			references.get(i).markNonexistingFiles();
 			referenceGenomesFilesPanel.add(references.get(i));
 		}
 
@@ -567,7 +688,7 @@ public class TreeProjectFrame extends javax.swing.JFrame {
                 .addGroup(phylogeneticTreePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(tfPhylogeneticTree, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(buPhylogeneticTree, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
                 .addComponent(phylogeneticTreeLabel))
         );
 
@@ -579,6 +700,7 @@ public class TreeProjectFrame extends javax.swing.JFrame {
         progress.setRows(5);
         progress.setTabSize(2);
         progress.setWrapStyleWord(true);
+        progress.setMargin(new java.awt.Insets(5, 5, 5, 5));
         progressScrollPane.setViewportView(progress);
 
         runButton.setText("Run");
@@ -588,6 +710,8 @@ public class TreeProjectFrame extends javax.swing.JFrame {
                 runAlgorithm(evt);
             }
         });
+
+        progressBar.setStringPainted(true);
 
         saveButton.setText("Save");
         saveButton.setToolTipText("Saves a the given information to a file");
@@ -625,10 +749,10 @@ public class TreeProjectFrame extends javax.swing.JFrame {
             progressPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(progressPanelLayout.createSequentialGroup()
                 .addGroup(progressPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progressScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
+                    .addComponent(progressScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
                     .addGroup(progressPanelLayout.createSequentialGroup()
                         .addComponent(runButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
                         .addComponent(loadButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(saveButton)))
@@ -711,6 +835,7 @@ public class TreeProjectFrame extends javax.swing.JFrame {
 				"Select a multi FASTA file that contains the contigs", lastDir, true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
 		if (f != null && f.canRead()) {
 			lastDir=f.getParentFile();
+			tfContigs.setBackground(Color.WHITE);
 			tfContigs.setText(f.getAbsolutePath());
 			tfContigs.setCaretPosition(tfContigs.getText().length());
 		}
@@ -720,6 +845,7 @@ public class TreeProjectFrame extends javax.swing.JFrame {
 		File dir = MiscFileUtils.chooseDir(this,"Select a project directory", lastDir);
 		if (dir != null && dir.isDirectory() && dir.canWrite()) {
 			lastDir=dir;
+			tfProjectdir.setBackground(Color.WHITE);
 			tfProjectdir.setText(dir.getAbsolutePath());
 			tfProjectdir.setCaretPosition(tfProjectdir.getText().length());
 		}
@@ -729,6 +855,7 @@ public class TreeProjectFrame extends javax.swing.JFrame {
 		File f = MiscFileUtils.chooseFile(this,"Select phylogenetic tree in Newick format", lastDir, true, new CustomFileFilter(".newick,.txt,.tree,.phylip", "Newick Tree"));
 		if (f != null && f.canRead()) {
 			lastDir=f.getParentFile();
+			tfPhylogeneticTree.setBackground(Color.WHITE);
 			tfPhylogeneticTree.setText(f.getAbsolutePath());
 			tfPhylogeneticTree.setCaretPosition(tfPhylogeneticTree.getText()
 					.length());
@@ -748,39 +875,104 @@ public class TreeProjectFrame extends javax.swing.JFrame {
 	}// GEN-LAST:event_addReferenceFile
 
 	private void runAlgorithm(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_runAlgorithm
+		boolean errorOccured=false;
+		
 		progressBar.setValue(0);
 		progressBar.setIndeterminate(true);
 		progress.setText("");
 
-		progress.append("Checking files.");
+		progress.append("Checking files..\n");
 
 		File projectDir = new File(tfProjectdir.getText());
+		if(!projectDir.isDirectory() || !projectDir.canWrite()) {
+			tfProjectdir.setBackground(Color.RED);
+			progress.append("Project directory is not writable or does not exist.\n");
+			errorOccured=true;
+		} else {
+			tfProjectdir.setBackground(Color.WHITE);
+		}
 
 		File contigs = new File(tfContigs.getText());
+		if(!contigs.isFile() || !contigs.canRead()) {
+			tfContigs.setBackground(Color.RED);
+			progress.append("Contigs file is not readable\n");
+			errorOccured=true;
+		} else {
+			tfContigs.setBackground(Color.WHITE);
+		}
 
+		
+		int unreadableReferences=0;
+		int referenceNumber=0;
 		Vector<File> referenceFiles = new Vector<File>();
 		for (ReferenceSelection refSel : references) {
-			referenceFiles.add(new File(refSel.getFile()));
+			if (!refSel.hasInitialText()) {
+				File f = new File(refSel.getFile());
+				if (!f.isFile() || !f.canRead()) {
+					unreadableReferences++;
+					errorOccured = true;
+				} else {
+					referenceFiles.add(f);
+					referenceNumber++;
+				}
+			}
 		}
+		if(unreadableReferences>0) {
+		progress.append(unreadableReferences+ "References file(s) not readable\n");
+		}
+		if(referenceNumber==0) {
+			errorOccured = true;
+			progress.append("No reference files given\n");
+			
+		}
+		if(errorOccured) {
+			//this will mark nonexisting files in red
+			setReferenceSelectionFromVector();
+		}
+		
+		
 
 		MultifurcatedTree phylogeneticTree = null;
 		try {
 			File treeFile = new File(tfPhylogeneticTree.getText());
 			if (treeFile.exists() && treeFile.canRead()) {
 				phylogeneticTree = new MultifurcatedTree(treeFile);
+				tfPhylogeneticTree.setBackground(Color.WHITE);
 			} else {
+				progress.append("NOT using a phylogenetic tree\n");
 				phylogeneticTree = null;
+				tfPhylogeneticTree.setBackground(Color.LIGHT_GRAY);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			progress.append("Could not read the tree\n"+e.getMessage());
+			errorOccured = true;
+			tfPhylogeneticTree.setBackground(Color.RED);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			progress.append("Error building the tree\n"+e.getMessage());
+			errorOccured = true;
+			tfPhylogeneticTree.setBackground(Color.RED);
+		}
+
+		
+		if(errorOccured) {
+			progressBar.setValue(0);
+			progressBar.setIndeterminate(false);
+			progress.append("Error(s): Stopping here.\n");
+
+			return;
+		} else {
+			progress.append("..ok");
 		}
 
 		TreebasedContigSorterProject tscp = new TreebasedContigSorterProject(
 				contigs, referenceFiles, projectDir, phylogeneticTree);
+
+		TreebasedContigSorterTask backgroundTask = new TreebasedContigSorterTask(tscp);
+		backgroundTask.addPropertyChangeListener(this);
+		backgroundTask.execute();
+		
+		
 
 	}// GEN-LAST:event_runAlgorithm
 
@@ -994,9 +1186,12 @@ public class TreeProjectFrame extends javax.swing.JFrame {
 		} // file has been parsed completely
 
 		tfProjectdir.setText(projectDirectoryFileString);
+		tfProjectdir.setBackground(Color.WHITE);
 		tfContigs.setText(contigsFileString);
+		tfContigs.setBackground(Color.WHITE);
 		tfPhylogeneticTree.setText(phylogeneticTreeFileString);
-
+		tfPhylogeneticTree.setBackground(Color.WHITE);
+		
 		references.clear();
 		for (File file : referenceFileStrings) {
 			references.add(new ReferenceSelection(file));

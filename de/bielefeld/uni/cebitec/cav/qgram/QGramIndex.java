@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
-import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
+import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 /**
@@ -48,7 +48,7 @@ public class QGramIndex {
 	private char[] input = null; //TODO make local in generateIndex if not needed otherwise
 	private QGramCoder coder;
 
-	private MatchDialog matchDialog;
+	private AbstractProgressReporter progressReporter;
 
 	public QGramIndex() {
 		coder = new QGramCoder(qLength);
@@ -295,32 +295,23 @@ public class QGramIndex {
 	}
 
 	/**
-	 * Registers the Match Dialog, to pass progress changes to it.
+	 * Registers the a progress reporter, to pass progress changes to it.
 	 * 
 	 * @param matchDialog
 	 */
-	public void register(MatchDialog matchDialog) {
-		this.matchDialog = matchDialog;
+	public void register(AbstractProgressReporter progressReporter) {
+		this.progressReporter=progressReporter;
 	}
-
+	
 	/**
-	 * If a MatchDialog is registered the output will be written in its
-	 * textfield. Otherwise on the command line.
-	 * 
-	 * @param percentDone
-	 *            how far are we?
-	 * @param s
-	 *            explaining sentence
+	 * If a progress reporter is registered progress changes are shown with is.
+	 * @param percentDone how far are we?
+	 * @param s explaining sentence
 	 */
 	public void reportProgress(double percentDone, String s) {
-		if (matchDialog != null) {
-			matchDialog.setProgress(percentDone, s);
-		} else {
-			System.out
-					.println((percentDone > 0 ? ((int) (percentDone * 100) + "% ")
-							: "")
-							+ s);
+		if (progressReporter != null) {
+			progressReporter.reportProgress(percentDone, s);
 		}
-	}
 
+	}
 }
