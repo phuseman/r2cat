@@ -78,6 +78,10 @@ public class ContigSorter implements Runnable {
 		for (int i = 0; i < apl.getQueries().size(); i++) {
 			query = apl.getQueries().get(i);
 			for (AlignmentPosition ap : apl) {
+				if(progress!= null && progress.isCanceled()) {
+					//stop sorting, if the user clicks on cancel
+					return;
+				}
 				if (query.equals(ap.getQuery())) {
 					enterApToHistogram(ap);
 				}
@@ -94,7 +98,7 @@ public class ContigSorter implements Runnable {
 
 			// stop the programm if the user canceled
 			if (progress != null && progress.isCanceled()) {
-				break;
+				return;
 			}
 		} // for each query
 
