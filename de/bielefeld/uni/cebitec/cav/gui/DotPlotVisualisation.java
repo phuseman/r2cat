@@ -39,7 +39,7 @@ import java.util.Observable;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
-import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
+import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
@@ -226,7 +226,7 @@ public class DotPlotVisualisation extends DataViewPlugin {
 				drawingWidth = this.getParent().getWidth() - 2 * border;
 			}
 
-			for (DNASequence q : ComparativeAssemblyViewer.dataModelController
+			for (DNASequence q : R2cat.dataModelController
 					.getAlignmentPositionsList().getQueries()) {
 				horizontalOffset = (q.getOffset() * AlignmentPositionDisplayer
 						.getNormalisationFactorY());
@@ -237,7 +237,7 @@ public class DotPlotVisualisation extends DataViewPlugin {
 
 			double verticalOffset = 0;
 			// vertical
-			for (DNASequence t : ComparativeAssemblyViewer.dataModelController
+			for (DNASequence t : R2cat.dataModelController
 					.getAlignmentPositionsList().getTargets()) {
 				verticalOffset = (t.getOffset() * AlignmentPositionDisplayer
 						.getNormalisationFactorX());
@@ -665,7 +665,7 @@ public class DotPlotVisualisation extends DataViewPlugin {
 	 *            the drawGrid to set
 	 */
 	public void drawGrid(boolean drawGrid) {
-		ComparativeAssemblyViewer.preferences.setDisplayGrid(drawGrid);
+		R2cat.preferences.setDisplayGrid(drawGrid);
 		this.drawGrid = drawGrid;
 	}
 

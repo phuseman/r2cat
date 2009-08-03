@@ -32,7 +32,7 @@ import java.util.prefs.Preferences;
  * 
  */
 
-public class CAVPrefs {
+public class CgcatPrefs {
 
 	private static Preferences preferences = null;
 
@@ -41,7 +41,7 @@ public class CAVPrefs {
 	 * On Windows this is the registry, whereas linux or unix use the ~/.java directory.
 	 * @see {@link Preferences}
 	 */
-	public CAVPrefs() {
+	public CgcatPrefs() {
 		if (preferences == null) {
 			preferences = Preferences.userNodeForPackage(this.getClass());
 		}

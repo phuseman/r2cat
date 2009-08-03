@@ -30,7 +30,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
-import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
+import de.bielefeld.uni.cebitec.cav.utils.CgcatPrefs;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 /**
@@ -159,8 +159,8 @@ public class QGramFilter {
 	 * Main Method is here for debugging. the matching can be tested without the gui.
 	 */
 	public static void main(String[] args) throws Exception {
-		CAVPrefs preferences = new CAVPrefs();
-		Preferences pref = CAVPrefs.getPreferences();
+		CgcatPrefs preferences = new CgcatPrefs();
+		Preferences pref = CgcatPrefs.getPreferences();
 		
 //		
 //		File test = new File("test_co.r2c");

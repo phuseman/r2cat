@@ -31,7 +31,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
-import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
+import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.controller.GuiController;
 
 /**
@@ -136,7 +136,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 
 		JCheckBoxMenuItem reverted = new JCheckBoxMenuItem(
 				"Complemented contigs",
-				ComparativeAssemblyViewer.preferences
+				R2cat.preferences
 						.getDisplayReverseComplements());
 		reverted.setMnemonic(KeyEvent.VK_U);
 		reverted.getAccessibleContext().setAccessibleDescription(
@@ -147,7 +147,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 
 		JCheckBoxMenuItem offsets = new JCheckBoxMenuItem(
 				"Show queries with offsets",
-				ComparativeAssemblyViewer.preferences.getDisplayOffsets());
+				R2cat.preferences.getDisplayOffsets());
 		offsets.setMnemonic(KeyEvent.VK_O);
 		offsets.getAccessibleContext().setAccessibleDescription(
 				"Consecutive Queries vs. all queries start at zero");
@@ -156,7 +156,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		optionsMenu.add(offsets);
 
 		JCheckBoxMenuItem grid = new JCheckBoxMenuItem("Show grid",
-				ComparativeAssemblyViewer.preferences.getDisplayGrid());
+				R2cat.preferences.getDisplayGrid());
 		grid.setMnemonic(KeyEvent.VK_G);
 		grid.getAccessibleContext().setAccessibleDescription(
 				"Display a grid between queries and targets");
@@ -252,15 +252,15 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			guiController.displayGrid(((JCheckBoxMenuItem) e.getSource())
 					.getState());
 		} else if (e.getActionCommand().matches("show_table")) {
-			ComparativeAssemblyViewer.guiController.showAlignmentsPositionTableFrame();
+			R2cat.guiController.showAlignmentsPositionTableFrame();
 		} else if (e.getActionCommand().matches("show_query_table")) {
-			ComparativeAssemblyViewer.guiController.showQuerySortTable(ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList());
+			R2cat.guiController.showQuerySortTable(R2cat.dataModelController.getAlignmentPositionsList());
 	} else if (e.getActionCommand().matches("sort_queries")) {
-		ComparativeAssemblyViewer.guiController.sortContigs();
+		R2cat.guiController.sortContigs();
 	} else if (e.getActionCommand().matches("show_help")) {
-			ComparativeAssemblyViewer.guiController.showHelpFrame();
+			R2cat.guiController.showHelpFrame();
 		} else if (e.getActionCommand().matches("show_about")) {
-			ComparativeAssemblyViewer.guiController.showAbout();
+			R2cat.guiController.showAbout();
 		} else if (e.getActionCommand().matches("exit")) {
 			System.exit(0);
 		} else if (e.getActionCommand().matches("export_image")) {

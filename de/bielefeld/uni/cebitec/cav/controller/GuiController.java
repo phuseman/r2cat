@@ -41,7 +41,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.freehep.util.export.ExportDialog;
 
-import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
+import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.ContigSorter;
 import de.bielefeld.uni.cebitec.cav.datamodel.SequenceOrderTableModel;
@@ -86,7 +86,7 @@ public class GuiController {
 	public void createMainWindow() {
 		mainWindow = new MainWindow(this);
 		URL url = Thread.currentThread().getContextClassLoader().getResource("images/icon.png");
-	//	URL url = ComparativeAssemblyViewer.class.getResource("/images/icon.png");
+	//	URL url = R2cat.class.getResource("/images/icon.png");
 		
 
 		if (url!=null) {
@@ -119,16 +119,16 @@ public class GuiController {
 		dotPlotVisualisation.addKeyListener(dotPlotVisualisationListener);
 
 		// load the previous state from prefs
-		dotPlotVisualisation.drawGrid(ComparativeAssemblyViewer.preferences
+		dotPlotVisualisation.drawGrid(R2cat.preferences
 				.getDisplayGrid());
 		dotPlotVisualisation.getAlignmentPositionDisplayerList()
 				.showReversedComplements(
-						ComparativeAssemblyViewer.preferences
+						R2cat.preferences
 								.getDisplayReverseComplements());
 
 		dotPlotVisualisation.getAlignmentPositionDisplayerList()
 				.setDisplayOffsets(
-						ComparativeAssemblyViewer.preferences
+						R2cat.preferences
 								.getDisplayOffsets());
 
 		return dotPlotVisualisation;
@@ -174,7 +174,7 @@ public class GuiController {
 	public void showAlignmentsPositionTableFrame() {
 		if (tableFrame == null) {
 			this
-					.createAlignmentsPositionTableFrame(ComparativeAssemblyViewer.dataModelController
+					.createAlignmentsPositionTableFrame(R2cat.dataModelController
 							.getAlignmentPositionsList());
 		}
 		if (tableFrame != null) {
@@ -251,10 +251,10 @@ public class GuiController {
 	}
 
 	public void displayReverseComplements(boolean unidirectional) {
-		ComparativeAssemblyViewer.preferences
+		R2cat.preferences
 				.setDisplayReverseComplements(unidirectional);
 
-		if (ComparativeAssemblyViewer.dataModelController
+		if (R2cat.dataModelController
 				.isAlignmentpositionsListReady()) {
 
 			dotPlotVisualisation.getAlignmentPositionDisplayerList()
@@ -265,8 +265,8 @@ public class GuiController {
 	}
 
 	public void displayGrid(boolean b) {
-		ComparativeAssemblyViewer.preferences.setDisplayGrid(b);
-		if (ComparativeAssemblyViewer.dataModelController
+		R2cat.preferences.setDisplayGrid(b);
+		if (R2cat.dataModelController
 				.isAlignmentpositionsListReady()) {
 			dotPlotVisualisation.drawGrid(b);
 			dotPlotVisualisation.repaint();
@@ -274,8 +274,8 @@ public class GuiController {
 	}
 
 	public void displayOffsets(boolean displayOffsets) {
-		ComparativeAssemblyViewer.preferences.setDisplayOffsets(displayOffsets);
-		if (ComparativeAssemblyViewer.dataModelController
+		R2cat.preferences.setDisplayOffsets(displayOffsets);
+		if (R2cat.dataModelController
 				.isAlignmentpositionsListReady()) {
 
 			dotPlotVisualisation.getAlignmentPositionDisplayerList()
@@ -288,11 +288,11 @@ public class GuiController {
 
 	public void initVisualisation() {
 		if (!visualisationInitialized()) {
-			if (ComparativeAssemblyViewer.dataModelController
+			if (R2cat.dataModelController
 					.isAlignmentpositionsListReady()) {
 
 				DataViewPlugin dotPlotVisualisation = this
-						.createDotPlotVisualisation(ComparativeAssemblyViewer.dataModelController
+						.createDotPlotVisualisation(R2cat.dataModelController
 								.getAlignmentPositionsList());
 
 				this.setVisualisation(dotPlotVisualisation);
@@ -314,7 +314,7 @@ public class GuiController {
 	public void loadCSVFile() {
 	File csv = this.chooseFile("Import matches from csv file", true, new CustomFileFilter(".csv", "comma separaded values"));
 		if (csv != null) {
-			ComparativeAssemblyViewer.dataModelController
+			R2cat.dataModelController
 					.setAlignmentsPositonsListFromCSV(csv);
 			this.setVisualisationNeedsUpdate();
 		}
@@ -325,7 +325,7 @@ public class GuiController {
 	 * then be loaded with the loadProject() method.
 	 */
 	public void saveProject() {
-		if (!ComparativeAssemblyViewer.dataModelController
+		if (!R2cat.dataModelController
 				.isAlignmentpositionsListReady()) {
 			errorAlert("There is nothing to save!");
 			return;
@@ -334,10 +334,8 @@ public class GuiController {
 		File f = this.chooseFile("Save project data to file", false, new CustomFileFilter(".r2c", "r2cat hits file"));
 		if (f != null) {
 			try {
-				if (!f.getName().endsWith(".r2c")) {
-					f = new File(f.getAbsolutePath() + ".r2c");
-				}
-				ComparativeAssemblyViewer.dataModelController
+				f = MiscFileUtils.enforceExtension(f, ".r2c");
+				R2cat.dataModelController
 						.writeAlignmentPositions(f);
 			} catch (IOException e) {
 				this.errorAlert("Unable to open file:" + e);
@@ -352,7 +350,7 @@ public class GuiController {
 		File f = this.chooseFile("Load project data from file", true, new CustomFileFilter(".r2c", "r2cat hits file"));
 		if (f != null) {
 			try {
-				ComparativeAssemblyViewer.dataModelController
+				R2cat.dataModelController
 						.readAlignmentPositions(f);
 				this.setVisualisationNeedsUpdate();
 			} catch (IOException e) {
@@ -367,7 +365,7 @@ public class GuiController {
 	 * as fasta files.
 	 */
 	public void exportAsFasta() {
-		if (!ComparativeAssemblyViewer.dataModelController
+		if (!R2cat.dataModelController
 				.isAlignmentpositionsListReady()) {
 			errorAlert("There is nothing to save!");
 			return;
@@ -390,9 +388,9 @@ public class GuiController {
 			// TODO check if all files are existent
 
 			// mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			int contigsWritten = ComparativeAssemblyViewer.dataModelController
+			int contigsWritten = R2cat.dataModelController
 					.writeOrderOfContigsFasta(f, ignoreMissingFiles);
-			 int totalContigs = ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().getQueries().size();
+			 int totalContigs = R2cat.dataModelController.getAlignmentPositionsList().getQueries().size();
 			JOptionPane.showMessageDialog(getMainWindow(),
 					"Wrote " + contigsWritten 
 					+ (contigsWritten!=totalContigs?(" out of " + totalContigs):"")
@@ -445,14 +443,14 @@ public class GuiController {
 	 */
 	private File chooseFile(String dialogTitle, boolean openDialog,
 			FileFilter filter) {
-		File lastFile = new File(ComparativeAssemblyViewer.preferences
+		File lastFile = new File(R2cat.preferences
 				.getLastFile());
 		File lastDir = lastFile.getParentFile();
 
 		lastFile = MiscFileUtils.chooseFile(mainWindow, dialogTitle, lastDir,
 				openDialog, filter);
 		if (lastFile != null) {
-			ComparativeAssemblyViewer.preferences.setLastFile(lastFile.getAbsolutePath());
+			R2cat.preferences.setLastFile(lastFile.getAbsolutePath());
 		}
 		return lastFile;
 	}
@@ -474,7 +472,7 @@ public class GuiController {
 	 * When the thread finishes it has to call sortContigsDone(), to update the gui and the datamodel.
 	 */
 	public void sortContigs() {
-		ContigSorter sorter = new ContigSorter(ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList());
+		ContigSorter sorter = new ContigSorter(R2cat.dataModelController.getAlignmentPositionsList());
 
 		ProgressMonitor progress = new ProgressMonitor(mainWindow,"Sorting contigs",null,0,100);
 	
@@ -492,7 +490,7 @@ public class GuiController {
 	 * @param sorter
 	 */
 	public void sortContigsDone(ContigSorter sorter) {
-		ComparativeAssemblyViewer.dataModelController.getAlignmentPositionsList().changeQueryOrder(sorter.getQueryOrder());
+		R2cat.dataModelController.getAlignmentPositionsList().changeQueryOrder(sorter.getQueryOrder());
 		this.setVisualisationNeedsUpdate();
 		dotPlotVisualisation.repaint();
 

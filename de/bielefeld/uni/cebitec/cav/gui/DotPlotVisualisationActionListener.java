@@ -41,7 +41,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
+import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.controller.GuiController;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
 
@@ -164,9 +164,9 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 			// remove selection if too far away
 			dotPlotVisualisation.getAlignmentPositionDisplayerList().unmakAll();
 		}
-		ComparativeAssemblyViewer.dataModelController
+		R2cat.dataModelController
 				.getAlignmentPositionsList().markQueriesWithSelectedAps();
-		ComparativeAssemblyViewer.dataModelController
+		R2cat.dataModelController
 				.getAlignmentPositionsList().notifyObservers(NotifyEvent.MARK);
 	}
 

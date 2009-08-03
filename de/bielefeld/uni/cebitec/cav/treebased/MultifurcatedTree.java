@@ -25,6 +25,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 /**
  * Multifurcated tree. Can be parsed from a newick format.
@@ -34,6 +35,24 @@ import java.util.Vector;
  */
 
 public class MultifurcatedTree {
+	
+	/**
+	 * Custom exception if the tree is unproper
+	 * @author phuseman
+	 *
+	 */
+	public class UnproperTreeException extends Exception{
+
+		/**
+		 * Message, why it is unporoper
+		 * @param message
+		 */
+		public UnproperTreeException(String message) {
+			super(message);
+		}
+		
+	}
+	
 	public interface NodeVisitor<Node> {
 		/**
 		 * Method to visit a <tt>node</tt> and do something with it.
@@ -329,6 +348,30 @@ public class MultifurcatedTree {
 	private Node<?> root;
 
 	/**
+	 * Reads the tree structure (newick format) from the given file
+	 * 
+	 * @param file
+	 *            the file to read the tree from
+	 * @return the tree
+	 */
+	
+	public MultifurcatedTree(File phylogeneticTreeFile) throws IOException, UnproperTreeException{
+		StringBuilder readString =  new StringBuilder();
+		// parse the file
+			BufferedReader in = new BufferedReader(new FileReader(phylogeneticTreeFile));
+			String line;
+			while ((line = in.readLine()) != null) {
+				if (line.length() > 0 && line.charAt(0) != '#') {
+					readString.append(line);
+				}
+			}
+			in.close();
+			
+			
+			constructTreeFromString(readString.toString());
+	}
+
+	/**
 	 * Constructor to create a <tt>multifurcated tree</tt>
 	 * 
 	 * @param root
@@ -400,7 +443,7 @@ public class MultifurcatedTree {
 	 * @param s
 	 * @return
 	 */
-	private Node parseNode(String s) throws Exception {
+	private Node parseNode(String s) throws UnproperTreeException {
 		// if no node name is specified in the string a default name will be
 		// used:
 		// node_0, node_1, ...
@@ -419,13 +462,13 @@ public class MultifurcatedTree {
 					p = new Node(null, p);
 					// determine children in next loop runs
 				} else {
-					throw new Exception("*** error: tree unproper.");
+					throw new UnproperTreeException("Tree unproper.");
 				}
 			}
 
 			if (token.equals(",") || token.equals(")") || token.equals(";")) {
 				if (p == null) {
-					throw new Exception("*** error: tree unproper.");
+					throw new UnproperTreeException("Tree unproper.");
 				}
 				// finish node
 				// has this node a name or edge length?
@@ -439,8 +482,8 @@ public class MultifurcatedTree {
 									.parseDouble(lastToken
 											.substring(sepPos + 1)));
 						} catch (NumberFormatException e) {
-							throw new Exception(
-									"*** error: tree unproper: unproper edge length.");
+							throw new UnproperTreeException(
+									"Tree unproper: Unproper edge length.");
 						}
 						lastToken = lastToken.substring(0, sepPos);
 					}
@@ -456,18 +499,18 @@ public class MultifurcatedTree {
 			}
 			if (token.equals(",")) {
 				p = new Node(null, p.getParent());
-				// detemine name and edge length in next loop run
+				// determine name and edge length in next loop run
 			}
 			if (token.equals(")")) {
 				p = p.getParent();
-				// detemine name and edge length in next loop run
+				// determine name and edge length in next loop run
 			}
 		}
 		// created a proper tree?
 		if (token.equals(";") && p.isRoot()) {
 			return p;
 		} else {
-			throw new Exception("*** error: tree unproper.");
+			throw new UnproperTreeException("Tree unproper.");
 		}
 	}
 
@@ -477,15 +520,15 @@ public class MultifurcatedTree {
 	 * @param newichTreeString
 	 *            the string containing a newick tree.
 	 */
-	public MultifurcatedTree(String newichTreeString) throws Exception {
+	public MultifurcatedTree(String newichTreeString) throws UnproperTreeException {
 		constructTreeFromString(newichTreeString);
 	}
 
-	private void constructTreeFromString(String input)throws Exception {
+	private void constructTreeFromString(String input)throws UnproperTreeException {
 		input = input.replaceAll("\\s", "");
 		if (input.indexOf(';') < 0) {
 			// error
-			throw new Exception("*** error: tree unproper: no ; found.");
+			throw new UnproperTreeException("Tree unproper: No \";\" found.");
 		} else {
 			String nodeString = input.substring(0, input.indexOf(';') + 1);
 			Node root = parseNode(nodeString);
@@ -493,32 +536,6 @@ public class MultifurcatedTree {
 		}
 
 	}
-
-	/**
-	 * Reads the tree structure (newick format) from the given file
-	 * 
-	 * @param file
-	 *            the file to read the tree from
-	 * @return the tree
-	 */
-
-	public MultifurcatedTree(File phylogeneticTreeFile) throws IOException, Exception{
-		StringBuilder readString =  new StringBuilder();
-		// parse the file
-			BufferedReader in = new BufferedReader(new FileReader(phylogeneticTreeFile));
-			String line;
-			while ((line = in.readLine()) != null) {
-				if (line.length() > 0 && line.charAt(0) != '#') {
-					readString.append(line);
-				}
-			}
-			in.close();
-			
-			
-			constructTreeFromString(readString.toString());
-	}
-	
-	
 
 	public String toString(boolean printEdgeLength) {
 		if (root != null)
@@ -530,4 +547,40 @@ public class MultifurcatedTree {
 	public String toString() {
 		return toString(true);
 	}
+	
+	/**
+	 * Opens the file and tries to determine quickly if this is a newick file.
+	 * Checks the first 100 non comment lines for a line starting with an open parenthesis.
+	 * 
+	 * Note that this test is not really reliable, but fast.
+	 * 
+	 * @return
+	 */
+	public static boolean isNewickQuickCheck(File source) throws IOException {
+		BufferedReader in = new BufferedReader(new FileReader(source));
+
+		Pattern commentLine	= Pattern.compile("^\\s*#");
+		Pattern startOfTree = Pattern.compile("^\\s*(");
+
+		
+		int nonCommentLines=0;
+		String line;
+		
+		while(nonCommentLines<100 && in.ready()) {
+			line = in.readLine();
+			if(!commentLine.matcher(line).lookingAt()) {
+				nonCommentLines++;
+			}
+			if(startOfTree.matcher(line).lookingAt()) {
+				in.close();
+				return true;
+			}
+		}
+
+		in.close();
+		return false;
+
+		
+	}
+
 }

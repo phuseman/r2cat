@@ -21,23 +21,33 @@
 package de.bielefeld.uni.cebitec.cav.utils;
 
 import java.awt.Component;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.ProgressMonitor;
 
 /**
  * Convenience class to pop up an ProgressMonitor that displays only the percentDone part in a new popup window.
  * It implements the {@link AbstractProgressReporter}.
+ * While the dialog only displays the progress in percent, all progress messages are cached and can be written to a file.
  * 
  * @author phuseman
  *
  */
 public class ProgressMonitorReporter extends ProgressMonitor implements AbstractProgressReporter {
 
+	
+	StringBuilder log = null;
+
+	
 	public ProgressMonitorReporter(Component parentComponent, Object message,
 			String note) {
 		super(parentComponent, message, note, 0, 100);
 		this.setMillisToDecideToPopup(10);
 		this.setMillisToPopup(500);
+		log = new StringBuilder();
 	}
 
 	/* (non-Javadoc)
@@ -49,7 +59,26 @@ public class ProgressMonitorReporter extends ProgressMonitor implements Abstract
 		if(percentDone>=0 && percentDone <=1) {
 			this.setProgress((int) (percentDone*100));
 		}
+		
+		// cache the comments
+		if (comment != null && !comment.isEmpty()) {
+			log.append(comment+"\n");
+		}
+
 
 	}
+	
+		
+	/**
+	 * Writes all cached progress comments to a file.
+	 * @param output
+	 * @throws IOException
+	 */
+	public void writeCommentsToFile(File output) throws IOException {
+		BufferedWriter fileWriter = new BufferedWriter(new FileWriter(output));
+		fileWriter.write(log.toString());
+		fileWriter.close();
+	}
+
 
 }

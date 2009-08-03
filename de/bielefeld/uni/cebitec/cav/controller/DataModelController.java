@@ -25,7 +25,7 @@ import java.io.IOException;
 
 import javax.swing.JOptionPane;
 
-import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
+import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsStatistics;
 import de.bielefeld.uni.cebitec.cav.datamodel.CSVParser;
@@ -62,7 +62,7 @@ public class DataModelController {
 
 			this.postSetProcessing();
 		} else {
-			JOptionPane.showMessageDialog(ComparativeAssemblyViewer.guiController.getMainWindow(), "Sorry, no Matches to display.", "Error",
+			JOptionPane.showMessageDialog(R2cat.guiController.getMainWindow(), "Sorry, no Matches to display.", "Error",
 					JOptionPane.ERROR_MESSAGE);
 		}
 	}
@@ -84,9 +84,9 @@ public class DataModelController {
 		
 		
 		
-		if (!ComparativeAssemblyViewer.guiController
+		if (!R2cat.guiController
 				.visualisationInitialized()) {
-			ComparativeAssemblyViewer.guiController.initVisualisation();
+			R2cat.guiController.initVisualisation();
 		}
 		alignmentPositionsList
 				.notifyObservers(AlignmentPositionsList.NotifyEvent.CHANGE);

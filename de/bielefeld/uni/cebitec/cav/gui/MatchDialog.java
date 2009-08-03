@@ -47,14 +47,14 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
-import de.bielefeld.uni.cebitec.cav.ComparativeAssemblyViewer;
+import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 import de.bielefeld.uni.cebitec.cav.qgram.QGramFilter;
 import de.bielefeld.uni.cebitec.cav.qgram.QGramIndex;
 import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
-import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
+import de.bielefeld.uni.cebitec.cav.utils.CgcatPrefs;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
@@ -101,76 +101,86 @@ public class MatchDialog extends JDialog implements ActionListener,
 			t.startTimer();
 
 			try {
-			progress.append("Opening target file " + target.getName() + " (" + target.length()+ ")");
-			t.startTimer();
-			FastaFileReader targetFasta = new FastaFileReader(target);
-			boolean targetIsFasta = targetFasta.scanContents(true);
-			progress.append(" ..."+t.stopTimer()+"\n");
-			
-			if(!targetIsFasta) {
-				progress.append("Error: Target file contains no id line (>idtag ...)");
-				setEndMatching();
-				return null;
-			}
 
-			
-			progress.append("Opening query file"+ query.getName() + " (" + query.length()+ ")");
-			t.startTimer();
-			FastaFileReader queryFasta = new FastaFileReader(query);
-			boolean queryIsFasta = queryFasta.scanContents(true);
-			progress.append(" ..."+t.stopTimer()+"\n");
-			if(!queryIsFasta) {
-				progress.append("Error: Query file contains no id line (>idtag ...)");
-				setEndMatching();
-				return null;
-			}
+					FastaFileReader targetFasta = new FastaFileReader(target);
 
-			
-			// check if targets and queries might be switched
-				double averageTargetSize = 0;
-				for (DNASequence seq : targetFasta.getSequences()) {
-					averageTargetSize += seq.getSize();
-				}
-				averageTargetSize /= targetFasta.getSequences().size();
+					boolean targetIsFasta = targetFasta.isFastaQuickCheck();
 
-				double averageQuerySize = 0;
-				for (DNASequence seq : queryFasta.getSequences()) {
-					averageQuerySize += seq.getSize();
-				}
-				averageQuerySize /= queryFasta.getSequences().size();
+					if (targetIsFasta) {
+						progress.append("Opening target file "
+								+ target.getName() + " (" + target.length()
+								+ ")");
+						t.startTimer();
+						targetFasta.scanContents(true);
+						progress.append(" ..." + t.stopTimer() + "\n");
+					} else {
+						progress
+								.append("Error: Target file contains no id line (>idtag ...)");
+						setEndMatching();
+						return null;
+					}
 
-				String warningMsg = "";
-				if (averageQuerySize > averageTargetSize) {
-					warningMsg = "The queries are bigger than the target sequences on average.";
-				} else if (targetFasta.getSequences().size() > queryFasta
-						.getSequences().size()) {
-					warningMsg = "There are more targets than queries.";
-				}
+					FastaFileReader queryFasta = new FastaFileReader(query);
+					boolean queryIsFasta = queryFasta.isFastaQuickCheck();
+					if (queryIsFasta) {
+						progress.append("Opening query file" + query.getName()
+								+ " (" + query.length() + ")");
+						t.startTimer();
+						queryFasta.scanContents(true);
+						progress.append(" ..." + t.stopTimer() + "\n");
 
-				// if there is an error, display dialog
-				if (!warningMsg.equals("")) {
-					progressBar.setIndeterminate(false);
-					int warningAnswer = -1;
-					warningMsg += "\nThis can lead to problems during the matching phase\n"
-							+ "and in the visualization.";
-					Object[] options = { "I know, continue!",
-							"Switch sequences" };
-					warningAnswer = JOptionPane.showOptionDialog(
-							MatchDialog.this, warningMsg,
-							"Target and queries switched?",
-							JOptionPane.YES_NO_OPTION,
-							JOptionPane.WARNING_MESSAGE, null, options,
-							options[1]);
-					if (warningAnswer == 1) {
-						// switch query <-> target
-						FastaFileReader tmp;
-						tmp = queryFasta;
-						queryFasta = targetFasta;
-						targetFasta = tmp;
-					}// else just continue
-					progressBar.setIndeterminate(true);
+					} else {
+						progress
+								.append("Error: Query file contains no id line (>idtag ...)");
+						setEndMatching();
+						return null;
+					}
 
-				}
+					// check if targets and queries might be switched
+					double averageTargetSize = 0;
+					for (DNASequence seq : targetFasta.getSequences()) {
+						averageTargetSize += seq.getSize();
+					}
+					averageTargetSize /= targetFasta.getSequences().size();
+
+					double averageQuerySize = 0;
+					for (DNASequence seq : queryFasta.getSequences()) {
+						averageQuerySize += seq.getSize();
+					}
+					averageQuerySize /= queryFasta.getSequences().size();
+
+					String warningMsg = "";
+					if (averageQuerySize > averageTargetSize) {
+						warningMsg = "The queries are bigger than the target sequences on average.";
+					} else if (targetFasta.getSequences().size() > queryFasta
+							.getSequences().size()) {
+						warningMsg = "There are more targets than queries.";
+					}
+
+					// if there is an error, display dialog
+					if (!warningMsg.equals("")) {
+						progressBar.setIndeterminate(false);
+						int warningAnswer = -1;
+						warningMsg += "\nThis can lead to problems during the matching phase\n"
+								+ "and in the visualization.";
+						Object[] options = { "I know, continue!",
+								"Switch sequences" };
+						warningAnswer = JOptionPane.showOptionDialog(
+								MatchDialog.this, warningMsg,
+								"Target and queries switched?",
+								JOptionPane.YES_NO_OPTION,
+								JOptionPane.WARNING_MESSAGE, null, options,
+								options[1]);
+						if (warningAnswer == 1) {
+							// switch query <-> target
+							FastaFileReader tmp;
+							tmp = queryFasta;
+							queryFasta = targetFasta;
+							targetFasta = tmp;
+						}// else just continue
+						progressBar.setIndeterminate(true);
+
+					}
 			 
 			
 				
@@ -234,8 +244,8 @@ public class MatchDialog extends JDialog implements ActionListener,
 					startButton.setText("Continue");
 					startButton.setActionCommand("ok");
 
-					ComparativeAssemblyViewer.dataModelController.setAlignmentsPositonsList(result);
-					ComparativeAssemblyViewer.guiController.setVisualisationNeedsUpdate();
+					R2cat.dataModelController.setAlignmentsPositonsList(result);
+					R2cat.guiController.setVisualisationNeedsUpdate();
 
 
 					
@@ -260,7 +270,7 @@ public class MatchDialog extends JDialog implements ActionListener,
 		this.setLayout(new BorderLayout());
 
 		// not used at the moment
-		prefs = CAVPrefs.getPreferences();
+		prefs = CgcatPrefs.getPreferences();
 		init();
 //		this.setSize(this.getPreferredSize());
 	}

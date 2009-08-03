@@ -6,7 +6,7 @@ import java.util.prefs.BackingStoreException;
 
 import de.bielefeld.uni.cebitec.cav.controller.DataModelController;
 import de.bielefeld.uni.cebitec.cav.controller.GuiController;
-import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
+import de.bielefeld.uni.cebitec.cav.utils.CgcatPrefs;
 
 /***************************************************************************
  *   Copyright (C) 2007 by Peter Husemann                                  *
@@ -29,12 +29,12 @@ import de.bielefeld.uni.cebitec.cav.utils.CAVPrefs;
  ***************************************************************************/
 
 /**
- * This is the class which is used to start the whole program.
+ * This is the class which is used to start r2cat.
  * 
  * @author Peter Husemann
  */
-public class ComparativeAssemblyViewer {
-	public static CAVPrefs preferences;
+public class R2cat {
+	public static CgcatPrefs preferences;
 
 	public static DataModelController dataModelController;
 
@@ -46,7 +46,7 @@ public class ComparativeAssemblyViewer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		preferences = new CAVPrefs();
+		preferences = new CgcatPrefs();
 		dataModelController = new DataModelController();
 		guiController = new GuiController();
 
@@ -102,7 +102,7 @@ public class ComparativeAssemblyViewer {
 		}
 	}
 
-	public static CAVPrefs getPrefs() {
+	public static CgcatPrefs getPrefs() {
 		return preferences;
 	}
 

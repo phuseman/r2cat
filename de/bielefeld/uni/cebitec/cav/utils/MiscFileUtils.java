@@ -153,4 +153,25 @@ public class MiscFileUtils {
 		return filename;
 	}
 
+	/**
+	 * Checks is a file has the given extension. If not, replace the existing one.
+	 * @param file File object to replace extension
+	 * @param extension extension chosen. 
+	 * @return
+	 */
+	public static File enforceExtension(File file, String extension) {
+		if (!file.getName().endsWith(extension)) {
+			String fileStr = file.getAbsolutePath();
+			int lastDot=fileStr.lastIndexOf('.');
+			if(lastDot>0) {
+				fileStr=fileStr.substring(0, lastDot);
+			}
+			// add a dot if it is not the first character
+			if(!extension.startsWith(".")) {
+				extension = "." + extension;
+			}
+			file = new File(fileStr + extension);
+		}
+		return file;
+	}
 }

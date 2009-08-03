@@ -26,6 +26,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 
@@ -47,13 +48,51 @@ public class FastaFileReader {
 		sequences = new Vector<DNASequence>();
 	}
 
+	
+	/**
+	 * Opens the file and tries to determine quickly if this is a fasta file.
+	 * Checks the first 100 non comment lines for an ident line.
+	 * @return
+	 */
+	public boolean isFastaQuickCheck() throws IOException {
+		BufferedReader in = new BufferedReader(new FileReader(source));
+
+		Pattern commentLine	= Pattern.compile("^\\s*#");
+		Pattern identLine = Pattern.compile("^>\\s?.+");
+
+		
+		int nonCommentLines=0;
+		String line;
+		
+		while(nonCommentLines<100 && in.ready()) {
+			line = in.readLine();
+			if(!commentLine.matcher(line).lookingAt()) {
+				nonCommentLines++;
+			}
+			if(identLine.matcher(line).lookingAt()) {
+				in.close();
+				return true;
+			}
+		}
+
+		in.close();
+		return false;
+
+		
+	}
+	
 	/**
 	 * Scans the contents of the file. Returns if a line ">id" was present
 	 * @param createCharArray
 	 * @return boolean Id's were found
 	 * @throws IOException
+	 * @throws NoFastaFileException 
 	 */
 	public boolean scanContents(boolean createCharArray) throws IOException {
+		if (!isFastaQuickCheck()) {
+			throw new IOException("File seems to be not a fasta file");
+		}
+		
 		BufferedReader in = null;
 		int character = 0;
 
@@ -187,7 +226,7 @@ public class FastaFileReader {
 	 * @return char array containing all dna sequences of the fasta file
 	 * @throws IOException
 	 */
-	public char[] getCharArray() throws IOException {
+	public char[] getCharArray() throws IOException  {
 		checkInitialisation();
 		return chararray;
 	}
@@ -207,7 +246,7 @@ public class FastaFileReader {
 	 * @return the bounds of all sequences in the char array
 	 * @throws IOException
 	 */
-	public int[] getOffsetsArray() throws IOException {
+	public int[] getOffsetsArray() throws IOException  {
 		checkInitialisation();
 
 		int[] out = new int[offsetsInCharArray.size() + 1];
@@ -241,7 +280,7 @@ public class FastaFileReader {
 	 * @return true if the operation was successful
 	 * @throws IOException
 	 */
-	public boolean writeSequence(String id, BufferedWriter output) throws IOException {
+	public boolean writeSequence(String id, BufferedWriter output) throws IOException  {
 		checkInitialisation();
 		//go through all sequences and find the one with the same id
 		for (int i = 0; i < sequences.size(); i++) {
@@ -263,7 +302,7 @@ public class FastaFileReader {
 	 * @return failure or success
 	 * @throws IOException
 	 */
-	public boolean writeReverseComplementSequence(String id, BufferedWriter output) throws IOException {
+	public boolean writeReverseComplementSequence(String id, BufferedWriter output) throws IOException  {
 		checkInitialisation();
 		//go through all sequences and find the one with the same id
 		for (int i = 0; i < sequences.size(); i++) {
@@ -309,12 +348,12 @@ public class FastaFileReader {
 
 	
 	/**
-	 * Returnes if an id is among those in this fasta file
+	 * Returns if an id is among those in this fasta file
 	 * @param id id to search for
 	 * @return existent or not
 	 * @throws IOException
 	 */
-	public boolean containsId(String id) throws IOException {
+	public boolean containsId(String id) throws IOException  {
 		checkInitialisation();
 		return offsetsInCharArray.containsKey(id);
 	}

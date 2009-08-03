@@ -4,6 +4,7 @@
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
     <Property name="title" type="java.lang.String" value="Phylogenetic Comparative Assembly"/>
+    <Property name="locationByPlatform" type="boolean" value="true"/>
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[600, 400]"/>
     </Property>
@@ -27,12 +28,17 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="1" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" attributes="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="loadButton" min="-2" max="-2" attributes="0"/>
+                  <Component id="saveButton" alignment="0" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="progressPanel" alignment="1" max="32767" attributes="0"/>
                   <Component id="phylogeneticTreePanel" alignment="0" max="32767" attributes="0"/>
                   <Component id="referenceGenomesPanel" alignment="0" min="-2" max="32767" attributes="0"/>
-                  <Component id="progressPanel" alignment="1" max="32767" attributes="0"/>
                   <Component id="contigPanel" alignment="0" max="32767" attributes="0"/>
                   <Component id="projectDirPanel" alignment="1" max="32767" attributes="0"/>
               </Group>
@@ -42,16 +48,26 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
-              <Component id="projectDirPanel" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="contigPanel" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="referenceGenomesPanel" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="phylogeneticTreePanel" min="-2" max="-2" attributes="1"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="progressPanel" max="32767" attributes="1"/>
+          <Group type="102" attributes="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <Component id="projectDirPanel" min="-2" pref="46" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="contigPanel" min="-2" pref="46" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="referenceGenomesPanel" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="phylogeneticTreePanel" min="-2" pref="68" max="-2" attributes="1"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="progressPanel" max="32767" attributes="1"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="loadButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="saveButton" min="-2" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -64,6 +80,9 @@
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
             <TitledBorder title="Project Directory"/>
           </Border>
+        </Property>
+        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[160, 47]"/>
         </Property>
       </Properties>
 
@@ -93,6 +112,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Project Directory"/>
             <Property name="toolTipText" type="java.lang.String" value="Select a directory where several files can be stored"/>
+            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[50, 20]"/>
+            </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="buProjectDir">
@@ -112,6 +134,9 @@
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
             <TitledBorder title="Contigs"/>
           </Border>
+        </Property>
+        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[160, 47]"/>
         </Property>
       </Properties>
 
@@ -150,6 +175,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Contigs"/>
             <Property name="toolTipText" type="java.lang.String" value="Select a FASTA file containing the contigs"/>
+            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[50, 20]"/>
+            </Property>
           </Properties>
         </Component>
       </SubComponents>
@@ -161,20 +189,28 @@
             <TitledBorder title="Phylogenetic Tree (optional)"/>
           </Border>
         </Property>
+        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[160, 82]"/>
+        </Property>
       </Properties>
 
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="1" attributes="0">
+              <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="phylogeneticTreeLabel" alignment="0" pref="503" max="32767" attributes="0"/>
-                      <Component id="tfPhylogeneticTree" alignment="0" pref="503" max="32767" attributes="2"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" alignment="1" attributes="0">
+                          <Component id="tfPhylogeneticTree" pref="509" max="32767" attributes="2"/>
+                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <Component id="buPhylogeneticTree" min="-2" pref="138" max="-2" attributes="1"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="phylogeneticTreeLabel" pref="503" max="32767" attributes="0"/>
+                          <EmptySpace min="-2" pref="162" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
-                  <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Component id="buPhylogeneticTree" min="-2" pref="138" max="-2" attributes="1"/>
-                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -185,7 +221,7 @@
                       <Component id="tfPhylogeneticTree" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="buPhylogeneticTree" alignment="3" min="-2" pref="21" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="14" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="phylogeneticTreeLabel" min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -196,6 +232,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Phylogenetic tree in Newick format"/>
             <Property name="toolTipText" type="java.lang.String" value="Enter the path to a phylogenetic tree in Newick format"/>
+            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[50, 20]"/>
+            </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="buPhylogeneticTree">
@@ -212,7 +251,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Dialog" size="12" style="0"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Note: The species name must be the name of the above files, without ending."/>
+            <Property name="text" type="java.lang.String" value="Note: The species name in the tree must be the name of the above files, without ending."/>
           </Properties>
         </Component>
       </SubComponents>
@@ -223,6 +262,9 @@
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
             <TitledBorder title="Progress"/>
           </Border>
+        </Property>
+        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[160, 158]"/>
         </Property>
       </Properties>
 
@@ -235,12 +277,8 @@
                       <Component id="progressBar" alignment="0" pref="585" max="32767" attributes="0"/>
                       <Component id="progressScrollPane" alignment="0" pref="585" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="runButton" min="-2" max="-2" attributes="0"/>
-                      <Component id="saveButton" alignment="1" min="-2" max="-2" attributes="0"/>
-                      <Component id="loadButton" alignment="1" min="-2" max="-2" attributes="0"/>
-                  </Group>
+                  <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                  <Component id="runButton" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -249,14 +287,8 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="progressScrollPane" alignment="1" pref="126" max="32767" attributes="0"/>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="runButton" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace pref="42" max="32767" attributes="0"/>
-                          <Component id="loadButton" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="saveButton" min="-2" max="-2" attributes="0"/>
-                      </Group>
+                      <Component id="progressScrollPane" alignment="1" pref="113" max="32767" attributes="0"/>
+                      <Component id="runButton" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="progressBar" min="-2" max="-2" attributes="0"/>
@@ -298,24 +330,6 @@
             <Property name="stringPainted" type="boolean" value="true"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="saveButton">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Save"/>
-            <Property name="toolTipText" type="java.lang.String" value="Saves a the given information to a file"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="saveProject"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JButton" name="loadButton">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Load"/>
-            <Property name="toolTipText" type="java.lang.String" value="Load a treecat project from file"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="loadProject"/>
-          </Events>
-        </Component>
       </SubComponents>
     </Container>
     <Container class="javax.swing.JPanel" name="referenceGenomesPanel">
@@ -330,19 +344,19 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
+              <Component id="referenceGenomesScrollPane" alignment="0" pref="677" max="32767" attributes="0"/>
+              <Group type="102" alignment="1" attributes="0">
                   <EmptySpace pref="531" max="32767" attributes="0"/>
                   <Component id="buReferences" min="-2" pref="134" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
-              <Component id="referenceGenomesScrollPane" alignment="0" pref="677" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
-                  <Component id="buReferences" min="-2" pref="15" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="buReferences" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
                   <Component id="referenceGenomesScrollPane" pref="98" max="32767" attributes="0"/>
               </Group>
           </Group>
@@ -391,5 +405,23 @@
         </Container>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JButton" name="loadButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Load"/>
+        <Property name="toolTipText" type="java.lang.String" value="Load a treecat project from file"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="loadProject"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="saveButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Save"/>
+        <Property name="toolTipText" type="java.lang.String" value="Saves a the given information to a file"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="saveProject"/>
+      </Events>
+    </Component>
   </SubComponents>
 </Form>
