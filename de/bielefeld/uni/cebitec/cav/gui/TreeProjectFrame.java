@@ -21,6 +21,7 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -369,11 +370,14 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 				progressBar.setValue(0);
 				progressBar.setIndeterminate(false);
 				runButton.setEnabled(false);
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
 			} else if ((SwingWorker.StateValue) evt.getNewValue() == SwingWorker.StateValue.DONE) {
 				// progressBar.setValue(100);
 				progressBar.setIndeterminate(false);
 				progress.setCaretPosition(progress.getDocument().getLength());
 				runButton.setEnabled(true);
+				setCursor(null);
 			}
 		}
 	}

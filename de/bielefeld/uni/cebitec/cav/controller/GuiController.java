@@ -36,6 +36,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
 import javax.swing.ProgressMonitor;
 import javax.swing.filechooser.FileFilter;
 
@@ -241,9 +242,16 @@ public class GuiController {
 	}
 	
 	public void showAbout() {
-		JOptionPane.showMessageDialog(mainWindow, "This tool was developed by\n" +
-				"Peter Husemann\n" +
-				"phuseman at cebitec dot uni-bielefeld.de","About",JOptionPane.PLAIN_MESSAGE);
+		JTextPane about = new JTextPane();
+		about.setText("This tool was developed by Peter Husemann\n" +
+				" phuseman at cebitec dot uni-bielefeld.de\n\n" +
+				"The source code is available under GPL.\n" +
+				"Thanks to the FreeHEP project for the image (vector & bitmap) export code.\n" +
+				"One class for svg output is from the Xerces Project\n" +
+				"and is licensed under the Apache Software License");
+		
+		JOptionPane.showMessageDialog(mainWindow, about
+				,"About",JOptionPane.PLAIN_MESSAGE);
 	}
 
 	public MainWindow getMainWindow() {
