@@ -31,12 +31,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
 import javax.swing.ProgressMonitor;
 import javax.swing.filechooser.FileFilter;
 
@@ -242,15 +242,18 @@ public class GuiController {
 	}
 	
 	public void showAbout() {
-		JTextPane about = new JTextPane();
-		about.setText("This tool was developed by Peter Husemann\n" +
-				" phuseman at cebitec dot uni-bielefeld.de\n\n" +
-				"The source code is available under GPL.\n" +
-				"Thanks to the FreeHEP project for the image (vector & bitmap) export code.\n" +
-				"One class for svg output is from the Xerces Project\n" +
-				"and is licensed under the Apache Software License");
+		JEditorPane about = new JEditorPane();
+		URL aboutUrl = Thread.currentThread().getContextClassLoader().getResource(
+		"extra/about.html");
+		try {
+			about.setPage(aboutUrl);
+		} catch (IOException e) {
+			about.setText("Sorry, could not read about.html");
+		}
 		
-		JOptionPane.showMessageDialog(mainWindow, about
+		about.setPreferredSize(new Dimension(600,400));
+
+		JOptionPane.showMessageDialog(mainWindow, new JScrollPane(about)
 				,"About",JOptionPane.PLAIN_MESSAGE);
 	}
 
