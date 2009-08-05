@@ -602,37 +602,30 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 	}// GEN-LAST:event_addReferenceFile
 
 	private void loadProject(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_loadProject
-		File load = MiscFileUtils.chooseFile(this, "Select a treecat project file to load", lastDir,true, new CustomFileFilter(".tcp","treecat project"));
-		if(load!=null && load.canRead()) {
-		try {
-			loadProjectFromFile(load);
-		} catch (IOException e) {
-			errorAlert("Could not open file.");
-		}
-		} else {
-			errorAlert("Could not open file.");
+		File load = MiscFileUtils.chooseFile(this,
+				"Select a treecat project file to load", lastDir, true,
+				new CustomFileFilter(".tcp", "treecat project"));
+		if (load != null) {
+			try {
+				loadProjectFromFile(load);
+			} catch (IOException e) {
+				errorAlert("Could not open file " + load.getName());
+			}
 		}
 	}// GEN-LAST:event_loadProject
 
 	private void saveProject(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_saveProject
-		
-		File save = MiscFileUtils.chooseFile(this, "Select a tree project file to save", lastDir,false, new CustomFileFilter(".tcp","treecat project"));
-		save = MiscFileUtils.enforceExtension(save,".tcp");
-		
-		if(save!=null) {
-			if(!save.exists() || save.canWrite()) {
-				try {
-					writeProjectToFile(save);
-				} catch (IOException e) {
-					errorAlert("Could not write to file");
-				}
-			} else {
-				errorAlert("Could not write to file");
+		File save = MiscFileUtils.chooseFile(this,
+				"Select a treecat project file to save", lastDir, false,
+				new CustomFileFilter(".tcp", "treecat project"));
+		if (save != null) {
+			save = MiscFileUtils.enforceExtension(save, ".tcp");
+			try {
+				writeProjectToFile(save);
+			} catch (IOException e) {
+				errorAlert("Could not write to file " + save.getName());
 			}
-			
 		}
-		
-		
 	}// GEN-LAST:event_saveProject
 
 	private void writeProjectToFile(File f) throws IOException {
