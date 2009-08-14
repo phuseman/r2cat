@@ -104,7 +104,10 @@ public class TreebasedContigSorter {
 		neato = null;
 		
 //		try {
-//			csvWriter=new BufferedWriter(new FileWriter(new File("/homes/phuseman/compassemb/treebased/distances.csv")));
+//			csvWriter=new BufferedWriter(new FileWriter(new File("/homes/phuseman/compassemb/treebased/distances20090810.csv")));
+//			
+//			csvWriter.write("nucDist,rankDist, treeDist, score\n");
+//			
 //		} catch (IOException e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
@@ -433,13 +436,20 @@ public class TreebasedContigSorter {
 //					int aNumber = Integer.parseInt(a);
 //					int bNumber = Integer.parseInt(b);
 //
-//					if ((aNumber == 26 && bNumber == 52) 
-//							|| (aNumber == 52 && bNumber == 26)) {
-//						if ((distanceWeight
-//						* (double) first.qhits * (double) second.qhits) > 10.) {
-//						System.out.println(treeDistance+" " +first.ap.getTarget().getId() + " " + first.ap + " " + second.ap  ); 
-//						}
-//					}
+////					if ((aNumber == 26 && bNumber == 52) 
+////							|| (aNumber == 52 && bNumber == 26)) {
+////						if ((distanceWeight
+////						* (double) first.qhits * (double) second.qhits) > 10.) {
+////						System.out.println(treeDistance+" " +first.ap.getTarget().getId() + " " + first.ap + " " + second.ap  ); 
+////						}
+////					}
+//					
+//					
+//					csvWriter.write(String.format((Locale)null,"%d, %d, %f, %f\n",
+//							((Integer)distance),
+//							Math.abs(aNumber - bNumber),
+//							treeDistance,
+//							distanceWeight));
 //					
 ////					if(Math.abs(aNumber - bNumber)<2) {
 ////					csvWriter.write(((Integer)distance).toString()+"\n");

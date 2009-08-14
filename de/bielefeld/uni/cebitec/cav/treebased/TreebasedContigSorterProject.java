@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Vector;
 
 import javax.naming.CannotProceedException;
@@ -514,6 +515,64 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 	}
 
 	/**
+	 * 
+	 */
+	private void normalizeTreeDistances() {
+		// TODO check if all values are NAN
+		// normalize the tree distances
+		double min = Double.MAX_VALUE;
+		double max = Double.MIN_VALUE;
+		// find minimum and maximum
+		for (int i = 0; i < contigsToReferencesTreeDistanceList.size(); i++) {
+			if (contigsToReferencesTreeDistanceList.get(i) != Double.NaN) {
+				if (contigsToReferencesTreeDistanceList.get(i) < min) {
+					min = contigsToReferencesTreeDistanceList.get(i);
+				}
+				if (contigsToReferencesTreeDistanceList.get(i) > max) {
+					max = contigsToReferencesTreeDistanceList.get(i);
+				}
+	
+			}
+		}
+	
+		// failsafe. if the minimum gets negative, move all the values such that
+		// the minimum will be around 0.1
+		double offset = 0;
+		if (min < 0) {
+			offset = -min + 0.1;
+			min += 0.1;
+		}
+	
+		// normalize values such that the closest leaf has distance 1
+		double value = 0;
+		double oldvalue = 0;
+		for (int i = 0; i < contigsToReferencesTreeDistanceList.size(); i++) {
+			if (contigsToReferencesTreeDistanceList.get(i) == Double.NaN) {
+				// if the value is not known. set it to the maximum distance
+				value = max;
+				reportProgress(-1, "TreeDist for " 
+						+ references.get(i).getName() 
+						+ " not known. Setting to max occuring distance");
+			} else {
+				value = contigsToReferencesTreeDistanceList.get(i);
+			}
+			
+			oldvalue=value;
+			
+			value += offset;
+			// normalize
+			value /= min;
+			contigsToReferencesTreeDistanceList.set(i, value);
+			reportProgress(-1, String.format((Locale)null, 
+					"TreeDist: normalized from %.3f to %.3f for %s", 
+					oldvalue, value,
+					MiscFileUtils.getFileNameWithoutExtension(references.get(i))));
+
+		}
+		reportProgress(-1, "TreeDist: The lowest tree distance is now 1");
+	}
+
+	/**
 	 * Tries to generate the matches between contigs and each reference genome.
 	 * After that the results are cached onto the file system. The next time
 	 * this method is called the cached results are used, if possible.
@@ -687,45 +746,7 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 			contigsToReferencesMatchesList.get(i).generateNewStatistics();
 		}
 
-		// TODO check if all values are NAN
-		// normalize the tree distances
-		double min = Double.MAX_VALUE;
-		double max = Double.MIN_VALUE;
-		// find minimum and maximum
-		for (int i = 0; i < contigsToReferencesTreeDistanceList.size(); i++) {
-			if (contigsToReferencesTreeDistanceList.get(i) != Double.NaN) {
-				if (contigsToReferencesTreeDistanceList.get(i) < min) {
-					min = contigsToReferencesTreeDistanceList.get(i);
-				}
-				if (contigsToReferencesTreeDistanceList.get(i) > max) {
-					max = contigsToReferencesTreeDistanceList.get(i);
-				}
-
-			}
-		}
-
-		// failsafe. if the minimum gets negative, move all the values such that
-		// the minimum will be around 0.1
-		double offset = 0;
-		if (min < 0) {
-			offset = -min + 0.1;
-			min += 0.1;
-		}
-
-		// normalize values such that the closest leaf has distance 1
-		double value = 0;
-		for (int i = 0; i < contigsToReferencesTreeDistanceList.size(); i++) {
-			if (contigsToReferencesTreeDistanceList.get(i) == Double.NaN) {
-				// if the value is not known. set it to the maximum distance
-				value = max;
-			} else {
-				value = contigsToReferencesTreeDistanceList.get(i);
-			}
-			value += offset;
-			// normalize
-			value /= min;
-			contigsToReferencesTreeDistanceList.set(i, value);
-		}
+		normalizeTreeDistances();
 
 		return success;
 
