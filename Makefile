@@ -4,7 +4,7 @@ OBJECTS := $(patsubst %.java,%.class,$(shell find . -iname '*.java'))
 JAVA := javac 
 
 R2CAT_JARFILE := r2cat.jar
-CGCAT_JARFILE := cgcat.jar
+CGCAT_JARFILE := cg-cat.jar
 TREE_JARFILE := treecat.jar
 
 
