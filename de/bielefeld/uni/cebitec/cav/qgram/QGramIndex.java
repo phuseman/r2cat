@@ -54,6 +54,18 @@ public class QGramIndex {
 		coder = new QGramCoder(qLength);
 	}
 
+	
+	/**
+	 * Gives the heap memory consumption in MByte. Does not call the garbage collector before!
+	 * @return
+	 */
+	public static int getHeapMemConsumption() {
+		return (int) Math.ceil((
+						(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())
+						/ (1024.*1024.)));
+	}
+
+	
 	/**
 	 * Generates a q-gram index. In the end you'll have one array (hashTable)
 	 * with pointers for each q-gram to another array (occurrencesTable) where
@@ -64,9 +76,14 @@ public class QGramIndex {
 	 * In a second run the occurrenceTable is filled. The q-Gram codes are
 	 * cached, to be used again in the second step. <br>
 	 * 
+	 * <br>Memory consumption<br>
+	 * Besides the memory of the string to be indexed (n bytes) 4xn bytes will be occupied for the
+	 * occurrenceTable. 16 MByte will be used for the hashIndex, as well as the tmparray.
+	 * Another 4 x n Bytes will be used for the code cache. This could be avoided but it would make
+	 * the indexing slower.<br>Together: 9 n Bytes + 32 Mbyte
+	 * 
 	 */
 	public void generateIndex(FastaFileReader fastaFileReader) {
-
 		try {
 			input = fastaFileReader.getCharArray();
 			offsetsInInput = fastaFileReader.getOffsetsArray();
@@ -79,11 +96,15 @@ public class QGramIndex {
 			e.printStackTrace();
 		}
 
+		// for q=11 this occupies 16 MByte
 		hashTable = new int[coder.numberOfPossibleQGrams()+1];
 
 		// cache the sucessivly computed codes.
 		// so that they can be reused on the second run.
+		//!!this costs 4 Bytes per input character!!
+		//on the other hand this saves time.
 		int[] codecache = new int[input.length];
+		
 
 		Timer t = Timer.getInstance();
 		// computeBucketBoundaries
@@ -120,11 +141,14 @@ public class QGramIndex {
 		}
 
 		this.reportProgress(0, "counting the qgrams took:" + t.restartTimer());
-
+		this.reportProgress(0, "current heap memory usage: " + getHeapMemConsumption() + " MB");
+		
+		
 		int offset = 0;
 		int lastValue = 0;
 
 		// tmparray is used to fill the occurrences table
+		//occupies 16 MByte heap memory
 		int[] tmparray = new int[hashTable.length];
 
 		// compute the pointers for the hashTable
@@ -143,7 +167,10 @@ public class QGramIndex {
 
 		this.reportProgress(0, "accumulation and copying took:"
 				+ t.restartTimer());
-
+		this.reportProgress(0, "current heap memory usage: " + getHeapMemConsumption() + " MB");
+		
+		
+		// approximately 4bytes per input character
 		occurrenceTable = new int[offset];
 
 		// collectQGramIndices
@@ -170,8 +197,11 @@ public class QGramIndex {
 		}
 
 		tmparray=null;
+                codecache=null;
+
 		this.reportProgress(0, "filling in the qgram occurrences took:"
 				+ t.stopTimer());
+		this.reportProgress(0, "current heap memory usage: " + getHeapMemConsumption() + " MB");
 		indexGenerated = true;
 	}
 

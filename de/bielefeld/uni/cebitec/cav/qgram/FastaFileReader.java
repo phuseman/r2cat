@@ -58,7 +58,7 @@ public class FastaFileReader {
 		BufferedReader in = new BufferedReader(new FileReader(source));
 
 		Pattern commentLine	= Pattern.compile("^\\s*#");
-		Pattern identLine = Pattern.compile("^>\\s?.+");
+		Pattern identLine = Pattern.compile("^>\\s*.+");
 
 		
 		int nonCommentLines=0;
@@ -108,7 +108,7 @@ public class FastaFileReader {
 		
 		StringBuilder sb = new StringBuilder();
 		offsetsInCharArray = new HashMap<String, Integer>();
-		try {
+//		try {
 			in = new BufferedReader(new FileReader(source), 1024 * 16);
 
 			if (createCharArray) {
@@ -127,8 +127,14 @@ public class FastaFileReader {
 				if (character == (int) '>') {
 					identLine = in.readLine();
 					
+					//remove all leading white spaces
+					identLine.replaceAll("^\\s+", "");
+										
 					if(identLine.matches("^.+$")) {
 						idsFound=true;
+					} else {
+						throw new IOException("Empty Identifier (\">\") in file "+ source.getName());
+
 					}
 
 					if (!firstSequence) {
@@ -137,6 +143,8 @@ public class FastaFileReader {
 //						System.out.println(" lastSequenceLength="
 //								+ lastSequenceLength);
 
+						//TODO: check if the id was not present until now
+						
 						sequences.add(new DNASequence(source, lastSequenceId,
 								lastSequenceDescription, lastSequenceLength));
 					} else {
@@ -160,12 +168,16 @@ public class FastaFileReader {
 
 					} // end: id/description separation
 
-					if (createCharArray) {
-						// remember starting positions in the char array
-						// the length of the stringbuffer is the same as the
-						// offset of the next sequence
-						offsetsInCharArray.put(lastSequenceId, sb.length());
+					// remember starting positions in the char array
+					// the length of the stringbuffer is the same as the
+					// offset of the next sequence
+					if(!offsetsInCharArray.containsKey(lastSequenceId)) {
+					offsetsInCharArray.put(lastSequenceId, sb.length());
+					} else {
+						//throw exeption if one identifier is not unique! (this is not allowed according to the fasta standard)
+						throw new IOException("Identifier not unique: " + lastSequenceId + " in file "+ source.getName());
 					}
+					
 
 				}// end: read id line
 				else if (Character.isLetter((char) character)) {
@@ -185,8 +197,14 @@ public class FastaFileReader {
 
 			if (idsFound) {
 			if (createCharArray) {
-				sb.trimToSize();
-				chararray = sb.toString().toCharArray();
+				// this is not necessary, I guess.
+//				sb.trimToSize();
+				
+				// this should be the same as below, but uses less heap memory!
+//				chararray = sb.toString().toCharArray();
+				
+				chararray = new char[sb.length()];
+				sb.getChars( 0, sb.length(), chararray, 0 );
 			}
 
 			lastSequenceLength = validCharCounter - lastValidCharCounter;
@@ -209,14 +227,16 @@ public class FastaFileReader {
 			
 			
 			
-		} finally {
+//		} finally {
 			if (in != null) {
 				in.close();
 			}
-		}
+//		}
 		
 		return idsFound;
 	}
+
+
 
 	/**
 	 * Gives all dna sequences of a fasta file as a char array. there are no

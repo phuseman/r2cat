@@ -28,6 +28,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -62,7 +64,7 @@ import de.bielefeld.uni.cebitec.cav.utils.Timer;
  * @author phuseman
  * 
  */
-public class MatchDialog extends JDialog implements ActionListener,
+public class MatchDialog extends JDialog implements ActionListener, WindowListener,
 		PropertyChangeListener, AbstractProgressReporter{
 
 	private Preferences prefs;
@@ -91,16 +93,16 @@ public class MatchDialog extends JDialog implements ActionListener,
 	class QGramMatcherTask extends SwingWorker<AlignmentPositionsList, String> {
 		@Override
 		protected AlignmentPositionsList doInBackground() {
-			try {
-			
-			progressBar.setValue(0);
-			progressBar.setIndeterminate(true);
-			progress.setText("");
+			try { // catches OutOfMemoryError s
 
-			Timer t = Timer.getInstance();
-			t.startTimer();
+				progressBar.setValue(0);
+				progressBar.setIndeterminate(true);
+				progress.setText("");
 
-			try {
+				Timer t = Timer.getInstance();
+				t.startTimer();
+
+				try { // catches io exceptions
 
 					FastaFileReader targetFasta = new FastaFileReader(target);
 
@@ -115,7 +117,7 @@ public class MatchDialog extends JDialog implements ActionListener,
 						progress.append(" ..." + t.stopTimer() + "\n");
 					} else {
 						progress
-								.append("Error: Target file contains no id line (>idtag ...)");
+								.append("Error: No valid id line (>idtag ...) found within the first 100 lines");
 						setEndMatching();
 						return null;
 					}
@@ -131,7 +133,7 @@ public class MatchDialog extends JDialog implements ActionListener,
 
 					} else {
 						progress
-								.append("Error: Query file contains no id line (>idtag ...)");
+								.append("Error: No valid id line (>idtag ...) found within the first 100 lines");
 						setEndMatching();
 						return null;
 					}
@@ -181,46 +183,52 @@ public class MatchDialog extends JDialog implements ActionListener,
 						progressBar.setIndeterminate(true);
 
 					}
-			 
-			
-				
-				
-			progress.append("Generating q-Gram Index\n");
-			t.startTimer();
-			QGramIndex qi = new QGramIndex();
-			qi.register(MatchDialog.this);
-			qi.generateIndex(targetFasta);
-			progress.append(" Generating q-Gram Index took: "+t.stopTimer()+"\n");
 
-			System.gc();
+					progress.append("Generating q-Gram Index\n");
+					t.startTimer();
+					QGramIndex qi = new QGramIndex();
+					qi.register(MatchDialog.this);
+					qi.generateIndex(targetFasta);
+					progress.append(" Generating q-Gram Index took: "
+							+ t.stopTimer() + "\n");
 
-			
-			progressBar.setIndeterminate(false);
+					System.gc();
 
-			progress.append("Matching:\n");
-			t.startTimer();
-			QGramFilter qf = new QGramFilter(qi, queryFasta);
-			qf.register(MatchDialog.this);
-			result = qf.match();
-			progress.append("Matching took: "+t.stopTimer()+"\n");
+					progressBar.setIndeterminate(false);
 
-			progress.append("Total time: "+t.stopTimer()+"\n");
-			progressBar.setValue(100);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			progress.append("Done!\n");
+					progress.append("Matching:\n");
+					t.startTimer();
+					QGramFilter qf = new QGramFilter(qi, queryFasta);
+					qf.register(MatchDialog.this);
+					result = qf.match();
+					progress.append("Matching took: " + t.stopTimer() + "\n");
 
-			setEndMatching();
-			return result;
-			
-			//Catch if the memory is exhausted. If so display a message and return
-			} catch (OutOfMemoryError e) {
-				errorAlert("The heap memory was exhausted.\nTry to start this program with '-Xmx400m'.");
-				progress.append(e.toString());
+					progress.append("Total time: " + t.stopTimer() + "\n");
+					progressBar.setValue(100);
+					
+					progress.append("Done!\n");
+
+				} catch (IOException e) {
+					progress.append("\n"+ e.getMessage()+"\n");
+					errorAlert(e.getMessage());
+				}
+
+
 				setEndMatching();
-				
+				return result;
+
+				// Catch if the memory is exhausted. If so display a message and
+				// return
+			} catch (OutOfMemoryError e) {
+				progressBar.setIndeterminate(false);
+				errorAlert("Sorry, the maximal heap memory was exhausted.\n"
+						+ "Please contact the author how to start the program with more memory.\n"
+						+ "Hint: '-Xmx400m' increases the heap memory to 400MB");
+
+				progress.append(e.toString());
+
+				setEndMatching();
+
 				return null;
 			}
 		}
@@ -233,7 +241,12 @@ public class MatchDialog extends JDialog implements ActionListener,
 
 		}
 
+		/* (non-Javadoc)
+		 * @see javax.swing.SwingWorker#done()
+		 */
 		public void done() {
+			//if the thread was not cancelled get and check the result.
+			if(!isCancelled()) {
 			try {
 				result = this.get();
 				if (result!=null) {
@@ -262,13 +275,15 @@ public class MatchDialog extends JDialog implements ActionListener,
 				;
 			}
 		}
+		}
 	}
 
 	public MatchDialog(Frame parent) {
 		super(parent,
 				"Find matching between queries (contigs) and a  target (reference genome)",true);
 		this.setLayout(new BorderLayout());
-
+		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		this.addWindowListener(this);
 		// not used at the moment
 		prefs = CgcatPrefs.getPreferences();
 		init();
@@ -517,6 +532,48 @@ public class MatchDialog extends JDialog implements ActionListener,
 			progress.append(comment+"\n");
 			progress.setCaretPosition(progress.getDocument().getLength());
 		}
+	}
+
+
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		//cancel the matcher task when the window is closed
+		// this calls cancel but does not "kill" the thread.
+		// TODO: stop the execution of the thread completely
+		if(this.matcherTask != null) {
+			matcherTask.cancel(true);
+		}
+	
+	}
+	
+	@Override
+	public void windowActivated(WindowEvent e) {
+		//I need only the closing event
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+		//I need only the closing event
+	}
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		//I need only the closing event
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		//I need only the closing event
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		//I need only the closing event
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+		//I need only the closing event
 	}
 
 }

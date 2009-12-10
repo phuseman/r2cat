@@ -122,7 +122,7 @@ public class ContigSorter implements Runnable {
 		int qhits = ap.getNumberOfQHits();
 		// failsafe. if qhits are not set, default to 1. the algorithm should
 		// work anyway
-		if (qhits >= 0) {
+		if (qhits <= 0) {
 			qhits = 1;
 		}
 
