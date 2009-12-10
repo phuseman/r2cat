@@ -222,6 +222,7 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 			} catch (OutOfMemoryError e) {
 				progressBar.setIndeterminate(false);
 				errorAlert("Sorry, the maximal heap memory was exhausted.\n"
+						+ "Probably the reference genome was to big.\n"
 						+ "Please contact the author how to start the program with more memory.\n"
 						+ "Hint: '-Xmx400m' increases the heap memory to 400MB");
 

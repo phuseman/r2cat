@@ -103,7 +103,11 @@ public class AlignmentTableModel extends AbstractTableModel implements Observer 
 					.getSize();
 			break;
 		case 8:
-			out = alPosList.getAlignmentPositionAt(rowIndex).getNumberOfQHits();
+			if(alPosList.getAlignmentPositionAt(rowIndex).getNumberOfQHits() > 0) {
+				out = alPosList.getAlignmentPositionAt(rowIndex).getNumberOfQHits();
+			} else {
+				out = "na";
+			}
 			break;
 
 		default:
