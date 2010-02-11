@@ -37,6 +37,9 @@ $(CGCAT_JARFILE):all
 META-INF/services/org.freehep.util.export.ExportFileType 
 	jarsigner -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(CGCAT_JARFILE) cgcat
 
+zipsources:
+	zip -9 sources.zip Manifest_*.txt `find . -iname '*.java'` images/*.png extra/* \
+	META-INF/services/org.freehep.util.export.ExportFileType LICENSE.txt ReadmeLicenses.txt
 
 
 

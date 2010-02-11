@@ -6,21 +6,22 @@ my $reference;
 my $contigs;
 
 if (@ARGV != 2) {
-        die "usage: $0 <references.fasta> <contigs.fasta>\n" .
-        "\tMatches the contigs on the references using BLAST.\n" .
-				"\t(BLAST as well as the perl module Bio::SeqIO have to be installed\n\tand the command \'blastall\' has to be available.)\n" .
-        "\tThe BLAST result is afterwards reformated such that it can be loaded within r2cat.\n" .
-        "\thttp://bibiserv.techfak.uni-bielefeld.de/r2cat\n";
+die "usage: $0 <contigs.fasta> <references.fasta> \n" .
+	"\tMatches the contigs on the references using BLAST.\n" .
+	"\t(BLAST as well as the perl module Bio::SeqIO have to be installed\n" .
+	"\tand the command \'blastall\' has to be available.)\n" .
+	"\tThe BLAST result is afterwards reformated such that it can be loaded within r2cat.\n" .
+	"\thttp://bibiserv.techfak.uni-bielefeld.de/r2cat\n";
 } else {
-	$reference=$ARGV[0];	# fasta filename of the reference genome(s)
-	$contigs=$ARGV[1];	#fasta filename of the contigs file
+	$contigs=$ARGV[0];	# FASTA filename of the contigs file
+	$reference=$ARGV[1];	# FASTA filename of the reference genome(s)
 }
 
-#create an artificial filename to put the results in. consists of both filenames
-my $outputfilename = $reference . "-" . $contigs;
+#Create an artificial filename to put the results in. consists of both filenames.
+my $outputfilename = $contigs . "-" . $reference;
 $outputfilename =~ s/[^a-z,A-Z,0-9,-]//g;
 
-#start the matching. first create a database for blast
+#Start the matching. First create a database for blast..
 if (! -e "$reference.nsq") {
 	print "Creating db for the reference in order to use BLAST:\n";
 	print "  formatdb -p F -i $reference\n";
@@ -30,23 +31,23 @@ if (! -e "$reference.nsq") {
 }
 print "done\n";
 
-# than run blast to find matches
+# ..then run BLAST to find matches.
 my $blastmatchfile="$outputfilename.blastmatches";
-if (! -e "$reference.nsq") {
+if (! -e "$blastmatchfile") {
 	print "BLASTing contigs on reference db:\n";
 	print "  blastall -p blastn -d $reference -i $contigs -o $blastmatchfile -e 1e-10 -m 8\n";
 	system "blastall -p blastn -d $reference -i $contigs -o $blastmatchfile -e 1e-10 -m 8";
 	print "done\n";
 } else {
-	print "A database for the reference was already created.\nRemove \n$blastmatchfile\n to redo the matching in the next run.\n";
+	print "The Matching was already performed.\nRemove \n$blastmatchfile\n to redo the matching in the next run.\n";
 }
 
 
-# here the blast matches are slightly reformated such that they can be imported into r2cat
+# Here, the blast matches are reformated such that they can be imported into r2cat
 print "Reformating the blast results.\n";
-# store the lines to be written in the matches section
+# Store the lines to be written in the matches section.
 my @outputMatches;
-# remember which contigs and reference sequences occur.
+# Remember which contigs and reference sequences occur.
 my %queries;
 my %targets;
 push @outputMatches, "BEGIN_HITS\n";
@@ -64,8 +65,8 @@ while(my $line = <BLAST>) {
 	$queries{$query_id} = 1; # mark that this id occurs
 	$targets{$target_id} = 1;# mark that this id occurs
 	
-# swap start and end for reverse complement matches.
-# (we indicate a reverse complement match on the query side instead of the target side)
+# Swap start and end for reverse complement matches.
+# (We indicate a reverse complement match on the query side instead of the target side.)
 	if($target_start>$target_end) {
 		my $tmp = $query_start;
 		$query_start = $query_end;
@@ -83,7 +84,7 @@ close(BLAST);
 
 
 
-#getting the sizes of contigs and references. this is necessary for the visualisation later in r2cat.
+#Getting the sizes of contigs and references. This is necessary for the visualisation later in r2cat.
 my @outputTargets;
 my @outputQueries;
 print "Collecting sequence sizes.\n";
@@ -91,7 +92,7 @@ print "Collecting sequence sizes.\n";
 my $contigseq=Bio::SeqIO->new(-file=>"$contigs",-format=>'fasta');
 my $referenceseq=Bio::SeqIO->new(-file=>"$reference",-format=>'fasta');
 
-#collect reference sequences sizes
+#Collect reference sequences sizes
 my $totalRefLen=0;
 while (my $entry=$referenceseq->next_seq()){
 	my $id = $entry->id;
@@ -110,7 +111,7 @@ while (my $entry=$referenceseq->next_seq()){
  }
 }
 
-# collect contigs sizes
+# Collect contigs sizes
 my $totalConLen=0;
 while (my $entry=$contigseq->next_seq()){
 	my $id = $entry->id;
