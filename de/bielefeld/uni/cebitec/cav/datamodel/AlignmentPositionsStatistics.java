@@ -79,59 +79,17 @@ public class AlignmentPositionsStatistics implements Observer {
 	}
 
 	/**
-	 * Generates some statistics. For example the minimum and maximum lengths of
-	 * targets and queries, the sum of the lengths and the center of mass for
-	 * the queries. the latter is used to order the queries on the y axis.
+	 * Generates some "statistics". For example the minimum and maximum lengths of
+	 * targets and queries, the sum of positive strand and reverse complement matches,
+	 * Look if matches are repetitive and mark the contigs as repetitive, too.
 	 */
 	protected void generateStatistics() {
 
 		this.resetStatistics();
 
-
-		
-		/////***** detect repeats*****
-		Vector<AlignmentPosition> sortedPositions = apl.getAlignmentPositions();
-		// sort by contig id's and then by contig start position of a match.
-		// this way it is easier to detect repeating matches (next for loop)
-		Collections.sort(sortedPositions, new Comparator<AlignmentPosition>() {
-			public int compare(AlignmentPosition a, AlignmentPosition b) {
-				if (a.getQuery() == b.getQuery()) {
-					if (a.getQuerySmallerIndex() == b.getQuerySmallerIndex()) {
-						return 0;
-					}
-					if (a.getQuerySmallerIndex() < b.getQuerySmallerIndex()) {
-						return -1;
-					} else {
-						return 1;
-					}
-				} else {
-					return a.getQuery().getId().compareTo(b.getQuery().getId());
-				}
-			}
-		});
-		
-		// go through the sorted list and find repeating matches
-		for (int i = 0; i < sortedPositions.size(); i++) {
-			
-			for (int j = i+1; j < sortedPositions.size(); j++) {
-				if (sortedPositions.get(i).getQuery() == sortedPositions.get(j).getQuery()) {
-					// two matches are a repeat, if the positions on the contig are very close to each other...
-					if((Math.abs(sortedPositions.get(i).getQuerySmallerIndex()-sortedPositions.get(j).getQuerySmallerIndex())+
-							Math.abs(sortedPositions.get(i).getQueryLargerIndex()-sortedPositions.get(j).getQueryLargerIndex()))<100) {
-						//... and the positions on the target are sufficiently far apart.
-						if((Math.abs(sortedPositions.get(i).getTargetSmallerIndex()-sortedPositions.get(j).getTargetSmallerIndex())+
-								Math.abs(sortedPositions.get(i).getTargetLargerIndex()-sortedPositions.get(j).getTargetLargerIndex()))>sortedPositions.get(i).size()) {
-
-							sortedPositions.get(i).addRepeat();
-							sortedPositions.get(j).addRepeat();
-						}
-					}
-					
-				}else {
-					break;
-				}
-			}
-		}
+		// Calculate the alignmentPosition.getRepeatCount() for each match in order to 
+		// decide if a whole contig is repetitive.
+		this.calculateRepeatCountForMatches();
 		
 
 		//get statistics about the size of the forward and backward alignments
@@ -143,10 +101,11 @@ public class AlignmentPositionsStatistics implements Observer {
 			}
 			
 			// if this hit occures several times on the reference and it covers more than 95 percent of the contig,
-			// mark this contig as a repeat
+			// mark this contig as a repeating
 			if (element.getRepeatCount()>0 && ((double)element.size()/element.getQuery().getSize())>.95) {
 				element.getQuery().setRepetitive(true);
-				
+				//debug output:
+				//System.out.println(element.getRepeatCount() + " "  + element.size() + element);
 			}
 		}
 
@@ -179,6 +138,59 @@ public class AlignmentPositionsStatistics implements Observer {
 			numberTargets++;
 		}
 
+	}
+
+	/**
+	 * This method look through the matches and checks for each match and each contig if the match is repetitive.
+	 * If so the match and its repeat are flagged as repetitive (through a counter)
+	 * This can then be used to decide if a whole contig is repetitive.
+	 */
+	private void calculateRepeatCountForMatches() {
+		Vector<AlignmentPosition> sortedPositions = apl.getAlignmentPositions();
+		// sort by contig id's and then by contig start position of a match.
+		// this way it is easier to detect repeating matches (next for loop)
+		Collections.sort(sortedPositions, new Comparator<AlignmentPosition>() {
+			public int compare(AlignmentPosition a, AlignmentPosition b) {
+				if (a.getQuery() == b.getQuery()) {
+					if (a.getQuerySmallerIndex() == b.getQuerySmallerIndex()) {
+						return 0;
+					}
+					if (a.getQuerySmallerIndex() < b.getQuerySmallerIndex()) {
+						return -1;
+					} else {
+						return 1;
+					}
+				} else {
+					return a.getQuery().getId().compareTo(b.getQuery().getId());
+				}
+			}
+		});
+		
+		// go through the sorted list and find repeating matches
+		for (int i = 0; i < sortedPositions.size(); i++) {
+			
+			for (int j = i+1; j < sortedPositions.size(); j++) {
+				if (sortedPositions.get(i).getQuery() == sortedPositions.get(j).getQuery()) {
+					// two matches are a repeat, if the positions on the contig are very close to each other...
+					if((Math.abs(sortedPositions.get(i).getQuerySmallerIndex()-sortedPositions.get(j).getQuerySmallerIndex())+
+							Math.abs(sortedPositions.get(i).getQueryLargerIndex()-sortedPositions.get(j).getQueryLargerIndex()))<100) {
+						//... and the positions on the target are sufficiently far apart.
+						if((Math.abs(sortedPositions.get(i).getTargetSmallerIndex()-sortedPositions.get(j).getTargetSmallerIndex())+
+								Math.abs(sortedPositions.get(i).getTargetLargerIndex()-sortedPositions.get(j).getTargetLargerIndex()))>sortedPositions.get(i).size()) {
+
+							// if both are true, add one to the repetitiveness counter of these matches
+							sortedPositions.get(i).addRepeat();
+							sortedPositions.get(j).addRepeat();
+						}
+					}
+					
+				}else {
+					// if the contigs are different, jump to the next match (i++)
+					break;
+				}
+			}
+		}
+		
 	}
 
 	/*
