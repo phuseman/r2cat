@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.PriorityQueue;
 import java.util.Vector;
 
@@ -719,14 +720,18 @@ public class TreebasedContigSorter {
 				second -= numberOfContigs;
 			}
 
+			// in my test case the contigs were named 1_contig000234
+			// which meant that this was the first contig according to reference order.
+			// in the neato plot I have put only the "1" to make the graph cleaner.
+			// this should not be in the normal treecat since it is not documented anywhere.
 			String a = contigs.get(first).getId();
-			if(a.indexOf("_")!=-1) {
-			a = a.substring(0, a.indexOf("_"));
-			}
+//			if(a.indexOf("_")!=-1) {
+//			a = a.substring(0, a.indexOf("_"));
+//			}
 			String b = contigs.get(second).getId();
-			if(b.indexOf("_")!=-1) {
-			b = b.substring(0, b.indexOf("_"));
-			}
+//			if(b.indexOf("_")!=-1) {
+//			b = b.substring(0, b.indexOf("_"));
+//			}
 
 			if(contigs.get(first).getSize()<3500 || contigs.get(second).getSize()<3500) {
 				connectionToSmallContig=true;
@@ -734,8 +739,10 @@ public class TreebasedContigSorter {
 				connectionToSmallContig=false;
 			}
 			
+			// the (Locale) null is used to force the numbers to have a dot as floaf seperator
+			// because depending on the systems locale setting either 3.12 or 3,12 is written.
 			neato.addConnection(a, b, "label="
-					+ String.format("%.2f", Math.log10(element.score)) + 
+					+ String.format((Locale)null,"%.2f", Math.log10(element.score)) + 
 					(connectionToSmallContig?",color=gray,fontcolor=gray20,":""));
 		}
 
