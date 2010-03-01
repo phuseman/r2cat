@@ -149,12 +149,14 @@ public class SequenceOrderTable extends JTable implements Observer,
 				selectionByUpdate = false;
 				this.revalidate();
 			} else if (action == NotifyEvent.HIDE) {
-				this.revalidate();
+				this.invalidate();
+				this.repaint();
 			} else if (action == NotifyEvent.CHANGE) {
-				// System.out.println("Elements changed; adjust table");
-				this.revalidate();
+				this.invalidate();
+				this.repaint();
 			} else if (action == NotifyEvent.ORDER_CHANGED_OR_CONTIG_REVERSED) {
-				this.revalidate();
+				this.invalidate();
+				this.repaint();
 			}
 		}
 	}

@@ -502,6 +502,7 @@ public class GuiController {
 	 */
 	public void sortContigsDone(ContigSorter sorter) {
 		R2cat.dataModelController.getAlignmentPositionsList().changeQueryOrder(sorter.getQueryOrder());
+		R2cat.dataModelController.getAlignmentPositionsList().notifyObservers(AlignmentPositionsList.NotifyEvent.ORDER_CHANGED_OR_CONTIG_REVERSED);
 		this.setVisualisationNeedsUpdate();
 		dotPlotVisualisation.repaint();
 
