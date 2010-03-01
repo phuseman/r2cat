@@ -68,10 +68,6 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener {
 	 */
 	public MainWindow(GuiController guiController) {
 		super("r2cat - Related Reference based Contig Arrangement Tool");
-
-		// in the future probably
-		// super("meercat - multiple related reference contig arrangement
-		// tool");
 		this.guiController = guiController;
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		init();
@@ -126,7 +122,6 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener {
 		controls.add(zoomPanel);
 
 		drawing = new JScrollPane();
-		drawing.setBorder(BorderFactory.createTitledBorder("Alignments"));
 
 		content.setLayout(new BorderLayout());
 		content.add(controls, BorderLayout.SOUTH);

@@ -281,7 +281,14 @@ public class DotPlotVisualisation extends DataViewPlugin {
 				.drawString("Contigs", -(border / 2), -this.getHeight() + 2
 						* border);
 
-		String xLabel = "Reference Genome(s)";
+		
+		String xLabel="";
+		if(R2cat.dataModelController.getAlignmentPositionsStatistics().getNumberOfTargets()>=2) {
+			xLabel = "Reference Sequences";
+		} else {
+			xLabel = "Reference Genome";
+		}
+		
 		int xLabelSize = SwingUtilities.computeStringWidth(this
 				.getFontMetrics(this.getFont()), xLabel);
 
