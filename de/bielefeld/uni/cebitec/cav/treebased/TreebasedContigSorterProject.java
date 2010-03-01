@@ -96,7 +96,7 @@ public class TreebasedContigSorterProject {
 			boolean projectParsed=project.readProject(new File(
 					// contigs
 //					 "/homes/phuseman/compassemb/treebased/Corynebacterium_aurimucosum_454AllContigs.tcp"));
-			 "/homes/phuseman/compassemb/treebased/Corynebacterium_urealyticum_DSM_7109_454AllContigs.tcp"));
+			 "/homes/phuseman/compassemb/20090323_treecat/evaluation_treecat/Corynebacterium_urealyticum_DSM_7109_454AllContigs.tcp"));
 //			"/homes/phuseman/compassemb/treebased/Corynebacterium_kroppenstedtii_DSM44385_454AllContigs.tcp"));
 //
 //			new assembly project from eva

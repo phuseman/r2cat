@@ -28,16 +28,23 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 import java.util.Observable;
 
 import javax.swing.JComponent;
+import javax.swing.JToolTip;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 
 import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
@@ -112,6 +119,8 @@ public class DotPlotVisualisation extends DataViewPlugin {
 		this.setMinimumSize(new Dimension(100, 100));
 		this.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 		this.setFocusable(true);
+//		   Register to display tooltips
+		   ToolTipManager.sharedInstance().registerComponent(this);
 
 	}
 
@@ -668,5 +677,119 @@ public class DotPlotVisualisation extends DataViewPlugin {
 		R2cat.preferences.setDisplayGrid(drawGrid);
 		this.drawGrid = drawGrid;
 	}
+	
+	
+	/* (non-Javadoc)
+	 * @see javax.swing.JComponent#getToolTipText(java.awt.event.MouseEvent)
+	 * 
+	 * Write the contig name and the target name as tooltip
+	 */
+	@Override
+	public String getToolTipText(MouseEvent e) {
+		
+		//get the mouse coordinates on the canvas
+		Point2D.Double clicked = convertMouseEventToCanvasPoint(e);
+		double x = clicked.x;
+		double y = -clicked.y;
 
+		
+    	double lower=0;
+    	double upper=0;
+
+
+    	//check which contig we are pointing at
+    	String contig="";
+   	
+		for (DNASequence q : R2cat.dataModelController
+				.getAlignmentPositionsList().getQueries()) {
+			
+			lower = (q.getOffset() * AlignmentPositionDisplayer
+					.getNormalisationFactorY());
+			upper =  ((q.getOffset()+q.getSize()) * AlignmentPositionDisplayer
+					.getNormalisationFactorY());
+			
+			if( y >= lower && y < upper) {
+				contig = "Contig: " + q.getId();
+			   	break;
+			}
+		}
+
+		//check on which reference sequence we are
+    	String reference="";
+		for (DNASequence t : R2cat.dataModelController
+				.getAlignmentPositionsList().getTargets()) {
+			
+			lower = (t.getOffset() * AlignmentPositionDisplayer
+					.getNormalisationFactorX());
+			upper =  ((t.getOffset()+t.getSize()) * AlignmentPositionDisplayer
+					.getNormalisationFactorX());
+			
+			if( x >= lower && x < upper) {
+				reference = "Reference: " + t.getId();
+			   	break;
+			}
+		}
+
+		// if both (contig and reference) are given separate them with a newline
+		String separator = "";
+		if (!contig.isEmpty() && ! reference.isEmpty()) {
+			separator = "<br>";
+		}
+		
+		String tooltip = "<html>" + contig + separator + reference;
+		return tooltip;
+	}
+
+  /*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.JComponent#createToolTip() 
+	 * modify tool tips back and fg color
+	 */
+	public JToolTip createToolTip() {
+		JToolTip tip = super.createToolTip();
+		tip.setBackground(Color.WHITE);
+		tip.setForeground(Color.BLACK);
+		return tip;
+	}
+
+	/**
+	 * Maps the mouse coordinates of a given event to the coordinates inside the
+	 * DotPlotVisualisation.<br>
+	 * This way alignments near to this point can be found.
+	 * 
+	 * @param e
+	 *            Mouse Event to map.
+	 * @return point coordinates inside the canvas.
+	 */
+	public Point2D.Double convertMouseEventToCanvasPoint(MouseEvent e) {
+		SwingUtilities.convertMouseEvent((JComponent) e.getSource(), e,
+				this);
+	
+		return convertPointToCanvasPoint(e.getPoint());
+	}
+
+	/**
+	 * The DotPlotVisualisation is usually transformed by a translation and
+	 * possibly a scaling.<br>
+	 * This method calculates the inversly transformed point.
+	 * 
+	 * @param p
+	 *            the Point given by a mouse event.
+	 * @return the transformed point in the canvas.
+	 */
+	public Point2D.Double convertPointToCanvasPoint(Point p) {
+		Double transformedPoint = new Double();
+		try {
+			getAlignmentPositionTransform()
+					.inverseTransform(p, transformedPoint);
+	
+		} catch (NoninvertibleTransformException e) {
+			e.printStackTrace();
+		}
+		return transformedPoint;
+	}
+    
+    
+    
 }

@@ -1,16 +1,11 @@
 <h1>r2cat, the <b>r</b>elated <b>r</b>eference based <b>c</b>ontig <b>a</b>rrangement <b>t</b>ool</h1>
 <h2><a name="intro">Introduction</a></h2>
-With the help of next generation sequencing technologies it is feasible
-to generate a vast number of reads for a given genome. However, the assembly
-usually ends up in a set of contigs with gaps between them.
-If a similar reference genome is known the contigs can be mapped onto
-this and the size of the gaps can be estimated. This way, it is possible
-to design specific primer sequences to fill the gaps and finish the
-assembly.
+<p>Recent parallel pyrosequencing methods and the increasing number of finished genomes encourage the sequencing and investigation of closely related strains. Although the sequencing itself becomes easier and cheaper with each machine generation, the finishing of the genomes remains difficult. Instead of the desired whole genomic sequence, a set of contigs is the result of the assembly. If a similar reference genome is known, the contigs can be mapped onto it to get an estimation about the order and the orientation of the contigs. This information can be helpful for the design of specific primer sequences to fill the gaps and finish the assembly.</p>
 
-<h2><a name="descr">Description</a></h2>
-This is the tool r2cat, which maps contigs onto a
-reference genome using a q-gram filter.
-The contigs are ordered by a simple procedure and the result is visualized.
+<p>This is the tool <b>r2cat</b>, the <b>r</b>elated
+        <b>r</b>eference based <b>c</b>ontig <b>a</b>rrangement
+        <b>t</b>ool, that
+can be used to order a set of contigs with respect to a single reference genome. This is done by mapping the contigs onto the reference using a q-gram filter. While the mapping is subsequently visualized in a synteny plot, the contigs can be ordered automatically with a simple sliding window approach.
+It is possible to export the ordered and oriented contigs as a FASTA file and to save the displayed synteny plot in various graphics formats.</p>
 
 Click <a href="howto.html">here</a> to see a typical worflow example.

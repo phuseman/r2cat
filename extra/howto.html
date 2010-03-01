@@ -2,16 +2,13 @@
 <p>
 This should describe a typical usecase for this program.
 </p><p>
-The prerequisites are that you have sequenced a genome with a Roche 454 sequencer or probably Illumina sequencer. The resulting reads are already assembled to contigs with a suitable assembler.
+The prerequisites are that a bacterial genome has been sequenced and the resulting reads were already assembled to contigs with a suitable assembler.
 </p><p>
-Let us assume that you have a multiple <a href="http://en.wikipedia.org/wiki/FASTA_format" target="_blank">FASTA</a> file containing all contigs and another FASTA file which contains the sequence of a reference genome. This can consist of multiple replicons. The matching procedure works well on medium size prokaryotic genomes.
+Let us assume that you have a multiple <a href="http://en.wikipedia.org/wiki/FASTA_format" target="_blank">FASTA</a> file containing all contigs and another FASTA file which contains the sequence of a suitable reference genome. This can consist of multiple replicons. The matching procedure works well on medium size prokaryotic genomes.
 </p><p>
-Start the program and choose "Match new" from the menu. Select two FASTA files. The contigs are the queries and the reference genome is the target for this search. Click on "Start Matching" and the program tries to find regions of up to 8% difference that have at least 44 exact matches of possibly overlapping 11-mers, which are each not further apart than 64 bases. After the matching has finished click on "Continue" and you can see the matches as dot plot. The contigs are ordered (and stacked) along the y axis in the order of the underlying fasta file.
-  The contigs can now be sorted based on their matches using
-  "Options-&gt;Sort queries". After that, the ordering can be
-  manually adjusted with "Window-&gt;Show queries/contigs".
+Start the program and choose "Match new" from the menu. Select two FASTA files. The contigs are the queries and the reference genome is the target for this search. Click on "Start Matching" and the program tries to find regions of up to 8% difference that have at least 44 exact matches of possibly overlapping 11-mers, which are each not further apart than 64 bases. After the matching has finished click on "Continue" and you can see the matches as a synteny plot. The contigs are ordered (and stacked) along the y axis in the order of the underlying fasta file. The contigs can now be sorted based on their matches using  "Options-&gt;Sort queries". After that, the ordering can be manually adjusted within the table under "Window-&gt;Show queries/contigs". Select the contigs to be moved and drag and drop them to another table row. In the synteny plot the matches of those two contigs will be marked in green, to where the selection would be moved. This helps to visually find the right place to insert the contig.
 </p><p>
-At this point, you might want to save the matches and the order with "Save project" from the "File" menu. All the matching information and the order of the contigs are then saved to a file. This file can be edited manually or by other programs. Each reference and contig has a section specifying its length and the associated file as well as other information. After that, all matching regions are given in a tab separated table.
+At this point, you might want to save the matches and the order with "Save project" from the "File" menu. All the matching information and the order of the contigs are then saved to a file. This file can be edited manually or by other programs. Each reference and contig has a section specifying its length and the associated file along with other information. After that, all matching regions are given in a tab separated table.
 A saved project can then be loaded without the time consuming process of matching.
 </p><p>
 After the matching and ordering of the contigs, a FASTA sequence of this layout can be produced if the original FASTA file is present. Select "Export contigs as FASTA file" from the file menu and select a file to write the results to. In the resulting file the contigs are in the order which is displayed and they are reversed if necessary.

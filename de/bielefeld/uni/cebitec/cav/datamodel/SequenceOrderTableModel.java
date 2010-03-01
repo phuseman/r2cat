@@ -39,7 +39,7 @@ public class SequenceOrderTableModel extends AbstractTableModel {
 	private boolean showComplementColumn = false;
 
 	private String[] columnNames = { "Id", "Length" };
-	private String[] columnNamesWithComplement = { "Id", "Length", "Complement", "Repeating" };
+	private String[] columnNamesWithComplement = { "Id", "Length", "Complement", "% Repeating" };
 
 	private AlignmentPositionsList apl;
 
@@ -111,7 +111,7 @@ public class SequenceOrderTableModel extends AbstractTableModel {
 			out = dnaSequence().get(rowIndex).isReverseComplemented();
 			break;
 		case 3:
-			out = dnaSequence().get(rowIndex).isRepetitive();
+			out = String.format("%.2f", dnaSequence().get(rowIndex).getRepetitivePercent()*100);
 			break;
 
 		default:

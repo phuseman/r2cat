@@ -23,6 +23,7 @@ package de.bielefeld.uni.cebitec.cav.gui;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -66,6 +67,40 @@ public class SequenceOrderTable extends JTable implements Observer,
 		this.setDropMode(DropMode.INSERT_ROWS);
 		this.setTransferHandler(new SequenceOrderTableTransferHandler());
 	}
+
+	
+    /* (non-Javadoc)
+     * @see javax.swing.JTable#getToolTipText(java.awt.event.MouseEvent)
+     * Borrowed from http://java.sun.com/docs/books/tutorial/uiswing/components/table.html
+     */
+    public String getToolTipText(MouseEvent e) {
+        String tip = null;
+        java.awt.Point p = e.getPoint();
+        int rowIndex = rowAtPoint(p);
+        int colIndex = columnAtPoint(p);
+        int realColumnIndex = convertColumnIndexToModel(colIndex);
+
+        if (realColumnIndex == 2) { //complemented column
+        	Boolean complemented = (Boolean) getValueAt(rowIndex, colIndex);
+            tip = "<html>The matches of this contig are displayed in<br><b>"
+                   + (complemented?"backward":"forward") + "</b> direction with respect to the underlying fasta file.";
+
+        } else if (realColumnIndex == 3) { //repeat column
+        	if (!((String)getValueAt(rowIndex, colIndex)).startsWith(String.format("%.2f",0.))) {
+            tip = "<html>This contig contains a repetitive match which spans over<br><b>"
+                + getValueAt(rowIndex, colIndex) + "%</b> of the contigs length";
+        	} else {
+        		tip = "<html>This contig contains no repetitive matches";
+        	}
+
+        } else { //another column
+            //You can omit this part if you know you don't 
+            //have any renderers that supply their own tool 
+            //tips.
+            tip = super.getToolTipText(e);
+        }
+        return tip;
+    }
 
 	/*
 	 * (non-Javadoc)

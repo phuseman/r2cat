@@ -354,7 +354,8 @@ public class TreebasedContigSorter {
 				if (first.contigIndex == second.contigIndex) {
 					continue;
 				}
-	
+				
+
 				// the first contig should be the leftmost projected contig. if not -> swap
 				if (second.start < first.start) {
 					ProjectedContig tmp = first;

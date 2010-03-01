@@ -100,12 +100,12 @@ public class AlignmentPositionsStatistics implements Observer {
 				element.getQuery().reverseAlignmentLength += element.size();
 			}
 			
-			// if this hit occures several times on the reference and it covers more than 95 percent of the contig,
+			// if this hit occurs several times on the reference and it covers more than 95 percent of the contig,
 			// mark this contig as a repeating
-			if (element.getRepeatCount()>0 && ((double)element.size()/element.getQuery().getSize())>.95) {
-				element.getQuery().setRepetitive(true);
+			if (element.getRepeatCount()>0 ) {
+				element.getQuery().setRepetitivePercent((double)element.size()/element.getQuery().getSize());
 				//debug output:
-				//System.out.println(element.getRepeatCount() + " "  + element.size() + element);
+//				System.out.println(element.getRepeatCount() + " "  + element.size() + element);
 			}
 		}
 

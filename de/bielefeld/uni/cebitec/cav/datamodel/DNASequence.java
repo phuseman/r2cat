@@ -24,8 +24,11 @@ public class DNASequence implements Comparable {
 
 	private boolean repetitive = false;
 
+	private double repetitivePercentage=0;
+
 	//how to order the sequences. a smaller numer = earlier
 	private int sortKey;
+
 
 
 
@@ -154,7 +157,6 @@ public class DNASequence implements Comparable {
 	 */
 	public void setRepetitive(boolean b) {
 		this.repetitive =b;
-		
 	}
 	/**
 	 * Tells whether or not this contig is repetitive. the {@link AlignmentPositionsStatistics} object will set this property.
@@ -163,9 +165,33 @@ public class DNASequence implements Comparable {
 	 */
 	public boolean isRepetitive() {
 		return this.repetitive;
-		
 	}
 
+	
+	/**
+	 * 	This method should be used by the {@link AlignmentPositionsStatistics} object only.
+	 * Remember the highest percentage of a repetitive match in this sequence.
+	 * @param perc
+	 */
+	public void setRepetitivePercent(double perc) {
+		if (perc > this.repetitivePercentage) {
+			this.repetitivePercentage = perc;
+			if (perc >= .95) {
+				this.repetitive = true;
+			}
+		}
+	}
+
+	/**
+	 * Gives the percentage of this sequence which occurs at least twice
+	 * @return
+	 */
+	public double getRepetitivePercent() {
+		return this.repetitivePercentage;
+	}
+
+	
+	
 	public void setSortKey(int sortKey) {
 		this.sortKey = sortKey;
 	}

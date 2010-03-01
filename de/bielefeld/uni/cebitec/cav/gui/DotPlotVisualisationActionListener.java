@@ -34,7 +34,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
 import javax.swing.JComponent;
@@ -60,7 +59,7 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 
 	private Cursor lastDefaultCursor;
 
-	private DotPlotVisualisation dotPlotVisualisation;
+	DotPlotVisualisation dotPlotVisualisation;
 
 	private GuiController guiController;
 
@@ -79,43 +78,6 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 		if (e.getActionCommand().matches("exit")) {
 			System.exit(0);
 		}
-	}
-
-	/**
-	 * Maps the mouse coordinates of a given event to the coordinates inside the
-	 * DotPlotVisualisation.<br>
-	 * This way alignments near to this point can be found.
-	 * 
-	 * @param e
-	 *            Mouse Event to map.
-	 * @return point coordinates inside the canvas.
-	 */
-	private Point2D.Double convertMouseEventToCanvasPoint(MouseEvent e) {
-		SwingUtilities.convertMouseEvent((JComponent) e.getSource(), e,
-				dotPlotVisualisation);
-
-		return convertPointToCanvasPoint(e.getPoint());
-	}
-
-	/**
-	 * The DotPlotVisualisation is usually transformed by a translation and
-	 * possibly a scaling.<br>
-	 * This method calculates the inversly transformed point.
-	 * 
-	 * @param p
-	 *            the Point given by a mouse event.
-	 * @return the transformed poind in the canvas.
-	 */
-	private Point2D.Double convertPointToCanvasPoint(Point p) {
-		Point2D.Double transformedPoint = new Point2D.Double();
-		try {
-			dotPlotVisualisation.getAlignmentPositionTransform()
-					.inverseTransform(p, transformedPoint);
-
-		} catch (NoninvertibleTransformException e) {
-			e.printStackTrace();
-		}
-		return transformedPoint;
 	}
 
 	/*
@@ -137,7 +99,7 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 	 *            Mouse Event which triggered this action
 	 */
 	private void markNearestPoint(MouseEvent e) {
-		Point2D.Double clickedPoint = convertMouseEventToCanvasPoint(e);
+		Point2D.Double clickedPoint = dotPlotVisualisation.convertMouseEventToCanvasPoint(e);
 
 		AlignmentPositionDisplayer smallestap = dotPlotVisualisation
 				.getAlignmentPositionDisplayerList()
@@ -242,8 +204,8 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 		int bottomY = Math.max(selectionStart.y, e.getPoint().y);
 
 		// translate the coordinates
-		Point2D.Double topLeft = convertPointToCanvasPoint(new Point(topX, topY));
-		Point2D.Double bottomRight = convertPointToCanvasPoint(new Point(
+		Point2D.Double topLeft = dotPlotVisualisation.convertPointToCanvasPoint(new Point(topX, topY));
+		Point2D.Double bottomRight = dotPlotVisualisation.convertPointToCanvasPoint(new Point(
 				bottomX, bottomY));
 
 		// handle different cases:
