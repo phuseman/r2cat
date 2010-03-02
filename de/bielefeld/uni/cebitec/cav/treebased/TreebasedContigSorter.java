@@ -288,7 +288,7 @@ public class TreebasedContigSorter {
 	 *            file to write the matrix to
 	 * @throws IOException
 	 */
-	private void writeWeightMatrix(File file) throws IOException {
+	public void writeWeightMatrix(File file) throws IOException {
 		BufferedWriter csv = new BufferedWriter(new FileWriter(file));
 		char seperator=',';
 		
@@ -317,7 +317,11 @@ public class TreebasedContigSorter {
 				// 100.)
 				// + seperator);
 				// s.append(Math.log(adjacencyWeightMatrix[i][j]+1.));
-				csv.write(((Double)adjacencyWeightMatrix[i][j]).toString() + seperator);
+				if(i<=j) {
+					csv.write(((Double)adjacencyWeightMatrix[i][j]).toString() + seperator);
+				} else {//since it is symmetrical
+					csv.write(((Double)adjacencyWeightMatrix[j][i]).toString() + seperator);
+				}
 			}
 			csv.newLine();
 		}
@@ -632,24 +636,21 @@ public class TreebasedContigSorter {
 	// write all contigs as node to the neato output
 			StringBuffer params;
 			String node;
-			for (int k = 0; k < contigs.size(); k++) {
+			for (int k = 0; k < numberOfContigs; k++) {
 				params = new StringBuffer();
-				node= contigs.get(k).getId();
-				if (node.indexOf("_")!=-1) {
-					node = node.substring(0, node.indexOf("_"));
-				}
-				params.append("label=\"" + node + "\\n"
-						+ String.format("%.1f", contigs.get(k).getSize()/1000.) + "kb\",");
-				if (contigs.get(k).isRepetitive()) {
+				//take thi index in the matrix as identifier for a neato node
+				node= Integer.toString(k);
+
+				//append some lables for repetitive or small contigs
+				params.append("label=\"" + getContigFromMatrixIndex(k).getId() + "\\n"
+						+ String.format("%.1f", getContigFromMatrixIndex(k).getSize()/1000.) + "kb\",");
+				if (getContigFromMatrixIndex(k).isRepetitive()) {
 					params.append("shape=box,");
 				}
-				if (contigs.get(k).getSize() < 3500) {
+				if (getContigFromMatrixIndex(k).getSize() < 3500) {
 					params.append("color=gray,fontcolor=gray20,");
 				}
-	
-				
 				neato.nodeDescription(node, params.toString());
-				
 			}
 	
 				greedyHeuristic();
@@ -680,6 +681,11 @@ public class TreebasedContigSorter {
 				if (adjacencyWeightMatrix[i][j] == 0) {
 					continue;
 				}
+
+				//testing
+//				if (getContigFromMatrixIndex(i).isRepetitive() || getContigFromMatrixIndex(j).isRepetitive()) {
+//					continue;
+//				}
 
 				freeConnections.add(new MatrixEntry(i, j,
 						adjacencyWeightMatrix[i][j]));
@@ -721,20 +727,8 @@ public class TreebasedContigSorter {
 				second -= numberOfContigs;
 			}
 
-			// in my test case the contigs were named 1_contig000234
-			// which meant that this was the first contig according to reference order.
-			// in the neato plot I have put only the "1" to make the graph cleaner.
-			// this should not be in the normal treecat since it is not documented anywhere.
-			String a = contigs.get(first).getId();
-//			if(a.indexOf("_")!=-1) {
-//			a = a.substring(0, a.indexOf("_"));
-//			}
-			String b = contigs.get(second).getId();
-//			if(b.indexOf("_")!=-1) {
-//			b = b.substring(0, b.indexOf("_"));
-//			}
 
-			if(contigs.get(first).getSize()<3500 || contigs.get(second).getSize()<3500) {
+			if(getContigFromMatrixIndex(first).getSize()<3500 || getContigFromMatrixIndex(second).getSize()<3500) {
 				connectionToSmallContig=true;
 			} else {
 				connectionToSmallContig=false;
@@ -742,11 +736,18 @@ public class TreebasedContigSorter {
 			
 			// the (Locale) null is used to force the numbers to have a dot as floaf seperator
 			// because depending on the systems locale setting either 3.12 or 3,12 is written.
-			neato.addConnection(a, b, "label="
+			neato.addConnection(Integer.toString(first), Integer.toString(second), "label="
 					+ String.format((Locale)null,"%.2f", Math.log10(element.score)) + 
 					(connectionToSmallContig?",color=gray,fontcolor=gray20,":""));
 		}
 
+	}
+	
+	private DNASequence getContigFromMatrixIndex(int index) {
+		if (index >= numberOfContigs) {
+			index -= numberOfContigs;
+		}
+		return contigs.get(index);
 	}
 
 
@@ -763,15 +764,15 @@ public class TreebasedContigSorter {
 
 		String connection = "";
 		if (i >= numberOfContigs) {
-			connection = "<" + contigs.get(i - numberOfContigs).getId() + "|";
+			connection = "<" + getContigFromMatrixIndex(i).getId() + "|";
 		} else {
-			connection = "|" + contigs.get(i).getId() + ">";
+			connection = "|" + getContigFromMatrixIndex(i).getId() + ">";
 		}
 
 		if (j >= numberOfContigs) {
-			connection += "|" + contigs.get(j - numberOfContigs).getId() + ">";
+			connection += "|" + getContigFromMatrixIndex(j).getId() + ">";
 		} else {
-			connection += "<" + contigs.get(j).getId() + "|";
+			connection += "<" + getContigFromMatrixIndex(j).getId() + "|";
 		}
 
 		return connection;
