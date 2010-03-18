@@ -176,7 +176,7 @@ public class DNASequence implements Comparable {
 	public void setRepetitivePercent(double perc) {
 		if (perc > this.repetitivePercentage) {
 			this.repetitivePercentage = perc;
-			if (perc >= .95) {
+			if (perc >= .90) {
 				this.repetitive = true;
 			}
 		}
