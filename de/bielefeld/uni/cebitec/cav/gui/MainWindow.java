@@ -109,8 +109,9 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener {
 		zoomSlider = new JSlider();
 		zoomSlider.addChangeListener(this);
 		zoomSlider.setOrientation(SwingConstants.HORIZONTAL);
-		zoomSlider.setMaximum(200);
-		zoomSlider.setMinimum(5);
+		zoomSlider.setMaximum(400);
+		zoomSlider.setMinimum(20);
+		zoomSlider.setValue(20);
 
 		zoomPanel.add(zoomSlider);
 

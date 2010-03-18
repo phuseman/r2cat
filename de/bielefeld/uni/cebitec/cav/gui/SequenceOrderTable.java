@@ -308,11 +308,7 @@ public class SequenceOrderTable extends JTable implements Observer,
 					scrolledToFirstSelectedRow = true;
 				}
 			}
-			
-
-
 		}
-
 	}
 
 }

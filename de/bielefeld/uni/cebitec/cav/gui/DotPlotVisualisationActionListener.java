@@ -326,9 +326,16 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 
 		double newZoomValue = dotPlotVisualisation.getZoom()
 				+ (zoomStep * -e.getWheelRotation());
+		
+		//don't allow a shrinking of the view area. normally the view is adjusted to screen witdth 
+		if(newZoomValue<1) {
+			newZoomValue = 1.;
+		}
+
 		// set zoom
 		dotPlotVisualisation.setZoom(newZoomValue);
 
+		
 		Rectangle newViewport = dotPlotVisualisation.getVisibleRect();
 		Dimension newDimension = dotPlotVisualisation.getSize();
 
