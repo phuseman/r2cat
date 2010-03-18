@@ -869,7 +869,11 @@ public class AlignmentPositionsList extends Observable implements
 		// ======================end: check for files and id's
 
 		
+		//change this to renumber the contigs (repeating and non repeating seperately)
+		boolean renumberContigs=false;
 		
+		int repeatingContigs=0;
+		int nonrepeatingContigs=0;
 		
 		int contigsWritten=0;
 		// ======================begin: write the existing id's into the file
@@ -886,26 +890,56 @@ public class AlignmentPositionsList extends Observable implements
 					fastaFile = sequences.get(path);
 					if (fastaFile.containsId(query.getId())) {
 						contigsWritten++;
-						// TODO write the former description
 						if (!query.isReverseComplemented()) {
-							out.write(">" 
-									// debugging: append index of contig
-//									+ queryOrder.indexOf(query)+"_"
-									+query.getId());
-							if(query.getDescription()!=null && !query.getId().equals("")) {
-								out.write(" " + query.getDescription());
-							}
+							
+							if (!renumberContigs) {
+								out.write(">" +query.getId());
+								if(query.getDescription()!=null && !query.getId().equals("")) {
+									out.write(" " + query.getDescription()) ;
+								}
+							} else {
+								// the contig ids should be renumbered
+								out.write(">" + (query.isRepetitive()?("r"+String.format("%03d", repeatingContigs)):String.format("%03d", nonrepeatingContigs))
+										+" oldid="+query.getId());
+								
+								if(query.isRepetitive()) {
+									repeatingContigs++;
+								} else {
+									nonrepeatingContigs++;
+								}
+								
+								if(query.getDescription()!=null && !query.getId().equals("")) {
+									out.write(" " + query.getDescription());
+								}
+							}//renumber contigs
 							out.write("\n");
+
+// write the actual sequence							
 							fastaFile.writeSequence(query.getId(), out);
 						} else {
-							out.write(">"
-									//debugging append index of contig
-//									+ queryOrder.indexOf(query)+"_"
-									+ query.getId()+ " reverse complemented");
-							if(query.getDescription()!=null && !query.getId().equals("")) {
-								out.write(" " +query.getDescription());
-							}
+							if (!renumberContigs) {
+								out.write(">" + query.getId()+ " reversed=true ");
+								if(query.getDescription()!=null && !query.getId().equals("")) {
+									out.write(" " +query.getDescription());
+								}
+							} else {
+								// the contig ids should be renumbered
+								out.write(">" + (query.isRepetitive()?("r"+String.format("%03d", repeatingContigs)):String.format("%03d", nonrepeatingContigs))
+										+" reversed=true oldid="+query.getId());
+								
+								if(query.isRepetitive()) {
+									repeatingContigs++;
+								} else {
+									nonrepeatingContigs++;
+								}
+								
+								if(query.getDescription()!=null && !query.getId().equals("")) {
+									out.write(" " + query.getDescription());
+								}
+								out.write("\n");
+							} // renumber contigs
 							out.write("\n");
+							//write the actual sequence
 							fastaFile.writeReverseComplementSequence(query
 									.getId(), out);
 						}
