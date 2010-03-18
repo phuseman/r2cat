@@ -94,22 +94,16 @@ public class TreebasedContigSorterProject {
 		try {
 			
 			boolean projectParsed=project.readProject(new File(
-					// contigs
-//					 "/homes/phuseman/compassemb/treebased/Corynebacterium_aurimucosum_454AllContigs.tcp"));
-			 "/homes/phuseman/compassemb/20090323_treecat/evaluation_treecat/Corynebacterium_urealyticum_DSM_7109_454AllContigs.tcp"));
-//			"/homes/phuseman/compassemb/treebased/Corynebacterium_kroppenstedtii_DSM44385_454AllContigs.tcp"));
-//
-//			new assembly project from eva
-//			"/homes/phuseman/compassemb/treebased/Corynebacterium_urealyticum_DSM_7111_454AllContigs.tcp"));
-//
-			//
-							// assembled genome against all
-							// "/homes/phuseman/compassemb/treebased/Corynebacterium_kroppenstedtii_DSM44385.tcp"));
-							// "/homes/phuseman/compassemb/treebased/Corynebacterium_urealyticum_DSM_7109.tcp"));
-							// "/homes/phuseman/compassemb/treebased/Corynebacterium_aurimucosum.tcp"));
-			
-
-			
+//					"/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7109/self/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_inOrder.tcp"
+//					 "/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7111/Corynebacterium_urealyticum_DSM_7111_454AllContigs.tcp"
+//					 "/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7111/Corynebacterium_urealyticum_DSM_7111_454LargeContigs_renumbered.tcp"
+//					 "/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7111/Corynebacterium_urealyticum_DSM_7111_454LargeContigs.tcp"
+//			 "/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7109/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_inOrder.tcp"
+//					"/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7109/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_inOrder.tcp"
+					"/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7109/self/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"
+//			 "/homes/phuseman/compassemb/20090323_treecat/evaluation_treecat/Corynebacterium_urealyticum_DSM_7109_454AllContigs.tcp"
+//			 "/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Agrobacterium_sp_H13-3/Agrobacterium_sp_H13-3_454AllContigs.tcp"
+			));
 			if(!projectParsed) {
 				System.err.println("The given project file was not sucessfully parsed");
 				System.exit(1);
@@ -134,6 +128,20 @@ public class TreebasedContigSorterProject {
 
 		t.stopTimer("sorting");
 
+		
+	////debugging: write weight matrix
+		try {
+			t.startTimer();
+
+			project.treebasedSorter.writeWeightMatrix(new File(project.projectDir + File.separator
+					+ MiscFileUtils.getFileNameWithoutExtension(project.contigs)+ "_weightMatrix.csv"));
+			t.stopTimer("writing matrix");
+
+		} catch (IOException e) {
+			project.message("Can't write weight matrix"+e.getMessage());
+		}
+
+		
 		System.out.println("Done");
 		} catch( CannotProceedException e) {
 			System.err.println("Programm failed:\n" + e.getMessage());
@@ -240,7 +248,7 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 
 			// ignore comments
 			if (line.startsWith("#") || line.startsWith("\"#")
-					|| line.isEmpty()) {
+					|| line.isEmpty() || line.matches("^\\s+$")) {
 				continue;
 			}
 
@@ -259,7 +267,12 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 			// remove trailing quotation marks
 			if (value.charAt(0) == '"'
 					&& value.charAt(value.length() - 1) == '"') {
-				value = value.substring(1, value.length() - 1);
+				if((value.length()-1) == 1) {
+					//this fixes a bug when the value is just the two quotes ("")
+					continue;
+				} else {
+					value = value.substring(1, value.length() - 1);
+				}
 			}
 
 			//check different keywords:
@@ -290,24 +303,27 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 			//********************reference*********************
 			if (propertyValue[0].matches("reference")) {
 				File file = new File(value);
-				// if not existant, try relative path
-				if (!file.exists()) {
+				if (file.exists()) {
+					references.add(file);
+				} else {
+					// if not existant, try relative path
 					file = new File(currentWorkingDirectory + File.separator
 							+ value);
-				} else {
+
+				if (file.exists()) {
 					references.add(file);
-				}
+				} else {
 				//if still not existant, give error
-				if (!file.exists()) {
 					criticalError("Error: " + line + "\nFile not found");
-				} else {
-					references.add(file);
 				}
+				
+				}
+
 			}
 
 			//********************newicktree*********************
 			if (propertyValue[0].matches("newicktree")) {
-				if (phylogeneticTree == null) {
+				if (phylogeneticTree == null ) {
 					// rolands newicktree parser
 					try {
 						phylogeneticTree = new MultifurcatedTree(value);
@@ -322,10 +338,10 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 			}
 			//do the same if the tree was given in an extra file
 			if (propertyValue[0].matches("newicktreefile")) {
-				if (phylogeneticTree == null) {
+				if (phylogeneticTree == null ) {
 					// rolands newicktree parser
 					try {
-						phylogeneticTree = new MultifurcatedTree(value);
+						phylogeneticTree = new MultifurcatedTree(new File(value));
 					} catch (UnproperTreeException e) {
 						criticalError("Error: " + line + "\n" + e.getMessage());
 						phylogeneticTree=null;
@@ -777,7 +793,11 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 			//fill the weight matrix with the projected contigs, based on the matches
 			treebasedSorter.fillWeightMatrix();
 			
-			//this method computes a path, or a Layout GRaph 
+			
+			
+			
+			
+			//this method computes a path, or a Layout Graph 
 			treebasedSorter.findPath();
 
 			//calculate the 'optimal' path
