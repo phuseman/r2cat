@@ -693,57 +693,62 @@ public class DotPlotVisualisation extends DataViewPlugin {
 	 */
 	@Override
 	public String getToolTipText(MouseEvent e) {
-		
-		//get the mouse coordinates on the canvas
-		Point2D.Double clicked = convertMouseEventToCanvasPoint(e);
-		double x = clicked.x;
-		double y = -clicked.y;
+		String tooltip = null;
+		if (this.getAlignmentPositionDisplayerList().getDisplayOffsets()) {
+			// get the mouse coordinates on the canvas
+			Point2D.Double clicked = convertMouseEventToCanvasPoint(e);
+			double x = clicked.x;
+			double y = -clicked.y;
 
-		
-    	double lower=0;
-    	double upper=0;
+			double lower = 0;
+			double upper = 0;
 
+			// check which contig we are pointing at
+			String contig = "";
 
-    	//check which contig we are pointing at
-    	String contig="";
-   	
-		for (DNASequence q : R2cat.dataModelController
-				.getAlignmentPositionsList().getQueries()) {
-			
-			lower = (q.getOffset() * AlignmentPositionDisplayer
-					.getNormalisationFactorY());
-			upper =  ((q.getOffset()+q.getSize()) * AlignmentPositionDisplayer
-					.getNormalisationFactorY());
-			
-			if( y >= lower && y < upper) {
-				contig = "Contig: " + q.getId();
-			   	break;
+			for (DNASequence q : R2cat.dataModelController
+					.getAlignmentPositionsList().getQueries()) {
+
+				lower = (q.getOffset() * AlignmentPositionDisplayer
+						.getNormalisationFactorY());
+				upper = ((q.getOffset() + q.getSize()) * AlignmentPositionDisplayer
+						.getNormalisationFactorY());
+
+				if (y >= lower && y < upper) {
+					contig = "Contig: " + q.getId();
+					break;
+				}
 			}
-		}
 
-		//check on which reference sequence we are
-    	String reference="";
-		for (DNASequence t : R2cat.dataModelController
-				.getAlignmentPositionsList().getTargets()) {
-			
-			lower = (t.getOffset() * AlignmentPositionDisplayer
-					.getNormalisationFactorX());
-			upper =  ((t.getOffset()+t.getSize()) * AlignmentPositionDisplayer
-					.getNormalisationFactorX());
-			
-			if( x >= lower && x < upper) {
-				reference = "Reference: " + t.getId();
-			   	break;
+			// check on which reference sequence we are
+			String reference = "";
+			for (DNASequence t : R2cat.dataModelController
+					.getAlignmentPositionsList().getTargets()) {
+
+				lower = (t.getOffset() * AlignmentPositionDisplayer
+						.getNormalisationFactorX());
+				upper = ((t.getOffset() + t.getSize()) * AlignmentPositionDisplayer
+						.getNormalisationFactorX());
+
+				if (x >= lower && x < upper) {
+					reference = "Reference: " + t.getId();
+					break;
+				}
 			}
-		}
 
-		// if both (contig and reference) are given separate them with a newline
-		String separator = "";
-		if (!contig.isEmpty() && ! reference.isEmpty()) {
-			separator = "<br>";
+			// if both (contig and reference) are given separate them with a
+			// newline
+			String separator = "";
+			if (!contig.isEmpty() && !reference.isEmpty()) {
+				separator = "<br>";
+			}
+
+			//if contig or reference is given, set tooltip. else it is null
+			if (!contig.isEmpty() || !reference.isEmpty()) {
+			tooltip = "<html>" + contig + separator + reference;
+			}
+			
 		}
-		
-		String tooltip = "<html>" + contig + separator + reference;
 		return tooltip;
 	}
 
