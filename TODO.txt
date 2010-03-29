@@ -1,7 +1,5 @@
   user comment 6.11.2008
  * it would be nice if the zoom  zooms into a selected element and not anywhere else
- * marked objects could get a mouse over effect which displays the relevandt information
-	- Popup for Contigs and References
  * it is quite difficult to find very small selected contigs/matches. if the image is zoomed the selected match could be centered.
    another idea is to highlight the selection by an animation. like a shrinking cross or something similar.
  
@@ -10,10 +8,9 @@
  * Filter all matches such that there are no overlapping ones.
 
  25.11.2008 04:14
- * Check and extend the help menu
- * Think about a tree based ordering algorithm
- * integrate Kais stuff
  * talk to Jochen (Primer)
- * implement: Jochens sliding window ordering
  * implement: load multiple matchings in different tabs
- * ask the support for new repository: cat
+ 
+29.03.2010 11:22
+ user comment
+ * If a set of contigs was ordered using several reference chromosomes (one genome!), then it would be nice to output the contigs for each chromosome seperately. At the moment ther is an ordering, but from the file it is not distinguishable according to which reference it was ordered.
