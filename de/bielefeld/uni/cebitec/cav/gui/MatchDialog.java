@@ -205,7 +205,19 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 
 					progress.append("Total time: " + t.stopTimer() + "\n");
 					progressBar.setValue(100);
-					
+
+					if(result!=null 
+							&& result.size() > 0 
+							&&  queryFasta.getSequences().size() > result.getQueries().size()) {
+						//if not all contigs could be matched
+						int contigs = queryFasta.getSequences().size();
+						int matchedContigs = result.getQueries().size();
+						
+						informationAlert("There were " + (contigs - matchedContigs) + " out of "+ contigs+" queries that could not be matched." +
+						"\nDetails are shown in the progress log.");
+						
+					}
+
 					progress.append("Done!\n");
 
 				} catch (IOException e) {
@@ -215,6 +227,8 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 
 
 				setEndMatching();
+				
+				
 				return result;
 
 				// Catch if the memory is exhausted. If so display a message and
@@ -464,6 +478,17 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 	private void errorAlert(String error) {
 		JOptionPane.showMessageDialog(this, error, "Error",
 				JOptionPane.ERROR_MESSAGE);
+	}
+
+	/**
+	 * Pop up an information message
+	 * 
+	 * @param error
+	 *            Message
+	 */
+	private void informationAlert(String info) {
+		JOptionPane.showMessageDialog(this, info, "Information",
+				JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	/**
