@@ -69,10 +69,12 @@ public class DotPlotVisualisation extends DataViewPlugin {
 	// transparent red
 	final private Color alignmentColorHighlighted = new Color(1f, 0f, 0f, 0.5f);
 
+	//transparent orange for all matches that belong to a contig where at least one match is selected
+	final private Color alignmentSameQuery = new Color(1f, 0.5f, 0f, 0.5f);
+
 	// transparent blue
 	final private Color alignmentColorReversed = new Color(0f, 0f, 1f, 0.5f);
 
-	final private Color alignmentSameQuery = new Color(0f, 1f, 0f, 0.5f);
 
 	final private int border = 20; // pixel
 
