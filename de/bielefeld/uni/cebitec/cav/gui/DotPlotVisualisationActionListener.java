@@ -436,6 +436,16 @@ public class DotPlotVisualisationActionListener implements ActionListener,
 	}
 
 	public void keyReleased(KeyEvent e) {
+		//remove selection when escape is pressed
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			dotPlotVisualisation.getAlignmentPositionDisplayerList()
+			.unmakAll();
+			R2cat.dataModelController
+			.getAlignmentPositionsList().markQueriesWithSelectedAps();
+	R2cat.dataModelController
+			.getAlignmentPositionsList().notifyObservers(NotifyEvent.MARK);
+		}
+
 		changeSelectionCursor(e);
 	}
 
