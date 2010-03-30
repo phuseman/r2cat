@@ -322,20 +322,6 @@ public class QGramFilter {
 			}
 		}// for each query
 		
-		//debugging:
-//		queryNumber = 0;
-//		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
-//		queryNumber = 1;
-//		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
-//		queryNumber = 15;
-//		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
-//		queryNumber = 66;
-//		matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
-//		queryNumber = 67;
-//		matchQuery(queriesOffsets[queryNumber+1],queriesOffsets[queryNumber]);
-//		queryNumber = 10;
-//		matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
-
 
 		// remove references so that the garbage collector can free the space
 		binCounts = null;
