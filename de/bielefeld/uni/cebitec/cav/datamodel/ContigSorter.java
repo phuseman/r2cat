@@ -233,7 +233,9 @@ public class ContigSorter implements Runnable {
 
 	@Override
 	public void run() {
-		this.sort();
+		if(apl != null && !apl.isEmpty()) {
+			this.sort();
+		}
 	}
 
 	public void register(GuiController guiController) {
