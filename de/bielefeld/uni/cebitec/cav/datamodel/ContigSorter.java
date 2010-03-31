@@ -89,9 +89,8 @@ public class ContigSorter implements Runnable {
 
 			int bestIndex = getIndexOfHighestWindowCountFromHistogram((int) query
 					.getSize());
-
 			apl.getQueries().get(i).setSortKey(bestIndex);
-			
+
 
 			this.resetHistogram();
 			reportProgress(((double) i / apl.getQueries().size()));
@@ -161,14 +160,17 @@ public class ContigSorter implements Runnable {
 	 * @return index with highest cumulated count
 	 */
 	private int getIndexOfHighestWindowCountFromHistogram(int windowSize) {
-		int highestValue = -1;
-		int actualValue = 0;
+		// if these values are an integer, a buffer overflow can happen.
+		double highestValue = -1;
+		double actualValue = 0;
+		
+		
 		int indexOfHighestValue = 0;
 
-		// try {
-		// BufferedWriter log = new BufferedWriter(new FileWriter(new
-		// File("test.csv")));
-		//
+//		 try {
+//		 BufferedWriter log = new BufferedWriter(new FileWriter(new
+//		 File("sortwindow.csv")));
+		
 
 		
 		//TODO: It would be great if this would work circular. but this had then to be for each target sequence.
@@ -185,9 +187,6 @@ public class ContigSorter implements Runnable {
 				}
 				actualValue -= histogram[i - windowSize];
 
-				// //debugging
-				// log.write(i+" "+ actualValue+"\n");
-				// 
 
 				if (histogram[i] != 0) {
 					actualValue += histogram[i];
@@ -196,14 +195,19 @@ public class ContigSorter implements Runnable {
 						indexOfHighestValue = i;
 					}
 				}
+				
+//				// //debugging
+//				 log.write(i+", "+ actualValue+","+ histogram[i]+"\n");
+//				// 
+				
 			}
 		}
 
-		// log.close();
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
+//		 log.close();
+//		 } catch (IOException e) {
+//		 // TODO Auto-generated catch block
+//		 e.printStackTrace();
+//		 }
 
 		return indexOfHighestValue;
 	}
