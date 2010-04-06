@@ -133,13 +133,63 @@ private int repeatCount=0;
 	}
 
 	public boolean hasSameQuery(AlignmentPosition pos) {
-		return this.query.equals(pos.target);
+		return this.query.equals(pos.query);
 	}
 
 	public long size() {
 		return queryEnd - queryStart >= 0 ? queryEnd - queryStart : queryStart
 				- queryEnd;
 	}
+	
+	
+	/**
+	 * Checks if this AlignmentPosition is included in another one. A slack of 10% of this AlignmentPositions size is allowed.
+	 * 
+	 * If the AlignmentPositions belog to different queries, then an IllegalArgumentException is thrown.
+	 * 
+	 * @param other The other AlignmentPosition with which this one is compared.
+	 * @return If this one is included in the other with a certain slack.
+	 */
+	public boolean includedInOtherAlignmentPosition(AlignmentPosition other) {
+		if(! this.hasSameQuery(other)) {
+			throw(new IllegalArgumentException("Matches refer to distinct queries."));
+		}
+
+		int slack = (int)(this.size() * 0.1);
+		
+		if((other.getQuerySmallerIndex()-slack)<this.getQuerySmallerIndex()
+				&& (other.getQueryLargerIndex()+slack)>this.getQueryLargerIndex()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Gives the distance of two alignment positions with respect to the target.
+	 * If the matches are overlapping, then we define the distance to be zero.
+	 * 
+	 * If the matches belong to different references, then an IllegalArgumentException is thrown.
+	 * 
+	 * @param other the other AlignmentPosition
+	 * @return distance with respect to the reference
+	 */
+	public int distanceOnTarget(AlignmentPosition other) {
+		int distance = 0;
+		
+		if(! this.hasSameTarget(other)) {
+			throw(new IllegalArgumentException("Matches refer to distinct references."));
+		}
+		
+		if(this.targetStart < other.targetStart) {
+			distance = (int) (other.targetStart - this.targetEnd);
+		} else if ( other.targetStart <  this.targetStart) {
+			distance = (int) (this.targetStart -  other.targetEnd);
+		}
+		
+		return Math.max(distance, 0);
+	}
+
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -158,23 +208,6 @@ private int repeatCount=0;
 		}
 	}
 	
-	/**
-	 * The target positions of this match are as close as 10 bases to the compared match.
-	 * @param obj other match
-	 * @return
-	 */
-	public boolean similarTargetPosition( Object obj ) {
-		AlignmentPosition other = (AlignmentPosition) obj;
-		
-		if (Math.abs(this.targetStart-other.targetStart)<10) {
-			return true;
-		}
-		if (Math.abs(this.targetStart-other.targetStart)<10) {
-			return true;
-		}
-		
-		return false;
-	}
 
 	public int getNumberOfQHits() {
 		return numberOfQHits;
@@ -207,7 +240,7 @@ private int repeatCount=0;
 	/**
 	 * This method is called from the alignmentpositionstatistics object, if it found that a match is repeating.
 	 */
-	protected void addRepeat() {
+	protected void increaseRepeatCount() {
 		this.repeatCount++;
 	}
 	

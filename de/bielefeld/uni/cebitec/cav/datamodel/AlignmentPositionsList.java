@@ -778,6 +778,14 @@ public class AlignmentPositionsList extends Observable implements
 	 */
 	public int writeContigsOrderFasta(File f, boolean ignoreMissingFiles)
 			throws IOException {
+		
+		
+		
+		//change this to renumber the contigs (repeating and non repeating seperately)
+		boolean renumberContigs=false;
+
+		
+		
 		HashMap<String, FastaFileReader> sequences = new HashMap<String, FastaFileReader>();
 		FastaFileReader fastaFile = null;
 		boolean anySequenceContained = false;
@@ -869,8 +877,6 @@ public class AlignmentPositionsList extends Observable implements
 		// ======================end: check for files and id's
 
 		
-		//change this to renumber the contigs (repeating and non repeating seperately)
-		boolean renumberContigs=false;
 		
 		int repeatingContigs=0;
 		int nonrepeatingContigs=0;
