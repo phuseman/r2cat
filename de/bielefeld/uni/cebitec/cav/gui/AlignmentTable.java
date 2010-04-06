@@ -21,6 +21,8 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -29,6 +31,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 
+import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentTableModel;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
@@ -160,5 +163,45 @@ public class AlignmentTable extends JTable implements Observer {
 
 		}
 	}
+	
+    /* (non-Javadoc)
+     * @see javax.swing.JTable#getToolTipText(java.awt.event.MouseEvent)
+     * Borrowed from http://java.sun.com/docs/books/tutorial/uiswing/components/table.html
+     */
+    public String getToolTipText(MouseEvent e) {
+        String tip = null;
+        java.awt.Point p = e.getPoint();
+        int rowIndex = rowAtPoint(p);
+        int colIndex = columnAtPoint(p);
+        int realColumnIndex = convertColumnIndexToModel(colIndex);
+
+        int modelIndex = this.convertRowIndexToModel(rowIndex);
+        AlignmentPosition ap = apl.getAlignmentPositionAt(modelIndex);
+		
+        if (realColumnIndex == 6) { //qhits
+        	if(ap.getNumberOfQHits()>1) {
+        		tip="<html>There were " + ap.getNumberOfQHits()+ " exactly matching 11-grams."+
+        		String.format((Locale)null,"<br>That is an average of %.3f q-grams per base.", (((float)ap.getNumberOfQHits())/ap.size()));
+        	} else {
+        		tip=null;
+        	}
+        } else if (realColumnIndex == 7) { //repeat count
+        	if (ap.getRepeatCount()>0) {
+        	tip="<html>The query sequence of this match seems to be<br>"
+        		+ ap.getRepeatCount()+ " times repeating";
+        	} else {
+        		tip=null;
+        	}
+        } else { //another column
+        	tip = "<html>Match size: "+ ap.size()+ " bases. That is<br>" +
+        	String.format((Locale)null,"%.2f%% of the queries size (%d)<br>%.2f%% of the targets size (%d)",
+        			((100.*ap.size())/ap.getQuery().getSize()),ap.getQuery().getSize(),
+        			((100.*ap.size())/ap.getTarget().getSize()),ap.getTarget().getSize()) ;
+        	
+        	
+        }
+        return tip;
+    }
+
 
 }

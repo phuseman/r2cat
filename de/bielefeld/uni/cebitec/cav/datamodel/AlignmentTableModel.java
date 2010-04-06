@@ -39,8 +39,8 @@ public class AlignmentTableModel extends AbstractTableModel implements Observer 
 	 */
 	private static final long serialVersionUID = 5076289599342214580L;
 
-	private String[] columnNames = { "Query", "Start", "Stop", "QLen", "Target",
-			"Start", "Stop",  "TLen", "q-hits" };
+	private String[] columnNames = { "Query", "Start", "Stop", "Target",
+			"Start", "Stop",  "q-hits", "repeat Count" };
 
 	private AlignmentPositionsList alPosList;
 
@@ -85,31 +85,26 @@ public class AlignmentTableModel extends AbstractTableModel implements Observer 
 			out = alPosList.getAlignmentPositionAt(rowIndex).getQueryEnd();
 			break;
 		case 3:
-			out = alPosList.getAlignmentPositionAt(rowIndex).getQuery()
-					.getSize();
-			break;
-		case 4:
 			out = alPosList.getAlignmentPositionAt(rowIndex).getTarget()
 					.getId();
 			break;
-		case 5:
+		case 4:
 			out = alPosList.getAlignmentPositionAt(rowIndex).getTargetStart();
 			break;
-		case 6:
+		case 5:
 			out = alPosList.getAlignmentPositionAt(rowIndex).getTargetEnd();
 			break;
-		case 7:
-			out = alPosList.getAlignmentPositionAt(rowIndex).getTarget()
-					.getSize();
-			break;
-		case 8:
+		case 6:
 			if(alPosList.getAlignmentPositionAt(rowIndex).getNumberOfQHits() > 0) {
 				out = alPosList.getAlignmentPositionAt(rowIndex).getNumberOfQHits();
 			} else {
-				out = "na";
+				out = "N/A";
 			}
 			break;
-
+		case 7:
+			out = alPosList.getAlignmentPositionAt(rowIndex).getRepeatCount();
+			break;
+			
 		default:
 			break;
 		}
