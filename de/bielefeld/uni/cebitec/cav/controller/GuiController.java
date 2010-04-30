@@ -375,7 +375,7 @@ public class GuiController {
 	 * Gives a dialog to save the contigs in the displayed order and orientation
 	 * as fasta files.
 	 */
-	public void exportAsFasta() {
+	public void exportOrderFasta() {
 		if (!R2cat.dataModelController
 				.isAlignmentpositionsListReady()) {
 			errorAlert("There is nothing to save!");
@@ -390,9 +390,35 @@ public class GuiController {
 		}
 	}
 
+	/**
+	 * Creates a dialog to export the displayed order of the contigs' fasta id's into a text file.
+	 */
+	public void exportOrderText() {
+		if (!R2cat.dataModelController.isAlignmentpositionsListReady()) {
+			errorAlert("There is nothing to save!");
+			return;
+		}
+
+		File f = this.chooseFile(
+				"Export contig order and orientation to text file", false,
+				new CustomFileFilter(".txt,.text", "Text File"));
+		if (f != null) {
+			if (!f.getName().endsWith(".txt") || !f.getName().endsWith(".text")) {
+				f = new File(f.getAbsolutePath() + ".txt");
+			}
+			try {
+				R2cat.dataModelController.writeOrderOfContigs(f);
+			} catch (IOException e) {
+				errorAlert(e.getLocalizedMessage());
+			}
+		} else {
+			return;
+		}
+	}
+
 	private void exportAsFastaFile(File f, boolean ignoreMissingFiles) {
 		try {
-			if (!f.getName().endsWith(".fas")) {
+			if (!f.getName().endsWith(".fas")||!f.getName().endsWith(".fasta")||!f.getName().endsWith(".fna")) {
 				f = new File(f.getAbsolutePath() + ".fas");
 			}
 

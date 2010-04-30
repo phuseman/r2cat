@@ -100,7 +100,15 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 //		swift.addActionListener(this);
 //		fileMenu.add(swift);
 
-		JMenuItem fastaExport = new JMenuItem("Export contigs as FASTA file");
+		JMenuItem contigOrderExport = new JMenuItem("Export contigs order (text)");
+		contigOrderExport.setMnemonic(KeyEvent.VK_F);
+		contigOrderExport.getAccessibleContext()
+				.setAccessibleDescription("Save the contigs in the displayed order and orientation in FASTA format");
+		contigOrderExport.setActionCommand("save_order");
+		contigOrderExport.addActionListener(this);
+		fileMenu.add(contigOrderExport);
+
+		JMenuItem fastaExport = new JMenuItem("Export contigs order (FASTA)");
 		fastaExport.setMnemonic(KeyEvent.VK_F);
 		fastaExport.getAccessibleContext()
 				.setAccessibleDescription("Save the contigs in the displayed order and orientation in FASTA format");
@@ -240,8 +248,10 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			guiController.loadProject();
 		} else if (e.getActionCommand().matches("save_project")) {
 			guiController.saveProject();
+		} else if (e.getActionCommand().matches("save_order")) {
+			guiController.exportOrderText();
 		} else if (e.getActionCommand().matches("save_fasta")) {
-			guiController.exportAsFasta();
+			guiController.exportOrderFasta();
 		} else if (e.getActionCommand().matches("reverted")) {
 			guiController.displayReverseComplements(((JCheckBoxMenuItem) e.getSource())
 					.getState());

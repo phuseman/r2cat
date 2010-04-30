@@ -757,8 +757,9 @@ public class AlignmentPositionsList extends Observable implements
 		BufferedWriter out = new BufferedWriter(new FileWriter(f));
 
 		for (DNASequence query : queryOrder) {
-				out.write((query.isReverseComplemented() ? "-" : "+")
-						+ query.getId() + "\n");
+				out.write( query.getId() + " " +
+						(query.isReverseComplemented() ? "-" : "+") +		
+				"\n");
 		}
 		out.close();
 	}

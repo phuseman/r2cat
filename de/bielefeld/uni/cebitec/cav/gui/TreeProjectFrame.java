@@ -866,7 +866,7 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 	@SuppressWarnings("unchecked")
 	// <editor-fold defaultstate="collapsed" desc="Generated
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private final void initComponents() {
 
         projectDirPanel = new javax.swing.JPanel();
         tfProjectdir = new javax.swing.JTextField();
