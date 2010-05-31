@@ -27,7 +27,7 @@ public class PrimerGenerator {
 	//private ArrayList markedSeq = new ArrayList();
 	
 	
-	public PrimerGenerator(File fasta, File xml,String[] marked, HashMap primerDir) throws Exception{
+	public PrimerGenerator(File fasta, File xml,String[] marked, HashMap<String, Integer> primerDir) throws Exception{
 	
 	FastaFileReader fastaParser = new FastaFileReader(fasta);
 	FileReader inXML = new FileReader(xml);
@@ -104,7 +104,7 @@ public class PrimerGenerator {
 							}
 						}
 					}
-				}else{
+				}if(direction ==-1){
 					//reverse Primer
 					for(int start = tempString.length();start>max;start--){
 						int end = start-maxLength;
@@ -113,8 +113,7 @@ public class PrimerGenerator {
 						String canidate = tempString.substring(end, start);
 						String lastPlus1 = tempString.substring(end-1, end);
 						String lastPlus2 = tempString.substring(end-2, end-1);
-						char[] canidateArray = canidate.toCharArray();
-						char[] canidateSeq = getComplement(canidateArray);
+						char[] canidateSeq = canidate.toCharArray();
 						for(char i :canidateSeq){
 							if(i==Bases.N|| i==Bases.n){
 								nCount++;
@@ -136,8 +135,7 @@ public class PrimerGenerator {
 								lastPlus12 = canidate.substring(length-1, length);
 								lastPlus22 = canidate.substring(length-2 ,length-1);
 							}
-							char[] canidateArray2 = canidate2.toCharArray();
-							char[] canidateSeq2 = getComplement(canidateArray2);
+							char[] canidateSeq2 = canidate2.toCharArray();
 							primer.add(new Primer(s,canidateSeq2,end,direction,length,lastPlus12, lastPlus22));		
 								}
 							}

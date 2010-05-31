@@ -32,7 +32,7 @@ public class printTest {
 		String[] marked = new String[2];
 		marked[0] ="r0";
 		marked[1] ="0";
-		HashMap primerDirection = new HashMap();
+		HashMap<String,Integer> primerDirection = new HashMap<String, Integer>();
 		int forward = 1;
 		int notForward = -1;
 		primerDirection.put(marked[0], forward);

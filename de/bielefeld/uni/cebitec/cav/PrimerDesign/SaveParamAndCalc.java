@@ -29,12 +29,12 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		private HashMap<String, String> atLast6 = new HashMap<String, String>();
 		private HashMap<String, String> gc0207 = new HashMap<String, String>();
 		private HashMap<String, String> anneal = new HashMap<String, String>();
-		private HashMap repeatAndBackfoldAndNPenalty= new HashMap();
-		private ArrayList gcArray = new ArrayList();
-		private ArrayList annealArray = new ArrayList();
-		private ArrayList atLast6Array = new ArrayList();
-		private ArrayList gc0207Array = new ArrayList();
-		private ArrayList offsetArray = new ArrayList();
+		private HashMap<DefaultMutableTreeNode, String> repeatAndBackfoldAndNPenalty= new HashMap<DefaultMutableTreeNode, String>();
+		private ArrayList<String> gcArray = new ArrayList<String>();
+		private ArrayList<String> annealArray = new ArrayList<String>();
+		private ArrayList<String> atLast6Array = new ArrayList<String>();
+		private ArrayList<String> gc0207Array = new ArrayList<String>();
+		private ArrayList<String> offsetArray = new ArrayList<String>();
 		private Stack stack = null;
 		
 		private void fillingContainer(String key, String value){
@@ -190,7 +190,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		//noch bearbeiten
 		public double calcScoreRepeat(double repeatCount){
 			double score = 0;
-			String tempScore = this.repeatAndBackfoldAndNPenalty.get("REPEAT").toString();
+			String tempScore = this.repeatAndBackfoldAndNPenalty.get("REPEAT");
 			double s = Double.parseDouble(tempScore);
 			score = (s*repeatCount);
 			return score;
@@ -251,7 +251,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			String last4Bases = new String(last4Base);
 			String primer = new String(seq);
 			if(primer.contains(last4Bases)){
-				String tempScore = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD").toString();
+				String tempScore = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD");
 				score = Double.parseDouble(tempScore);
 			}
 			return score;
