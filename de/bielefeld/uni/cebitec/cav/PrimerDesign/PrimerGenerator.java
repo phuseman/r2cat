@@ -59,6 +59,7 @@ public class PrimerGenerator {
 		//SEQUENZEN CHECKEN!!!!
 	public void getPrimerCanidates(){
 			getMarkedSeq();
+			boolean size =false;
 			int nCount =0;
 			int repeatCount = 0;
 			String lastPlus12 = null;
@@ -68,6 +69,11 @@ public class PrimerGenerator {
 				char[] tempChar;
 				tempChar = templateSeq.get(s);
 				String tempString = new String(tempChar);
+				if(tempString.length()-300<500){
+					size=true;
+				} else{
+					size=false;
+				}
 				if(direction == 1){
 					//forward Primer
 					for(int start =0;start<=(tempString.length()-max);start++){
@@ -88,7 +94,7 @@ public class PrimerGenerator {
 							//ContigID, primersequenz, startpunkt, forward length
 							int offset=tempString.length()-start;
 							boolean off = this.filter(offset, tempString.length());
-							if(off){
+							if(off||size){
 							primer.add(new Primer(s,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2));
 						for(int length = miniLength; length<canidate.length();length++){
 							String canidate2 = canidate.substring(0, length);
@@ -130,7 +136,7 @@ public class PrimerGenerator {
 							//String temp = new String(canidateSeq);
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
-							if(off){
+							if(off||size){
 							primer.add(new Primer(s,canidateSeq,end,direction,maxLength,lastPlus1, lastPlus2));
 						for(int length = miniLength; length<canidate.length();length++){
 							String canidate2 = canidate.substring(canidate.length()-length,canidate.length());
