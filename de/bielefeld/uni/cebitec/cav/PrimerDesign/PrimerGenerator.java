@@ -80,11 +80,9 @@ public class PrimerGenerator {
 					for(char i :canidateSeq){
 							if(i==Bases.N|| i==Bases.n){
 								nCount++;
-						} if(i == Bases.a||i==Bases.t||i==Bases.g||i==Bases.c){
-							repeatCount++; //abspeichern zum abfragen???
 						}
 					}
-						if(nCount<2){
+						if(nCount==0){
 							//String temp = new String(canidateSeq);
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
