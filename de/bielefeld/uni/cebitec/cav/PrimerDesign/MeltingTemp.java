@@ -15,6 +15,7 @@ public class MeltingTemp {
 		this.oligoConc = 0.0000025;
 		base=seq[0];
 		annealTemp = this.calcTemp(seq);
+		this.setAnnealTemp(annealTemp);
 		System.out.println(annealTemp);
 	}
 	public void fillEnthalpieAndEntropieParam(){
