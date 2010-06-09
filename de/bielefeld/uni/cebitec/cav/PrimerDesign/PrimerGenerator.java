@@ -86,6 +86,9 @@ public class PrimerGenerator {
 							//String temp = new String(canidateSeq);
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
+							int offset=tempString.length()-start;
+							boolean off = this.filter(offset, tempString.length());
+							if(off){
 							primer.add(new Primer(s,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2));
 						for(int length = miniLength; length<canidate.length();length++){
 							String canidate2 = canidate.substring(0, length);
@@ -99,6 +102,7 @@ public class PrimerGenerator {
 							char[] canidateArray2 = canidate2.toCharArray();
 							char[] canidateSeq2 = getComplement(canidateArray2);
 							primer.add(new Primer(s,canidateSeq2,start,direction,length,lastPlus12, lastPlus22));		
+							}
 							}
 						}
 					}
@@ -119,10 +123,14 @@ public class PrimerGenerator {
 							repeatCount++; //abspeichern zum abfragen???
 						}
 					}
-						if(nCount<2){
+		
+						if(nCount==0){
+							int offset=tempString.length()-end;
+							boolean off = this.filter(offset, tempString.length());
 							//String temp = new String(canidateSeq);
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
+							if(off){
 							primer.add(new Primer(s,canidateSeq,end,direction,maxLength,lastPlus1, lastPlus2));
 						for(int length = miniLength; length<canidate.length();length++){
 							String canidate2 = canidate.substring(canidate.length()-length,canidate.length());
@@ -138,11 +146,36 @@ public class PrimerGenerator {
 								}
 							}
 						}
+						}
 					}
 			}
 			System.out.println(primer.size());
 	}
 	
+	public boolean filter(int offset, int seqSize){
+		boolean off = false;
+		int mu =200;
+		int sigma=50;
+		double phi = Phi((offset - mu) / sigma);
+		if(phi<0.1||phi>0.9){
+			//off=true;
+			return off;
+		} else{
+			off =true;
+			return off;
+		}
+	}
+    public double Phi(double z) {
+        if (z < -8.0) return 0.0;
+        if (z >  8.0) return 1.0;
+        double sum = 0.0, term = z;
+        for (int i = 3; sum + term != sum; i += 2) {
+            sum  = sum + term;
+            term = term * z * z / i;
+        }
+        return 0.5 + sum * Math.exp(-z*z / 2) / Math.sqrt(2 * Math.PI);
+    }
+
 	public char[] getComplement(char[] PrimerSeq){
 		char[] alphabetMap= new char[256];
 		char[] complement = new char[PrimerSeq.length];
