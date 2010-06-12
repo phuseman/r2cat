@@ -29,7 +29,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		private HashMap<String, String> atLast6 = new HashMap<String, String>();
 		private HashMap<String, String> gc0207 = new HashMap<String, String>();
 		private HashMap<String, String> anneal = new HashMap<String, String>();
-		private HashMap<DefaultMutableTreeNode, String> repeatAndBackfoldAndNPenalty= new HashMap<DefaultMutableTreeNode, String>();
+		private HashMap<String, String> repeatAndBackfoldAndNPenalty= new HashMap<String, String>();
 		private ArrayList<String> gcArray = new ArrayList<String>();
 		private ArrayList<String> annealArray = new ArrayList<String>();
 		private ArrayList<String> atLast6Array = new ArrayList<String>();
@@ -57,7 +57,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			}if(currentParent.toString().equals("MAX_OFFSET")){
 				maxOffset.put(currentTag, value);
 			}if(currentParent==currentNode){
-				repeatAndBackfoldAndNPenalty.put(currentParent, value);		
+				String cP = currentParent.toString();
+				repeatAndBackfoldAndNPenalty.put(cP, value);		
 			}if(currentParent.toString().equals("OFFSET")){
 				offset.put(key, value);
 				offsetArray.add(key);
@@ -160,6 +161,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			score = score + Double.parseDouble(plus2);
 			return score;
 		}
+		
 		public double calcScoreTotalGCLevel(double gcRatio){
 			Object[] tempArray=this.gcArray.toArray();
 			Arrays.sort(tempArray,Collections.reverseOrder());
@@ -173,6 +175,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			}
 			return score;
 		}
+		
 		//noch zu bearbeiten
 		public double calcScoreAnnealTemp(double mintemp){
 			double score = 0;
@@ -187,6 +190,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			}
 			return score;
 		}
+		
 		//noch bearbeiten
 		public double calcScoreRepeat(double repeatCount){
 			double score = 0;
@@ -195,6 +199,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			score = (s*repeatCount);
 			return score;
 		}
+		
 		//noch bearbeiten homopolyCount mit qgramIndex berechnen?
 		public double calcScoreHomopoly(int homopolyCount){
 			double score = 0;
@@ -246,18 +251,21 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 					return score;
 		}
 		
-		public double calcScoreBackfold(char[] last4Base,char[] seq){
+		public double calcScoreBackfold(char[] last4Base,char[] leftseq){
 			double score = 0;
 			String last4Bases = new String(last4Base);
-			String primer = new String(seq);
+			String primer = new String(leftseq);
 			if(primer.contains(last4Bases)){
 				String tempScore = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD");
-				score = Double.parseDouble(tempScore);
+				score = Double.valueOf(tempScore).doubleValue();
+			} else{
+				score = 0;
 			}
 			return score;
 		}
 		
 		public double calcScoreOffset(int realstart){
+			double scoreOffset = 0;
 			double score = 0;
 			Object[] tempArray = this.offsetArray.toArray();
 			Arrays.sort(tempArray);
@@ -265,9 +273,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 				String temp = key.toString();
 				int t = Integer.valueOf(temp).intValue();
 				if(realstart>=t){
-					score = Double.valueOf((this.offset.get(key)));
+					scoreOffset = Double.valueOf((this.offset.get(key)));
 				}
 			}
+			double scoreMaxOffset = calcScoreMaxOffset(realstart);
+			score = scoreOffset+scoreMaxOffset;
 			return score;
 		}
 		

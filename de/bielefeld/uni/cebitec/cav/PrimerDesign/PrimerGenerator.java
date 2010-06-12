@@ -3,6 +3,7 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
@@ -20,6 +21,8 @@ public class PrimerGenerator {
 	private HashMap<String, char[]> templateSeq = new HashMap<String,char[]>();
 	private HashMap<String, Integer> primerDirection = new HashMap<String, Integer>();
 	private SaveParamAndCalc scoring = new SaveParamAndCalc();
+	private MeltingTemp meltTemp;
+	private Vector<Primer> primerCanidates;
 	private Vector<Primer> primer;
 	private int maxLength = 24;
 	private int miniLength = 19;
@@ -39,9 +42,12 @@ public class PrimerGenerator {
 	seq = fastaParser.getCharArray();
 	offsetsInInput = fastaParser.getOffsetsArray();
 	sequences =fastaParser.getSequences();
+	primerCanidates = new Vector<Primer>();
 	primer = new Vector<Primer>();
 	getPrimerCanidates();
+	this.calcScoreEachPrimerCanidate();
 }
+
 	public void getMarkedSeq(){
 		
 		for(String s:markedSeq){
@@ -56,7 +62,59 @@ public class PrimerGenerator {
 			}
 		}
 	}
-		//SEQUENZEN CHECKEN!!!!
+	
+	public void calcScoreEachPrimerCanidate(){
+		double score = 0;
+		char[] seq;
+		Integer direction;
+		int length;
+		int start;
+		int seqLength;
+		String contigID;
+		String plus1;
+		String plus2;
+		
+		double scoreFirstLastBase = 0;
+		double scoreGCTotal = 0;
+		double scoreBackfold = 0;
+		double scoreLength = 0;
+		double scoreLast6 = 0;
+		double scoreGC0207 = 0;
+		double scoreOffset = 0;
+		double scorePlus1Plus2 = 0;
+		double scoreTemp = 0;
+		
+		for(int i = 0; i<primerCanidates.size();i++){
+			contigID = primerCanidates.elementAt(i).getContigID();
+			length = primerCanidates.elementAt(i).getLength();
+			seq = primerCanidates.elementAt(i).getSeq();
+			direction = primerCanidates.elementAt(i).getForward();
+			start = primerCanidates.elementAt(i).getStart();
+			seqLength =  primerCanidates.elementAt(i).getSeqLength();
+			plus1 = primerCanidates.elementAt(i).getLastPlus1();
+			plus2 = primerCanidates.elementAt(i).getLastPlus2();
+			meltTemp = new MeltingTemp(seq);
+			double melting = meltTemp.getAnnealTemp();
+			
+			scoreLength = this.getLengthScore(length);
+			scoreGCTotal = this.getGCScore(seq, true);
+			scoreFirstLastBase = this.getFirstAndLastBaseScore(seq, direction);
+			scoreBackfold = this.getBackfoldScore(seq);
+			scoreLast6 = this.getLast6Score(seq);
+			scoreGC0207 = this.getGCScore(seq, false);
+			scoreOffset = this.getOffsetsScore(start, seqLength, length, direction);
+			scorePlus1Plus2 = this.getPlus1Plus2Score(plus1, plus2);
+			scoreTemp = scoring.calcScoreAnnealTemp(melting);
+			
+			score = scoreGCTotal+scoreFirstLastBase+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp;
+			System.out.println(score);
+			primer.add(new Primer(contigID,seq,start,direction,length,score,melting));
+		}
+		System.out.println(primer.size());
+	}
+	
+	
+	//SEQUENZEN CHECKEN!!!!
 	public void getPrimerCanidates(){
 			getMarkedSeq();
 			boolean size =false;
@@ -64,23 +122,20 @@ public class PrimerGenerator {
 			int repeatCount = 0;
 			String lastPlus12 = null;
 			String lastPlus22 = null;
-			for(String s : markedSeq){
-				Integer direction = primerDirection.get(s);
-				char[] tempChar;
-				tempChar = templateSeq.get(s);
-				String tempString = new String(tempChar);
-				if(tempString.length()-300<500){
-					size=true;
-				} else{
-					size=false;
-				}
+			for(String contigID : markedSeq){
+				Integer direction = primerDirection.get(contigID);
+				char[] tempSeqChar;
+				tempSeqChar = templateSeq.get(contigID);
+				int seqLength = tempSeqChar.length;
+				String templateSeqString = new String(tempSeqChar);
 				if(direction == 1){
 					//forward Primer
-					for(int start =0;start<=(tempString.length()-max);start++){
+					for(int start =0;start<=(templateSeqString.length()-max);start++){
 						int end = start+maxLength;
-						String canidate = tempString.substring(start,end);
-						String lastPlus1 = tempString.substring(end, end+1);
-						String lastPlus2 = tempString.substring(end+1, end+2);
+						int offset=templateSeqString.length()-start;
+						String canidate = templateSeqString.substring(start,end);
+						String lastPlus1 = templateSeqString.substring(end, end+1);
+						String lastPlus2 = templateSeqString.substring(end+1, end+2);
 						char[] canidateArray = canidate.toCharArray();
 						char[] canidateSeq = getComplement(canidateArray);
 					for(char i :canidateSeq){
@@ -92,10 +147,9 @@ public class PrimerGenerator {
 							//String temp = new String(canidateSeq);
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
-							int offset=tempString.length()-start;
-							boolean off = this.filter(offset, tempString.length());
+							boolean off = this.filter(offset, templateSeqString.length());
 							if(off||size){
-							primer.add(new Primer(s,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2));
+							primerCanidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
 						for(int length = miniLength; length<canidate.length();length++){
 							String canidate2 = canidate.substring(0, length);
 							if(length ==23){
@@ -107,20 +161,21 @@ public class PrimerGenerator {
 							}
 							char[] canidateArray2 = canidate2.toCharArray();
 							char[] canidateSeq2 = getComplement(canidateArray2);
-							primer.add(new Primer(s,canidateSeq2,start,direction,length,lastPlus12, lastPlus22));		
+							primerCanidates.add(new Primer(contigID,seqLength,canidateSeq2,start,direction,length,lastPlus12, lastPlus22,offset));		
 							}
 							}
 						}
 					}
 				}if(direction ==-1){
 					//reverse Primer
-					for(int start = tempString.length();start>max;start--){
+					for(int start = templateSeqString.length();start>max;start--){
 						int end = start-maxLength;
+						int offset=templateSeqString.length()-end;
 						//System.out.println(start);
 						//System.out.println(end);
-						String canidate = tempString.substring(end, start);
-						String lastPlus1 = tempString.substring(end-1, end);
-						String lastPlus2 = tempString.substring(end-2, end-1);
+						String canidate = templateSeqString.substring(end, start);
+						String lastPlus1 = templateSeqString.substring(end-1, end);
+						String lastPlus2 = templateSeqString.substring(end-2, end-1);
 						char[] canidateSeq = canidate.toCharArray();
 						for(char i :canidateSeq){
 							if(i==Bases.N|| i==Bases.n){
@@ -131,13 +186,12 @@ public class PrimerGenerator {
 					}
 		
 						if(nCount==0){
-							int offset=tempString.length()-end;
-							boolean off = this.filter(offset, tempString.length());
+							boolean off = this.filter(offset, templateSeqString.length());
 							//String temp = new String(canidateSeq);
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
 							if(off||size){
-							primer.add(new Primer(s,canidateSeq,end,direction,maxLength,lastPlus1, lastPlus2));
+							primerCanidates.add(new Primer(contigID,seqLength,canidateSeq,end,direction,maxLength,lastPlus1, lastPlus2,offset));
 						for(int length = miniLength; length<canidate.length();length++){
 							String canidate2 = canidate.substring(canidate.length()-length,canidate.length());
 							if(length == 23){
@@ -148,14 +202,14 @@ public class PrimerGenerator {
 								lastPlus22 = canidate.substring(length-2 ,length-1);
 							}
 							char[] canidateSeq2 = canidate2.toCharArray();
-							primer.add(new Primer(s,canidateSeq2,end,direction,length,lastPlus12, lastPlus22));		
+							primerCanidates.add(new Primer(contigID,seqLength,canidateSeq2,end,direction,length,lastPlus12, lastPlus22,offset));		
 								}
 							}
 						}
 						}
 					}
 			}
-			System.out.println(primer.size());
+			System.out.println(primerCanidates.size());
 	}
 	
 	public boolean filter(int offset, int seqSize){
@@ -163,7 +217,7 @@ public class PrimerGenerator {
 		int mu =200;
 		int sigma=50;
 		double phi = Phi((offset - mu) / sigma);
-		if(phi<0.1||phi>0.9){
+		if(phi<=0.3||phi>=0.7){
 			//off=true;
 			return off;
 		} else{
@@ -171,7 +225,8 @@ public class PrimerGenerator {
 			return off;
 		}
 	}
-    public double Phi(double z) {
+    
+	public double Phi(double z) {
         if (z < -8.0) return 0.0;
         if (z >  8.0) return 1.0;
         double sum = 0.0, term = z;
@@ -204,11 +259,11 @@ public class PrimerGenerator {
 		return complement;
 	}
 	
-public double getBackfoldScore(char[] PrimerSeq){
+	public double getBackfoldScore(char[] PrimerSeq){
 	double score = 0;
 	char[] temp = new char[3];
 	char[] temp2 = new char[PrimerSeq.length-8];
-	System.arraycopy(PrimerSeq, (PrimerSeq.length-4), temp, 0, 4);
+	System.arraycopy(PrimerSeq, (PrimerSeq.length-4), temp, 0, 3);
 	System.arraycopy(PrimerSeq, 0, temp2, 0, (PrimerSeq.length-8));
 	char[] last4Bases = getComplement(temp);
 	char[] leftSeq = temp2;
@@ -216,7 +271,7 @@ public double getBackfoldScore(char[] PrimerSeq){
 	return score;
 }
 
-public double getFirstAndLastBaseScore(char[] PrimerSeq,Integer forward){
+	public double getFirstAndLastBaseScore(char[] PrimerSeq,Integer forward){
 	double score = 0;
 	if(forward == 1){
 		Object f = PrimerSeq[PrimerSeq.length-1];
@@ -245,20 +300,20 @@ public double getFirstAndLastBaseScore(char[] PrimerSeq,Integer forward){
 		score = scoring.calcNPenalty(count);
 		return score;
 	}
+	
 	public double getLengthScore(int primerLength){
 		double score = 0;
 		score = scoring.calcLengthScore(primerLength);
 		return score;
 	}
 	
-public double getLast6Score(char[] PrimerSeq){
+	public double getLast6Score(char[] PrimerSeq){
 	double score = 0;
 	double last6Ratio =0;
 	int ATLevelAtLast6 =0;
-	int seqLength = PrimerSeq.length;
-	
-	for(int i =0; i<6;i++){
-		if(PrimerSeq[seqLength-i]==Bases.A || PrimerSeq[seqLength-i]==Bases.a || PrimerSeq[seqLength-i] ==Bases.T || PrimerSeq[seqLength-i] ==Bases.t){
+
+	for(int i =1; i<=6;i++){
+		if(PrimerSeq[(PrimerSeq.length-i)]==Bases.A || PrimerSeq[(PrimerSeq.length-i)]==Bases.a || PrimerSeq[(PrimerSeq.length-i)]==Bases.T || PrimerSeq[(PrimerSeq.length-i)]==Bases.t){
 			ATLevelAtLast6++;
 		}
 		last6Ratio = ((ATLevelAtLast6/6)*100);
@@ -267,7 +322,7 @@ public double getLast6Score(char[] PrimerSeq){
 	return score;
 }
 
-public double getGCScore(char[] PrimerSeq,boolean totalGCRatio){
+	public double getGCScore(char[] PrimerSeq,boolean totalGCRatio){
 	double score = 0;
 	boolean totalGC = totalGCRatio;
 	int gcLevel=0;
@@ -294,7 +349,7 @@ public double getGCScore(char[] PrimerSeq,boolean totalGCRatio){
 	}
 }	
 
-public double getOffsetsScore(int startposition, int seqLength, int primerLength, Integer forward){
+	public double getOffsetsScore(int startposition, int seqLength, int primerLength, Integer forward){
 	double score = 0;
 	int realstart = 0;
 	if(forward ==1){
@@ -307,7 +362,13 @@ public double getOffsetsScore(int startposition, int seqLength, int primerLength
 	return score;
 }
 
-/*	private char[] copyEachSequ(int start, int length){
+	public double getPlus1Plus2Score(String Plus1,String Plus2){
+		double score = 0;
+		score = scoring.calcScorePlus1(Plus1, Plus2);
+		return score;
+	}
+
+	/*	private char[] copyEachSequ(int start, int length){
 char[] tempSequ = new char[length];
 System.arraycopy(seq, start, tempSequ, 0, length-start);
 return tempSequ;

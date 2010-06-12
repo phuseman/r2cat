@@ -3,6 +3,7 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 public class Primer {
 	private double score = 0;
 	private int length = 0;
+	private int seqLength = 0;
 	private double annelTemp = 0;
 	private Integer forward = 1,reverse =-1;
 	private String contigID = null;
@@ -12,19 +13,70 @@ public class Primer {
 	private String readDirection = null;
 	private String lastPlus1 = null;
 	private String lastPlus2 = null;
+	private int offset = 0;
 	
 	
-	public Primer(String contigID,char[] seq, int start, Integer forward, int length, String lastPlus1, String lastPlus2) {
+	public Primer(String contigID,int seqLength,char[] seq, int start, Integer direction, int length, String lastPlus1, String lastPlus2, int offset) {
 		this.contigID = contigID;
-		this.forward = forward;
+		this.forward = direction;
 		this.length = length;
 		this.seq = seq;
 		this.start = start;
 		this.lastPlus1 =lastPlus1;
 		this.lastPlus2 = lastPlus2;
-		
+		this.offset = offset;
+		this.seqLength = seqLength;
 	}
 	
+
+	public Primer(String contigID, char[] seq, int start, Integer direction, int length, double score,double annealTemperature){
+		this.contigID = contigID;
+		this.forward = direction;
+		this.length = length;
+		this.seq = seq;
+		this.start = start;
+		this.score = score;
+		this.annelTemp = annealTemperature;
+	}
+	
+	public int getSeqLength() {
+		return seqLength;
+	}
+
+	public void setSeqLength(int seqLength) {
+		this.seqLength = seqLength;
+	}
+	public String getReadDirection() {
+		return readDirection;
+	}
+
+	public void setReadDirection(String readDirection) {
+		this.readDirection = readDirection;
+	}
+
+	public String getLastPlus1() {
+		return lastPlus1;
+	}
+
+	public void setLastPlus1(String lastPlus1) {
+		this.lastPlus1 = lastPlus1;
+	}
+
+	public String getLastPlus2() {
+		return lastPlus2;
+	}
+
+	public void setLastPlus2(String lastPlus2) {
+		this.lastPlus2 = lastPlus2;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
 	public Integer getForward() {
 		return forward;
 	}
