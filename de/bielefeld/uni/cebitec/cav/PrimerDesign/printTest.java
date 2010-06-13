@@ -61,7 +61,7 @@ public class printTest {
 		primerDirection.put(marked[0], forward);
 		primerDirection.put(marked[1], notForward);
 		PrimerGenerator t = new PrimerGenerator(fasta, xml,marked,primerDirection);
-		MeltingTemp test = new MeltingTemp(seq);
+		//MeltingTemp test = new MeltingTemp(seq);
 	}
 
 }

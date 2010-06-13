@@ -36,6 +36,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		private ArrayList<String> gc0207Array = new ArrayList<String>();
 		private ArrayList<String> offsetArray = new ArrayList<String>();
 		private Stack stack = null;
+		double mintemp = 0;
 		
 		private void fillingContainer(String key, String value){
 			
@@ -73,7 +74,6 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 				annealArray.add(key);
 			}
 		}
-		
 		
 		
 		/**
@@ -175,18 +175,22 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			}
 			return score;
 		}
-		
-		//noch zu bearbeiten
-		public double calcScoreAnnealTemp(double mintemp){
+
+
+		public double calcScoreAnnealTemp(char[] seq){
 			double score = 0;
+			MeltingTemp melt = new MeltingTemp();
+			mintemp = melt.calcTemp(seq);
 			Object[] tempArray = this.annealArray.toArray();
 			Arrays.sort(tempArray,Collections.reverseOrder());
 			for(Object key : tempArray){
 				String temp = key.toString();
-				int interval = Integer.valueOf(temp).intValue();
-			if(mintemp>=(60-interval)&&mintemp<=(60+interval)){
-				score = Double.parseDouble(anneal.get(key));
-			}
+				double interval = Double.valueOf(temp).doubleValue();
+				double border = 60-interval;
+				double border2 = 60+interval;
+			if(mintemp>=border&&mintemp<=border2){
+				score = Double.valueOf(anneal.get(temp)).doubleValue();
+				} 
 			}
 			return score;
 		}
@@ -265,7 +269,6 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		}
 		
 		public double calcScoreOffset(int realstart){
-			double scoreOffset = 0;
 			double score = 0;
 			Object[] tempArray = this.offsetArray.toArray();
 			Arrays.sort(tempArray);
@@ -273,11 +276,9 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 				String temp = key.toString();
 				int t = Integer.valueOf(temp).intValue();
 				if(realstart>=t){
-					scoreOffset = Double.valueOf((this.offset.get(key)));
+					score = Double.valueOf((this.offset.get(key)));
 				}
 			}
-			double scoreMaxOffset = calcScoreMaxOffset(realstart);
-			score = scoreOffset+scoreMaxOffset;
 			return score;
 		}
 		
@@ -288,7 +289,9 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			int m = Integer.valueOf(mult).intValue();
 			int dis = Integer.valueOf(distance).intValue();
 			if(realstart > dis){
+				//System.out.println(realstart);
 				int temp = realstart - dis;
+				//System.out.println("test ="+temp);
 				score = (temp * m);
 			}
 			return score;
@@ -311,4 +314,13 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			score = (dis*s);
 			return score;
 		}
+		
+		public double getMintemp() {
+			return mintemp;
+		}
+
+		public void setMintemp(double mintemp) {
+			this.mintemp = mintemp;
+		}
 	}
+	

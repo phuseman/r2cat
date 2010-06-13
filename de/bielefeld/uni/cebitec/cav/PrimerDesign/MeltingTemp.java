@@ -6,18 +6,9 @@ public class MeltingTemp {
 
 	private double oligoConc;
 	private char base;
-	private double annealTemp = 0;
 	private HashMap<String,Double> enthalpie=new HashMap<String,Double>();
 	private HashMap<String,Double> entropie=new HashMap<String,Double>();
-	
-	public MeltingTemp(char[] seq){
-		this.fillEnthalpieAndEntropieParam();
-		this.oligoConc = 0.0000025;
-		base=seq[0];
-		annealTemp = this.calcTemp(seq);
-		//this.setAnnealTemp(annealTemp);
-		//System.out.println(annealTemp);
-	}
+
 	public void fillEnthalpieAndEntropieParam(){
 		enthalpie.put("AA", -8.4);
 		enthalpie.put("AT", -6.5);
@@ -54,7 +45,11 @@ public class MeltingTemp {
 		entropie.put("TG", -19.3);
 	}
 
+	//testen wegen base[0]?!?!
 	public double calcTemp(char[] seq){
+		this.fillEnthalpieAndEntropieParam();
+		this.oligoConc = 0.0000025;
+		base = seq[0];
 		double temp = 0;
 		double errors = 0;
 		double ent = 0;
@@ -85,12 +80,14 @@ public class MeltingTemp {
 			return -1.0;
 		}
 	}
-	
-	public double getAnnealTemp() {
-		return annealTemp;
-	}
-	public void setAnnealTemp(double annealTemp) {
-		this.annealTemp = annealTemp;
-	}
-	
 }
+
+
+/*public MeltingTemp(){
+	this.fillEnthalpieAndEntropieParam();
+	this.oligoConc = 0.0000025;
+	//base=seq[0];
+	//annealTemp = this.calcTemp(seq);
+	//this.setAnnealTemp(annealTemp);
+	//System.out.println(annealTemp);
+}*/

@@ -3,7 +3,6 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Vector;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
@@ -21,12 +20,13 @@ public class PrimerGenerator {
 	private HashMap<String, char[]> templateSeq = new HashMap<String,char[]>();
 	private HashMap<String, Integer> primerDirection = new HashMap<String, Integer>();
 	private SaveParamAndCalc scoring = new SaveParamAndCalc();
-	private MeltingTemp meltTemp;
 	private Vector<Primer> primerCanidates;
 	private Vector<Primer> primer;
 	private int maxLength = 24;
 	private int miniLength = 19;
 	private int max = maxLength+2;
+	private double meltTemperature;
+	MeltingTemp meltTemp = new MeltingTemp();
 	//private ArrayList markedSeq = new ArrayList();
 	
 	
@@ -44,24 +44,9 @@ public class PrimerGenerator {
 	sequences =fastaParser.getSequences();
 	primerCanidates = new Vector<Primer>();
 	primer = new Vector<Primer>();
-	getPrimerCanidates();
-	this.calcScoreEachPrimerCanidate();
+	this.getPrimerCanidates();
 }
-
-	public void getMarkedSeq(){
-		
-		for(String s:markedSeq){
-			for(int i = 0; i<sequences.size();i++){
-				if(sequences.get(i).getId().matches(s)){
-					int length = (int) sequences.get(i).getSize();
-					int start = (int) sequences.get(i).getOffset();
-					char[] temp = new char[length];
-					System.arraycopy(seq, start, temp, 0, length);
-					templateSeq.put(s, temp);
-				}
-			}
-		}
-	}
+	
 	
 	public void calcScoreEachPrimerCanidate(){
 		double score = 0;
@@ -93,8 +78,6 @@ public class PrimerGenerator {
 			seqLength =  primerCanidates.elementAt(i).getSeqLength();
 			plus1 = primerCanidates.elementAt(i).getLastPlus1();
 			plus2 = primerCanidates.elementAt(i).getLastPlus2();
-			meltTemp = new MeltingTemp(seq);
-			double melting = meltTemp.getAnnealTemp();
 			
 			scoreLength = this.getLengthScore(length);
 			scoreGCTotal = this.getGCScore(seq, true);
@@ -102,24 +85,50 @@ public class PrimerGenerator {
 			scoreBackfold = this.getBackfoldScore(seq);
 			scoreLast6 = this.getLast6Score(seq);
 			scoreGC0207 = this.getGCScore(seq, false);
-			scoreOffset = this.getOffsetsScore(start, seqLength, length, direction);
+			scoreOffset = 0;//this.getOffsetsScore(start, seqLength, length, direction);
 			scorePlus1Plus2 = this.getPlus1Plus2Score(plus1, plus2);
-			scoreTemp = scoring.calcScoreAnnealTemp(melting);
+			scoreTemp = 0;//this.getTempScore(seq);
 			
 			score = scoreGCTotal+scoreFirstLastBase+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp;
-			System.out.println(score);
-			primer.add(new Primer(contigID,seq,start,direction,length,score,melting));
+			//System.out.println(score);
+			//System.out.println(scoreLength+scoreGCTotal+scoreFirstLastBase+scoreLast6+scoreGC0207+scorePlus1Plus2+scoreTemp);
+			primer.add(new Primer(contigID,seq,start,direction,length,score,meltTemperature));
+			
 		}
-		System.out.println(primer.size());
+		for(int j = 0;j<primer.size();j++){
+			System.out.println(primer.elementAt(j).getScore());
+		}
+		//System.out.println(primer.size());
 	}
 	
+	public double getTempScore(char[] seq){
+		double score = 0;
+		score = scoring.calcScoreAnnealTemp(seq);
+		meltTemperature = scoring.getMintemp();
+		return score;
+	}
+
+	public void getMarkedSeq(){
+		
+		for(String s:markedSeq){
+			for(int i = 0; i<sequences.size();i++){
+				if(sequences.get(i).getId().matches(s)){
+					int length = (int) sequences.get(i).getSize();
+					int start = (int) sequences.get(i).getOffset();
+					char[] temp = new char[length];
+					System.arraycopy(seq, start, temp, 0, length);
+					templateSeq.put(s, temp);
+				}
+			}
+		}
+	}
 	
 	//SEQUENZEN CHECKEN!!!!
 	public void getPrimerCanidates(){
 			getMarkedSeq();
 			boolean size =false;
 			int nCount =0;
-			int repeatCount = 0;
+			//int repeatCount = 0;
 			String lastPlus12 = null;
 			String lastPlus22 = null;
 			for(String contigID : markedSeq){
@@ -148,6 +157,7 @@ public class PrimerGenerator {
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
 							boolean off = this.filter(offset, templateSeqString.length());
+							size =true;
 							if(off||size){
 							primerCanidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
 						for(int length = miniLength; length<canidate.length();length++){
@@ -170,7 +180,7 @@ public class PrimerGenerator {
 					//reverse Primer
 					for(int start = templateSeqString.length();start>max;start--){
 						int end = start-maxLength;
-						int offset=templateSeqString.length()-end;
+						int offset=start;
 						//System.out.println(start);
 						//System.out.println(end);
 						String canidate = templateSeqString.substring(end, start);
@@ -180,9 +190,9 @@ public class PrimerGenerator {
 						for(char i :canidateSeq){
 							if(i==Bases.N|| i==Bases.n){
 								nCount++;
-						} if(i == Bases.a||i==Bases.t||i==Bases.g||i==Bases.c){
+						} /*if(i == Bases.a||i==Bases.t||i==Bases.g||i==Bases.c){
 							repeatCount++; //abspeichern zum abfragen???
-						}
+						}*/
 					}
 		
 						if(nCount==0){
@@ -190,6 +200,7 @@ public class PrimerGenerator {
 							//String temp = new String(canidateSeq);
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
+							size = false;
 							if(off||size){
 							primerCanidates.add(new Primer(contigID,seqLength,canidateSeq,end,direction,maxLength,lastPlus1, lastPlus2,offset));
 						for(int length = miniLength; length<canidate.length();length++){
@@ -209,19 +220,19 @@ public class PrimerGenerator {
 						}
 					}
 			}
+			this.calcScoreEachPrimerCanidate();
 			System.out.println(primerCanidates.size());
 	}
 	
 	public boolean filter(int offset, int seqSize){
 		boolean off = false;
 		int mu =200;
-		int sigma=50;
+		int sigma=150;
 		double phi = Phi((offset - mu) / sigma);
-		if(phi<=0.3||phi>=0.7){
-			//off=true;
+		if(phi<=0.7&&phi>=0.3){
+			off=true;
 			return off;
 		} else{
-			off =true;
 			return off;
 		}
 	}
@@ -310,14 +321,14 @@ public class PrimerGenerator {
 	public double getLast6Score(char[] PrimerSeq){
 	double score = 0;
 	double last6Ratio =0;
-	int ATLevelAtLast6 =0;
-
-	for(int i =1; i<=6;i++){
+	double ATLevelAtLast6 =0;
+	
+	for(int i = 1; i<=6;i++){
 		if(PrimerSeq[(PrimerSeq.length-i)]==Bases.A || PrimerSeq[(PrimerSeq.length-i)]==Bases.a || PrimerSeq[(PrimerSeq.length-i)]==Bases.T || PrimerSeq[(PrimerSeq.length-i)]==Bases.t){
 			ATLevelAtLast6++;
 		}
-		last6Ratio = ((ATLevelAtLast6/6)*100);
 	}
+	last6Ratio = (ATLevelAtLast6/6*100);
 	score = scoring.calcScoreLast6(last6Ratio);
 	return score;
 }
@@ -359,6 +370,7 @@ public class PrimerGenerator {
 		realstart = startposition+max-primerLength;
 		score = scoring.calcScoreOffset(realstart)+scoring.calcScoreMaxOffset(realstart);
 	}
+	//System.out.println(score);
 	return score;
 }
 
@@ -368,6 +380,7 @@ public class PrimerGenerator {
 		return score;
 	}
 
+	
 	/*	private char[] copyEachSequ(int start, int length){
 char[] tempSequ = new char[length];
 System.arraycopy(seq, start, tempSequ, 0, length-start);

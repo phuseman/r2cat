@@ -4,7 +4,7 @@ public class Primer {
 	private double score = 0;
 	private int length = 0;
 	private int seqLength = 0;
-	private double annelTemp = 0;
+	private double meltTemp = 0;
 	private Integer forward = 1,reverse =-1;
 	private String contigID = null;
 	private int start = 0;
@@ -29,14 +29,14 @@ public class Primer {
 	}
 	
 
-	public Primer(String contigID, char[] seq, int start, Integer direction, int length, double score,double annealTemperature){
+	public Primer(String contigID, char[] seq, int start, Integer direction, int length, double score,double meltTemperature){
 		this.contigID = contigID;
 		this.forward = direction;
 		this.length = length;
 		this.seq = seq;
 		this.start = start;
 		this.score = score;
-		this.annelTemp = annealTemperature;
+		this.meltTemp = meltTemperature;
 	}
 	
 	public int getSeqLength() {
@@ -108,10 +108,10 @@ public class Primer {
 		this.length = length;
 	}
 	public double getAnnelTemp() {
-		return annelTemp;
+		return meltTemp;
 	}
 	public void setAnnelTemp(double annelTemp) {
-		this.annelTemp = annelTemp;
+		this.meltTemp = annelTemp;
 	}
 
 	public String getContigID() {
