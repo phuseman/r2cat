@@ -78,7 +78,7 @@ public class PrimerGenerator {
 			seqLength =  primerCanidates.elementAt(i).getSeqLength();
 			plus1 = primerCanidates.elementAt(i).getLastPlus1();
 			plus2 = primerCanidates.elementAt(i).getLastPlus2();
-			
+
 			scoreLength = this.getLengthScore(length);
 			scoreGCTotal = this.getGCScore(seq, true);
 			scoreFirstLastBase = this.getFirstAndLastBaseScore(seq, direction);
@@ -87,18 +87,21 @@ public class PrimerGenerator {
 			scoreGC0207 = this.getGCScore(seq, false);
 			scoreOffset = 0;//this.getOffsetsScore(start, seqLength, length, direction);
 			scorePlus1Plus2 = this.getPlus1Plus2Score(plus1, plus2);
-			scoreTemp = 0;//this.getTempScore(seq);
-			
+			scoreTemp = this.getTempScore(seq);
 			score = scoreGCTotal+scoreFirstLastBase+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp;
+			boolean filter = this.filter(0, meltTemperature);
+			//filter =true;
+			if(filter){
 			//System.out.println(score);
 			//System.out.println(scoreLength+scoreGCTotal+scoreFirstLastBase+scoreLast6+scoreGC0207+scorePlus1Plus2+scoreTemp);
 			primer.add(new Primer(contigID,seq,start,direction,length,score,meltTemperature));
+			}
 			
 		}
 		for(int j = 0;j<primer.size();j++){
-			System.out.println(primer.elementAt(j).getScore());
+			System.out.println(primer.elementAt(j).getAnnelTemp());
 		}
-		//System.out.println(primer.size());
+		System.out.println(primer.size());
 	}
 	
 	public double getTempScore(char[] seq){
@@ -156,7 +159,7 @@ public class PrimerGenerator {
 							//String temp = new String(canidateSeq);
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
-							boolean off = this.filter(offset, templateSeqString.length());
+							boolean off = this.filter(offset,0);
 							size =true;
 							if(off||size){
 							primerCanidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
@@ -196,7 +199,7 @@ public class PrimerGenerator {
 					}
 		
 						if(nCount==0){
-							boolean off = this.filter(offset, templateSeqString.length());
+							boolean off = this.filter(offset, 0);
 							//String temp = new String(canidateSeq);
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
@@ -224,11 +227,21 @@ public class PrimerGenerator {
 			System.out.println(primerCanidates.size());
 	}
 	
-	public boolean filter(int offset, int seqSize){
+	public boolean filter(int offset,double meltingTemp){
 		boolean off = false;
-		int mu =200;
-		int sigma=150;
-		double phi = Phi((offset - mu) / sigma);
+		int mu = 0;
+		double z = 0;
+		int sigma =0;
+		if(offset!=0){
+			mu =200;
+			sigma = 150;
+			z = offset;
+		} else{
+			mu = 60;
+			sigma = 20;
+			z = meltingTemp;
+		}
+		double phi = Phi((z - mu) / sigma);
 		if(phi<=0.7&&phi>=0.3){
 			off=true;
 			return off;
