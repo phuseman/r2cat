@@ -7,7 +7,14 @@ import java.util.Vector;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 
-
+/**
+ * This class generates the primer candidate sequences given a contig-sequence.
+ * The sequence of primer candidates has to be checked on certain biological 
+ * properties and are scored according to the scoring-scheme from the "other" class.
+ * 
+ * @author yherrmann	
+ *
+ */
 public class PrimerGenerator {
 	class Bases{
 		private final static char A ='A',a='a',G ='G',g='g', C='C',c='c',T='T',t='t',N='N', n='n';
@@ -29,7 +36,9 @@ public class PrimerGenerator {
 	MeltingTemp meltTemp = new MeltingTemp();
 	//private ArrayList markedSeq = new ArrayList();
 	
-	
+	/**
+	 * 
+	 */
 	public PrimerGenerator(File fasta, File xml,String[] marked, HashMap<String, Integer> primerDir) throws Exception{
 	
 	FastaFileReader fastaParser = new FastaFileReader(fasta);
@@ -88,13 +97,16 @@ public class PrimerGenerator {
 			scoreOffset = 0;//this.getOffsetsScore(start, seqLength, length, direction);
 			scorePlus1Plus2 = this.getPlus1Plus2Score(plus1, plus2);
 			scoreTemp = this.getTempScore(seq);
-			score = scoreGCTotal+scoreFirstLastBase+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp;
-			boolean filter = this.filter(0, meltTemperature);
+			if(scoreTemp!=-1){
+				score = scoreGCTotal+scoreFirstLastBase+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp;
+				boolean filter = this.filter(0, meltTemperature);
+			
 			//filter =true;
 			if(filter){
 			//System.out.println(score);
 			//System.out.println(scoreLength+scoreGCTotal+scoreFirstLastBase+scoreLast6+scoreGC0207+scorePlus1Plus2+scoreTemp);
 			primer.add(new Primer(contigID,seq,start,direction,length,score,meltTemperature));
+			}
 			}
 			
 		}
@@ -103,6 +115,7 @@ public class PrimerGenerator {
 		}
 		System.out.println(primer.size());
 	}
+	
 	
 	public double getTempScore(char[] seq){
 		double score = 0;
