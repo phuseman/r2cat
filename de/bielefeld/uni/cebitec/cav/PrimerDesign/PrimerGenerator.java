@@ -116,7 +116,6 @@ public class PrimerGenerator {
 		System.out.println(primer.size());
 	}
 	
-	
 	public double getTempScore(char[] seq){
 		double score = 0;
 		score = scoring.calcScoreAnnealTemp(seq);
@@ -389,7 +388,7 @@ public class PrimerGenerator {
 	public double getOffsetsScore(int startposition, int seqLength, int primerLength, Integer forward){
 	double score = 0;
 	int realstart = 0;
-	if(forward ==1){
+	if(forward == 1){
 	realstart = seqLength - startposition - primerLength;
 	score = scoring.calcScoreOffset(realstart)+scoring.calcScoreMaxOffset(realstart);
 	} else{
