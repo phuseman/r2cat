@@ -1,7 +1,13 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.util.HashMap;
-
+/**
+ * This class includes methods to calculate the melting-temperature of a given 
+ * nucleotide sequence.
+ * 
+ * @author yherrmann
+ *
+ */
 public class MeltingTemp {
 
 	private double oligoConc;
@@ -9,6 +15,11 @@ public class MeltingTemp {
 	private HashMap<String,Double> enthalpie=new HashMap<String,Double>();
 	private HashMap<String,Double> entropie=new HashMap<String,Double>();
 
+	/**
+	 *	Methods fills HashMaps with the scores for a given pair of nucleotides regarding
+	 *	the enthalpie and the entropie. 
+	 *
+	 */
 	public void fillEnthalpieAndEntropieParam(){
 		enthalpie.put("AA", -8.4);
 		enthalpie.put("AT", -6.5);
@@ -45,6 +56,18 @@ public class MeltingTemp {
 		entropie.put("TG", -19.3);
 	}
 
+	/**
+	 * This method calculates the melting temperature with the base-stacking method.
+	 * A pair of bases of the sequence is compared to the entries of the HashMaps in order to
+	 * get the level of entropie and enthalpie of the whole sequence. This factors are used in 
+	 * the formula of the base-stacking method to calculate the melting temperature.
+	 * 
+	 * If the sequence contains unknown letters the calculation can not proceed.
+	 * 
+	 * @param seq
+	 * @return melting temperature
+	 */
+	
 	//testen wegen base[0]?!?!
 	public double calcTemp(char[] seq){
 		this.fillEnthalpieAndEntropieParam();
