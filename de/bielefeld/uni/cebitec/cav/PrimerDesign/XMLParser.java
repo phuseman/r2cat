@@ -5,6 +5,13 @@ import java.util.Stack;
 
 import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 
+/**
+ * This class reports what kind of tag was met in the XML-file in order to store the
+ * information of the XML-file in the same structure.
+ * 
+ * @author yherrmann
+ *
+ */
 public class XMLParser {
 	class TagType{
 		private static final int
@@ -32,9 +39,9 @@ public class XMLParser {
 	 * @throws SAXException 
 	 * @throws ParserConfigurationException 
 	 */
-	private int popMode(Stack s){
+	private int popMode(Stack<Integer> s){
 		if(!s.empty()){
-			return ((Integer)s.pop()).intValue();
+			return (s.pop()).intValue();
 		} else{
 			return TagType.PRE;
 		}
@@ -48,9 +55,9 @@ public class XMLParser {
 	 */
 	
 	  public void parse(DocHandler doc,FileReader r) throws Exception {
-		    Stack st = new Stack();
+		    Stack<Integer> st = new Stack<Integer>();
 		    StringBuffer sb = new StringBuffer();
-		    StringBuffer etag = new StringBuffer();
+		   // StringBuffer etag = new StringBuffer();
 		    int depth = 0;
 		    int mode = TagType.PRE;
 		    int character = 0;

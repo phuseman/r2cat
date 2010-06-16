@@ -1,5 +1,12 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
+/**
+ * This class represents a primer object. This object includes information about
+ * certain primer properties for example: length, startposition, melting temperature, etc.
+ * 
+ * @author yherrmann
+ *
+ */
 public class Primer {
 	private double score = 0;
 	private int length = 0;
