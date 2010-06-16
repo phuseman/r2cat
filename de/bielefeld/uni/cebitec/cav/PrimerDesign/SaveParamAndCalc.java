@@ -12,7 +12,11 @@ import java.util.Stack;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
-
+/**
+ * 
+ * @author yherrmann
+ *
+ */
 	final class SaveParamAndCalc implements DocHandler {
 		private DefaultMutableTreeNode root, currentNode, currentParent;
 		private String currentTag = null;
@@ -38,6 +42,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		private Stack stack = null;
 		double mintemp = 0;
 		
+		/**
+		 * 
+		 * @param key
+		 * @param value
+		 */
 		private void fillingContainer(String key, String value){
 			
 			if(currentParent.toString().equals("GC")){
@@ -153,6 +162,12 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			}
 		}
 		
+		/**
+		 * 
+		 * @param lastPlus1
+		 * @param lastPlus2
+		 * @return score for base at position +1
+		 */
 		public double calcScorePlus1(String lastPlus1, String lastPlus2){
 			double score = 0;
 			String plus1 = this.plus1Base.get(lastPlus1).toString();
@@ -162,6 +177,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			return score;
 		}
 		
+		/**
+		 * 
+		 * @param gcRatio
+		 * @return GC-Level score
+		 */
 		public double calcScoreTotalGCLevel(double gcRatio){
 			Object[] tempArray=this.gcArray.toArray();
 			Arrays.sort(tempArray,Collections.reverseOrder());
@@ -176,7 +196,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			return score;
 		}
 
-
+		/**
+		 * 
+		 * @param seq
+		 * @return melting temperature score
+		 */
 		public double calcScoreAnnealTemp(char[] seq){
 			double score = 0;
 			MeltingTemp melt = new MeltingTemp();
@@ -195,6 +219,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			return score;
 		}
 		
+		/**
+		 * 
+		 * @param repeatCount
+		 * @return repeat-score
+		 */
 		//noch bearbeiten
 		public double calcScoreRepeat(double repeatCount){
 			double score = 0;
@@ -204,6 +233,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			return score;
 		}
 		
+		/**
+		 * 
+		 * @param homopolyCount
+		 * @return homopoly-score
+		 */
 		//noch bearbeiten homopolyCount mit qgramIndex berechnen?
 		public double calcScoreHomopoly(int homopolyCount){
 			double score = 0;
@@ -217,6 +251,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			return score;
 		}
 		
+		/**
+		 * 
+		 * @param gcRatio2A7
+		 * @return GC-Level at position 2 and 7 score 
+		 */
 		public double calcScoreGCLevel2A7(double gcRatio2A7){
 			double score = 0;
 			Object[] tempArray = this.gc0207Array.toArray();
@@ -231,6 +270,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			return score;
 		}
 		
+		/**
+		 * 
+		 * @param ATLast6Ratio
+		 * @return AT at last 6 Base score
+		 */
 		public double calcScoreLast6(double ATLast6Ratio){
 			double score =0;
 			Object[] tempArray = this.atLast6Array.toArray();
@@ -245,6 +289,12 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			return score;
 		}
 		
+		/**
+		 * 
+		 * @param firstBase
+		 * @param lastBase
+		 * @return first and last base score
+		 */
 		public double calcScoreFirstBaseAndLastBase(String firstBase, String lastBase){
 					double score = 0;
 					String tempFirst = this.firstBase.get(firstBase);
@@ -255,6 +305,12 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 					return score;
 		}
 		
+		/**
+		 * 		
+		 * @param last4Base
+		 * @param leftseq
+		 * @return backfold-score
+		 */
 		public double calcScoreBackfold(char[] last4Base,char[] leftseq){
 			double score = 0;
 			String last4Bases = new String(last4Base);
@@ -268,6 +324,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			return score;
 		}
 		
+		/**
+		 * 
+		 * @param realstart
+		 * @return offset-score
+		 */
 		public double calcScoreOffset(int realstart){
 			double score = 0;
 			Object[] tempArray = this.offsetArray.toArray();
@@ -282,6 +343,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			return score;
 		}
 		
+		/**
+		 * 
+		 * @param realstart
+		 * @return max-offset score
+		 */
 		public double calcScoreMaxOffset(int realstart){
 			double score = 0;
 			String distance = this.maxOffset.get("DISTANCE");
@@ -304,6 +370,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			return score;
 		}
 		
+		/**
+		 * 
+		 * @param length
+		 * @return length-score
+		 */
 		public double calcLengthScore(int length){
 			double score = 0;
 			String idealTemp = this.length.get("IDEAL");
