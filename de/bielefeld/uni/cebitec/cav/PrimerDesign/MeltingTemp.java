@@ -5,6 +5,8 @@ import java.util.HashMap;
  * This class includes methods to calculate the melting-temperature of a given 
  * nucleotide sequence.
  * 
+ * It is a reproduction of the function (Function.pm) used in the Perl-script written by Jochen Blom.
+ * 
  * @author yherrmann
  *
  */
