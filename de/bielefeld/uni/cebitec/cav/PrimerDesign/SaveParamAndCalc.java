@@ -340,6 +340,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 					score = Double.valueOf((this.offset.get(key)));
 				}
 			}
+			System.out.println(score);
 			return score;
 		}
 		

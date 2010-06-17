@@ -33,6 +33,8 @@ public class PrimerGenerator {
 	private int miniLength = 19;
 	private int max = maxLength+2;
 	private double meltTemperature;
+	private int minBorderOffset = 80;
+	private int maxBorderOffset =400;
 	MeltingTemp meltTemp = new MeltingTemp();
 	//private ArrayList markedSeq = new ArrayList();
 	
@@ -94,24 +96,21 @@ public class PrimerGenerator {
 			scoreBackfold = this.getBackfoldScore(seq);
 			scoreLast6 = this.getLast6Score(seq);
 			scoreGC0207 = this.getGCScore(seq, false);
-			scoreOffset = 0;//this.getOffsetsScore(start, seqLength, length, direction);
+			scoreOffset = this.getOffsetsScore(start, seqLength, length, direction);
 			scorePlus1Plus2 = this.getPlus1Plus2Score(plus1, plus2);
 			scoreTemp = this.getTempScore(seq);
 			if(scoreTemp!=-1){
 				score = scoreGCTotal+scoreFirstLastBase+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp;
-				boolean filter = this.filter(0, meltTemperature);
 			
 			//filter =true;
-			if(filter){
 			//System.out.println(score);
 			//System.out.println(scoreLength+scoreGCTotal+scoreFirstLastBase+scoreLast6+scoreGC0207+scorePlus1Plus2+scoreTemp);
 			primer.add(new Primer(contigID,seq,start,direction,length,score,meltTemperature));
 			}
-			}
 			
 		}
 		for(int j = 0;j<primer.size();j++){
-			System.out.println(primer.elementAt(j).getAnnelTemp());
+		//	System.out.println(primer.elementAt(j).getAnnelTemp());
 		}
 		System.out.println(primer.size());
 	}
@@ -171,9 +170,7 @@ public class PrimerGenerator {
 							//String temp = new String(canidateSeq);
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
-							boolean off = this.filter(offset,0);
-							size =true;
-							if(off||size){
+							if(offset>minBorderOffset&&offset<maxBorderOffset){
 							primerCanidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
 						for(int length = miniLength; length<canidate.length();length++){
 							String canidate2 = canidate.substring(0, length);
@@ -211,12 +208,10 @@ public class PrimerGenerator {
 					}
 		
 						if(nCount==0){
-							boolean off = this.filter(offset, 0);
 							//String temp = new String(canidateSeq);
 							//System.out.println(temp);
 							//ContigID, primersequenz, startpunkt, forward length
-							size = false;
-							if(off||size){
+							if(offset>minBorderOffset&&offset<maxBorderOffset){
 							primerCanidates.add(new Primer(contigID,seqLength,canidateSeq,end,direction,maxLength,lastPlus1, lastPlus2,offset));
 						for(int length = miniLength; length<canidate.length();length++){
 							String canidate2 = canidate.substring(canidate.length()-length,canidate.length());
@@ -238,40 +233,6 @@ public class PrimerGenerator {
 			this.calcScoreEachPrimerCanidate();
 			System.out.println(primerCanidates.size());
 	}
-	
-	public boolean filter(int offset,double meltingTemp){
-		boolean off = false;
-		int mu = 0;
-		double z = 0;
-		int sigma =0;
-		if(offset!=0){
-			mu =200;
-			sigma = 150;
-			z = offset;
-		} else{
-			mu = 60;
-			sigma = 20;
-			z = meltingTemp;
-		}
-		double phi = Phi((z - mu) / sigma);
-		if(phi<=0.7&&phi>=0.3){
-			off=true;
-			return off;
-		} else{
-			return off;
-		}
-	}
-    
-	public double Phi(double z) {
-        if (z < -8.0) return 0.0;
-        if (z >  8.0) return 1.0;
-        double sum = 0.0, term = z;
-        for (int i = 3; sum + term != sum; i += 2) {
-            sum  = sum + term;
-            term = term * z * z / i;
-        }
-        return 0.5 + sum * Math.exp(-z*z / 2) / Math.sqrt(2 * Math.PI);
-    }
 
 	public char[] getComplement(char[] PrimerSeq){
 		char[] alphabetMap= new char[256];
@@ -390,10 +351,11 @@ public class PrimerGenerator {
 	int realstart = 0;
 	if(forward == 1){
 	realstart = seqLength - startposition - primerLength;
-	score = scoring.calcScoreOffset(realstart)+scoring.calcScoreMaxOffset(realstart);
+	System.out.println(realstart);
+	score = scoring.calcScoreOffset(realstart);//+scoring.calcScoreMaxOffset(realstart);
 	} else{
 		realstart = startposition+max-primerLength;
-		score = scoring.calcScoreOffset(realstart)+scoring.calcScoreMaxOffset(realstart);
+		score = scoring.calcScoreOffset(realstart); //+scoring.calcScoreMaxOffset(realstart);
 	}
 	//System.out.println(score);
 	return score;
@@ -497,6 +459,40 @@ public void getPrimerCandidates(char[] sequence){
 public void scorePrimer(char[] seq){
 scoring.calcScoreTotalGCLevel(getGCRatio(seq, true));
 scoring.calcScoreGCLevel2A7(getGCRatio(seq, false));
+}*/
+	
+	/*public boolean filter(int offset,double meltingTemp){
+	boolean off = false;
+	int mu = 0;
+	double z = 0;
+	int sigma =0;
+	if(offset!=0){
+		mu =200;
+		sigma = 150;
+		z = offset;
+	} else{
+		mu = 60;
+		sigma = 20;
+		z = meltingTemp;
+	}
+	double phi = Phi((z - mu) / sigma);
+	if(phi<=0.7&&phi>=0.3){
+		off=true;
+		return off;
+	} else{
+		return off;
+	}
+}
+
+public double Phi(double z) {
+    if (z < -8.0) return 0.0;
+    if (z >  8.0) return 1.0;
+    double sum = 0.0, term = z;
+    for (int i = 3; sum + term != sum; i += 2) {
+        sum  = sum + term;
+        term = term * z * z / i;
+    }
+    return 0.5 + sum * Math.exp(-z*z / 2) / Math.sqrt(2 * Math.PI);
 }*/
 
 }
