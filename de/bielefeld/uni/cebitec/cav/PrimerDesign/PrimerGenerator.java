@@ -143,8 +143,20 @@ public class PrimerGenerator {
 			temperature = scoring.getTemperature();
 			primerScore = scoreGCTotal+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp;
 		
-			String ps = new String(primerSeq);
-			if(offset==400){
+			//Stichproben Test
+		/*	if(offset==120&&start==675&&primerLength==21){
+				System.out.println("Total Primer score: "+primerScore);
+				System.out.println("length score "+scoreLength);
+				System.out.println("temperature score " +scoreTemp);
+				System.out.println("temperature "+temperature);
+				System.out.println("Offset score: "+scoreOffset);
+				System.out.println(plus1+" "+ plus2);
+				System.out.println("plus1plus2 "+scorePlus1Plus2);
+				System.out.println("GC0207 "+scoreGC0207);
+				System.out.println("AT score: "+scoreLast6);
+				System.out.println("backfold "+scoreBackfold);
+				System.out.println("first/last"+scoreFirstLastBase);
+				System.out.println("total GC "+scoreGCTotal);
 				System.out.println("Total Primer score: "+primerScore);
 				System.out.println("contig "+contigID);
 				System.out.println("direction "+direction);
@@ -157,34 +169,12 @@ public class PrimerGenerator {
 					System.out.print(primerSeq[j]);
 				}
 				System.out.println("/n");
-			}
-			
-			/*
-			System.out.println("Total Primer score: "+primerScore);
-			System.out.println("length score "+scoreLength);
-			System.out.println("temperature score " +scoreTemp);
-			System.out.println("temperature "+temperature);
-			System.out.println("Offset score: "+scoreOffset);
-			System.out.println(plus1+" "+ plus2);
-			System.out.println("plus1plus2 "+scorePlus1Plus2);
-			System.out.println("GC0207 "+scoreGC0207);
-			System.out.println("AT score: "+scoreLast6);
-			System.out.println("backfold "+scoreBackfold);
-			System.out.println("first/last"+scoreFirstLastBase);
-			System.out.println("total GC "+scoreGCTotal);
-			*/
+			}*/
 			if(primerScore>0){
 			primer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature));
 
 			}
 		}
-//		for(int j = 0; j<primer.size();j++){
-//			primerSeq = primer.elementAt(j).getPrimerSeq();
-//			for(int k=0; k<primerSeq.length;k++){
-//			System.out.print(primerSeq[k]);
-//		}
-//			System.out.println(" "+primer.elementAt(j).getContigID()+" "+primer.elementAt(j).getStart()+" "+primer.elementAt(j).getPrimerScore());
-//		}
 		System.out.println("primer: "+primer.size());
 
 	}
@@ -265,7 +255,7 @@ public class PrimerGenerator {
 						String lastPlus2 = templateSeqString.substring(end-2, end-1);
 						
 						char[] canidateArray = canidate.toCharArray();
-						char[] canidateSeq = getComplement(canidateArray);
+						char[] canidateSeq = getReverseComplement(canidateArray);
 	
 						for(char i :canidateSeq){
 							if(i==Bases.N|| i==Bases.n){
@@ -286,7 +276,7 @@ public class PrimerGenerator {
 								lastPlus22 = canidate.substring(length-2 ,length-1);
 							}
 							char[] canidateArray2 = canidate2.toCharArray();
-							char[] canidateSeq2 = getComplement(canidateArray2);
+							char[] canidateSeq2 = getReverseComplement(canidateArray2);
 							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq2,end,direction,length,lastPlus12, lastPlus22,offset));		
 								}
 							}
@@ -298,10 +288,10 @@ public class PrimerGenerator {
 			System.out.println("kandidaten: "+primerCandidates.size());
 	}
 
-	public char[] getComplement(char[] primerSeq){
+	public char[] getReverseComplement(char[] primerSeq){
 
 		char[] alphabetMap= new char[256];
-		char[] complement = new char[primerSeq.length];
+		char[] reverseComplement = new char[primerSeq.length];
 		
 		for (int j = 0; j < alphabetMap.length; j++) {
 			alphabetMap[j]= (char) j;
@@ -317,60 +307,51 @@ public class PrimerGenerator {
 		
 		int m = 0;
 		for (int k = primerSeq.length-1; k>=0; k--,m++) {
-			complement[m]= alphabetMap[primerSeq[k]];
+			reverseComplement[m]= alphabetMap[primerSeq[k]];
 			
 		}
 	/*	for(int m = 0; m<complement.length;m++){
 		System.out.print(complement[m]);
 		}*/
 		
-	/*	for (int j = 0; j<primerSeq.length; j++) {
+	/*	//nur komplement
+	 * for (int j = 0; j<primerSeq.length; j++) {
 			complement[j]= alphabetMap[primerSeq[j]];
 		}*/
 	
-		return complement;
+		return reverseComplement;
 	}
 	
 	public double getBackfoldScore(char[] PrimerSeq){
 	double scoreBackfold = 0;
 	char[] last4 = new char[4];
 	char[] last4Bases;
-	char[] reversedLast4Bases;
-	int m = 0;
-	int n = 0;
 	char[] primerSeqMinusEight = new char[PrimerSeq.length-8];
 	System.arraycopy(PrimerSeq, (PrimerSeq.length-4), last4, 0, 4);
 	System.arraycopy(PrimerSeq, 0, primerSeqMinusEight, 0, (PrimerSeq.length-8));
-	last4Bases = getComplement(last4);
-	n = (last4Bases.length-1);
-	reversedLast4Bases =  new char[last4Bases.length];
-		while(m<last4Bases.length){
-			reversedLast4Bases[n] = last4Bases[m];
-			m++;
-			n--;
-	}
+	last4Bases = getReverseComplement(last4);
 	char[] leftSeq = primerSeqMinusEight;
-	scoreBackfold = scoring.calcScoreBackfold(reversedLast4Bases, leftSeq);
+	scoreBackfold = scoring.calcScoreBackfold(last4Bases, leftSeq);
 	return scoreBackfold;
 }
 
 	public double getFirstAndLastBaseScore(char[] primerSeq,Integer direction){
 	double scoreFirstLastBase = 0;
-	if(direction == 1){
+/*	if(direction == 1){
 		Object first = primerSeq[primerSeq.length-1];
 		Object last = primerSeq[0];
 		String firstBase = first.toString();
 		String lastBase = last.toString();
 		scoreFirstLastBase = scoring.calcScoreFirstBaseAndLastBase(firstBase, lastBase);
 		return scoreFirstLastBase;	
-	} else{
+	} else{*/
 		Object first = primerSeq[0];
 		Object last =primerSeq[primerSeq.length-1];
 		String firstBase = first.toString();
 		String lastBase = last.toString();
 		scoreFirstLastBase = scoring.calcScoreFirstBaseAndLastBase(firstBase, lastBase);
 		return scoreFirstLastBase;	
-	}
+	//}
 }	
 
 	public double getNPenalty(char[] PrimerSeq){
@@ -391,23 +372,23 @@ public class PrimerGenerator {
 		return scoreLength;
 	}
 	
-	public double getLast6Score(char[] primerSeq,Integer direction){
+	public double getLast6Score(char[] primerSeq, Integer direction){
 	double scoreLast6Bases = 0;
 	double last6Ratio =0;
 	double ATLevelAtLast6 =0;
-	if(direction == -1){
+	//if(direction == -1){
 		for(int i = 1; i<=6;i++){
 			if(primerSeq[(primerSeq.length-i)]==Bases.A || primerSeq[(primerSeq.length-i)]==Bases.a || primerSeq[(primerSeq.length-i)]==Bases.T || primerSeq[(primerSeq.length-i)]==Bases.t){
 				ATLevelAtLast6++;
 			}
 		}
-	} else{
-		for(int i = 0; i<=6;i++){
-			if(primerSeq[i]==Bases.A || primerSeq[i]==Bases.a || primerSeq[i]==Bases.T || primerSeq[i]==Bases.t){
-				ATLevelAtLast6++;
-			}
-		}
-	}
+	//} else{
+//		for(int i = 0; i<=6;i++){
+//			if(primerSeq[i]==Bases.A || primerSeq[i]==Bases.a || primerSeq[i]==Bases.T || primerSeq[i]==Bases.t){
+//				ATLevelAtLast6++;
+//			}
+//		}
+//	}
 	last6Ratio = (ATLevelAtLast6/6*100);
 	scoreLast6Bases = scoring.calcScoreLast6(last6Ratio);
 	return scoreLast6Bases;
@@ -423,15 +404,15 @@ public class PrimerGenerator {
 	for(int i =0; i<primerSeq.length;i++){
 		if(primerSeq[i]== Bases.G|| primerSeq[i] ==Bases.g|| primerSeq[i]==Bases.C || primerSeq[i] ==Bases.c){
 			gcLevel++;
-			if(direction == -1){
+			//if(direction == -1){
 				if(i>0&&i<7){
 					gcLevel2A7++;
 				}
-			} else {
-				if(i<primerSeq.length && i>(primerSeq.length-7)){
-					gcLevel2A7++;
-				}
-			}
+			//} else {
+			//	if(i<primerSeq.length && i>(primerSeq.length-7)){
+			//		gcLevel2A7++;
+			//	}
+			//}
 		}
 	}
 	
