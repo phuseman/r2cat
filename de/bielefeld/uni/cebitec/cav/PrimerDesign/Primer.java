@@ -8,15 +8,15 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
  *
  */
 public class Primer {
-	private double score = 0;
-	private int length = 0;
-	private int seqLength = 0;
-	private double meltTemp = 0;
-	private Integer forward = 1,reverse =-1;
+	private double primerScore = 0;
+	private int primerLength = 0;
+	private int contigLength = 0;
+	private double temperature = 0;
+	private Integer direction = 0;
 	private String contigID = null;
 	private int start = 0;
 	private int end = 0;
-	private char[] seq = null;
+	private char[] primerSeq = null;
 	private String readDirection = null;
 	private String lastPlus1 = null;
 	private String lastPlus2 = null;
@@ -25,33 +25,33 @@ public class Primer {
 	
 	public Primer(String contigID,int seqLength,char[] seq, int start, Integer direction, int length, String lastPlus1, String lastPlus2, int offset) {
 		this.contigID = contigID;
-		this.forward = direction;
-		this.length = length;
-		this.seq = seq;
+		this.direction = direction;
+		this.primerLength = length;
+		this.primerSeq = seq;
 		this.start = start;
 		this.lastPlus1 =lastPlus1;
 		this.lastPlus2 = lastPlus2;
 		this.offset = offset;
-		this.seqLength = seqLength;
+		this.contigLength = seqLength;
 	}
 	
 
 	public Primer(String contigID, char[] seq, int start, Integer direction, int length, double score,double meltTemperature){
 		this.contigID = contigID;
-		this.forward = direction;
-		this.length = length;
-		this.seq = seq;
+		this.direction = direction;
+		this.primerLength = length;
+		this.primerSeq = seq;
 		this.start = start;
-		this.score = score;
-		this.meltTemp = meltTemperature;
+		this.primerScore = score;
+		this.temperature = meltTemperature;
 	}
 	
-	public int getSeqLength() {
-		return seqLength;
+	public int getContigLength() {
+		return contigLength;
 	}
 
-	public void setSeqLength(int seqLength) {
-		this.seqLength = seqLength;
+	public void setContigLength(int contigLength) {
+		this.contigLength = contigLength;
 	}
 	public String getReadDirection() {
 		return readDirection;
@@ -76,6 +76,15 @@ public class Primer {
 	public void setLastPlus2(String lastPlus2) {
 		this.lastPlus2 = lastPlus2;
 	}
+	
+	public Integer getDirection() {
+		return direction;
+	}
+
+
+	public void setDirection(Integer direction) {
+		this.direction = direction;
+	}
 
 	public int getOffset() {
 		return offset;
@@ -84,41 +93,30 @@ public class Primer {
 	public void setOffset(int offset) {
 		this.offset = offset;
 	}
-	public Integer getForward() {
-		return forward;
+	
+	public char[] getPrimerSeq() {
+		return primerSeq;
 	}
-	public void setForward(Integer forward) {
-		this.forward = forward;
+	public void setPrimerSeq(char[] primerSeq) {
+		this.primerSeq = primerSeq;
 	}
-	public Integer getReverse() {
-		return reverse;
+	public double getPrimerScore() {
+		return primerScore;
 	}
-	public void setReverse(Integer reverse) {
-		this.reverse = reverse;
+	public void setPrimerScore(double primerScore) {
+		this.primerScore = primerScore;
 	}
-	public char[] getSeq() {
-		return seq;
+	public int getPrimerLength() {
+		return primerLength;
 	}
-	public void setSeq(char[] seq) {
-		this.seq = seq;
+	public void setPrimerLength(int primerLength) {
+		this.primerLength = primerLength;
 	}
-	public double getScore() {
-		return score;
+	public double getTemperature() {
+		return temperature;
 	}
-	public void setScore(double score) {
-		this.score = score;
-	}
-	public int getLength() {
-		return length;
-	}
-	public void setLength(int length) {
-		this.length = length;
-	}
-	public double getAnnelTemp() {
-		return meltTemp;
-	}
-	public void setAnnelTemp(double annelTemp) {
-		this.meltTemp = annelTemp;
+	public void setTemperature(double temperature) {
+		this.temperature = temperature;
 	}
 
 	public String getContigID() {

@@ -9,9 +9,11 @@ import java.util.HashMap;
 import java.util.Stack;
 
 
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
+import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 /**
  * 
  * @author yherrmann
@@ -40,8 +42,18 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		private ArrayList<String> gc0207Array = new ArrayList<String>();
 		private ArrayList<String> offsetArray = new ArrayList<String>();
 		private Stack stack = null;
-		double mintemp = 0;
+		double temperature = 0;
 		
+		public double getTemperature() {
+			return temperature;
+		}
+
+
+		public void setTemperature(double temperature) {
+			this.temperature = temperature;
+		}
+
+
 		/**
 		 * 
 		 * @param key
@@ -72,7 +84,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			}if(currentParent.toString().equals("OFFSET")){
 				offset.put(key, value);
 				offsetArray.add(key);
-			}if(currentParent.toString().equals("GC0207")){
+			}if(currentParent.toString().equals("GC_0207")){
 				gc0207.put(key, value);
 				gc0207Array.add(key);
 			}if(currentParent.toString().equals("AT_LAST6")){
@@ -169,12 +181,12 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @return score for base at position +1
 		 */
 		public double calcScorePlus1(String lastPlus1, String lastPlus2){
-			double score = 0;
+			double scorePlus1Plus2 = 0;
 			String plus1 = this.plus1Base.get(lastPlus1).toString();
 			String plus2 = this.plus2Base.get(lastPlus2).toString();
-			score = Double.parseDouble(plus1);
-			score = score + Double.parseDouble(plus2);
-			return score;
+			scorePlus1Plus2 = Double.parseDouble(plus1);
+			scorePlus1Plus2 = scorePlus1Plus2 + Double.parseDouble(plus2);
+			return scorePlus1Plus2;
 		}
 		
 		/**
@@ -183,17 +195,19 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @return GC-Level score
 		 */
 		public double calcScoreTotalGCLevel(double gcRatio){
+			double scoreGCTotal = 0;
+			String keyString = null;
+			int borderFactor = 0;
 			Object[] tempArray=this.gcArray.toArray();
 			Arrays.sort(tempArray,Collections.reverseOrder());
-			double score = 0;
 			for (Object key : tempArray){
-			String temp = key.toString();
-			int t = Integer.valueOf(temp).intValue();
-			if(gcRatio >=(50-t)&&gcRatio<=(50+t)){
-						score =Double.valueOf((gc.get(key)));
+			keyString = key.toString();
+			borderFactor = Integer.valueOf(keyString).intValue();
+			if(gcRatio >=(50-borderFactor)&&gcRatio<=(50+borderFactor)){
+						scoreGCTotal =Double.valueOf((gc.get(key)));
 				}
 			}
-			return score;
+			return scoreGCTotal;
 		}
 
 		/**
@@ -201,23 +215,36 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @param seq
 		 * @return melting temperature score
 		 */
+		//sorting umschreiben?!?!
 		public double calcScoreAnnealTemp(char[] seq){
-			double score = 0;
+			double scoreTemperature = 0;
+			double temperature = 0;
+			String keyString = null;
+			double border = 0;
+			double interval = 0;
+			double border2 = 0;
 			MeltingTemp melt = new MeltingTemp();
-			mintemp = melt.calcTemp(seq);
+			temperature = melt.calcTemp(seq);
+			this.setTemperature(temperature);
+			
 			Object[] tempArray = this.annealArray.toArray();
-			Arrays.sort(tempArray,Collections.reverseOrder());
+			tempArray[0] = annealArray.get(2);
+			tempArray[1] = annealArray.get(1);
+			tempArray[2] = annealArray.get(0);
 			for(Object key : tempArray){
-				String temp = key.toString();
-				double interval = Double.valueOf(temp).doubleValue();
-				double border = 60-interval;
-				double border2 = 60+interval;
-			if(mintemp>=border&&mintemp<=border2){
-				score = Double.valueOf(anneal.get(temp)).doubleValue();
-				} 
+				keyString = key.toString();
+				interval = Double.valueOf(keyString).doubleValue();
+				border = 60-interval;
+				border2 = 60+interval;
+			if(temperature>=border&&temperature<=border2){
+				scoreTemperature = Double.valueOf(anneal.get(key)).doubleValue();
+				}
 			}
-			return score;
+			return scoreTemperature;
 		}
+		
+  
+
 		
 		/**
 		 * 
@@ -240,15 +267,17 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 */
 		//noch bearbeiten homopolyCount mit qgramIndex berechnen?
 		public double calcScoreHomopoly(int homopolyCount){
-			double score = 0;
-			String  tempCNT = this.homopoly.get("CNT");
-			String tempScore = this.homopoly.get("SCORE");
-			int cnt = Integer.valueOf(tempCNT).intValue();
-			int s = Integer.valueOf(tempScore).intValue();
+			double scoreHomopoly = 0;
+			int cnt = 0;
+			int score = 0;
+			String  cntString = this.homopoly.get("CNT");
+			String scoreString = this.homopoly.get("SCORE");
+			cnt = Integer.valueOf(cntString).intValue();
+			score = Integer.valueOf(scoreString).intValue();
 			if(homopolyCount >= cnt){
-				score = s;
+				scoreHomopoly = score;
 			}
-			return score;
+			return scoreHomopoly;
 		}
 		
 		/**
@@ -257,17 +286,19 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @return GC-Level at position 2 and 7 score 
 		 */
 		public double calcScoreGCLevel2A7(double gcRatio2A7){
-			double score = 0;
+			double scoreGC2A7 = 0;
+			String keyString = null;
+			int border = 0;
 			Object[] tempArray = this.gc0207Array.toArray();
 			Arrays.sort(tempArray);
 			for(Object key : tempArray){
-				String temp = key.toString();
-				int t = Integer.valueOf(temp).intValue();
-				if(gcRatio2A7>=t){
-					score = Double.valueOf((this.gc0207.get(key)));
+				keyString = key.toString();
+				border= Integer.valueOf(keyString).intValue();
+				if(gcRatio2A7>=border){
+					scoreGC2A7 = Double.valueOf((this.gc0207.get(key)));
 				}
 			}
-			return score;
+			return scoreGC2A7;
 		}
 		
 		/**
@@ -276,16 +307,41 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @return AT at last 6 Base score
 		 */
 		public double calcScoreLast6(double ATLast6Ratio){
-			double score =0;
+			double scoreLast6Bases =0;
+			int border = 0;
+			String keyString = null;
 			Object[] tempArray = this.atLast6Array.toArray();
 			Arrays.sort(tempArray);
 			for(Object key : tempArray){
-				String temp = key.toString();
-				int t = Integer.valueOf(temp).intValue();
-				if(ATLast6Ratio>= t){
-					score = Double.valueOf((this.atLast6.get(key)));
+				keyString = key.toString();
+				border = Integer.valueOf(keyString).intValue();
+				if(ATLast6Ratio>= border){
+					scoreLast6Bases = Double.valueOf((this.atLast6.get(key)));
 				}
 			}
+			return scoreLast6Bases;
+		}
+		
+		public double calcScoreOffset(int realstart){
+			double score =0;
+			int border = 0;
+			String keyString = null;
+			Object[] tempArray = this.offsetArray.toArray();
+		/*	//Arrays.sort(tempArray);
+			System.out.println(tempArray[0]);
+			System.out.println(tempArray[1]);
+			System.out.println(tempArray[2]);
+			System.out.println(tempArray[3]);
+			System.out.println(tempArray[4]);
+			System.out.println(tempArray[5]);*/
+			for(Object key : tempArray){
+				keyString= key.toString();
+				border = Integer.valueOf(keyString).intValue();
+				if(realstart>= border){
+					score = Double.valueOf((this.offset.get(key)));
+				}
+			}
+		
 			return score;
 		}
 		
@@ -296,13 +352,13 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @return first and last base score
 		 */
 		public double calcScoreFirstBaseAndLastBase(String firstBase, String lastBase){
-					double score = 0;
-					String tempFirst = this.firstBase.get(firstBase);
-					double firstScore = Double.parseDouble(tempFirst);
-					String tempLast = this.lastBase.get(lastBase);
-					double lastScore = Double.parseDouble(tempLast);
-					score=firstScore+lastScore;
-					return score;
+					double scoreFirstLastBase = 0;
+					String firstString = this.firstBase.get(firstBase);
+					double firstScore = Double.parseDouble(firstString);
+					String lastString = this.lastBase.get(lastBase);
+					double lastScore = Double.parseDouble(lastString);
+					scoreFirstLastBase=firstScore+lastScore;
+					return scoreFirstLastBase;
 		}
 		
 		/**
@@ -312,36 +368,17 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @return backfold-score
 		 */
 		public double calcScoreBackfold(char[] last4Base,char[] leftseq){
-			double score = 0;
+			double scoreBackfold = 0;
+			String scoreString = null;
 			String last4Bases = new String(last4Base);
 			String primer = new String(leftseq);
 			if(primer.contains(last4Bases)){
-				String tempScore = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD");
-				score = Double.valueOf(tempScore).doubleValue();
+				scoreString = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD");
+				scoreBackfold = Double.valueOf(scoreString).doubleValue();
 			} else{
-				score = 0;
+				scoreBackfold = 0;
 			}
-			return score;
-		}
-		
-		/**
-		 * 
-		 * @param realstart
-		 * @return offset-score
-		 */
-		public double calcScoreOffset(int realstart){
-			double score = 0;
-			Object[] tempArray = this.offsetArray.toArray();
-			Arrays.sort(tempArray);
-			for(Object key : tempArray){
-				String temp = key.toString();
-				int t = Integer.valueOf(temp).intValue();
-				if(realstart>=t){
-					score = Double.valueOf((this.offset.get(key)));
-				}
-			}
-			System.out.println(score);
-			return score;
+			return scoreBackfold;
 		}
 		
 		/**
@@ -350,25 +387,25 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @return max-offset score
 		 */
 		public double calcScoreMaxOffset(int realstart){
-			double score = 0;
-			String distance = this.maxOffset.get("DISTANCE");
-			String mult = this.maxOffset.get("MULT");
-			int m = Integer.valueOf(mult).intValue();
-			int dis = Integer.valueOf(distance).intValue();
-			if(realstart > dis){
-				//System.out.println(realstart);
-				int temp = realstart - dis;
-				//System.out.println("test ="+temp);
-				score = (temp * m);
+			double scoreMaxOffset = 0;
+			int mult = 0;
+			int distance = 0;
+			String distanceString = this.maxOffset.get("DISTANCE");
+			String multString = this.maxOffset.get("MULT");
+			mult = Integer.valueOf(multString).intValue();
+			distance = Integer.valueOf(distanceString).intValue();
+			if(realstart > distance){
+				int maxOffset = realstart - distance;
+				scoreMaxOffset = (maxOffset * mult);
 			}
-			return score;
+			return scoreMaxOffset;
 		}
 
 		public double calcNPenalty(int nCount) {
-			double score = 0;
-			String temp = this.repeatAndBackfoldAndNPenalty.get("N_PENALTY").toString();
-			score = (Double.parseDouble(temp))*nCount;
-			return score;
+			double nPenalty = 0;
+			String penaltyString = this.repeatAndBackfoldAndNPenalty.get("N_PENALTY").toString();
+			nPenalty = (Double.parseDouble(penaltyString))*nCount;
+			return nPenalty;
 		}
 		
 		/**
@@ -377,22 +414,19 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @return length-score
 		 */
 		public double calcLengthScore(int length){
-			double score = 0;
-			String idealTemp = this.length.get("IDEAL");
-			String sTemp = this.length.get("SCORE");
-			double s = Double.parseDouble(sTemp);
-			double ideal = Double.parseDouble(idealTemp);
-			double dis = Math.abs(ideal - length);
-			score = (dis*s);
-			return score;
+			double scoreLength = 0;
+			double idealLength = 0;
+			double factor = 0;
+			double distance = 0;
+			String idealString = this.length.get("IDEAL");
+			String factorString = this.length.get("SCORE");
+			factor = Double.parseDouble(factorString);
+			idealLength = Double.parseDouble(idealString);
+			distance = Math.abs(idealLength - length);
+			scoreLength = (distance*factor);
+			return scoreLength;
 		}
+	
 		
-		public double getMintemp() {
-			return mintemp;
-		}
-
-		public void setMintemp(double mintemp) {
-			this.mintemp = mintemp;
-		}
 	}
 	

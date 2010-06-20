@@ -1,6 +1,9 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.File;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class printTest {
@@ -56,10 +59,10 @@ public class printTest {
 		marked[0] ="r0";
 		marked[1] ="0";
 		HashMap<String,Integer> primerDirection = new HashMap<String, Integer>();
-		int forward = 1;
-		int notForward = -1;
-		primerDirection.put(marked[0], forward);
-		primerDirection.put(marked[1], notForward);
+		int leftPrimer = 1;
+		int rightPrimer = -1;
+		primerDirection.put(marked[0],leftPrimer);
+		primerDirection.put(marked[1],rightPrimer);
 		PrimerGenerator t = new PrimerGenerator(fasta, xml,marked,primerDirection);
 		//MeltingTemp test = new MeltingTemp(seq);
 	}
