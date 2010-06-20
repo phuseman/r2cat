@@ -25,38 +25,37 @@ public class PrimerGenerator {
 	private Vector<DNASequence> sequences;
 	private String[] markedSeq;
 	private HashMap<String, char[]> templateSeq = new HashMap<String,char[]>();
-	private HashMap<String, Integer> primerDirection = new HashMap<String, Integer>();
+	private HashMap<String, Integer> contigAndPrimerInfo = new HashMap<String, Integer>();
 	private SaveParamAndCalc scoring = new SaveParamAndCalc();
 	private Vector<Primer> primerCandidates;
-	private Vector<Primer> primer;
+	private Vector<Primer> leftPrimer;
+	private Vector<Primer> rightPrimer;
 
 
 	private int maxLength = 24;
 	private int miniLength = 19;
 	private int max = maxLength+2;
-	private double meltTemperature;
 	private int minBorderOffset = 80;
 	private int maxBorderOffset =400;
-	//MeltingTemp meltTemp = new MeltingTemp();
-	//private ArrayList markedSeq = new ArrayList();
 	
 	/**
 	 * 
 	 */
-	public PrimerGenerator(File fasta, File xml,String[] marked, HashMap<String, Integer> primerDir) throws Exception{
+	public PrimerGenerator(File fasta, File xml,String[] marked, HashMap<String, Integer> contigPrimerInfo) throws Exception{
 	
 	FastaFileReader fastaParser = new FastaFileReader(fasta);
 	FileReader inXML = new FileReader(xml);
 	XMLParser xmlParser = new XMLParser();
 	xmlParser.parse(scoring,inXML);
 	
-	primerDirection = primerDir;
+	contigAndPrimerInfo = contigPrimerInfo;
 	markedSeq = marked;
 	seq = fastaParser.getCharArray();
 	offsetsInInput = fastaParser.getOffsetsArray();
 	sequences =fastaParser.getSequences();
 	primerCandidates = new Vector<Primer>();
-	primer = new Vector<Primer>();
+	leftPrimer = new Vector<Primer>();
+	rightPrimer = new Vector<Primer>();
 	this.getPrimerCanidates();
 	
 	char[] test = new char[21];
@@ -82,9 +81,9 @@ public class PrimerGenerator {
 	test[19] ='A';
 	test[20] ='T';
 
-	PrimerPairs pp = new PrimerPairs(primer);
+	PrimerPairs pp = new PrimerPairs(leftPrimer,rightPrimer,contigAndPrimerInfo);
 }
-	
+
 	
 	public void calcScoreEachPrimerCanidate(){
 		double primerScore = 0;
@@ -120,15 +119,6 @@ public class PrimerGenerator {
 			plus1 = primerCandidates.elementAt(i).getLastPlus1();
 			plus2 = primerCandidates.elementAt(i).getLastPlus2();
 			offset = primerCandidates.elementAt(i).getOffset();
-			
-			//System.out.println(start);
-			/*
-			primerLength =21;
-			primerSeq = test;
-			direction = -1;
-			start = 642;
-			offset = 132;
-			contigLength = 796;*/
 			
 			scoreLength = this.getLengthScore(primerLength);
 			scoreGCTotal = this.getGCScore(primerSeq, true,direction);
@@ -171,12 +161,15 @@ public class PrimerGenerator {
 				System.out.println("/n");
 			}*/
 			if(primerScore>0){
-			primer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature));
-
+				if(direction == 1){
+					leftPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature));
+				} else{
+					rightPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature));
+				}
 			}
 		}
-		System.out.println("primer: "+primer.size());
-
+		System.out.println("left primer: "+leftPrimer.size());
+		System.out.println("right primer: "+rightPrimer.size());
 	}
 	
 	public double getTempScore(char[] seq){
@@ -208,7 +201,7 @@ public class PrimerGenerator {
 			String lastPlus12 = null;
 			String lastPlus22 = null;
 			for(String contigID : markedSeq){
-				Integer direction = primerDirection.get(contigID);
+				Integer direction = contigAndPrimerInfo.get(contigID);
 				char[] tempSeqChar;
 				tempSeqChar = templateSeq.get(contigID);
 				int seqLength = tempSeqChar.length;

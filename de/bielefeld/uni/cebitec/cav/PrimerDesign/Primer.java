@@ -7,7 +7,7 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
  * @author yherrmann
  *
  */
-public class Primer {
+public class Primer implements Comparable {
 	private double primerScore = 0;
 	private int primerLength = 0;
 	private int contigLength = 0;
@@ -136,5 +136,12 @@ public class Primer {
 	}
 	public void setEnd(int end) {
 		this.end = end;
+	}
+
+
+	@Override
+	public int compareTo(Object o) {
+		Primer p1 = (Primer) o;
+		return 0;
 	}
 }

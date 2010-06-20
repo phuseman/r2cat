@@ -58,12 +58,12 @@ public class printTest {
 		String[] marked = new String[2];
 		marked[0] ="r0";
 		marked[1] ="0";
-		HashMap<String,Integer> primerDirection = new HashMap<String, Integer>();
+		HashMap<String,Integer> contigAndDirectionInfo = new HashMap<String, Integer>();
 		int leftPrimer = 1;
 		int rightPrimer = -1;
-		primerDirection.put(marked[0],leftPrimer);
-		primerDirection.put(marked[1],rightPrimer);
-		PrimerGenerator t = new PrimerGenerator(fasta, xml,marked,primerDirection);
+		contigAndDirectionInfo.put(marked[0],leftPrimer);
+		contigAndDirectionInfo.put(marked[1],rightPrimer);
+		PrimerGenerator t = new PrimerGenerator(fasta, xml,marked,contigAndDirectionInfo);
 		//MeltingTemp test = new MeltingTemp(seq);
 	}
 

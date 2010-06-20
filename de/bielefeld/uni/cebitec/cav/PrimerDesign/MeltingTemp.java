@@ -99,7 +99,7 @@ public class MeltingTemp {
 			}
 		}
 		if(errors == 0){
-			temp = (ent*1000/(enp+(1.987*Math.log((oligoConc/4.0))))) - 273.15- 21.59;
+			temp = (ent*1000/(enp+(1.987*Math.log((oligoConc/4.0))))) - 273.15 - 21.59;
 			return temp;
 		} else {
 			return -1.0;
