@@ -265,12 +265,11 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		 * @param homopolyCount
 		 * @return homopoly-score
 		 */
-		//noch bearbeiten homopolyCount mit qgramIndex berechnen?
 		public double calcScoreHomopoly(int homopolyCount){
 			double scoreHomopoly = 0;
 			int cnt = 0;
 			int score = 0;
-			String  cntString = this.homopoly.get("CNT");
+			String cntString = this.homopoly.get("CNT");
 			String scoreString = this.homopoly.get("SCORE");
 			cnt = Integer.valueOf(cntString).intValue();
 			score = Integer.valueOf(scoreString).intValue();

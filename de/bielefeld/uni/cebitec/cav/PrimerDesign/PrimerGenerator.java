@@ -108,6 +108,7 @@ public class PrimerGenerator {
 		double scorePlus1Plus2 = 0;
 		double scoreTemp = 0;
 		double scoreNPenalty = 0;
+		double scoreHomopoly = 0;
 	
 		for(int i = 0; i<primerCandidates.size();i++){
 			contigID = primerCandidates.elementAt(i).getContigID();
@@ -130,11 +131,12 @@ public class PrimerGenerator {
 			scoreOffset = this.getOffsetsScore(offset,primerLength,direction);
 			scoreNPenalty = this.getNPenalty(primerSeq);
 			scoreTemp = this.getTempScore(primerSeq);
+			scoreHomopoly = this.getHomopolyScore(primerSeq);
+			primerScore = scoreGCTotal+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
 			temperature = scoring.getTemperature();
-			primerScore = scoreGCTotal+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp;
-		
+			
 			//Stichproben Test
-		/*	if(offset==120&&start==675&&primerLength==21){
+			if(offset==153&&start==642&&primerLength==21){
 				System.out.println("Total Primer score: "+primerScore);
 				System.out.println("length score "+scoreLength);
 				System.out.println("temperature score " +scoreTemp);
@@ -153,13 +155,15 @@ public class PrimerGenerator {
 				System.out.println("primer length "+primerLength);
 				System.out.println("start "+start);
 				System.out.println("seqLength "+contigLength);
-			int	offset2 = offset -primerLength;
+				System.out.println("homopolyscore: "+scoreHomopoly);
+				int	offset2 = offset - primerLength;
 				System.out.println("offset "+ offset2);
 				for(int j=0; j<primerSeq.length;j++){
 					System.out.print(primerSeq[j]);
 				}
 				System.out.println("/n");
-			}*/
+			}
+			
 			if(primerScore>0){
 				if(direction == 1){
 					leftPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature));
@@ -315,13 +319,31 @@ public class PrimerGenerator {
 		return reverseComplement;
 	}
 	
-	public double getBackfoldScore(char[] PrimerSeq){
+	public double getHomopolyScore(char[] primerSeq){
+		double scoreHomopoly = 0;
+		int homCount = 0;
+		char prevBase = 'X';
+		char currentBase;
+		for(int i=0;i<primerSeq.length;i++){
+			currentBase = primerSeq[i];
+			if(currentBase == prevBase){
+				homCount++;
+			} //else{
+			//	homCount=0;
+			//}
+			prevBase=currentBase;
+		}
+		scoreHomopoly = scoring.calcScoreHomopoly(homCount);
+		return scoreHomopoly;
+	}
+	
+	public double getBackfoldScore(char[] primerSeq){
 	double scoreBackfold = 0;
 	char[] last4 = new char[4];
 	char[] last4Bases;
-	char[] primerSeqMinusEight = new char[PrimerSeq.length-8];
-	System.arraycopy(PrimerSeq, (PrimerSeq.length-4), last4, 0, 4);
-	System.arraycopy(PrimerSeq, 0, primerSeqMinusEight, 0, (PrimerSeq.length-8));
+	char[] primerSeqMinusEight = new char[primerSeq.length-8];
+	System.arraycopy(primerSeq, (primerSeq.length-4), last4, 0, 4);
+	System.arraycopy(primerSeq, 0, primerSeqMinusEight, 0, (primerSeq.length-8));
 	last4Bases = getReverseComplement(last4);
 	char[] leftSeq = primerSeqMinusEight;
 	scoreBackfold = scoring.calcScoreBackfold(last4Bases, leftSeq);

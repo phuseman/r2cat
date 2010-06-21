@@ -64,7 +64,6 @@ public class printTest {
 		contigAndDirectionInfo.put(marked[0],leftPrimer);
 		contigAndDirectionInfo.put(marked[1],rightPrimer);
 		PrimerGenerator t = new PrimerGenerator(fasta, xml,marked,contigAndDirectionInfo);
-		//MeltingTemp test = new MeltingTemp(seq);
 	}
 
 }
