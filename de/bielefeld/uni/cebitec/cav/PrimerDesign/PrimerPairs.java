@@ -18,15 +18,25 @@ public class PrimerPairs {
 		leftPrimer = p1;
 		rightPrimer = p2;
 		contigPrimerInfo = contigPrimer;
-		for(int i = 0;i<leftPrimer.size();i++){
-		
-/*		Collections.sort(leftPrimer,new Comparator(){
-			public int compare(Object o1, Object o2){
-				Primer p1 = (Primer) o1;
-				Primer p2 = (Primer) o2;
-				return p1.getPrimerScore().compareTo(getPrimerScore());
-				}
-		} );*/
+		for(int i = 0; i<leftPrimer.size();i++){
+			System.out.println(leftPrimer.elementAt(i).getPrimerScore());
 		}
+		sortPrimer();
+	}
+	
+	public void sortPrimer(){
+		Comparator<Primer> comparator = new PrimerScoreComparator();
+		PriorityQueue<Primer> queue = new PriorityQueue<Primer>(100,comparator);
+		for(int j = 0;j<leftPrimer.size();j++){
+			queue.add(leftPrimer.elementAt(j));
+		}
+		leftPrimer.clear();
+		while(queue.size()!=0){
+			leftPrimer.add(queue.remove());
+		
+		}
+			for(int i = 0; i<leftPrimer.size();i++){
+		System.out.println(leftPrimer.elementAt(i).getPrimerScore());
+	}
 	}
 }

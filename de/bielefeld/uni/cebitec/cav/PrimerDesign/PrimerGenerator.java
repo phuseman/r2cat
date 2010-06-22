@@ -136,7 +136,7 @@ public class PrimerGenerator {
 			temperature = scoring.getTemperature();
 			
 			//Stichproben Test
-			if(offset==153&&start==642&&primerLength==21){
+	/*		if(offset==153&&start==642&&primerLength==21){
 				System.out.println("Total Primer score: "+primerScore);
 				System.out.println("length score "+scoreLength);
 				System.out.println("temperature score " +scoreTemp);
@@ -162,7 +162,7 @@ public class PrimerGenerator {
 					System.out.print(primerSeq[j]);
 				}
 				System.out.println("/n");
-			}
+			}*/
 			
 			if(primerScore>0){
 				if(direction == 1){
