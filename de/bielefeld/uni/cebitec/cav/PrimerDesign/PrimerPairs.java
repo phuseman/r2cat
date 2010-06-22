@@ -38,4 +38,14 @@ public class PrimerPairs {
 		}
 			return primer;
 	}
+	
+	public void pairPrimer(){
+		for(int i = 0; i<leftPrimer.size();i++){
+			if(leftPrimer.elementAt(i).getTemperature()-rightPrimer.elementAt(1).getTemperature()<5){
+				
+			}
+		}
+	}
+	
+	
 }
