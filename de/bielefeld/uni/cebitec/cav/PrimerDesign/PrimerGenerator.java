@@ -321,6 +321,7 @@ public class PrimerGenerator {
 	
 	public double getHomopolyScore(char[] primerSeq){
 		double scoreHomopoly = 0;
+		double temp = 0;
 		int homCount = 0;
 		char prevBase = 'X';
 		char currentBase;
@@ -328,12 +329,14 @@ public class PrimerGenerator {
 			currentBase = primerSeq[i];
 			if(currentBase == prevBase){
 				homCount++;
-			} //else{
-			//	homCount=0;
-			//}
+			} else{
+				homCount=0;
+			}
 			prevBase=currentBase;
+			temp += scoring.calcScoreHomopoly(homCount);
+		
 		}
-		scoreHomopoly = scoring.calcScoreHomopoly(homCount);
+		scoreHomopoly = temp;
 		return scoreHomopoly;
 	}
 	
