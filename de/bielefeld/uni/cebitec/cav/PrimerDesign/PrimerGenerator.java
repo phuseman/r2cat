@@ -57,7 +57,7 @@ public class PrimerGenerator {
 	leftPrimer = new Vector<Primer>();
 	rightPrimer = new Vector<Primer>();
 	this.getPrimerCanidates();
-	
+	/*
 	char[] test = new char[21];
 	test[0] = 'T';
 	test[1] ='C';
@@ -79,9 +79,10 @@ public class PrimerGenerator {
 	test[17] ='T';
 	test[18] ='C';
 	test[19] ='A';
-	test[20] ='T';
-
-	PrimerPairs pp = new PrimerPairs(leftPrimer,rightPrimer,contigAndPrimerInfo);
+	test[20] ='T';*/
+	if(!rightPrimer.isEmpty()){
+		PrimerPairs pp = new PrimerPairs(leftPrimer,rightPrimer,contigAndPrimerInfo);
+	}
 }
 
 	
