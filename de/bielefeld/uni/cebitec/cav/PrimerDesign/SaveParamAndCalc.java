@@ -4,6 +4,7 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Stack;
@@ -36,11 +37,11 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		private HashMap<String, String> gc0207 = new HashMap<String, String>();
 		private HashMap<String, String> anneal = new HashMap<String, String>();
 		private HashMap<String, String> repeatAndBackfoldAndNPenalty= new HashMap<String, String>();
-		private ArrayList<String> gcArray = new ArrayList<String>();
-		private ArrayList<String> annealArray = new ArrayList<String>();
-		private ArrayList<String> atLast6Array = new ArrayList<String>();
-		private ArrayList<String> gc0207Array = new ArrayList<String>();
-		private ArrayList<String> offsetArray = new ArrayList<String>();
+		private ArrayList<String> gcArrayList = new ArrayList<String>();
+		private ArrayList<String> annealArrayList = new ArrayList<String>();
+		private ArrayList<String> atLast6ArrayList = new ArrayList<String>();
+		private ArrayList<String> gc0207ArrayList = new ArrayList<String>();
+		private ArrayList<String> offsetArrayList = new ArrayList<String>();
 		private Stack stack = null;
 		double temperature = 0;
 		
@@ -63,7 +64,7 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 			
 			if(currentParent.toString().equals("GC")){
 				gc.put(key, value);
-				gcArray.add(key);
+				gcArrayList.add(key);
 			}if(currentParent.toString().equals("FIRST")){
 				firstBase.put(key, value);
 			}if(currentParent.toString().equals("LAST")){
@@ -83,16 +84,16 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 				repeatAndBackfoldAndNPenalty.put(cP, value);		
 			}if(currentParent.toString().equals("OFFSET")){
 				offset.put(key, value);
-				offsetArray.add(key);
+				offsetArrayList.add(key);
 			}if(currentParent.toString().equals("GC_0207")){
 				gc0207.put(key, value);
-				gc0207Array.add(key);
+				gc0207ArrayList.add(key);
 			}if(currentParent.toString().equals("AT_LAST6")){
 				atLast6.put(key, value);
-				atLast6Array.add(key);
+				atLast6ArrayList.add(key);
 			}if(currentParent.toString().equals("ANNEAL")){
 				anneal.put(key, value);
-				annealArray.add(key);
+				annealArrayList.add(key);
 			}
 		}
 		
@@ -189,6 +190,16 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 			return scorePlus1Plus2;
 		}
 		
+		public Integer[] makeIntArray(Object[] o){
+			Integer[] array = new Integer[o.length];
+			for(int i = 0; i<o.length;i++){
+			String t =	o[i].toString();
+			int temp = Integer.valueOf(t).intValue();
+			array[i] = temp;
+			}
+			return array ;
+		}
+		
 		/**
 		 * 
 		 * @param gcRatio
@@ -196,15 +207,13 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		 */
 		public double calcScoreTotalGCLevel(double gcRatio){
 			double scoreGCTotal = 0;
-			String keyString = null;
-			int borderFactor = 0;
-			Object[] tempArray=this.gcArray.toArray();
-			Arrays.sort(tempArray,Collections.reverseOrder());
-			for (Object key : tempArray){
-			keyString = key.toString();
-			borderFactor = Integer.valueOf(keyString).intValue();
-			if(gcRatio >=(50-borderFactor)&&gcRatio<=(50+borderFactor)){
-						scoreGCTotal =Double.valueOf((gc.get(key)));
+			Integer[] gcArray;
+			Object[] tempArray=this.gcArrayList.toArray();
+			gcArray = makeIntArray(tempArray);
+			Arrays.sort(gcArray,Collections.reverseOrder());
+			for (Integer interval : gcArray){
+			if(gcRatio >=(50-interval)&&gcRatio<=(50+interval)){
+						scoreGCTotal =Double.valueOf((gc.get(interval.toString())));
 				}
 			}
 			return scoreGCTotal;
@@ -215,29 +224,24 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		 * @param seq
 		 * @return melting temperature score
 		 */
-		//sorting umschreiben?!?!
 		public double calcScoreAnnealTemp(char[] seq){
 			double scoreTemperature = 0;
 			double temperature = 0;
-			String keyString = null;
-			double border = 0;
-			double interval = 0;
-			double border2 = 0;
+			double minBorder = 0;
+			double maxBorder = 0;
+			Integer[] annealArray;
 			MeltingTemp melt = new MeltingTemp();
 			temperature = melt.calcTemp(seq);
 			this.setTemperature(temperature);
 			
-			Object[] tempArray = this.annealArray.toArray();
-			tempArray[0] = annealArray.get(2);
-			tempArray[1] = annealArray.get(1);
-			tempArray[2] = annealArray.get(0);
-			for(Object key : tempArray){
-				keyString = key.toString();
-				interval = Double.valueOf(keyString).doubleValue();
-				border = 60-interval;
-				border2 = 60+interval;
-			if(temperature>=border&&temperature<=border2){
-				scoreTemperature = Double.valueOf(anneal.get(key)).doubleValue();
+			Object[] tempArray = this.annealArrayList.toArray();
+			annealArray = makeIntArray(tempArray);
+			Arrays.sort(annealArray,Collections.reverseOrder());
+			for(Integer interval : annealArray){
+				minBorder = 60-interval;
+				maxBorder = 60+interval;
+			if(temperature>=minBorder&&temperature<=maxBorder){
+				scoreTemperature = Double.valueOf(anneal.get(interval.toString())).doubleValue();
 				}
 			}
 			return scoreTemperature;
@@ -286,15 +290,13 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		 */
 		public double calcScoreGCLevel2A7(double gcRatio2A7){
 			double scoreGC2A7 = 0;
-			String keyString = null;
-			int border = 0;
-			Object[] tempArray = this.gc0207Array.toArray();
-			Arrays.sort(tempArray);
-			for(Object key : tempArray){
-				keyString = key.toString();
-				border= Integer.valueOf(keyString).intValue();
+			Integer[] gc0207Array;
+			Object[] tempArray = this.gc0207ArrayList.toArray();
+			gc0207Array = makeIntArray(tempArray);
+			Arrays.sort(gc0207Array);
+			for(Integer border : gc0207Array){
 				if(gcRatio2A7>=border){
-					scoreGC2A7 = Double.valueOf((this.gc0207.get(key)));
+					scoreGC2A7 = Double.valueOf((this.gc0207.get(border.toString())));
 				}
 			}
 			return scoreGC2A7;
@@ -307,15 +309,13 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		 */
 		public double calcScoreLast6(double ATLast6Ratio){
 			double scoreLast6Bases =0;
-			int border = 0;
-			String keyString = null;
-			Object[] tempArray = this.atLast6Array.toArray();
-			Arrays.sort(tempArray);
-			for(Object key : tempArray){
-				keyString = key.toString();
-				border = Integer.valueOf(keyString).intValue();
+			Integer[] ATLast6Array;
+			Object[] tempArray = this.atLast6ArrayList.toArray();
+			ATLast6Array = makeIntArray(tempArray);
+			Arrays.sort(ATLast6Array);
+			for(Integer border : ATLast6Array){
 				if(ATLast6Ratio>= border){
-					scoreLast6Bases = Double.valueOf((this.atLast6.get(key)));
+					scoreLast6Bases = Double.valueOf((this.atLast6.get(border.toString())));
 				}
 			}
 			return scoreLast6Bases;
@@ -323,21 +323,13 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		
 		public double calcScoreOffset(int realstart){
 			double score =0;
-			int border = 0;
-			String keyString = null;
-			Object[] tempArray = this.offsetArray.toArray();
-		/*	//Arrays.sort(tempArray);
-			System.out.println(tempArray[0]);
-			System.out.println(tempArray[1]);
-			System.out.println(tempArray[2]);
-			System.out.println(tempArray[3]);
-			System.out.println(tempArray[4]);
-			System.out.println(tempArray[5]);*/
-			for(Object key : tempArray){
-				keyString= key.toString();
-				border = Integer.valueOf(keyString).intValue();
+			Integer[] offsetArray;
+			Object[] tempArray = this.offsetArrayList.toArray();
+			offsetArray = makeIntArray(tempArray);
+			Arrays.sort(offsetArray);
+			for(Integer border : offsetArray){
 				if(realstart>= border){
-					score = Double.valueOf((this.offset.get(key)));
+					score = Double.valueOf((this.offset.get(border.toString())));
 				}
 			}
 		

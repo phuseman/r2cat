@@ -7,8 +7,6 @@ import java.util.PriorityQueue;
 import java.util.Vector;
 
 public class PrimerPairs {
-	private Vector<Primer> leftPrimer = null;
-	private Vector<Primer> rightPrimer = null;
 	//private ArrayList<Integer> pairs = new ArrayList<Integer>();
 	private HashMap<Integer,Integer> pairs = new HashMap<Integer,Integer>();
 	//private int[] pairs;
@@ -16,22 +14,6 @@ public class PrimerPairs {
 	private ArrayList<Integer> notPairedLeftPrimer = new ArrayList<Integer>();
 	HashMap<String, Integer> contigPrimerInfo = new HashMap<String,Integer>();
 
-
-	public PrimerPairs(Vector<Primer> leftP,Vector<Primer> rightP,HashMap<String, Integer> contigPrimer){
-
-		contigPrimerInfo = contigPrimer;
-		leftPrimer = sortPrimer(leftP);
-		rightPrimer = sortPrimer(rightP);
-		//pairs = new int[leftPrimer.size()];		
-		pairPrimer();
-		
-	/*	for(int i = 0; i<leftPrimer.size();i++){
-			System.out.println(leftPrimer.elementAt(i).getPrimerScore());
-		}*/
-/*		for(int i = 0; i<rightPrimer.size();i++){
-			System.out.println(rightPrimer.elementAt(i).getPrimerScore());
-		}*/
-	}
 	
 	public Vector<Primer> sortPrimer(Vector<Primer> primer){
 		Comparator<Primer> comparator = new PrimerScoreComparator();
@@ -47,7 +29,7 @@ public class PrimerPairs {
 			return primer;
 	}
 	
-	public void pairPrimer(){
+	public void pairPrimer(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer){
 		char[] leftPrimerSeq;
 		char[] rightPrimerSeq;
 		boolean seqCheck = false;
@@ -105,5 +87,4 @@ public class PrimerPairs {
 		System.out.println("kein paar(links): "+notPairedLeftPrimer.size());
 		System.out.println("paar "+pairs.size());
 	}
-
 }

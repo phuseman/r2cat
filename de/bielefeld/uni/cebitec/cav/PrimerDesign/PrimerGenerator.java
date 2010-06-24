@@ -80,11 +80,19 @@ public class PrimerGenerator {
 	test[18] ='C';
 	test[19] ='A';
 	test[20] ='T';*/
-	if(!rightPrimer.isEmpty()){
-		PrimerPairs pp = new PrimerPairs(leftPrimer,rightPrimer,contigAndPrimerInfo);
-	}
+	output(leftPrimer,rightPrimer);
 }
 
+	public void output(Vector<Primer> lPrimer, Vector<Primer> rPrimer){
+		PrimerPairs pp = new PrimerPairs();
+		if(!rPrimer.isEmpty()){
+			leftPrimer = pp.sortPrimer(leftPrimer);
+			rightPrimer = pp.sortPrimer(rightPrimer);
+			pp.pairPrimer(leftPrimer, rightPrimer);
+		} else{
+			leftPrimer = pp.sortPrimer(leftPrimer);
+		}
+	}
 	
 	public void calcScoreEachPrimerCanidate(){
 		double primerScore = 0;
@@ -110,6 +118,7 @@ public class PrimerGenerator {
 		double scoreTemp = 0;
 		double scoreNPenalty = 0;
 		double scoreHomopoly = 0;
+		double scoreRepeat = 0;
 	
 		for(int i = 0; i<primerCandidates.size();i++){
 			contigID = primerCandidates.elementAt(i).getContigID();
@@ -133,37 +142,39 @@ public class PrimerGenerator {
 			scoreNPenalty = this.getNPenalty(primerSeq);
 			scoreTemp = this.getTempScore(primerSeq);
 			scoreHomopoly = this.getHomopolyScore(primerSeq);
-			primerScore = scoreGCTotal+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
+			scoreRepeat = this.getRepeatScore(primerSeq);
+			primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
 			temperature = scoring.getTemperature();
 			
 			//Stichproben Test
-	/*		if(offset==153&&start==642&&primerLength==21){
+			if(offset==153&&start==642&&primerLength==21){
 				System.out.println("Total Primer score: "+primerScore);
 				System.out.println("length score "+scoreLength);
 				System.out.println("temperature score " +scoreTemp);
-				System.out.println("temperature "+temperature);
 				System.out.println("Offset score: "+scoreOffset);
-				System.out.println(plus1+" "+ plus2);
-				System.out.println("plus1plus2 "+scorePlus1Plus2);
+				System.out.println("plus1plus2: "+scorePlus1Plus2);
 				System.out.println("GC0207 "+scoreGC0207);
 				System.out.println("AT score: "+scoreLast6);
-				System.out.println("backfold "+scoreBackfold);
-				System.out.println("first/last"+scoreFirstLastBase);
+				System.out.println("backfold: "+scoreBackfold);
+				System.out.println("first/last: "+scoreFirstLastBase);
 				System.out.println("total GC "+scoreGCTotal);
-				System.out.println("Total Primer score: "+primerScore);
 				System.out.println("contig "+contigID);
 				System.out.println("direction "+direction);
 				System.out.println("primer length "+primerLength);
 				System.out.println("start "+start);
 				System.out.println("seqLength "+contigLength);
 				System.out.println("homopolyscore: "+scoreHomopoly);
+				System.out.println("repeatscore: "+scoreRepeat);
 				int	offset2 = offset - primerLength;
-				System.out.println("offset "+ offset2);
+				System.out.println(plus1+" "+ plus2);
+				System.out.println("offset: "+offset);
+				System.out.println("real offset: "+ offset2);
+				System.out.println("temperature: "+temperature);
 				for(int j=0; j<primerSeq.length;j++){
 					System.out.print(primerSeq[j]);
 				}
-				System.out.println("/n");
-			}*/
+				System.out.println(" /n");
+			}
 			
 			if(primerScore>0){
 				if(direction == 1){
@@ -202,7 +213,6 @@ public class PrimerGenerator {
 	public void getPrimerCanidates(){
 			getMarkedSeq();
 			int nCount =0;
-			//int repeatCount = 0;
 			String lastPlus12 = null;
 			String lastPlus22 = null;
 			for(String contigID : markedSeq){
@@ -356,21 +366,12 @@ public class PrimerGenerator {
 
 	public double getFirstAndLastBaseScore(char[] primerSeq,Integer direction){
 	double scoreFirstLastBase = 0;
-/*	if(direction == 1){
-		Object first = primerSeq[primerSeq.length-1];
-		Object last = primerSeq[0];
-		String firstBase = first.toString();
-		String lastBase = last.toString();
-		scoreFirstLastBase = scoring.calcScoreFirstBaseAndLastBase(firstBase, lastBase);
-		return scoreFirstLastBase;	
-	} else{*/
 		Object first = primerSeq[0];
 		Object last =primerSeq[primerSeq.length-1];
 		String firstBase = first.toString();
 		String lastBase = last.toString();
 		scoreFirstLastBase = scoring.calcScoreFirstBaseAndLastBase(firstBase, lastBase);
 		return scoreFirstLastBase;	
-	//}
 }	
 
 	public double getNPenalty(char[] PrimerSeq){
@@ -395,19 +396,11 @@ public class PrimerGenerator {
 	double scoreLast6Bases = 0;
 	double last6Ratio =0;
 	double ATLevelAtLast6 =0;
-	//if(direction == -1){
 		for(int i = 1; i<=6;i++){
 			if(primerSeq[(primerSeq.length-i)]==Bases.A || primerSeq[(primerSeq.length-i)]==Bases.a || primerSeq[(primerSeq.length-i)]==Bases.T || primerSeq[(primerSeq.length-i)]==Bases.t){
 				ATLevelAtLast6++;
 			}
 		}
-	//} else{
-//		for(int i = 0; i<=6;i++){
-//			if(primerSeq[i]==Bases.A || primerSeq[i]==Bases.a || primerSeq[i]==Bases.T || primerSeq[i]==Bases.t){
-//				ATLevelAtLast6++;
-//			}
-//		}
-//	}
 	last6Ratio = (ATLevelAtLast6/6*100);
 	scoreLast6Bases = scoring.calcScoreLast6(last6Ratio);
 	return scoreLast6Bases;
@@ -423,15 +416,9 @@ public class PrimerGenerator {
 	for(int i =0; i<primerSeq.length;i++){
 		if(primerSeq[i]== Bases.G|| primerSeq[i] ==Bases.g|| primerSeq[i]==Bases.C || primerSeq[i] ==Bases.c){
 			gcLevel++;
-			//if(direction == -1){
 				if(i>0&&i<7){
 					gcLevel2A7++;
 				}
-			//} else {
-			//	if(i<primerSeq.length && i>(primerSeq.length-7)){
-			//		gcLevel2A7++;
-			//	}
-			//}
 		}
 	}
 	
@@ -467,6 +454,18 @@ public class PrimerGenerator {
 	}
 
 	
+	public double getRepeatScore(char[] primerSeq){
+		double scoreRepeat = 0;
+		double repeatCount = 0;
+		for(int i = 0; i<primerSeq.length;i++){
+			if(primerSeq[i] == Bases.a||primerSeq[i] == Bases.t||primerSeq[i] == Bases.g||primerSeq[i] == Bases.c){
+			repeatCount++;
+			}
+		}
+		scoreRepeat = scoring.calcScoreRepeat(repeatCount);
+		return scoreRepeat;
+	}
+
 	/*	private char[] copyEachSequ(int start, int length){
 char[] tempSequ = new char[length];
 System.arraycopy(seq, start, tempSequ, 0, length-start);
