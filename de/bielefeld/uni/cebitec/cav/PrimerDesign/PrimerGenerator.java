@@ -56,7 +56,7 @@ public class PrimerGenerator {
 	primerCandidates = new Vector<Primer>();
 	leftPrimer = new Vector<Primer>();
 	rightPrimer = new Vector<Primer>();
-	this.getPrimerCanidates();
+	this.getPrimerCandidates();
 	/*
 	char[] test = new char[21];
 	test[0] = 'T';
@@ -97,7 +97,7 @@ public class PrimerGenerator {
 		}
 	}
 	
-	public void calcScoreEachPrimerCanidate(){
+	public void calcScoreEachPrimerCandidate(){
 		double primerScore = 0;
 		char[] primerSeq = null;
 		Integer direction = 0;
@@ -148,8 +148,8 @@ public class PrimerGenerator {
 			scoreRepeat = this.getRepeatScore(primerSeq);
 			primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
 			temperature = scoring.getTemperature();
-			
-			//Stichproben Test leftPrimer
+				
+	/*		//Stichproben Test leftPrimer
 		//	if(offset==153&&start==642&&primerLength==21){
 			String temp = new String(primerSeq);
 			//Stichproben Test right Primer
@@ -183,7 +183,7 @@ public class PrimerGenerator {
 					System.out.print(primerSeq[j]);
 				}
 				System.out.println(" /n");
-			}
+			}*/
 			
 			if(primerScore>0){
 				if(direction == 1){
@@ -219,7 +219,7 @@ public class PrimerGenerator {
 	}
 	
 	//SEQUENZEN CHECKEN!!!!
-	public void getPrimerCanidates(){
+	public void getPrimerCandidates(){
 			getMarkedSeq();
 			int nCount =0;
 			String lastPlus12 = null;
@@ -264,17 +264,14 @@ public class PrimerGenerator {
 					}
 				}if(direction ==-1){
 					//right primer
-				//	this.getReverseComplement(tempSeqChar);
-				//	templateSeqString = new String(tempSeqChar);
 					for(int end = templateSeqString.length()-2;end>=max;end--){
 						int start = end-max;
 						int offset=end;
 						String canidate = templateSeqString.substring(start, end);
-						String lastPlus1 = templateSeqString.substring(end, end+1);
-						String lastPlus2 = templateSeqString.substring(end+1, end+2);
+						String lastPlus1= templateSeqString.substring(end,end+1);
+						String lastPlus2 = templateSeqString.substring(end+1,end+2);
 						char[] canidateArray = canidate.toCharArray();
 						char[] canidateSeq = getReverseComplement(canidateArray);
-	
 						for(char i :canidateSeq){
 							if(i==Bases.N|| i==Bases.n){
 								nCount++;
@@ -286,13 +283,6 @@ public class PrimerGenerator {
 							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
 						for(int length = miniLength; length<canidate.length();length++){
 							String canidate2 = canidate.substring((canidate.length()-length),canidate.length());
-							if(length == 23){
-								lastPlus12 = canidate.substring(length-1, length);
-								lastPlus22 = lastPlus1;
-							} else {
-								lastPlus12 = canidate.substring(length-1, length);
-								lastPlus22 = canidate.substring(length-2 ,length-1);
-							}
 							char[] canidateArray2 = canidate2.toCharArray();
 							char[] canidateSeq2 = getReverseComplement(canidateArray2);
 							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq2,start,direction,length,lastPlus12, lastPlus22,offset));		
@@ -302,10 +292,11 @@ public class PrimerGenerator {
 						}
 					}
 			}
-			this.calcScoreEachPrimerCanidate();
+			this.calcScoreEachPrimerCandidate();
 			System.out.println("kandidaten: "+primerCandidates.size());
 	}
 
+	
 	public char[] getReverseComplement(char[] primerSeq){
 
 		char[] alphabetMap= new char[256];
