@@ -21,7 +21,7 @@ public class Primer{
 	private String lastPlus1 = null;
 	private String lastPlus2 = null;
 	private int offset = 0;
-	
+	private int realstart = 0;
 	
 	public Primer(String contigID,int seqLength,char[] seq, int start, Integer direction, int length, String lastPlus1, String lastPlus2, int offset) {
 		this.contigID = contigID;
@@ -36,7 +36,7 @@ public class Primer{
 	}
 	
 
-	public Primer(String contigID, char[] seq, int start, Integer direction, int length, double score,double meltTemperature){
+	public Primer(String contigID, char[] seq, int start, Integer direction, int length, double score,double meltTemperature,int realstart){
 		this.contigID = contigID;
 		this.direction = direction;
 		this.primerLength = length;
@@ -44,8 +44,31 @@ public class Primer{
 		this.start = start;
 		this.primerScore = score;
 		this.temperature = meltTemperature;
+		this.realstart = realstart;
 	}
 	
+	@Override public String toString(){
+		StringBuilder result = new StringBuilder();
+	    String NEW_LINE = System.getProperty("line.separator");
+		String TAB = "\t";
+		String seq = new String(this.getPrimerSeq());
+		double temp = Math.round(this.getTemperature());
+		//result.append("start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence"+NEW_LINE);
+		//result.append("Primer for contig "+this.getContigID()+NEW_LINE);
+		result.append(this.getStart()+TAB+this.getPrimerLength()+TAB+this.getRealstart()+TAB+temp+TAB+this.getPrimerScore()+TAB+seq);
+		return result.toString();
+	}
+	
+	public int getRealstart() {
+		return realstart;
+	}
+
+
+	public void setRealstart(int realstart) {
+		this.realstart = realstart;
+	}
+
+
 	public int getContigLength() {
 		return contigLength;
 	}

@@ -35,13 +35,12 @@ public class PrimerGenerator {
 	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
 	private ArrayList<Integer> noPartnerLeft = new ArrayList<Integer>();
 	private ArrayList<Integer> noPartnerRight = new ArrayList<Integer>();
-
-
 	private int maxLength = 24;
 	private int miniLength = 19;
 	private int max = maxLength+5;
 	private int minBorderOffset = 80;
 	private int maxBorderOffset =400;
+	private int realstart = 0;
 	
 	/**
 	 * 
@@ -86,10 +85,20 @@ public class PrimerGenerator {
 	test[19] ='A';
 	test[20] ='T';*/
 	getPrimerPairs(leftPrimer,rightPrimer);
+	output();
 }
 	
 	public void output(){
-		
+		String NEW_LINE = System.getProperty("line.separator");
+		String TAB = "\t";
+		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
+			if(i<100){
+			System.out.println("primer pair for contig "+leftPrimer.elementAt(i).getContigID()+" and contig "+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).getContigID()+NEW_LINE);
+			System.out.println("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+			System.out.println("left primer: "+TAB+leftPrimer.elementAt(i).toString());
+			System.out.println("right primer: "+TAB+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).toString()+NEW_LINE);
+		}
+		}
 	}
 	
 
@@ -116,6 +125,7 @@ public class PrimerGenerator {
 		int start = 0;
 		int contigLength = 0;
 		int offset = 0;
+		int realstart=0;
 		String contigID = null;
 		String plus1 = null;
 		String plus2 = null;
@@ -157,10 +167,11 @@ public class PrimerGenerator {
 			scoreTemp = this.getTempScore(primerSeq);
 			scoreHomopoly = this.getHomopolyScore(primerSeq);
 			scoreRepeat = this.getRepeatScore(primerSeq);
+			realstart=this.getRealstart();
 			primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
 			temperature = scoring.getTemperature();
 				
-	/*		//Stichproben Test leftPrimer
+			//Stichproben Test leftPrimer
 		//	if(offset==153&&start==642&&primerLength==21){
 			String temp = new String(primerSeq);
 			//Stichproben Test right Primer
@@ -194,13 +205,13 @@ public class PrimerGenerator {
 					System.out.print(primerSeq[j]);
 				}
 				System.out.println(" /n");
-			}*/
+			}
 			
 			if(primerScore>-200){
 				if(direction == 1){
-					leftPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature));
+					leftPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature,realstart));
 				} else{
-					rightPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature));
+					rightPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature,offset-primerLength));
 				}
 			}
 		}
@@ -229,7 +240,6 @@ public class PrimerGenerator {
 		}
 	}
 	
-	//SEQUENZEN CHECKEN!!!!
 	public void getPrimerCandidates(){
 			getMarkedSeq();
 			int nCount =0;
@@ -306,7 +316,6 @@ public class PrimerGenerator {
 			this.calcScoreEachPrimerCandidate();
 			System.out.println("kandidaten: "+primerCandidates.size());
 	}
-
 	
 	public char[] getReverseComplement(char[] primerSeq){
 
@@ -445,11 +454,20 @@ public class PrimerGenerator {
 	}
 }	
 
+	public int getRealstart() {
+		return realstart;
+	}
+
+	public void setRealstart(int realstart) {
+		this.realstart = realstart;
+	}
+
 	public double getOffsetsScore(int offset,int primerLength, Integer direction){
 	double scoreOffset = 0;
-	int realstart = 0;
+
 	if(direction == 1){
 	realstart = offset - primerLength;
+	this.setRealstart(realstart);
 	scoreOffset = scoring.calcScoreOffset(realstart)+scoring.calcScoreMaxOffset(realstart);
 	return scoreOffset;
 	} else{
@@ -464,7 +482,6 @@ public class PrimerGenerator {
 		scorePlus1Plus2 = scoring.calcScorePlus1(plus1, plus2);
 		return scorePlus1Plus2;
 	}
-
 	
 	public double getRepeatScore(char[] primerSeq){
 		double scoreRepeat = 0;
