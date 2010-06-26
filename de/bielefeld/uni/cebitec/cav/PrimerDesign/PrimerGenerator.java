@@ -2,6 +2,7 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
@@ -30,6 +31,10 @@ public class PrimerGenerator {
 	private Vector<Primer> primerCandidates;
 	private Vector<Primer> leftPrimer;
 	private Vector<Primer> rightPrimer;
+	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
+	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
+	private ArrayList<Integer> noPartnerLeft = new ArrayList<Integer>();
+	private ArrayList<Integer> noPartnerRight = new ArrayList<Integer>();
 
 
 	private int maxLength = 24;
@@ -80,18 +85,24 @@ public class PrimerGenerator {
 	test[18] ='C';
 	test[19] ='A';
 	test[20] ='T';*/
-	output(leftPrimer,rightPrimer);
+	getPrimerPairs(leftPrimer,rightPrimer);
 }
+	
+	public void output(){
+		
+	}
+	
 
-	public void output(Vector<Primer> lPrimer, Vector<Primer> rPrimer){
+	public void getPrimerPairs(Vector<Primer> lPrimer, Vector<Primer> rPrimer){
 		PrimerPairs pp = new PrimerPairs();
 		if(!rPrimer.isEmpty()){
 			leftPrimer = pp.sortPrimer(leftPrimer);
 			rightPrimer = pp.sortPrimer(rightPrimer);
-	/*		for(int i = 0;i<rightPrimer.size();i++){
-				System.out.println(rightPrimer.elementAt(i).getPrimerScore());
-			}*/
 			pp.pairPrimer(leftPrimer, rightPrimer);
+			pairsFirstLeftPrimer=pp.getPairsFirstLeftPrimer();
+			pairsFirstRightPrimer=pp.getPairsFirstRightPrimer();
+			noPartnerLeft=pp.getNoPartnerLeft();
+			noPartnerRight=pp.getNoPartnerRight();
 		} else{
 			leftPrimer = pp.sortPrimer(leftPrimer);
 		}
@@ -185,7 +196,7 @@ public class PrimerGenerator {
 				System.out.println(" /n");
 			}*/
 			
-			if(primerScore>0){
+			if(primerScore>-200){
 				if(direction == 1){
 					leftPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature));
 				} else{
