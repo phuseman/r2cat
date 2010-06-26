@@ -48,6 +48,7 @@ public class PrimerGenerator {
 	public PrimerGenerator(File fasta, File xml,String[] marked, HashMap<String, Integer> contigPrimerInfo) throws Exception{
 	
 	FastaFileReader fastaParser = new FastaFileReader(fasta);
+	RepeatMasking rm = new RepeatMasking(fastaParser);
 	FileReader inXML = new FileReader(xml);
 	XMLParser xmlParser = new XMLParser();
 	xmlParser.parse(scoring,inXML);
@@ -93,7 +94,7 @@ public class PrimerGenerator {
 		String TAB = "\t";
 		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
 			if(i<100){
-			System.out.println("primer pair for contig "+leftPrimer.elementAt(i).getContigID()+" and contig "+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).getContigID()+NEW_LINE);
+			System.out.println("primer picking results for contig "+leftPrimer.elementAt(i).getContigID()+" and contig "+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).getContigID()+":"+NEW_LINE);
 			System.out.println("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 			System.out.println("left primer: "+TAB+leftPrimer.elementAt(i).toString());
 			System.out.println("right primer: "+TAB+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).toString()+NEW_LINE);
@@ -170,7 +171,7 @@ public class PrimerGenerator {
 			realstart=this.getRealstart();
 			primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
 			temperature = scoring.getTemperature();
-				
+	/*			
 			//Stichproben Test leftPrimer
 		//	if(offset==153&&start==642&&primerLength==21){
 			String temp = new String(primerSeq);
@@ -206,12 +207,13 @@ public class PrimerGenerator {
 				}
 				System.out.println(" /n");
 			}
-			
+			*/
 			if(primerScore>-200){
 				if(direction == 1){
 					leftPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature,realstart));
 				} else{
-					rightPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature,offset-primerLength));
+					realstart=offset-primerLength;
+					rightPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature,realstart));
 				}
 			}
 		}

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Vector;
 
+import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator.Bases;
+
 public class PrimerPairs {
 	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
 	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
@@ -27,7 +29,32 @@ public class PrimerPairs {
 		}
 			return primer;
 	}
+	public char[] getComplement(char[] primerSeq){
+
+		char[] alphabetMap= new char[256];
+		char[] complement = new char[primerSeq.length];
+		
+		for (int j = 0; j < alphabetMap.length; j++) {
+			alphabetMap[j]= (char) j;
+		}
+		alphabetMap['a']='t';
+		alphabetMap['A']='T';
+		alphabetMap['c']='g';
+		alphabetMap['C']='G';
+		alphabetMap['g']='c';
+		alphabetMap['G']='C';
+		alphabetMap['t']='a';
+		alphabetMap['T']='A';
+		
+
+		
+		//nur komplement
+		for (int j = 0; j<primerSeq.length; j++) {
+			complement[j]= alphabetMap[primerSeq[j]];
+		}
 	
+		return complement;
+	}
 	public boolean tempCheck(double firstTemperature, double secondTemperature){
 		double tempDifference =0;
 		boolean tempCheck=false;
@@ -49,15 +76,16 @@ public class PrimerPairs {
 		char[] eightBases = new char[8];
 		char[] leftLastBases = new char[4];
 		char[] rightLastBases = new char[4];
+		secondSeq = this.getComplement(secondSeq);
 		for(int k = 0;k<firstSeq.length-8;k++){
 			System.arraycopy(firstSeq, k, eightBases, 0, 8);
-			System.arraycopy(firstSeq, firstSeq.length-4, leftLastBases, 0, 3);
-			System.arraycopy(secondSeq, secondSeq.length-4, rightLastBases, 0, 3);
+			System.arraycopy(firstSeq, 0, leftLastBases, 0, 3);
+			System.arraycopy(secondSeq, 0, rightLastBases, 0, 3);
 			firstSeqLastBases = new String(leftLastBases);
 			secondSeqLastBases = new String(rightLastBases);
 			firstSeqEightBases = new String(eightBases);
 			secondSeqAsString = new String(secondSeq);
-			if(secondSeqAsString.contains(firstSeqEightBases)||firstSeqLastBases.equals(secondSeqLastBases)){
+			if(secondSeqAsString.contains(firstSeqEightBases)||firstSeqLastBases.contains(secondSeqLastBases)){
 				notComplement = false;
 			} else{
 				notComplement = true;
