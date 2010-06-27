@@ -49,12 +49,9 @@ public class Primer{
 	
 	@Override public String toString(){
 		StringBuilder result = new StringBuilder();
-	    String NEW_LINE = System.getProperty("line.separator");
 		String TAB = "\t";
 		String seq = new String(this.getPrimerSeq());
 		double temp = Math.round(this.getTemperature());
-		//result.append("start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence"+NEW_LINE);
-		//result.append("Primer for contig "+this.getContigID()+NEW_LINE);
 		result.append(this.getStart()+TAB+this.getPrimerLength()+TAB+this.getRealstart()+TAB+temp+TAB+this.getPrimerScore()+TAB+seq);
 		return result.toString();
 	}

@@ -86,19 +86,26 @@ public class PrimerGenerator {
 	test[19] ='A';
 	test[20] ='T';*/
 	getPrimerPairs(leftPrimer,rightPrimer);
-	output();
 }
 	
 	public void output(){
 		String NEW_LINE = System.getProperty("line.separator");
 		String TAB = "\t";
+		if(!rightPrimer.isEmpty()){
 		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
 			if(i<100){
 			System.out.println("primer picking results for contig "+leftPrimer.elementAt(i).getContigID()+" and contig "+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).getContigID()+":"+NEW_LINE);
 			System.out.println("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 			System.out.println("left primer: "+TAB+leftPrimer.elementAt(i).toString());
 			System.out.println("right primer: "+TAB+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).toString()+NEW_LINE);
-		}
+				}
+			}
+		} else{
+			for(int j = 0; j<leftPrimer.size();j++){
+				System.out.println("primer picking results for contig "+leftPrimer.elementAt(j).getContigID()+":"+NEW_LINE);
+				System.out.println("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+				System.out.println("left primer: "+TAB+leftPrimer.elementAt(j).toString());
+			}
 		}
 	}
 	
@@ -113,8 +120,10 @@ public class PrimerGenerator {
 			pairsFirstRightPrimer=pp.getPairsFirstRightPrimer();
 			noPartnerLeft=pp.getNoPartnerLeft();
 			noPartnerRight=pp.getNoPartnerRight();
+			output();
 		} else{
 			leftPrimer = pp.sortPrimer(leftPrimer);
+			output();
 		}
 	}
 	
@@ -168,7 +177,7 @@ public class PrimerGenerator {
 			scoreTemp = this.getTempScore(primerSeq);
 			scoreHomopoly = this.getHomopolyScore(primerSeq);
 			scoreRepeat = this.getRepeatScore(primerSeq);
-			realstart=this.getRealstart();
+			realstart=this.realstart;
 			primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
 			temperature = scoring.getTemperature();
 	/*			
@@ -456,20 +465,12 @@ public class PrimerGenerator {
 	}
 }	
 
-	public int getRealstart() {
-		return realstart;
-	}
-
-	public void setRealstart(int realstart) {
-		this.realstart = realstart;
-	}
 
 	public double getOffsetsScore(int offset,int primerLength, Integer direction){
 	double scoreOffset = 0;
 
 	if(direction == 1){
 	realstart = offset - primerLength;
-	this.setRealstart(realstart);
 	scoreOffset = scoring.calcScoreOffset(realstart)+scoring.calcScoreMaxOffset(realstart);
 	return scoreOffset;
 	} else{

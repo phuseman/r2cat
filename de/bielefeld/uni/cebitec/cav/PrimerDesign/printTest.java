@@ -55,14 +55,14 @@ public class printTest {
 		seq[18] ='C';
 		seq[19] ='A';
 		seq[20] ='T';
-		String[] marked = new String[2];
+		String[] marked = new String[1];
 		marked[0] ="r0";
-		marked[1] ="0";
+		//marked[1] ="0";
 		HashMap<String,Integer> contigAndDirectionInfo = new HashMap<String, Integer>();
 		int leftPrimer = 1;
 		int rightPrimer = -1;
 		contigAndDirectionInfo.put(marked[0],leftPrimer);
-		contigAndDirectionInfo.put(marked[1],rightPrimer);
+		//contigAndDirectionInfo.put(marked[1],rightPrimer);
 		PrimerGenerator t = new PrimerGenerator(fasta, xml,marked,contigAndDirectionInfo);
 	}
 
