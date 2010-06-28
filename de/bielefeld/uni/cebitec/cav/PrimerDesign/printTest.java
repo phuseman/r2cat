@@ -10,7 +10,7 @@ public class printTest {
 	
 	public static void main(String args[]) throws Exception{
 		File xml = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
-		File fasta = new File("C:/Users/Yvisunshine/Uni/erstesContig.fas");
+		File fasta = new File("C:/Users/Yvisunshine/Uni/erstenContigsRepeat.fas");
 		/*char[] seq = new char[20];
 		seq[0] = 'T';
 		seq[1] ='A';
@@ -55,14 +55,14 @@ public class printTest {
 		seq[18] ='C';
 		seq[19] ='A';
 		seq[20] ='T';
-		String[] marked = new String[1];
+		String[] marked = new String[2];
 		marked[0] ="r0";
-		//marked[1] ="0";
+		marked[1] ="0";
 		HashMap<String,Integer> contigAndDirectionInfo = new HashMap<String, Integer>();
 		int leftPrimer = 1;
 		int rightPrimer = -1;
 		contigAndDirectionInfo.put(marked[0],leftPrimer);
-		//contigAndDirectionInfo.put(marked[1],rightPrimer);
+		contigAndDirectionInfo.put(marked[1],rightPrimer);
 		PrimerGenerator t = new PrimerGenerator(fasta, xml,marked,contigAndDirectionInfo);
 	}
 

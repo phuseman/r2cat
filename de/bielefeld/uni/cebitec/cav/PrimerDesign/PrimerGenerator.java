@@ -47,11 +47,17 @@ public class PrimerGenerator {
 	 */
 	public PrimerGenerator(File fasta, File xml,String[] marked, HashMap<String, Integer> contigPrimerInfo) throws Exception{
 	
-	FastaFileReader fastaParser = new FastaFileReader(fasta);
-	RepeatMasking rm = new RepeatMasking(fastaParser);
+	
+	RepeatMasking rm = new RepeatMasking(fasta);
+	FastaFileReader fastaParser = rm.getFfr();
 	FileReader inXML = new FileReader(xml);
 	XMLParser xmlParser = new XMLParser();
 	xmlParser.parse(scoring,inXML);
+/*	char[] test = fastaParser.getCharArray();
+	
+	for(int i=0;i<15;i++){
+		System.out.print(test[i]);
+	}*/
 	
 	contigAndPrimerInfo = contigPrimerInfo;
 	markedSeq = marked;
@@ -120,10 +126,10 @@ public class PrimerGenerator {
 			pairsFirstRightPrimer=pp.getPairsFirstRightPrimer();
 			noPartnerLeft=pp.getNoPartnerLeft();
 			noPartnerRight=pp.getNoPartnerRight();
-			output();
+			//output();
 		} else{
 			leftPrimer = pp.sortPrimer(leftPrimer);
-			output();
+			//output();
 		}
 	}
 	
