@@ -11,7 +11,7 @@ import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 /**
  * This class generates the primer candidate sequences given a contig-sequence.
  * The sequence of primer candidates has to be checked on certain biological 
- * properties and are scored according to the scoring-scheme from the "other" class.
+ * properties and are scored according to the scoring-scheme from the "SaveParamAndCalc" class.
  * 
  * @author yherrmann	
  *
@@ -43,7 +43,13 @@ public class PrimerGenerator {
 	private int realstart = 0;
 	
 	/**
+	 * constructor for this class
 	 * 
+	 * @param fasta
+	 * @param xml
+	 * @param marked
+	 * @param contigPrimerInfo
+	 * @throws Exception
 	 */
 	public PrimerGenerator(File fasta, File xml,String[] marked, HashMap<String, Integer> contigPrimerInfo) throws Exception{
 	
@@ -93,11 +99,14 @@ public class PrimerGenerator {
 	test[20] ='T';*/
 	getPrimerPairs(leftPrimer,rightPrimer);
 }
-	
+	/**
+	 * sets up the output of the primer objects
+	 * 
+	 */
 	public void output(){
 		String NEW_LINE = System.getProperty("line.separator");
 		String TAB = "\t";
-		if(!rightPrimer.isEmpty()){
+		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
 		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
 			if(i<100){
 			System.out.println("primer picking results for contig "+leftPrimer.elementAt(i).getContigID()+" and contig "+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).getContigID()+":"+NEW_LINE);
@@ -105,6 +114,17 @@ public class PrimerGenerator {
 			System.out.println("left primer: "+TAB+leftPrimer.elementAt(i).toString());
 			System.out.println("right primer: "+TAB+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).toString()+NEW_LINE);
 				}
+			if(!noPartnerLeft.isEmpty()&&!noPartnerRight.isEmpty()){
+				System.out.println("Could not find fitting pair for following primer candidates: ");
+				System.out.println("\n");
+				System.out.println("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+				for(Integer a : noPartnerLeft){
+					System.out.println("left primer for contig "+leftPrimer.elementAt(a).getContigID() +": "+TAB+leftPrimer.elementAt(a).toString());
+				}
+				for(Integer b : noPartnerRight){
+					System.out.println("right primer for contig "+rightPrimer.elementAt(b).getContigID()+": "+TAB+rightPrimer.elementAt(b).toString());
+				}
+			}
 			}
 		} else{
 			for(int j = 0; j<leftPrimer.size();j++){
@@ -115,7 +135,13 @@ public class PrimerGenerator {
 		}
 	}
 	
-
+	/**
+	 * Initializes a instance of the class PrimerPairs in order to pair the primer candidates
+	 * of each contig end.
+	 * 
+	 * @param lPrimer
+	 * @param rPrimer
+	 */
 	public void getPrimerPairs(Vector<Primer> lPrimer, Vector<Primer> rPrimer){
 		PrimerPairs pp = new PrimerPairs();
 		if(!rPrimer.isEmpty()){
@@ -133,6 +159,10 @@ public class PrimerGenerator {
 		}
 	}
 	
+	/**
+	 * Methods access each scoring method for each primer object and retrieves 
+	 * the whole score for each primer candidate.
+	 */
 	public void calcScoreEachPrimerCandidate(){
 		double primerScore = 0;
 		char[] primerSeq = null;
@@ -186,14 +216,14 @@ public class PrimerGenerator {
 			realstart=this.realstart;
 			primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
 			temperature = scoring.getTemperature();
-	/*			
+				
 			//Stichproben Test leftPrimer
-		//	if(offset==153&&start==642&&primerLength==21){
+			if(offset==153&&start==642&&primerLength==21){
 			String temp = new String(primerSeq);
 			//Stichproben Test right Primer
 				
 				//if(temp.contains("TGATCAGTGCAGCGGACAATCTT")&&primerLength==23){
-				if(temp.contains("TGCAGCGGACAATCTTTCACT")&&primerLength==21){
+			//	if(temp.contains("TGCAGCGGACAATCTTTCACT")&&primerLength==21){
 			//if(primerScore==764){
 				System.out.println("Total Primer score: "+primerScore);
 				System.out.println("length score "+scoreLength);
@@ -222,7 +252,7 @@ public class PrimerGenerator {
 				}
 				System.out.println(" /n");
 			}
-			*/
+			
 			if(primerScore>-200){
 				if(direction == 1){
 					leftPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature,realstart));
@@ -235,13 +265,19 @@ public class PrimerGenerator {
 		System.out.println("left primer: "+leftPrimer.size());
 		System.out.println("right primer: "+rightPrimer.size());
 	}
-	
+	/**
+	 * 
+	 * @param seq
+	 * @return
+	 */
 	public double getTempScore(char[] seq){
 		double scoreTemperature = 0;
 		scoreTemperature = scoring.calcScoreAnnealTemp(seq);
 		return scoreTemperature;
 	}
-
+/**
+ * 
+ */
 	public void getMarkedSeq(){
 		
 		for(String s:markedSeq){
@@ -256,7 +292,9 @@ public class PrimerGenerator {
 			}
 		}
 	}
-	
+	/**
+	 * 
+	 */
 	public void getPrimerCandidates(){
 			getMarkedSeq();
 			int nCount =0;
@@ -333,7 +371,11 @@ public class PrimerGenerator {
 			this.calcScoreEachPrimerCandidate();
 			System.out.println("kandidaten: "+primerCandidates.size());
 	}
-	
+	/**
+	 * 
+	 * @param primerSeq
+	 * @return
+	 */
 	public char[] getReverseComplement(char[] primerSeq){
 
 		char[] alphabetMap= new char[256];
@@ -367,7 +409,11 @@ public class PrimerGenerator {
 	
 		return reverseComplement;
 	}
-	
+	/**
+	 * 
+	 * @param primerSeq
+	 * @return
+	 */
 	public double getHomopolyScore(char[] primerSeq){
 		double scoreHomopoly = 0;
 		double temp = 0;
@@ -388,7 +434,11 @@ public class PrimerGenerator {
 		scoreHomopoly = temp;
 		return scoreHomopoly;
 	}
-	
+	/**
+	 * 
+	 * @param primerSeq
+	 * @return
+	 */
 	public double getBackfoldScore(char[] primerSeq){
 	double scoreBackfold = 0;
 	char[] last4 = new char[4];
@@ -401,7 +451,12 @@ public class PrimerGenerator {
 	scoreBackfold = scoring.calcScoreBackfold(last4Bases, leftSeq);
 	return scoreBackfold;
 }
-
+/**
+ * 
+ * @param primerSeq
+ * @param direction
+ * @return
+ */
 	public double getFirstAndLastBaseScore(char[] primerSeq,Integer direction){
 	double scoreFirstLastBase = 0;
 		Object first = primerSeq[0];
@@ -411,7 +466,11 @@ public class PrimerGenerator {
 		scoreFirstLastBase = scoring.calcScoreFirstBaseAndLastBase(firstBase, lastBase);
 		return scoreFirstLastBase;	
 }	
-
+/**
+ * 
+ * @param PrimerSeq
+ * @return
+ */
 	public double getNPenalty(char[] PrimerSeq){
 		double scoreNPenalty = 0;
 		int count = 0;
@@ -423,13 +482,22 @@ public class PrimerGenerator {
 		scoreNPenalty = scoring.calcNPenalty(count);
 		return scoreNPenalty;
 	}
-	
+	/**
+	 * 
+	 * @param primerLength
+	 * @return
+	 */
 	public double getLengthScore(int primerLength){
 		double scoreLength = 0;
 		scoreLength = scoring.calcLengthScore(primerLength);
 		return scoreLength;
 	}
-	
+	/**
+	 * 
+	 * @param primerSeq
+	 * @param direction
+	 * @return
+	 */
 	public double getLast6Score(char[] primerSeq, Integer direction){
 	double scoreLast6Bases = 0;
 	double last6Ratio =0;
@@ -443,7 +511,13 @@ public class PrimerGenerator {
 	scoreLast6Bases = scoring.calcScoreLast6(last6Ratio);
 	return scoreLast6Bases;
 }
-
+/**
+ * 
+ * @param primerSeq
+ * @param totalGC
+ * @param direction
+ * @return
+ */
 	public double getGCScore(char[] primerSeq,boolean totalGC,Integer direction){
 	double scoreTotalGC = 0;
 	double scoreGC2A7 = 0;
@@ -471,7 +545,13 @@ public class PrimerGenerator {
 	}
 }	
 
-
+/**
+ * 
+ * @param offset
+ * @param primerLength
+ * @param direction
+ * @return
+ */
 	public double getOffsetsScore(int offset,int primerLength, Integer direction){
 	double scoreOffset = 0;
 
@@ -485,13 +565,22 @@ public class PrimerGenerator {
 		return scoreOffset;
 	}
 }
-
+/**
+ * 
+ * @param plus1
+ * @param plus2
+ * @return
+ */
 	public double getPlus1Plus2Score(String plus1,String plus2){
 		double scorePlus1Plus2 = 0;
 		scorePlus1Plus2 = scoring.calcScorePlus1(plus1, plus2);
 		return scorePlus1Plus2;
 	}
-	
+	/**
+	 * 
+	 * @param primerSeq
+	 * @return
+	 */
 	public double getRepeatScore(char[] primerSeq){
 		double scoreRepeat = 0;
 		double repeatCount = 0;

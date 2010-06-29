@@ -7,7 +7,13 @@ import java.util.PriorityQueue;
 import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator.Bases;
-
+/**
+ * This class includes methods to make primer pairs from primer candidates of the left and right
+ * contig end.
+ * 
+ * @author yherrman
+ *
+ */
 public class PrimerPairs {
 	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
 	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
@@ -15,7 +21,11 @@ public class PrimerPairs {
 	private ArrayList<Integer> noPartnerLeft = new ArrayList<Integer>();
 	private ArrayList<Integer> noPartnerRight = new ArrayList<Integer>();
 
-	
+	/**
+	 * 
+	 * @param primer
+	 * @return
+	 */
 	public Vector<Primer> sortPrimer(Vector<Primer> primer){
 		Comparator<Primer> comparator = new PrimerScoreComparator();
 		PriorityQueue<Primer> queue = new PriorityQueue<Primer>(100,comparator);
@@ -29,6 +39,12 @@ public class PrimerPairs {
 		}
 			return primer;
 	}
+	
+	/**
+	 * 
+	 * @param primerSeq
+	 * @return
+	 */
 	public char[] getComplement(char[] primerSeq){
 
 		char[] alphabetMap= new char[256];
@@ -55,6 +71,12 @@ public class PrimerPairs {
 	
 		return complement;
 	}
+	/**
+	 * 
+	 * @param firstTemperature
+	 * @param secondTemperature
+	 * @return
+	 */
 	public boolean tempCheck(double firstTemperature, double secondTemperature){
 		double tempDifference =0;
 		boolean tempCheck=false;
@@ -66,7 +88,12 @@ public class PrimerPairs {
 		}
 		return tempCheck;
 	}
-	
+	/**
+	 * 
+	 * @param firstSeq
+	 * @param secondSeq
+	 * @return
+	 */
 	public boolean seqCheck(char[] firstSeq,char[] secondSeq){
 		boolean notComplement = false;
 		String firstSeqLastBases = null;
@@ -93,7 +120,11 @@ public class PrimerPairs {
 		}
 		return notComplement;
 	}
-	
+	/**
+	 * 
+	 * @param leftPrimer
+	 * @param rightPrimer
+	 */
 	public void pairPrimer(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer){
 		char[] leftPrimerSeq;
 		char[] rightPrimerSeq;
@@ -195,7 +226,9 @@ public class PrimerPairs {
 	}
 		
 	}
-	
+	/**
+	 * 
+	 */
 	public void noPartnerCheck(){
 		int countR = 0;
 		int countL = 0; 

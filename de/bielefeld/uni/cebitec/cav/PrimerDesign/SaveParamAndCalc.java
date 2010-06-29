@@ -163,7 +163,7 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		 * @see DocHandler
 		 */
 		@Override
-		public void score(String s) throws Exception {
+		public void value(String s) throws Exception {
 			if(!s.isEmpty()&&!s.contains(" ")&&!s.matches("\r\n")){
 				String score = s;
 				String keyValue = value;

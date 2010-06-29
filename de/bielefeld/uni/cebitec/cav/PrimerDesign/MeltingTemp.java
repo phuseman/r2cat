@@ -18,6 +18,17 @@ public class MeltingTemp {
 	private HashMap<String,Double> entropie=new HashMap<String,Double>();
 
 	/**
+	 * Constructor of this class.
+	 * oligoConc is set and the HasMaps enthalpie and entropie are set up through the method
+	 * fillingEnthalpieAndEntropieParam.
+	 */
+	public MeltingTemp(){
+	this.fillEnthalpieAndEntropieParam();
+	this.oligoConc = 0.0000025;
+	
+}
+	
+	/**
 	 *	Methods fills HashMaps with the scores for a given pair of nucleotides regarding
 	 *	the enthalpie and the entropie. 
 	 *
@@ -57,6 +68,7 @@ public class MeltingTemp {
 		entropie.put("TC", -20.3);
 		entropie.put("TG", -19.3);
 	}
+	
 
 	/**
 	 * This method calculates the melting temperature with the base-stacking method.
@@ -64,16 +76,13 @@ public class MeltingTemp {
 	 * get the level of entropie and enthalpie of the whole sequence. This factors are used in 
 	 * the formula of the base-stacking method to calculate the melting temperature.
 	 * 
-	 * If the sequence contains unknown letters the calculation can not proceed.
+	 * If the sequence contains unknown letters the calculation can not proceed and returns -1.
 	 * 
 	 * @param seq
 	 * @return melting temperature
 	 */
 	
-	//testen wegen base[0]?!?!
 	public double calcTemp(char[] seq){
-		this.fillEnthalpieAndEntropieParam();
-		this.oligoConc = 0.0000025;
 		base = seq[0];
 		double temp = 0;
 		double errors = 0;
@@ -106,13 +115,3 @@ public class MeltingTemp {
 		}
 	}
 }
-
-
-/*public MeltingTemp(){
-	this.fillEnthalpieAndEntropieParam();
-	this.oligoConc = 0.0000025;
-	//base=seq[0];
-	//annealTemp = this.calcTemp(seq);
-	//this.setAnnealTemp(annealTemp);
-	//System.out.println(annealTemp);
-}*/

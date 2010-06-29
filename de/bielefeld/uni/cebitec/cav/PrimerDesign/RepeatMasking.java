@@ -8,7 +8,7 @@ import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
-
+//Corynebacterium urealyticum
 
 public class RepeatMasking {
 	private char[] seq;
@@ -53,6 +53,21 @@ public class RepeatMasking {
 		String temp = new String(seq);
 		temp = temp.toUpperCase();
 		seq = temp.toCharArray();	
+	}
+	
+	public void setRepeatsToLowerLetters(String repeatSeq){
+		String temp = new String(seq);
+		if(temp.equals(repeatSeq)){
+			for(int i =0;i<repeatSeq.length();i++){
+				char[] t = new char[1];
+				t[0] = temp.charAt(i);
+				String test = new String(t);
+				test = test.toLowerCase();
+				t = test.toCharArray();
+				temp = temp.replace(temp.charAt(i), t[0]);
+			}
+		}
+		seq = temp.toCharArray();
 	}
 	
 	public void repeatMasking(){

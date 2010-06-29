@@ -3,12 +3,20 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 import java.util.*;
 import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 
+/**
+ * Interface to handle the tags while going through a xml-file.
+ * 
+ * @author yherrman
+ *
+ */
+
 public interface DocHandler {
 	/**
 	 * method is called when a element of XML starts
 	 *
-	 * @param tag
-	 * @param attrs 
+	 * @param tag represents the xml-tag
+	 * @param attrs includes the expression infront of '=' as a key and 
+	 * the following expression as the value
 	 * @throws Exception
 	 */
 	
@@ -42,5 +50,5 @@ public interface DocHandler {
    * @throws Exception
    */
   
-  public void score(String str) throws Exception;
+  public void value(String str) throws Exception;
 }

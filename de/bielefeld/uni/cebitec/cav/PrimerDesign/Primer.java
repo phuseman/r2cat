@@ -2,7 +2,8 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 /**
  * This class represents a primer object. This object includes information about
- * certain primer properties for example: length, startposition, melting temperature, etc.
+ * the following primer properties:
+ * length, startposition, melting temperature, offset, primer sequence and contig id.
  * 
  * @author yherrmann
  *
@@ -23,6 +24,20 @@ public class Primer{
 	private int offset = 0;
 	private int realstart = 0;
 	
+	/**
+	 * Constructor for the primer candidates
+	 * 
+	 * @param contigID
+	 * @param seqLength
+	 * @param seq
+	 * @param start
+	 * @param direction
+	 * @param length
+	 * @param lastPlus1
+	 * @param lastPlus2
+	 * @param offset
+	 */
+	
 	public Primer(String contigID,int seqLength,char[] seq, int start, Integer direction, int length, String lastPlus1, String lastPlus2, int offset) {
 		this.contigID = contigID;
 		this.direction = direction;
@@ -35,7 +50,18 @@ public class Primer{
 		this.contigLength = seqLength;
 	}
 	
-
+/**
+ * constructor for the primer candidates
+ * 
+ * @param contigID
+ * @param seq
+ * @param start
+ * @param direction
+ * @param length
+ * @param score
+ * @param meltTemperature
+ * @param realstart
+ */
 	public Primer(String contigID, char[] seq, int start, Integer direction, int length, double score,double meltTemperature,int realstart){
 		this.contigID = contigID;
 		this.direction = direction;
@@ -46,7 +72,10 @@ public class Primer{
 		this.temperature = meltTemperature;
 		this.realstart = realstart;
 	}
-	
+	/**
+	 * Override the toString() method of this object
+	 * Setting up the output of the primer object
+	 */
 	@Override public String toString(){
 		StringBuilder result = new StringBuilder();
 		String TAB = "\t";

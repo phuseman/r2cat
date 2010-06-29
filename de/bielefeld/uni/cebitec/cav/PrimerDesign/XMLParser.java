@@ -78,7 +78,7 @@ public class XMLParser {
 			  st.push(new Integer(mode));
 			  mode = TagType.START_TAG;
 			  if(sb.length() > 0) {
-			    doc.score(sb.toString());
+			    doc.value(sb.toString());
 			    sb.setLength(0);
 			  }
 		        }else
