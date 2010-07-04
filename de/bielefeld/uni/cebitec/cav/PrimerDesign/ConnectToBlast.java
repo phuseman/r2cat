@@ -2,6 +2,8 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Scanner;
+
 
 
 public class ConnectToBlast {
@@ -13,15 +15,23 @@ public class ConnectToBlast {
 	}
 
 	public void makeBlastDB() throws IOException{
-		//System.out.println("test");
-		//Process t = Runtime.getRuntime().exec("cmd /c formatdb -i "+file.getAbsolutePath()+" -p F");
-		//System.out.println(file.toString());
-		//t.destroy();
-		//System.out.println(t.exitValue());
-		
+		file.setWritable(true);
+		String command = new String("cmd.exe /c CHDIR C:\\Users\\Yvisunshine\\Uni "+"&"+" formatdb -i "+file.getName()+" -p F");
+		//String command = new String("cmd.exe /c cd C:\\Users\\Yvisunshine "+"&"+" formatdb -i "+file.getName()+" -p F");
+		//String[] command = new String[]{"cmd.exe /c cd C:\\Users\\Yvisunshine"," formatdb -i "+file.getName()+" -p F"};
+		//ProcessBuilder builder = new ProcessBuilder(command);
+		//builder.directory(new File("C:\\Users\\Yvisunshine"));
+		//Process p = builder.start();
+		System.out.println(file.getAbsolutePath());
+		System.out.println(command);
+		Process p = Runtime.getRuntime().exec(command);
+		 Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
+		 System.out.println(s.next()); 
 	}
 	public void runBlastCommand() throws IOException{
-		//Runtime.getRuntime().exec("cmd /c notepad.exe c:\\autoexec.bat");
+		ProcessBuilder builder = new ProcessBuilder("cmd","/c","blastall -p blastn -i  -d  -F F -m 8 -e 1e-04 >blastout.txt");
+		//builder.directory(new File("C:/Users/Yvisunshine/AppData/Local/Temp"));
+		Process p = builder.start();
         
 	}
 }

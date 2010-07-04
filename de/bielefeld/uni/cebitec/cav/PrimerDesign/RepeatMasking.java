@@ -8,7 +8,7 @@ import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
-//Corynebacterium urealyticum
+
 
 public class RepeatMasking {
 	private char[] seq;
@@ -25,7 +25,7 @@ public class RepeatMasking {
 	}
 
 	public File writeTempFile() throws IOException{
-		File temp_file = File.createTempFile("toBlast", "temp");
+		File temp_file = File.createTempFile("toBlast", ".fas",new File("C:\\Users\\Yvisunshine\\Uni"));
 		PrintWriter buffer = new PrintWriter(new FileWriter(temp_file));
 		String description = null;
 		String id = null;
