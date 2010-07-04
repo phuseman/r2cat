@@ -80,7 +80,8 @@ public class Primer{
 		StringBuilder result = new StringBuilder();
 		String TAB = "\t";
 		String seq = new String(this.getPrimerSeq());
-		double temp = Math.round(this.getTemperature());
+		double temperature = this.getTemperature();
+		double temp = Math.round(temperature*100.0)/100.0;
 		result.append(this.getStart()+TAB+this.getPrimerLength()+TAB+this.getRealstart()+TAB+temp+TAB+this.getPrimerScore()+TAB+seq);
 		return result.toString();
 	}

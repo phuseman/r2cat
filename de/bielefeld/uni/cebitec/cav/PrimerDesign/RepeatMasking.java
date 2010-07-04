@@ -14,38 +14,32 @@ public class RepeatMasking {
 	private char[] seq;
 	FastaFileReader ffr= null;
 	Vector<DNASequence> sequences=null;
+	ConnectToBlast ctb =null;
 	
 	public RepeatMasking(File fasta) throws IOException {
 		ffr = new FastaFileReader(fasta);
 		sequences = ffr.getSequences();
 		setSeqToCapLetters();
-		writeTempFile();
+		File tempFile=writeTempFile();
+		ctb = new ConnectToBlast(tempFile);
 	}
 
-	public void writeTempFile() throws IOException{
+	public File writeTempFile() throws IOException{
 		File temp_file = File.createTempFile("toBlast", "temp");
 		PrintWriter buffer = new PrintWriter(new FileWriter(temp_file));
-		char[] sequence = null;
-		int offset = 0;
-		int size = 0;
+		String description = null;
 		String id = null;
 		for (int i = 0;i<sequences.size();i++){
-			offset = (int) sequences.elementAt(i).getOffset();
-			size = (int) sequences.elementAt(i).getSize();
 			id = sequences.elementAt(i).getId();
-			buffer.print(">"+id+" size: "+size);
+			description = sequences.elementAt(i).getDescription();
+			buffer.print(">"+id+" "+description);
 			buffer.write('\n');
-			buffer.write(seq,offset, size);
+			buffer.write(seq);
 			buffer.write('\n');
 		}
 		
-		/* ffr = new FastaFileReader(temp_file);
-		* sequence = ffr.getCharArray();
-		for(int i = 0;i<15;i++){
-			System.out.print(sequence[i]);
-		}*/
-		//System.out.println(temp_file);
 		buffer=null;
+		return temp_file;
 	}
 
 	public void setSeqToCapLetters() throws IOException{
@@ -70,9 +64,6 @@ public class RepeatMasking {
 		seq = temp.toCharArray();
 	}
 	
-	public void repeatMasking(){
-		//Runtime.getRuntime().equals(obj);
-	}
 	public FastaFileReader getFfr() {
 		return ffr;
 	}

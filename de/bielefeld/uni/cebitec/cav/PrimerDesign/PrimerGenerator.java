@@ -108,7 +108,7 @@ public class PrimerGenerator {
 		String TAB = "\t";
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
 		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
-			if(i<100){
+			if(i<3){
 			System.out.println("primer picking results for contig "+leftPrimer.elementAt(i).getContigID()+" and contig "+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).getContigID()+":"+NEW_LINE);
 			System.out.println("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 			System.out.println("left primer: "+TAB+leftPrimer.elementAt(i).toString());
@@ -217,9 +217,11 @@ public class PrimerGenerator {
 			primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
 			temperature = scoring.getTemperature();
 				
-			//Stichproben Test leftPrimer
-			if(offset==153&&start==642&&primerLength==21){
+		/*	//Stichproben Test leftPrimer
 			String temp = new String(primerSeq);
+			//if(offset==153&&start==642&&primerLength==21){
+			if(temp.contains("ACCGCAGAGACCTGCTGTTTA")&&primerLength==21){
+
 			//Stichproben Test right Primer
 				
 				//if(temp.contains("TGATCAGTGCAGCGGACAATCTT")&&primerLength==23){
@@ -252,7 +254,7 @@ public class PrimerGenerator {
 				}
 				System.out.println(" /n");
 			}
-			
+			*/
 			if(primerScore>-200){
 				if(direction == 1){
 					leftPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature,realstart));

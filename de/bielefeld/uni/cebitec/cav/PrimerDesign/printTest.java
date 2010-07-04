@@ -10,7 +10,7 @@ public class printTest {
 	
 	public static void main(String args[]) throws Exception{
 		File xml = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
-		File fasta = new File("C:/Users/Yvisunshine/Uni/erstenContigsRepeat.fas");
+		File fasta = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
 		/*char[] seq = new char[20];
 		seq[0] = 'T';
 		seq[1] ='A';
