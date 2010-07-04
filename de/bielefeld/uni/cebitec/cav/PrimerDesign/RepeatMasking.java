@@ -25,7 +25,7 @@ public class RepeatMasking {
 	}
 
 	public File writeTempFile() throws IOException{
-		File temp_file = File.createTempFile("toBlast", ".fas",new File("C:\\Users\\Yvisunshine\\Uni"));
+		File temp_file = File.createTempFile("toBlast", ".fas",new File("C:\\Users\\Mini-Yvi\\Uni"));
 		PrintWriter buffer = new PrintWriter(new FileWriter(temp_file));
 		String description = null;
 		String id = null;
