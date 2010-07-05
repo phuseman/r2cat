@@ -16,7 +16,7 @@ public class ConnectToBlast {
 
 	public void makeBlastDB() throws IOException{
 		file.setWritable(true);
-		String command = new String("cmd.exe CHDIR C:\\Users\\Mini-Yvi\\Uni "+"&"+" formatdb -i contigs.fas -p F");
+		String command = new String("formatdb -i "+file.getName()+" -p F");
 		//String command = new String("cmd.exe /c cd C:\\Users\\Yvisunshine "+"&"+" formatdb -i "+file.getName()+" -p F");
 		//String[] command = new String[]{"cmd.exe /c cd C:\\Users\\Yvisunshine"," formatdb -i "+file.getName()+" -p F"};
 		//ProcessBuilder builder = new ProcessBuilder(command);
@@ -24,9 +24,10 @@ public class ConnectToBlast {
 		//Process p = builder.start();
 		//System.out.println(file.getAbsolutePath());
 		System.out.println(command);
-		Process p = Runtime.getRuntime().exec(command);
-		 Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
-		 System.out.println(s.next()); 
+		Process p = Runtime.getRuntime().exec(command,null,new File("C:\\Users\\Yvisunshine\\Uni"));
+		//p.wait();
+	/*	 Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
+		 System.out.println(s.next()); */
 	}
 	
 	public void runBlastCommand() throws IOException{
