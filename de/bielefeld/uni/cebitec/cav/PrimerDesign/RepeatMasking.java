@@ -14,14 +14,14 @@ public class RepeatMasking {
 	private char[] seq;
 	FastaFileReader ffr= null;
 	Vector<DNASequence> sequences=null;
-	ConnectToBlast ctb =null;
+	RunBlast ctb =null;
 	
 	public RepeatMasking(File fasta) throws IOException {
 		ffr = new FastaFileReader(fasta);
 		sequences = ffr.getSequences();
 		setSeqToCapLetters();
 		File tempFile=writeTempFile();
-		ctb = new ConnectToBlast(tempFile);
+		ctb = new RunBlast(tempFile);
 	}
 
 	public File writeTempFile() throws IOException{

@@ -6,10 +6,10 @@ import java.util.Scanner;
 
 
 
-public class ConnectToBlast {
+public class RunBlast {
 	File file = null;
 
-	public ConnectToBlast(File tempFile) throws IOException {
+	public RunBlast(File tempFile) throws IOException {
 		file = tempFile;
 		makeBlastDB();
 	}
@@ -25,15 +25,16 @@ public class ConnectToBlast {
 		//System.out.println(file.getAbsolutePath());
 		System.out.println(command);
 		Process p = Runtime.getRuntime().exec(command,null,new File("C:\\Users\\Yvisunshine\\Uni"));
+		runBlastCommand();
 		//p.wait();
 	/*	 Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
 		 System.out.println(s.next()); */
 	}
 	
 	public void runBlastCommand() throws IOException{
-		ProcessBuilder builder = new ProcessBuilder("cmd","/c","blastall -p blastn -i  -d  -F F -m 8 -e 1e-04 >blastout.txt");
-		//builder.directory(new File("C:/Users/Yvisunshine/AppData/Local/Temp"));
-		Process p = builder.start();
-        
+		String command = new String("blastall -p blastn -i "+file.getName()+" -d "+file.getName()+" -F F -m 8 -e 1e-04 -o blastout.txt");
+		Process p = Runtime.getRuntime().exec(command,null,new File("C:\\Users\\Yvisunshine\\Uni"));
+		 Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
+		 System.out.println(s.next());
 	}
 }
