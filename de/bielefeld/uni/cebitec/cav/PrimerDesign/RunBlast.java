@@ -8,32 +8,35 @@ import java.util.Scanner;
 
 public class RunBlast {
 	File file = null;
+	File dir = null;
 
-	public RunBlast(File tempFile) throws IOException {
+	public RunBlast(File tempFile, File tempDir) throws IOException {
 		file = tempFile;
+		dir = tempDir;
 		makeBlastDB();
 	}
 
 	public void makeBlastDB() throws IOException{
 		file.setWritable(true);
 		String command = new String("formatdb -i "+file.getName()+" -p F");
-		//String command = new String("cmd.exe /c cd C:\\Users\\Yvisunshine "+"&"+" formatdb -i "+file.getName()+" -p F");
-		//String[] command = new String[]{"cmd.exe /c cd C:\\Users\\Yvisunshine"," formatdb -i "+file.getName()+" -p F"};
-		//ProcessBuilder builder = new ProcessBuilder(command);
-		//builder.directory(new File("C:\\Users\\Yvisunshine"));
-		//Process p = builder.start();
-		//System.out.println(file.getAbsolutePath());
 		System.out.println(command);
-		Process p = Runtime.getRuntime().exec(command,null,new File("C:\\Users\\Yvisunshine\\Uni"));
-		runBlastCommand();
+		Process p = Runtime.getRuntime().exec(command,null,dir);
+	/*	try {
+			p.wait();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
 		//p.wait();
 	/*	 Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
 		 System.out.println(s.next()); */
+		//runBlastCommand();
+		//System.out.println(dir.listFiles().length);
 	}
 	
 	public void runBlastCommand() throws IOException{
 		String command = new String("blastall -p blastn -i "+file.getName()+" -d "+file.getName()+" -F F -m 8 -e 1e-04 -o blastout.txt");
-		Process p = Runtime.getRuntime().exec(command,null,new File("C:\\Users\\Yvisunshine\\Uni"));
+		Process p = Runtime.getRuntime().exec(command,null,dir);
 		 Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
 		 System.out.println(s.next());
 	}

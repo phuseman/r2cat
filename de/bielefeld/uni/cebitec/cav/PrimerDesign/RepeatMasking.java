@@ -15,17 +15,35 @@ public class RepeatMasking {
 	FastaFileReader ffr= null;
 	Vector<DNASequence> sequences=null;
 	RunBlast ctb =null;
+	File dir = null;
 	
+
 	public RepeatMasking(File fasta) throws IOException {
 		ffr = new FastaFileReader(fasta);
 		sequences = ffr.getSequences();
 		setSeqToCapLetters();
-		File tempFile=writeTempFile();
-		ctb = new RunBlast(tempFile);
+		File dir = makeDir();
+		if(dir.exists()){
+		File tempFile=writeTempFile(dir);
+		ctb = new RunBlast(tempFile,dir);
+		
+		}
 	}
-
-	public File writeTempFile() throws IOException{
-		File temp_file = File.createTempFile("toBlast", ".fas",new File("C:\\Users\\Yvisunshine\\Uni"));
+	
+	public File makeDir(){
+		String dirName = "C:\\Users\\Yvisunshine\\r2catPrimer";
+		dir = new File(dirName);
+		if(dir.isDirectory()){
+			System.out.println("Directory " +dir.getName()+ " already exists");
+			return null;
+		} else{
+			dir.mkdir();
+			return dir;
+		}
+	}
+	public File writeTempFile(File dir) throws IOException{
+		
+		File temp_file = File.createTempFile("toBlast", ".fas",dir);
 		PrintWriter buffer = new PrintWriter(new FileWriter(temp_file));
 		String description = null;
 		String id = null;
@@ -70,5 +88,13 @@ public class RepeatMasking {
 
 	public void setFfr(FastaFileReader ffr) {
 		this.ffr = ffr;
+	}
+	
+	public File getDir() {
+		return dir;
+	}
+
+	public void setDir(File dir) {
+		this.dir = dir;
 	}
 }

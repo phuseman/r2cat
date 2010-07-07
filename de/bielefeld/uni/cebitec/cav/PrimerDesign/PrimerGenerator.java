@@ -41,6 +41,8 @@ public class PrimerGenerator {
 	private int minBorderOffset = 80;
 	private int maxBorderOffset =400;
 	private int realstart = 0;
+	FastaFileReader fastaParser = null;
+	File directory = null;
 	
 	/**
 	 * constructor for this class
@@ -55,7 +57,8 @@ public class PrimerGenerator {
 	
 	
 	RepeatMasking rm = new RepeatMasking(fasta);
-	FastaFileReader fastaParser = rm.getFfr();
+	fastaParser = rm.getFfr();
+	directory = rm.getDir();
 	FileReader inXML = new FileReader(xml);
 	XMLParser xmlParser = new XMLParser();
 	xmlParser.parse(scoring,inXML);
@@ -108,7 +111,7 @@ public class PrimerGenerator {
 		String TAB = "\t";
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
 		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
-			if(i<3){
+			if(i<-1){
 			System.out.println("primer picking results for contig "+leftPrimer.elementAt(i).getContigID()+" and contig "+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).getContigID()+":"+NEW_LINE);
 			System.out.println("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 			System.out.println("left primer: "+TAB+leftPrimer.elementAt(i).toString());
@@ -133,6 +136,21 @@ public class PrimerGenerator {
 				System.out.println("left primer: "+TAB+leftPrimer.elementAt(j).toString());
 			}
 		}
+		deleteDir(directory);
+	}
+	
+	public void deleteDir(File dir){
+		System.out.println(dir.getAbsolutePath());
+		File[] files = dir.listFiles();
+/*		
+		if (files != null) {
+			for (int i = 0; i < files.length; i++) {
+				System.out.println(files[i]);
+					files[i].delete();
+			}*/
+			dir.delete(); 
+		//}
+
 	}
 	
 	/**
@@ -152,10 +170,10 @@ public class PrimerGenerator {
 			pairsFirstRightPrimer=pp.getPairsFirstRightPrimer();
 			noPartnerLeft=pp.getNoPartnerLeft();
 			noPartnerRight=pp.getNoPartnerRight();
-			//output();
+			output();
 		} else{
 			leftPrimer = pp.sortPrimer(leftPrimer);
-			//output();
+			output();
 		}
 	}
 	
