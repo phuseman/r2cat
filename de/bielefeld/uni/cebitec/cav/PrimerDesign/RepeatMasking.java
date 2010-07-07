@@ -30,6 +30,17 @@ public class RepeatMasking {
 		}
 	}
 	
+
+	public char[] getSeq() {
+		return seq;
+	}
+
+
+	public void setSeq(char[] seq) {
+		this.seq = seq;
+	}
+
+
 	public File makeDir(){
 		String dirName = "C:\\Users\\Yvisunshine\\r2catPrimer";
 		dir = new File(dirName);

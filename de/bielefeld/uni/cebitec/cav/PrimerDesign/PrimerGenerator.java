@@ -62,7 +62,7 @@ public class PrimerGenerator {
 	FileReader inXML = new FileReader(xml);
 	XMLParser xmlParser = new XMLParser();
 	xmlParser.parse(scoring,inXML);
-/*	char[] test = fastaParser.getCharArray();
+/*	char[] test = rm.getSeq();
 	
 	for(int i=0;i<15;i++){
 		System.out.print(test[i]);
@@ -70,7 +70,7 @@ public class PrimerGenerator {
 	
 	contigAndPrimerInfo = contigPrimerInfo;
 	markedSeq = marked;
-	seq = fastaParser.getCharArray();
+	seq = rm.getSeq();
 	offsetsInInput = fastaParser.getOffsetsArray();
 	sequences =fastaParser.getSequences();
 	primerCandidates = new Vector<Primer>();
