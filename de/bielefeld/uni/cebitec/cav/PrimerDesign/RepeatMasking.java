@@ -21,10 +21,12 @@ public class RepeatMasking {
 	RunBlast ctb =null;
 	File dir = null;
 	File blastOutput = null;
+	String dirName = "C:\\Users\\Yvisunshine\\r2catPrimer";
+	String preProcessedFastaFile ="preProcessedFastaFile";
+	String toBlast ="toBlast";
 	
 
 	public RepeatMasking(File fasta) throws IOException, InterruptedException {
-		String toBlast ="toBlast";
 		ffr = new FastaFileReader(fasta);
 		sequences = ffr.getSequences();
 		this.setSeqToCapLetters();
@@ -37,7 +39,6 @@ public class RepeatMasking {
 	}
 	
 	public void setUp(File dir) throws IOException{
-		String preProcessedFastaFile ="preProcessedFastaFile";
 		File preProcessed = writeTempFile(preProcessedFastaFile,dir);
 		ffrForpreprocessed = new FastaFileReader(preProcessed);
 	}
@@ -51,7 +52,7 @@ public class RepeatMasking {
 	}
 
 	public File makeDir(){
-		String dirName = "C:\\Users\\Yvisunshine\\r2catPrimer";
+		
 		File dir = new File(dirName);
 		if(dir.isDirectory()){
 			System.out.println("Directory " +dir.getName()+ " already exists");
@@ -65,6 +66,8 @@ public class RepeatMasking {
 	
 	
 	public void blastOutputParsen() throws IOException{
+		//File f = new File("C:\\Users\\Mini-Yvi\\blastout.txt");
+		//BufferedReader in = new BufferedReader(new FileReader(f));
 		BufferedReader in = new BufferedReader(new FileReader(blastOutput));
 		String currentLine = null;
 		String[] tab = null;
@@ -72,9 +75,9 @@ public class RepeatMasking {
 				tab = currentLine.split("\t");
 				String contigID=tab[0];
 				String contigID2 = tab[1];
-				String tab4 = tab[4];
+				//String tab4 = tab[4];
 				if(!contigID.equals(contigID2)){
-					
+					//System.out.println(contigID+" "+contigID2);
 					int length = Integer.valueOf(tab[3]).intValue();
 					int startPosContig1 = Integer.valueOf(tab[6]).intValue();
 					int endPosContig1 = Integer.valueOf(tab[7]).intValue();
@@ -82,7 +85,7 @@ public class RepeatMasking {
 					int endPosContig2 = Integer.valueOf(tab[9]).intValue();
 					//System.out.println(length+" "+startPosContig1+" "+endPosContig1);
 					this.setRepeatsToLowerLetters(length,startPosContig1, endPosContig1);
-					//this.setRepeatsToLowerLetters(length, startPosContig2, endPosContig2);
+					this.setRepeatsToLowerLetters(length, startPosContig2, endPosContig2);
 					
 				}
 		}
@@ -125,17 +128,28 @@ public class RepeatMasking {
 		seq = temp.toCharArray();	
 	}
 	
-	//BEARBEITEN!!!
 	public void setRepeatsToLowerLetters(int repeatLength, int repeatStartPos,int repeatEndPos){
+		char[] repeat = new char[repeatLength];
+		int m =0;
+		for(int j = repeatStartPos;j<repeatStartPos+repeatLength;j++,m++){
+			repeat[m] = seq[j];
+		}
+		String tempRepeat = new String(repeat);
 		String temp = new String(seq);
-		char[] charAtPos = new char[1];
+		String repeatLowerCase = tempRepeat.toLowerCase();
+		temp = temp.replace(tempRepeat, repeatLowerCase);
+		
+		
+/*		char[] charAtPos = new char[1];
 			for(int i =repeatStartPos;i<repeatEndPos-1;i++){
 				charAtPos[0] = seq[i];
 				String testing = new String(charAtPos);
 				testing = testing.toLowerCase();
 				charAtPos = testing.toCharArray();
 				temp = temp.replace(temp.charAt(i), charAtPos[0]);
-		}
+				
+		}*/
+			//seq = temp.toCharArray();
 		
 		this.setSeq(temp.toCharArray());
 	/*	for(int i=393;i<393+71;i++){

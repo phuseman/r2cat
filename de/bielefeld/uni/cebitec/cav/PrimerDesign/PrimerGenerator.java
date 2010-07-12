@@ -62,11 +62,11 @@ public class PrimerGenerator {
 	XMLParser xmlParser = new XMLParser();
 	xmlParser.parse(scoring,inXML);
 	fastaParser = rm.getFfrForpreprocessed();
-	char[] test = fastaParser.getCharArray();
+/*	char[] test = fastaParser.getCharArray();
 	
 	for(int i=393;i<393+71;i++){
 		System.out.print(test[i]);
-	}
+	}*/
 	
 	contigAndPrimerInfo = contigPrimerInfo;
 	markedSeq = marked;
