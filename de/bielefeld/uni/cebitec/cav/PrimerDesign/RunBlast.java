@@ -7,37 +7,40 @@ import java.util.Scanner;
 
 
 public class RunBlast {
-	File file = null;
-	File dir = null;
+	File contigToBlast = null;
+	File directoryForTempFiles = null;
+	File blastOutput = null;
 
-	public RunBlast(File tempFile, File tempDir) throws IOException {
-		file = tempFile;
-		dir = tempDir;
+	public RunBlast(File tempFile, File tempDir) throws IOException, InterruptedException {
+		contigToBlast = tempFile;
+		directoryForTempFiles = tempDir;
 		makeBlastDB();
+		runBlastCommand();
 	}
 
-	public void makeBlastDB() throws IOException{
-		file.setWritable(true);
-		String command = new String("formatdb -i "+file.getName()+" -p F");
-		System.out.println(command);
-		Process p = Runtime.getRuntime().exec(command,null,dir);
-	/*	try {
-			p.wait();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		//p.wait();
+	public void makeBlastDB() throws IOException, InterruptedException{
+		contigToBlast.setWritable(true);
+		String command = new String("formatdb -i "+contigToBlast.getName()+" -p F");
+		Process p = Runtime.getRuntime().exec(command,null,directoryForTempFiles);
+		p.waitFor();
 	/*	 Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
 		 System.out.println(s.next()); */
-		//runBlastCommand();
-		//System.out.println(dir.listFiles().length);
 	}
 	
-	public void runBlastCommand() throws IOException{
-		String command = new String("blastall -p blastn -i "+file.getName()+" -d "+file.getName()+" -F F -m 8 -e 1e-04 -o blastout.txt");
-		Process p = Runtime.getRuntime().exec(command,null,dir);
-		 Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
-		 System.out.println(s.next());
+	public void runBlastCommand() throws IOException, InterruptedException{
+		blastOutput = File.createTempFile("blastout",".txt",directoryForTempFiles);
+		String command = new String("blastall -p blastn -i "+contigToBlast.getName()+" -d "+contigToBlast.getName()+" -F F -m 8 -e 1e-04 -o " +blastOutput.getName());
+		Process p = Runtime.getRuntime().exec(command,null,directoryForTempFiles);
+		p.waitFor();
+		/* Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
+		 System.out.println(s.next());*/
+	}
+
+	public File getBlastOutput() {
+		return blastOutput;
+	}
+
+	public void setBlastOutput(File blastOutput) {
+		this.blastOutput = blastOutput;
 	}
 }

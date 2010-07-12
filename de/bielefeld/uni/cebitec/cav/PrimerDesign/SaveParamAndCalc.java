@@ -183,6 +183,8 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		 */
 		public double calcScorePlus1(String lastPlus1, String lastPlus2){
 			double scorePlus1Plus2 = 0;
+			lastPlus1.toUpperCase();
+			lastPlus2.toUpperCase();
 			String plus1 = this.plus1Base.get(lastPlus1).toString();
 			String plus2 = this.plus2Base.get(lastPlus2).toString();
 			scorePlus1Plus2 = Double.parseDouble(plus1);
@@ -343,6 +345,8 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		 * @return first and last base score
 		 */
 		public double calcScoreFirstBaseAndLastBase(String firstBase, String lastBase){
+			firstBase.toUpperCase();
+			lastBase.toUpperCase();
 					double scoreFirstLastBase = 0;
 					String firstString = this.firstBase.get(firstBase);
 					double firstScore = Double.parseDouble(firstString);
@@ -362,7 +366,9 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 			double scoreBackfold = 0;
 			String scoreString = null;
 			String last4Bases = new String(last4Base);
+			last4Bases.toUpperCase();
 			String primer = new String(leftseq);
+			primer.toUpperCase();
 			if(primer.contains(last4Bases)){
 				scoreString = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD");
 				scoreBackfold = Double.valueOf(scoreString).doubleValue();

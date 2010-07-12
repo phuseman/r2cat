@@ -57,20 +57,20 @@ public class PrimerGenerator {
 	
 	
 	RepeatMasking rm = new RepeatMasking(fasta);
-	fastaParser = rm.getFfr();
 	directory = rm.getDir();
 	FileReader inXML = new FileReader(xml);
 	XMLParser xmlParser = new XMLParser();
 	xmlParser.parse(scoring,inXML);
-/*	char[] test = rm.getSeq();
+	fastaParser = rm.getFfrForpreprocessed();
+	char[] test = fastaParser.getCharArray();
 	
-	for(int i=0;i<15;i++){
+	for(int i=393;i<393+71;i++){
 		System.out.print(test[i]);
-	}*/
+	}
 	
 	contigAndPrimerInfo = contigPrimerInfo;
 	markedSeq = marked;
-	seq = rm.getSeq();
+	seq = fastaParser.getCharArray();
 	offsetsInInput = fastaParser.getOffsetsArray();
 	sequences =fastaParser.getSequences();
 	primerCandidates = new Vector<Primer>();
@@ -111,7 +111,7 @@ public class PrimerGenerator {
 		String TAB = "\t";
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
 		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
-			if(i<-1){
+			if(i<100){
 			System.out.println("primer picking results for contig "+leftPrimer.elementAt(i).getContigID()+" and contig "+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).getContigID()+":"+NEW_LINE);
 			System.out.println("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 			System.out.println("left primer: "+TAB+leftPrimer.elementAt(i).toString());
@@ -170,10 +170,10 @@ public class PrimerGenerator {
 			pairsFirstRightPrimer=pp.getPairsFirstRightPrimer();
 			noPartnerLeft=pp.getNoPartnerLeft();
 			noPartnerRight=pp.getNoPartnerRight();
-			output();
+			//output();
 		} else{
 			leftPrimer = pp.sortPrimer(leftPrimer);
-			output();
+			//output();
 		}
 	}
 	
@@ -335,12 +335,12 @@ public class PrimerGenerator {
 						String lastPlus1 = templateSeqString.substring(end, end+1);
 						String lastPlus2 = templateSeqString.substring(end+1, end+2);
 						char[] canidateSeq = canidate.toCharArray();
-					for(char i :canidateSeq){
+			/*		for(char i :canidateSeq){
 							if(i==Bases.N|| i==Bases.n){
 								nCount++;
 						}
-					}
-						if(nCount<2){
+					}*/
+						//if(nCount<2){
 							if(offset>minBorderOffset&&offset<maxBorderOffset){
 							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
 						for(int length = miniLength; length<canidate.length();length++){
@@ -356,7 +356,7 @@ public class PrimerGenerator {
 							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq2,start,direction,length,lastPlus12, lastPlus22,offset));		
 							}
 							}
-						}
+						//}
 					}
 				}if(direction ==-1){
 					//right primer
@@ -368,13 +368,13 @@ public class PrimerGenerator {
 						String lastPlus2 = templateSeqString.substring(end+1,end+2);
 						char[] canidateArray = canidate.toCharArray();
 						char[] canidateSeq = getReverseComplement(canidateArray);
-						for(char i :canidateSeq){
+			/*			for(char i :canidateSeq){
 							if(i==Bases.N|| i==Bases.n){
 								nCount++;
 						}
-					}
+					}*/
 		
-						if(nCount<2){
+						//if(nCount<2){
 							if(offset>minBorderOffset&&offset<maxBorderOffset){
 							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
 						for(int length = miniLength; length<canidate.length();length++){
@@ -384,7 +384,7 @@ public class PrimerGenerator {
 							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq2,start,direction,length,lastPlus12, lastPlus22,offset));		
 								}
 							}
-						}
+					//	}
 						}
 					}
 			}

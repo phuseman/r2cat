@@ -1,6 +1,9 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,37 +16,43 @@ import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 public class RepeatMasking {
 	private char[] seq;
 	FastaFileReader ffr= null;
+	FastaFileReader ffrForpreprocessed = null;
 	Vector<DNASequence> sequences=null;
 	RunBlast ctb =null;
 	File dir = null;
+	File blastOutput = null;
 	
 
-	public RepeatMasking(File fasta) throws IOException {
+	public RepeatMasking(File fasta) throws IOException, InterruptedException {
+		String toBlast ="toBlast";
 		ffr = new FastaFileReader(fasta);
 		sequences = ffr.getSequences();
-		setSeqToCapLetters();
-		File dir = makeDir();
-		if(dir.exists()){
-		File tempFile=writeTempFile(dir);
-		ctb = new RunBlast(tempFile,dir);
-		
-		}
+		this.setSeqToCapLetters();
+		dir = this.makeDir();
+		File tempFileToBlast=writeTempFile(toBlast,dir);
+		ctb = new RunBlast(tempFileToBlast,dir);
+		blastOutput = ctb.getBlastOutput();
+		this.blastOutputParsen();
+		this.setUp(dir);
 	}
 	
-
-	public char[] getSeq() {
-		return seq;
+	public void setUp(File dir) throws IOException{
+		String preProcessedFastaFile ="preProcessedFastaFile";
+		File preProcessed = writeTempFile(preProcessedFastaFile,dir);
+		ffrForpreprocessed = new FastaFileReader(preProcessed);
+	}
+	
+	public FastaFileReader getFfrForpreprocessed() {
+		return ffrForpreprocessed;
 	}
 
-
-	public void setSeq(char[] seq) {
-		this.seq = seq;
+	public void setFfrForpreprocessed(FastaFileReader ffrForpreprocessed) {
+		this.ffrForpreprocessed = ffrForpreprocessed;
 	}
-
 
 	public File makeDir(){
 		String dirName = "C:\\Users\\Yvisunshine\\r2catPrimer";
-		dir = new File(dirName);
+		File dir = new File(dirName);
 		if(dir.isDirectory()){
 			System.out.println("Directory " +dir.getName()+ " already exists");
 			return null;
@@ -52,18 +61,52 @@ public class RepeatMasking {
 			return dir;
 		}
 	}
-	public File writeTempFile(File dir) throws IOException{
+	
+	
+	
+	public void blastOutputParsen() throws IOException{
+		BufferedReader in = new BufferedReader(new FileReader(blastOutput));
+		String currentLine = null;
+		String[] tab = null;
+		while((currentLine = in.readLine()) != null){
+				tab = currentLine.split("\t");
+				
+				if(tab[0]!=tab[1]){
+					int length = Integer.valueOf(tab[3]).intValue();
+					int startPosContig1 = Integer.valueOf(tab[6]).intValue();
+					int endPosContig1 = Integer.valueOf(tab[7]).intValue();
+					int startPosContig2 = Integer.valueOf(tab[8]).intValue();
+					int endPosContig2 = Integer.valueOf(tab[9]).intValue();
+					//this.setRepeatsToLowerLetters(length,startPosContig1, endPosContig1);
+					//this.setRepeatsToLowerLetters(length, startPosContig2, endPosContig2);
+					
+				}
+		}
+
+	/*	for(int i = 0; i<tab.length;i++){
+		System.out.print(tab[i]+"\t");
+		}*/
+		//System.out.println(tab.length);
+	}
+	
+	public File writeTempFile(String fileName, File dir) throws IOException{
 		
-		File temp_file = File.createTempFile("toBlast", ".fas",dir);
+		File temp_file = File.createTempFile(fileName, ".fas",dir);
 		PrintWriter buffer = new PrintWriter(new FileWriter(temp_file));
 		String description = null;
 		String id = null;
+		int offset = 0;
+		int size = 0;
 		for (int i = 0;i<sequences.size();i++){
 			id = sequences.elementAt(i).getId();
 			description = sequences.elementAt(i).getDescription();
+			offset = (int) sequences.elementAt(i).getOffset();
+			size = (int) sequences.elementAt(i).getSize();
 			buffer.print(">"+id+" "+description);
 			buffer.write('\n');
-			buffer.write(seq);
+			for(int j=offset+size-1;j>=offset;j--){
+				buffer.write(seq[j]);
+			}
 			buffer.write('\n');
 		}
 		
@@ -78,25 +121,29 @@ public class RepeatMasking {
 		seq = temp.toCharArray();	
 	}
 	
-	public void setRepeatsToLowerLetters(String repeatSeq){
+	//BEARBEITEN!!!
+	public void setRepeatsToLowerLetters(int repeatLength, int repeatStartPos,int repeatEndPos){
 		String temp = new String(seq);
-		if(temp.equals(repeatSeq)){
-			for(int i =0;i<repeatSeq.length();i++){
-				char[] t = new char[1];
-				t[0] = temp.charAt(i);
-				String test = new String(t);
-				test = test.toLowerCase();
-				t = test.toCharArray();
-				temp = temp.replace(temp.charAt(i), t[0]);
-			}
+		char[] charAtPos = new char[1];
+			for(int i =repeatStartPos;i<repeatLength-1;i++){
+				charAtPos[0] = temp.charAt(i);
+				String testing = new String(charAtPos);
+				testing = testing.toLowerCase();
+				charAtPos = testing.toCharArray();
+				temp = temp.replace(temp.charAt(i), charAtPos[0]);
 		}
-		seq = temp.toCharArray();
+		
+		this.setSeq(temp.toCharArray());
+	/*	for(int i=393;i<393+71;i++){
+			System.out.print(seq[i]);
+		}*/
 	}
 	
 	public FastaFileReader getFfr() {
 		return ffr;
 	}
 
+	
 	public void setFfr(FastaFileReader ffr) {
 		this.ffr = ffr;
 	}
@@ -107,5 +154,14 @@ public class RepeatMasking {
 
 	public void setDir(File dir) {
 		this.dir = dir;
+	}
+	
+	public char[] getSeq() {
+		return seq;
+	}
+
+
+	public void setSeq(char[] seq) {
+		this.seq = seq;
 	}
 }
