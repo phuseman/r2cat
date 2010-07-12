@@ -101,8 +101,8 @@ public class PrimerGenerator {
 	test[19] ='A';
 	test[20] ='T';*/
 	
-	//this.calcScoreEachPrimerCandidate();
-	getPrimerPairs(leftPrimer,rightPrimer);
+	this.calcScoreEachPrimerCandidate();
+	this.getPrimerPairs(leftPrimer,rightPrimer);
 }
 	/**
 	 * sets up the output of the primer objects
