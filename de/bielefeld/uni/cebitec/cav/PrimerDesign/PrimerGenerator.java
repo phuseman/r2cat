@@ -102,7 +102,7 @@ public class PrimerGenerator {
 	test[20] ='T';*/
 	
 	this.calcScoreEachPrimerCandidate();
-	this.getPrimerPairs(leftPrimer,rightPrimer);
+	this.getPrimerPairs();
 }
 	/**
 	 * sets up the output of the primer objects
@@ -162,9 +162,9 @@ public class PrimerGenerator {
 	 * @param lPrimer
 	 * @param rPrimer
 	 */
-	public void getPrimerPairs(Vector<Primer> lPrimer, Vector<Primer> rPrimer){
+	public void getPrimerPairs(){
 		PrimerPairs pp = new PrimerPairs();
-		if(!rPrimer.isEmpty()){
+		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
 			leftPrimer = pp.sortPrimer(leftPrimer);
 			rightPrimer = pp.sortPrimer(rightPrimer);
 			pp.pairPrimer(leftPrimer, rightPrimer);
@@ -173,9 +173,11 @@ public class PrimerGenerator {
 			noPartnerLeft=pp.getNoPartnerLeft();
 			noPartnerRight=pp.getNoPartnerRight();
 			//output();
-		} else{
+		} if(!leftPrimer.isEmpty()){
 			leftPrimer = pp.sortPrimer(leftPrimer);
 			//output();
+		} else{
+			System.out.println("No Primer found");
 		}
 	}
 	
@@ -484,6 +486,8 @@ public class PrimerGenerator {
 		Object last =primerSeq[primerSeq.length-1];
 		String firstBase = first.toString();
 		String lastBase = last.toString();
+		firstBase = firstBase.toUpperCase();
+		lastBase = lastBase.toUpperCase();
 		scoreFirstLastBase = scoring.calcScoreFirstBaseAndLastBase(firstBase, lastBase);
 		return scoreFirstLastBase;	
 }	
@@ -594,6 +598,8 @@ public class PrimerGenerator {
  */
 	public double getPlus1Plus2Score(String plus1,String plus2){
 		double scorePlus1Plus2 = 0;
+		plus1 = plus1.toUpperCase();
+		plus2 = plus2.toUpperCase();
 		scorePlus1Plus2 = scoring.calcScorePlus1(plus1, plus2);
 		return scorePlus1Plus2;
 	}

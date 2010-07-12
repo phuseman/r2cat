@@ -81,7 +81,7 @@ public class RepeatMasking {
 					int startPosContig2 = Integer.valueOf(tab[8]).intValue();
 					int endPosContig2 = Integer.valueOf(tab[9]).intValue();
 					//System.out.println(length+" "+startPosContig1+" "+endPosContig1);
-					//this.setRepeatsToLowerLetters(length,startPosContig1, endPosContig1);
+					this.setRepeatsToLowerLetters(length,startPosContig1, endPosContig1);
 					//this.setRepeatsToLowerLetters(length, startPosContig2, endPosContig2);
 					
 				}
