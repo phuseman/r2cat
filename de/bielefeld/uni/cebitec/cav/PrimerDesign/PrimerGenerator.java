@@ -100,6 +100,8 @@ public class PrimerGenerator {
 	test[18] ='C';
 	test[19] ='A';
 	test[20] ='T';*/
+	
+	//this.calcScoreEachPrimerCandidate();
 	getPrimerPairs(leftPrimer,rightPrimer);
 }
 	/**
@@ -388,7 +390,6 @@ public class PrimerGenerator {
 						}
 					}
 			}
-			this.calcScoreEachPrimerCandidate();
 			System.out.println("kandidaten: "+primerCandidates.size());
 	}
 	/**

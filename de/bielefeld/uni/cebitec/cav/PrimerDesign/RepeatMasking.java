@@ -70,14 +70,18 @@ public class RepeatMasking {
 		String[] tab = null;
 		while((currentLine = in.readLine()) != null){
 				tab = currentLine.split("\t");
-				
-				if(tab[0]!=tab[1]){
+				String contigID=tab[0];
+				String contigID2 = tab[1];
+				String tab4 = tab[4];
+				if(!contigID.equals(contigID2)){
+					
 					int length = Integer.valueOf(tab[3]).intValue();
 					int startPosContig1 = Integer.valueOf(tab[6]).intValue();
 					int endPosContig1 = Integer.valueOf(tab[7]).intValue();
 					int startPosContig2 = Integer.valueOf(tab[8]).intValue();
 					int endPosContig2 = Integer.valueOf(tab[9]).intValue();
-					//this.setRepeatsToLowerLetters(length,startPosContig1, endPosContig1);
+					//System.out.println(length+" "+startPosContig1+" "+endPosContig1);
+					this.setRepeatsToLowerLetters(length,startPosContig1, endPosContig1);
 					//this.setRepeatsToLowerLetters(length, startPosContig2, endPosContig2);
 					
 				}
@@ -125,8 +129,8 @@ public class RepeatMasking {
 	public void setRepeatsToLowerLetters(int repeatLength, int repeatStartPos,int repeatEndPos){
 		String temp = new String(seq);
 		char[] charAtPos = new char[1];
-			for(int i =repeatStartPos;i<repeatLength-1;i++){
-				charAtPos[0] = temp.charAt(i);
+			for(int i =repeatStartPos;i<repeatEndPos-1;i++){
+				charAtPos[0] = seq[i];
 				String testing = new String(charAtPos);
 				testing = testing.toLowerCase();
 				charAtPos = testing.toCharArray();
