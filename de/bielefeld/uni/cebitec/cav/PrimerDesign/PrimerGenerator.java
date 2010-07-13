@@ -87,7 +87,8 @@ public class PrimerGenerator {
 	public void output() throws IOException{
 		String NEW_LINE = System.getProperty("line.separator");
 		String TAB = "\t";
-		outputFile = File.createTempFile("r2cat Primerlist", ".txt",directory);
+		File outputDir = new File("C:\\Users\\Yvisunshine\\");
+		outputFile = File.createTempFile("r2cat Primerlist for contigs "+markedSeq[0]+" and "+markedSeq[1], ".txt",outputDir);
 		PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 		
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
@@ -133,11 +134,12 @@ public class PrimerGenerator {
 		if(files!=null){
 			for(int i = 0;i<files.length;i++){
 				File tempFile = files[i];
-				if(!tempFile.equals(outputFile)){
+				//if(!tempFile.equals(outputFile)){
 					files[i].delete();
-				}
+				//}
 			}
 		}
+		dir.delete();
 
 	}
 	
