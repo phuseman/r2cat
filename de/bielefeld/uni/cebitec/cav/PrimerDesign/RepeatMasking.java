@@ -71,20 +71,35 @@ public class RepeatMasking {
 		String[] tab = null;
 		while((currentLine = in.readLine()) != null){
 				tab = currentLine.split("\t");
-				String contigID=tab[0];
-				String contigID2 = tab[1];
-				if(!contigID.equals(contigID2)){
-					int length = Integer.valueOf(tab[3]).intValue();
-					int startPosContig1 = Integer.valueOf(tab[6]).intValue();
-					int endPosContig1 = Integer.valueOf(tab[7]).intValue();
-					int startPosContig2 = Integer.valueOf(tab[8]).intValue();
-					int endPosContig2 = Integer.valueOf(tab[9]).intValue();
-				/*	if(contigID.equals("0")||contigID2.equals("0")){
-					System.out.println(length+" "+startPosContig1+" "+endPosContig1);
-					System.out.println(length+" "+startPosContig2+" "+endPosContig2);
-					}*/
-					this.setRepeatsToLowerLetters(length,startPosContig1, endPosContig1);
-					this.setRepeatsToLowerLetters(length, startPosContig2, endPosContig2);
+				String queryID=tab[0];
+				String subjectID = tab[1];
+				if(!queryID.equals(subjectID)){
+					int alignmentLength = Integer.valueOf(tab[3]).intValue();
+					int startQuery = Integer.valueOf(tab[6]).intValue();
+					int endQuery = Integer.valueOf(tab[7]).intValue();
+					int startSubject = Integer.valueOf(tab[8]).intValue();
+					int endSubject = Integer.valueOf(tab[9]).intValue();
+				
+					for(int i = 0; i<sequences.size();i++){
+						String currentID = sequences.elementAt(i).getId();
+						if(currentID.equals(queryID)){
+							int offset = (int) sequences.elementAt(i).getOffset();
+							int size = (int) sequences.elementAt(i).getSize();
+							if(startQuery>=offset&&startQuery<size&&endQuery>=offset&&endQuery<=size){
+								this.setRepeatsToLowerLetters(alignmentLength, startQuery, endQuery);
+								//System.out.println("query: "+queryID+" startpos: "+startQuery+" startPosSeq: "+offset+" length: "+size);
+						
+							}
+						} if(currentID.equals(subjectID)){
+							int offset = (int) sequences.elementAt(i).getOffset();
+							int size = (int) sequences.elementAt(i).getSize();
+							if(startSubject>=offset&&startSubject<size&&endSubject>=offset&&endSubject<=size){
+								this.setRepeatsToLowerLetters(alignmentLength, startSubject, endSubject);
+								//System.out.println("subject: "+subjectID+" startpos: "+startSubject+" startPosSeq: "+offset+" length: "+size);
+							}
+						}
+					}
+					
 				}
 			}
 		}
@@ -118,17 +133,35 @@ public class RepeatMasking {
 	}
 	
 	public void setRepeatsToLowerLetters(int repeatLength, int repeatStartPos,int repeatEndPos){
+		if(repeatStartPos<repeatEndPos){
+		for(int j = repeatStartPos;j<=repeatEndPos;j++){
+			seq[j] = Character.toLowerCase(seq[j]);
+		}
+		} else{
+			for(int j = repeatEndPos;j<repeatStartPos;j++){
+				seq[j] = Character.toLowerCase(seq[j]);
+			}
+		}
+		
+/*		
 		char[] repeat = new char[repeatLength];
 		int m = 0;
-		for(int j = repeatStartPos;j<=repeatStartPos+repeatLength-1;j++,m++){
+		String temp = new String(seq);
+		char[] currentChar;
+		for(int j = repeatStartPos;j<=repeatEndPos;j++,m++){
 			repeat[m] = seq[j];
+			repeat[m] = temp.charAt(j);
+			String cc = new String(repeat);
+			cc = cc.toLowerCase();
+			currentChar = cc.toCharArray();
+			temp.replace(repeat[m], currentChar[m]);
 		}
 		String tempRepeat = new String(repeat);
-		String temp = new String(seq);
 		String repeatLowerCase = tempRepeat.toLowerCase();
 		temp = temp.replace(tempRepeat, repeatLowerCase);
-		
-		this.setSeq(temp.toCharArray());
+				this.setSeq(temp.toCharArray());
+		*/
+
 	}
 	
 	public FastaFileReader getFfr() {
