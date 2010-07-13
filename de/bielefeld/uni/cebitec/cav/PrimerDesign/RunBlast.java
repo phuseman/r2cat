@@ -23,8 +23,10 @@ public class RunBlast {
 		String command = new String("formatdb -i "+contigToBlast.getName()+" -p F");
 		Process p = Runtime.getRuntime().exec(command,null,directoryForTempFiles);
 		p.waitFor();
-	/*	 Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
-		 System.out.println(s.next()); */
+		Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
+		 if(s.hasNext()){
+			 System.out.println(s.next());
+		 }
 	}
 	
 	public void runBlastCommand() throws IOException, InterruptedException{
@@ -32,8 +34,10 @@ public class RunBlast {
 		String command = new String("blastall -p blastn -i "+contigToBlast.getName()+" -d "+contigToBlast.getName()+" -F F -m 8 -e 1e-04 -o " +blastOutput.getName());
 		Process p = Runtime.getRuntime().exec(command,null,directoryForTempFiles);
 		p.waitFor();
-		/* Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
-		 System.out.println(s.next());*/
+		Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
+		 if(s.hasNext()){
+			 System.out.println(s.next());
+		 }
 	}
 
 	public File getBlastOutput() {

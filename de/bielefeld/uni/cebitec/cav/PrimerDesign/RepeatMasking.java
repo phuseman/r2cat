@@ -52,7 +52,6 @@ public class RepeatMasking {
 	}
 
 	public File makeDir(){
-		
 		File dir = new File(dirName);
 		if(dir.isDirectory()){
 			System.out.println("Directory " +dir.getName()+ " already exists");
@@ -62,8 +61,6 @@ public class RepeatMasking {
 			return dir;
 		}
 	}
-	
-	
 	
 	public void blastOutputParsen() throws IOException{
 		BufferedReader in = new BufferedReader(new FileReader(blastOutput));

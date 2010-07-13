@@ -45,6 +45,7 @@ public class PrimerGenerator {
 	private int realstart = 0;
 	FastaFileReader fastaParser = null;
 	File directory = null;
+	File outputFile = null;
 	
 	/**
 	 * constructor for this class
@@ -75,7 +76,9 @@ public class PrimerGenerator {
 	this.getPrimerCandidates();
 	this.calcScoreEachPrimerCandidate();
 	this.getPrimerPairs();
+	this.deleteDir(directory);
 }
+	
 	/**
 	 * sets up the output of the primer objects
 	 * @throws IOException 
@@ -84,49 +87,57 @@ public class PrimerGenerator {
 	public void output() throws IOException{
 		String NEW_LINE = System.getProperty("line.separator");
 		String TAB = "\t";
-		File temp_file = File.createTempFile("r2cat Primerlist", ".txt",directory);
-		PrintWriter buffer = new PrintWriter(new FileWriter(temp_file));
+		outputFile = File.createTempFile("r2cat Primerlist", ".txt",directory);
+		PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 		
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
 		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
 			if(i<100){
-			buffer.write("primer picking results for contig "+leftPrimer.elementAt(i).getContigID()+" and contig "+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).getContigID()+":"+NEW_LINE);
-			buffer.write("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+			buffer.write("primer picking results for contig "+leftPrimer.elementAt(i).getContigID()+" and contig "+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).getContigID()+":"+"\n");
+			buffer.write(NEW_LINE);
+			buffer.write(NEW_LINE);
+			buffer.write("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence"+"\n");
+			buffer.write(NEW_LINE);
 			buffer.write("left primer: "+TAB+leftPrimer.elementAt(i).toString());
-			buffer.write("right primer: "+TAB+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).toString()+NEW_LINE);
+			buffer.write(NEW_LINE);
+			buffer.write("right primer: "+TAB+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).toString());
+			buffer.write(NEW_LINE);
+			buffer.write(NEW_LINE);
 				}
 			if(!noPartnerLeft.isEmpty()&&!noPartnerRight.isEmpty()){
 				buffer.write("Could not find fitting pair for following primer candidates: ");
-				buffer.write("\n");
+				buffer.write(NEW_LINE);
 				buffer.write("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+				buffer.write(NEW_LINE);
 				for(Integer a : noPartnerLeft){
 					buffer.write("left primer for contig "+leftPrimer.elementAt(a).getContigID() +": "+TAB+leftPrimer.elementAt(a).toString());
+					buffer.write(NEW_LINE);
 				}
 				for(Integer b : noPartnerRight){
 					buffer.write("right primer for contig "+rightPrimer.elementAt(b).getContigID()+": "+TAB+rightPrimer.elementAt(b).toString());
+					buffer.write(NEW_LINE);
 					}
 				}
 			}
 		} else{
 			for(int j = 0; j<leftPrimer.size();j++){
-				buffer.write("primer picking results for contig "+leftPrimer.elementAt(j).getContigID()+":"+NEW_LINE);
-				buffer.write("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+				buffer.write("primer picking results for contig "+leftPrimer.elementAt(j).getContigID()+":"+"\n");
+				buffer.write("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence"+"\n");
 				buffer.write("left primer: "+TAB+leftPrimer.elementAt(j).toString());
 			}
 		}
 	}
 	
 	public void deleteDir(File dir){
-		//System.out.println(dir.getAbsolutePath());
 		File[] files = dir.listFiles();
-/*		
-		if (files != null) {
-			for (int i = 0; i < files.length; i++) {
-				System.out.println(files[i]);
+		if(files!=null){
+			for(int i = 0;i<files.length;i++){
+				File tempFile = files[i];
+				if(!tempFile.equals(outputFile)){
 					files[i].delete();
-			}*/
-			dir.delete(); 
-		//}
+				}
+			}
+		}
 
 	}
 	
@@ -134,8 +145,6 @@ public class PrimerGenerator {
 	 * Initializes a instance of the class PrimerPairs in order to pair the primer candidates
 	 * of each contig end.
 	 * 
-	 * @param lPrimer
-	 * @param rPrimer
 	 * @throws IOException 
 	 */
 	public void getPrimerPairs() throws IOException{
