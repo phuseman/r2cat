@@ -1,9 +1,8 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.File;
-import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public class printTest {
 	
@@ -12,7 +11,7 @@ public class printTest {
 		File fasta = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
 		HashMap<String,Integer> contigAndDirectionInfo = new HashMap<String, Integer>();
 		HashMap<String, String> pairSetUp = new HashMap<String, String>();
-		
+		Date start=new Date();
 		String[] forwardPrimer = new String[2];
 		forwardPrimer[0] = "1";
 		forwardPrimer[1] ="2";
@@ -30,6 +29,8 @@ public class printTest {
 			contigAndDirectionInfo.put(marked[1],rightPrimer);
 			PrimerGenerator t = new PrimerGenerator(fasta, xml,marked,contigAndDirectionInfo);
 		}
+
+		System.out.println("Anzahl Sekunden: " + (System.currentTimeMillis() - start.getTime())/1000);
 	}
 
 }
