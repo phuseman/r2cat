@@ -8,16 +8,20 @@ public class printTest {
 	
 	public static void main(String args[]) throws Exception{
 		File xml = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
+		//File xml = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
 		File fasta = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
 		HashMap<String,Integer> contigAndDirectionInfo = new HashMap<String, Integer>();
 		HashMap<String, String> pairSetUp = new HashMap<String, String>();
 		Date start=new Date();
 		String[] forwardPrimer = new String[2];
 		forwardPrimer[0] = "1";
-		forwardPrimer[1] ="2";
+		forwardPrimer[1] = "2";
 		
-		pairSetUp.put(forwardPrimer[0],"0");
-		pairSetUp.put(forwardPrimer[1], "0");
+		String[] reversePrimer = new String[1];
+		reversePrimer[0] ="0";
+		
+		pairSetUp.put(forwardPrimer[0],reversePrimer[0]);
+		pairSetUp.put(forwardPrimer[1], reversePrimer[0]);
 		
 		for(String key : forwardPrimer){
 			String[] marked = new String[2];
