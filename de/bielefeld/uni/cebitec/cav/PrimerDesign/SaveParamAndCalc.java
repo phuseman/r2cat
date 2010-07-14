@@ -381,14 +381,14 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		 */
 		public double calcScoreMaxOffset(int realstart){
 			double scoreMaxOffset = 0;
-			int mult = 0;
-			int distance = 0;
+			double mult = 0;
+			double distance = 0;
 			String distanceString = this.maxOffset.get("DISTANCE");
 			String multString = this.maxOffset.get("MULT");
-			mult = Integer.valueOf(multString).intValue();
-			distance = Integer.valueOf(distanceString).intValue();
+			mult = Double.parseDouble(multString);
+			distance = Double.parseDouble(distanceString);
 			if(realstart > distance){
-				int maxOffset = realstart - distance;
+				double maxOffset = realstart - distance;
 				scoreMaxOffset = (maxOffset * mult);
 			}
 			return scoreMaxOffset;
