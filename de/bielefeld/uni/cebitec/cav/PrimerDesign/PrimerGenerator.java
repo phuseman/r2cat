@@ -86,28 +86,46 @@ public class PrimerGenerator {
 		scoring = new SaveParamAndCalc();
 	}*/
 
+	public boolean idCheck(String[] contigID) throws IOException{
+		boolean checked = false;
+		for(int j = 0;j<contigID.length;j++){
+			if(fastaParser.containsId(contigID[j])){
+				checked =true;
+			} else{
+				checked = false;
+			}
+		}
+		return checked;
+	}
+	
 	public void generatePrimers(Vector<String[]> contigPair) throws IOException{
 		int directionContig1 = 0;
 		int directionContig2 = 0;
+		boolean idCheck =false;
 		HashMap<String, Integer> contigAndDirectionInfo = new HashMap<String,Integer>();
 		for(int i = 0; i<contigPair.size();i++){
 			String[] tempPair = contigPair.elementAt(i);
 			if(tempPair.length==4){
-				markedSeq = new String[2];
+			markedSeq = new String[2];
 			markedSeq[0] = tempPair[0];
 			markedSeq[1] = tempPair[2];
+			idCheck = idCheck(markedSeq);
+			if(idCheck){
 			directionContig1 = this.setPrimerDirection(tempPair[1].toString());
 			directionContig2 = this.setPrimerDirection(tempPair[3].toString());
 			contigAndDirectionInfo.put(markedSeq[0],directionContig1);
 			contigAndDirectionInfo.put(markedSeq[1],directionContig2);
 			this.getPrimerCandidates(markedSeq, contigAndDirectionInfo);
-			} else{
+				}
+			} else if(tempPair.length==2){
 				markedSeq = new String[1];
 				markedSeq[0] = tempPair[0];
-				//markedSeq[1] = null;
+				idCheck = idCheck(markedSeq);
+				if(idCheck){
 				directionContig1 = this.setPrimerDirection(tempPair[1].toString());
 				contigAndDirectionInfo.put(markedSeq[0],directionContig1);
 				this.getPrimerCandidates(markedSeq, contigAndDirectionInfo);
+				}
 			}
 		}
 	}
@@ -624,9 +642,8 @@ public class PrimerGenerator {
 			buffer.write(NEW_LINE);
 			buffer.write(NEW_LINE);
 		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
-			if(i<100){
+			if(i<=100){
 			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence"+"\n");
-			buffer.write(NEW_LINE);
 			buffer.write(NEW_LINE);
 			buffer.write("forward primer: "+TAB+leftPrimer.elementAt(i).toString());
 			buffer.write(NEW_LINE);
@@ -659,10 +676,11 @@ public class PrimerGenerator {
 			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 			buffer.write(NEW_LINE);
 			for(int j = 0; j<leftPrimer.size();j++){
-			
+				if(j<=100){
 				buffer.write("forward primer: "+TAB+leftPrimer.elementAt(j).toString());
 				buffer.write(NEW_LINE);
 				buffer.write(NEW_LINE);
+				}
 			}
 		}
 		if(!rightPrimer.isEmpty()&&leftPrimer.isEmpty()){
@@ -673,13 +691,13 @@ public class PrimerGenerator {
 			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 			buffer.write(NEW_LINE);
 			for(int j = 0; j<leftPrimer.size();j++){
+				if(j<=100){
 				buffer.write("reverse primer: "+TAB+leftPrimer.elementAt(j).toString());
 				buffer.write(NEW_LINE);
 				buffer.write(NEW_LINE);
+				}
 			}
 		}
 		this.deleteDir(directory);
 	}
-	
-
 }

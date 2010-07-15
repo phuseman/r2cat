@@ -37,17 +37,25 @@ public class RepeatMasking {
 		this.setUp(dir);
 	}
 	
-	public void setUp(File dir) throws IOException{
-		File preProcessed = writeTempFile(preProcessedFastaFile,dir);
-		ffrForpreprocessed = new FastaFileReader(preProcessed);
-	}
-	
-	public FastaFileReader getFfrForpreprocessed() {
-		return ffrForpreprocessed;
-	}
-
-	public void setFfrForpreprocessed(FastaFileReader ffrForpreprocessed) {
-		this.ffrForpreprocessed = ffrForpreprocessed;
+	public File writeTempFile(String fileName, File dir) throws IOException{
+		
+		File temp_file = File.createTempFile(fileName, ".fas",dir);
+		PrintWriter buffer = new PrintWriter(new FileWriter(temp_file));
+		for (int i = 0;i<sequences.size();i++){
+			String id = sequences.elementAt(i).getId();
+			String description = sequences.elementAt(i).getDescription();
+			int offset = (int) sequences.elementAt(i).getOffset();
+			int size = (int) sequences.elementAt(i).getSize();
+			buffer.print(">"+id+" "+description);
+			buffer.write('\n');
+			for(int j=offset;j<=size+offset-1;j++){
+				buffer.write(seq[j]);
+			}
+			buffer.write('\n');
+		}
+		
+		buffer=null;
+		return temp_file;
 	}
 
 	public File makeDir(){
@@ -103,26 +111,7 @@ public class RepeatMasking {
 			}
 		}
 	
-	public File writeTempFile(String fileName, File dir) throws IOException{
-		
-		File temp_file = File.createTempFile(fileName, ".fas",dir);
-		PrintWriter buffer = new PrintWriter(new FileWriter(temp_file));
-		for (int i = 0;i<sequences.size();i++){
-			String id = sequences.elementAt(i).getId();
-			String description = sequences.elementAt(i).getDescription();
-			int offset = (int) sequences.elementAt(i).getOffset();
-			int size = (int) sequences.elementAt(i).getSize();
-			buffer.print(">"+id+" "+description);
-			buffer.write('\n');
-			for(int j=offset;j<=size+offset-1;j++){
-				buffer.write(seq[j]);
-			}
-			buffer.write('\n');
-		}
-		
-		buffer=null;
-		return temp_file;
-	}
+
 
 	public void setSeqToCapLetters() throws IOException{
 		seq = ffr.getCharArray();
@@ -133,7 +122,7 @@ public class RepeatMasking {
 	
 	public void setRepeatsToLowerLetters(int repeatLength, int repeatStartPos,int repeatEndPos){
 		if(repeatStartPos<repeatEndPos){
-		for(int j = repeatStartPos;j<=repeatEndPos;j++){
+		for(int j = repeatStartPos-1;j<=repeatEndPos;j++){
 			seq[j] = Character.toLowerCase(seq[j]);
 		}
 		} else{
@@ -141,26 +130,20 @@ public class RepeatMasking {
 				seq[j] = Character.toLowerCase(seq[j]);
 			}
 		}
-		
-/*		
-		char[] repeat = new char[repeatLength];
-		int m = 0;
-		String temp = new String(seq);
-		char[] currentChar;
-		for(int j = repeatStartPos;j<=repeatEndPos;j++,m++){
-			repeat[m] = seq[j];
-			repeat[m] = temp.charAt(j);
-			String cc = new String(repeat);
-			cc = cc.toLowerCase();
-			currentChar = cc.toCharArray();
-			temp.replace(repeat[m], currentChar[m]);
-		}
-		String tempRepeat = new String(repeat);
-		String repeatLowerCase = tempRepeat.toLowerCase();
-		temp = temp.replace(tempRepeat, repeatLowerCase);
-				this.setSeq(temp.toCharArray());
-		*/
 
+	}
+	
+	public void setUp(File dir) throws IOException{
+		File preProcessed = writeTempFile(preProcessedFastaFile,dir);
+		ffrForpreprocessed = new FastaFileReader(preProcessed);
+	}
+	
+	public FastaFileReader getFfrForpreprocessed() {
+		return ffrForpreprocessed;
+	}
+
+	public void setFfrForpreprocessed(FastaFileReader ffrForpreprocessed) {
+		this.ffrForpreprocessed = ffrForpreprocessed;
 	}
 	
 	public FastaFileReader getFfr() {
