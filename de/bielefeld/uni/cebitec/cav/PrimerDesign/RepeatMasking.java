@@ -53,8 +53,16 @@ public class RepeatMasking {
 	public File makeDir(){
 		File dir = new File(dirName);
 		if(dir.isDirectory()){
-			System.out.println("Directory " +dir.getName()+ " already exists");
-			return null;
+			File[] files = dir.listFiles();
+			if(files!=null){
+				for(int i = 0;i<files.length;i++){
+					File tempFile = files[i];
+						files[i].delete();
+				}
+			}
+			dir.delete();
+			dir.mkdir();
+			return dir;
 		} else{
 			dir.mkdir();
 			return dir;
@@ -81,18 +89,13 @@ public class RepeatMasking {
 						if(currentID.equals(queryID)){
 							int offset = (int) sequences.elementAt(i).getOffset();
 							int size = (int) sequences.elementAt(i).getSize();
-							if(startQuery>=offset&&startQuery<size&&endQuery>=offset&&endQuery<=size){
-								this.setRepeatsToLowerLetters(alignmentLength, startQuery, endQuery);
-								//System.out.println("query: "+queryID+" startpos: "+startQuery+" startPosSeq: "+offset+" length: "+size);
 						
-							}
+								this.setRepeatsToLowerLetters(alignmentLength, startQuery+offset, endQuery+offset);
+					
 						} if(currentID.equals(subjectID)){
 							int offset = (int) sequences.elementAt(i).getOffset();
 							int size = (int) sequences.elementAt(i).getSize();
-							if(startSubject>=offset&&startSubject<size&&endSubject>=offset&&endSubject<=size){
-								this.setRepeatsToLowerLetters(alignmentLength, startSubject, endSubject);
-								//System.out.println("subject: "+subjectID+" startpos: "+startSubject+" startPosSeq: "+offset+" length: "+size);
-							}
+								this.setRepeatsToLowerLetters(alignmentLength, startSubject+offset, endSubject+offset);
 						}
 					}
 					

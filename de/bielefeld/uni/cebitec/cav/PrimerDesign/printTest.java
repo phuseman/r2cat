@@ -3,38 +3,44 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Vector;
 
 public class printTest {
 	
 	public static void main(String args[]) throws Exception{
-		File xml = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
-		//File xml = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
-		File fasta = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
-		HashMap<String,Integer> contigAndDirectionInfo = new HashMap<String, Integer>();
-		HashMap<String, String> pairSetUp = new HashMap<String, String>();
+		//File xml = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
+		File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
+		File fastaFile = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
 		Date start=new Date();
-		String[] forwardPrimer = new String[2];
-		forwardPrimer[0] = "1";
-		forwardPrimer[1] = "2";
+		boolean repeatMasking = false;
 		
-		String[] reversePrimer = new String[1];
-		reversePrimer[0] ="0";
+		repeatMasking = true;
+		PrimerGenerator pg = new PrimerGenerator(fastaFile,configFile,repeatMasking);
+		Vector<String[]> contigPairs = new Vector<String[]>();
+		String[] pair1 = new String[4];
+		pair1[0] = "1";
+		pair1[1] = "forward";
+		pair1[2] = "0";
+		pair1[3] = "reverse";
 		
-		pairSetUp.put(forwardPrimer[0],reversePrimer[0]);
-		pairSetUp.put(forwardPrimer[1], reversePrimer[0]);
+		String[] pair2 = new String[4];
+		pair2[0] = "2";
+		pair2[1] = "forward";
+		pair2[2] = "0";
+		pair2[3] = "reverse";
 		
-		for(String key : forwardPrimer){
-			String[] marked = new String[2];
-			marked[0] = key;
-			marked[1] = pairSetUp.get(key);
-			int leftPrimer = 1;
-			int rightPrimer = -1;
-			contigAndDirectionInfo.put(marked[0],leftPrimer);
-			contigAndDirectionInfo.put(marked[1],rightPrimer);
-			PrimerGenerator t = new PrimerGenerator(fasta, xml,marked,contigAndDirectionInfo);
-		}
-
-		System.out.println("Anzahl Sekunden: " + (System.currentTimeMillis() - start.getTime())/1000);
+		String[] pair3=new String[2];
+		pair3[0] = "1";
+		pair3[1] ="forward";
+		
+		contigPairs.add(pair1);
+		contigPairs.add(pair2);
+		contigPairs.add(pair3);
+		
+		
+		pg.generatePrimers(contigPairs);
+		
+		System.out.println("Anzahl Sekunden: " + (System.currentTimeMillis() - start.getTime())/1000);	
 	}
 
 }

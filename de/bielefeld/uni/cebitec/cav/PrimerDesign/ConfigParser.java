@@ -12,7 +12,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
  * @author yherrmann
  *
  */
-public class XMLParser {
+public class ConfigParser {
 	class TagType{
 		private static final int
 				TEXT = 1,
