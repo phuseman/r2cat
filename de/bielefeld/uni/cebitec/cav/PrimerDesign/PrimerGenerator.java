@@ -26,7 +26,7 @@ public class PrimerGenerator {
 
 	private char[] seq;
 	private Vector<DNASequence> sequences;
-	private String[] markedSeq = new String[2];
+	private String[] markedSeq = null;
 	private SaveParamAndCalc scoring = null;
 	FastaFileReader fastaParser = null;
 	private int maxLength = 24;
@@ -93,6 +93,7 @@ public class PrimerGenerator {
 		for(int i = 0; i<contigPair.size();i++){
 			String[] tempPair = contigPair.elementAt(i);
 			if(tempPair.length==4){
+				markedSeq = new String[2];
 			markedSeq[0] = tempPair[0];
 			markedSeq[1] = tempPair[2];
 			directionContig1 = this.setPrimerDirection(tempPair[1].toString());
@@ -101,11 +102,12 @@ public class PrimerGenerator {
 			contigAndDirectionInfo.put(markedSeq[1],directionContig2);
 			this.getPrimerCandidates(markedSeq, contigAndDirectionInfo);
 			} else{
+				markedSeq = new String[1];
 				markedSeq[0] = tempPair[0];
 				//markedSeq[1] = null;
 				directionContig1 = this.setPrimerDirection(tempPair[1].toString());
-				contigAndDirectionInfo.put(tempPair[0],directionContig1);
-				this.getPrimerCandidates(tempPair, contigAndDirectionInfo);
+				contigAndDirectionInfo.put(markedSeq[0],directionContig1);
+				this.getPrimerCandidates(markedSeq, contigAndDirectionInfo);
 			}
 		}
 	}
@@ -119,93 +121,105 @@ public class PrimerGenerator {
 		}
 		return direction;
 	}
-	
+		
 	/**
-	 * sets up the output of the primer objects
-	 * @throws IOException 
 	 * 
 	 */
- 	public void output(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException{
-		String NEW_LINE = System.getProperty("line.separator");
-		String TAB = "\t";
-		File outputDir = new File("C:\\Users\\Yvisunshine\\");
-		outputFile = File.createTempFile("r2cat Primerlist for contigs "+markedSeq[0]+" and "+markedSeq[1]+" ", ".txt",outputDir);
-		PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
-		
-		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
-		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
-			if(i<100){
-			buffer.write("primer picking results for contig "+leftPrimer.elementAt(i).getContigID()+" and contig "+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).getContigID()+":"+"\n");
-			buffer.write(NEW_LINE);
-			buffer.write(NEW_LINE);
-			buffer.write("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence"+"\n");
-			buffer.write(NEW_LINE);
-			buffer.write("left primer: "+TAB+leftPrimer.elementAt(i).toString());
-			buffer.write(NEW_LINE);
-			buffer.write("right primer: "+TAB+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).toString());
-			buffer.write(NEW_LINE);
-			buffer.write(NEW_LINE);
-				}
-			if(!noPartnerLeft.isEmpty()&&!noPartnerRight.isEmpty()){
-				buffer.write("Could not find fitting pair for following primer candidates: ");
-				buffer.write(NEW_LINE);
-				buffer.write("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
-				buffer.write(NEW_LINE);
-				for(Integer a : noPartnerLeft){
-					buffer.write("left primer for contig "+leftPrimer.elementAt(a).getContigID() +": "+TAB+leftPrimer.elementAt(a).toString());
-					buffer.write(NEW_LINE);
-				}
-				for(Integer b : noPartnerRight){
-					buffer.write("right primer for contig "+rightPrimer.elementAt(b).getContigID()+": "+TAB+rightPrimer.elementAt(b).toString());
-					buffer.write(NEW_LINE);
+		public HashMap<String,char[]> getMarkedSeq(String[] markedContig){
+			HashMap<String, char[]> templateSeq = new HashMap<String,char[]>();
+			for(String s:markedContig){
+				for(int i = 0; i<sequences.size();i++){
+					if(sequences.get(i).getId().matches(s)){
+						int length = (int) sequences.get(i).getSize();
+						int start = (int) sequences.get(i).getOffset();
+						char[] temp = new char[length];
+						System.arraycopy(seq, start, temp, 0, length);
+						templateSeq.put(s, temp);
 					}
 				}
 			}
-		} else{
-			for(int j = 0; j<leftPrimer.size();j++){
-				buffer.write("primer picking results for contig "+leftPrimer.elementAt(j).getContigID()+":"+"\n");
-				buffer.write("oligo "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence"+"\n");
-				buffer.write("left primer: "+TAB+leftPrimer.elementAt(j).toString());
-			}
+			return templateSeq;
 		}
-		this.deleteDir(directory);
-	}
-	
-	public void deleteDir(File dir){
-		File[] files = dir.listFiles();
-		if(files!=null){
-			for(int i = 0;i<files.length;i++){
-				File tempFile = files[i];
-					files[i].delete();
-			}
-		}
-		dir.delete();
-	}
-	
 	/**
-	 * Initializes a instance of the class PrimerPairs in order to pair the primer candidates
-	 * of each contig end.
-	 * 
 	 * @throws IOException 
+	 * 
 	 */
-	public void getPrimerPairs(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException{
-		PrimerPairs pp = new PrimerPairs();
-		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
-			leftPrimer = pp.sortPrimer(leftPrimer);
-			rightPrimer = pp.sortPrimer(rightPrimer);
-			pp.pairPrimer(leftPrimer, rightPrimer);
-			pairsFirstLeftPrimer=pp.getPairsFirstLeftPrimer();
-			pairsFirstRightPrimer=pp.getPairsFirstRightPrimer();
-			noPartnerLeft=pp.getNoPartnerLeft();
-			noPartnerRight=pp.getNoPartnerRight();
-			output(leftPrimer, rightPrimer);
-		} else if(!leftPrimer.isEmpty()){
-			leftPrimer = pp.sortPrimer(leftPrimer);
-			output(leftPrimer, rightPrimer);
-		} else{
-			System.out.println("No Primer found");
-		}
+	public void getPrimerCandidates(String[] markedContig,HashMap<String, Integer> contigAndDirectionInfo) throws IOException{
+	HashMap<String, char[]> templateSeq = getMarkedSeq(markedContig);
+	Vector<Primer> primerCandidates = new Vector<Primer>();
+			int nCount =0;
+			String lastPlus12 = null;
+			String lastPlus22 = null;
+			for(String contigID : markedContig){
+				Integer direction = contigAndDirectionInfo.get(contigID);
+				char[] tempSeqChar = templateSeq.get(contigID);
+				int seqLength = tempSeqChar.length;
+				String templateSeqString = new String(tempSeqChar);
+				if(direction == 1){
+					//left primer
+					for(int start =0;start<=(templateSeqString.length()-max);start++){
+						int end = start+maxLength;
+						int offset=templateSeqString.length()-start;
+						String canidate = templateSeqString.substring(start,end);
+						String lastPlus1 = templateSeqString.substring(end, end+1);
+						String lastPlus2 = templateSeqString.substring(end+1, end+2);
+						char[] canidateSeq = canidate.toCharArray();
+			/*		for(char i :canidateSeq){
+							if(i==Bases.N|| i==Bases.n){
+								nCount++;
+						}
+					}*/
+						//if(nCount<2){
+							if(offset>minBorderOffset&&offset<maxBorderOffset){
+							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
+						for(int length = miniLength; length<canidate.length();length++){
+							String canidate2 = canidate.substring(0, length);
+							if(length ==23){
+								lastPlus12 = canidate.substring(length, length+1);
+								lastPlus22 = lastPlus1;
+							} else{
+								lastPlus12 = canidate.substring(length, length+1);
+								lastPlus22 = canidate.substring(length+1,length+2);
+							}
+							char[] canidateSeq2 = canidate2.toCharArray();
+							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq2,start,direction,length,lastPlus12, lastPlus22,offset));		
+							}
+							}
+						//}
+					}
+				}if(direction ==-1){
+					//right primer
+					for(int end = templateSeqString.length()-2;end>=max;end--){
+						int start = end-max;
+						int offset=end;
+						String canidate = templateSeqString.substring(start, end);
+						String lastPlus1= templateSeqString.substring(end,end+1);
+						String lastPlus2 = templateSeqString.substring(end+1,end+2);
+						char[] canidateArray = canidate.toCharArray();
+						char[] canidateSeq = getReverseComplement(canidateArray);
+			/*			for(char i :canidateSeq){
+							if(i==Bases.N|| i==Bases.n){
+								nCount++;
+						}
+					}*/
+		
+						//if(nCount<2){
+							if(offset>minBorderOffset&&offset<maxBorderOffset){
+							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
+						for(int length = miniLength; length<canidate.length();length++){
+							String canidate2 = canidate.substring((canidate.length()-length),canidate.length());
+							char[] canidateArray2 = canidate2.toCharArray();
+							char[] canidateSeq2 = getReverseComplement(canidateArray2);
+							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq2,start,direction,length,lastPlus12, lastPlus22,offset));		
+								}
+							}
+					//	}
+						}
+					}
+			}
+			this.calcScoreEachPrimerCandidate(primerCandidates);
 	}
+	
 	
 	/**
 	 * Methods access each scoring method for each primer object and retrieves 
@@ -319,114 +333,43 @@ public class PrimerGenerator {
 		System.out.println("left primer: "+leftPrimer.size());
 		System.out.println("right primer: "+rightPrimer.size());
 	}
-	/**
-	 * 
-	 * @param seq
-	 * @return
-	 */
-	public double getTempScore(char[] seq){
-		double scoreTemperature = 0;
-		scoreTemperature = scoring.calcScoreAnnealTemp(seq);
-		return scoreTemperature;
-	}
-/**
- * 
- */
 	
-	public HashMap<String,char[]> getMarkedSeq(String[] markedContig){
-		HashMap<String, char[]> templateSeq = new HashMap<String,char[]>();
-		for(String s:markedContig){
-			for(int i = 0; i<sequences.size();i++){
-				if(sequences.get(i).getId().matches(s)){
-					int length = (int) sequences.get(i).getSize();
-					int start = (int) sequences.get(i).getOffset();
-					char[] temp = new char[length];
-					System.arraycopy(seq, start, temp, 0, length);
-					templateSeq.put(s, temp);
-				}
+	/**
+	 * Initializes a instance of the class PrimerPairs in order to pair the primer candidates
+	 * of each contig end.
+	 * 
+	 * @throws IOException 
+	 */
+	public void getPrimerPairs(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException{
+		PrimerPairs pp = new PrimerPairs();
+		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
+			leftPrimer = pp.sortPrimer(leftPrimer);
+			rightPrimer = pp.sortPrimer(rightPrimer);
+			pp.pairPrimer(leftPrimer, rightPrimer);
+			pairsFirstLeftPrimer=pp.getPairsFirstLeftPrimer();
+			pairsFirstRightPrimer=pp.getPairsFirstRightPrimer();
+			noPartnerLeft=pp.getNoPartnerLeft();
+			noPartnerRight=pp.getNoPartnerRight();
+			output(leftPrimer, rightPrimer);
+		} else if(!leftPrimer.isEmpty()){
+			leftPrimer = pp.sortPrimer(leftPrimer);
+			output(leftPrimer, rightPrimer);
+		} else{
+			System.out.println("No Primer found");
+		}
+	}
+	
+	public void deleteDir(File dir){
+		File[] files = dir.listFiles();
+		if(files!=null){
+			for(int i = 0;i<files.length;i++){
+				File tempFile = files[i];
+					files[i].delete();
 			}
 		}
-		return templateSeq;
+		dir.delete();
 	}
-	/**
-	 * @throws IOException 
-	 * 
-	 */
-	public void getPrimerCandidates(String[] markedContig,HashMap<String, Integer> contigAndDirectionInfo) throws IOException{
-	HashMap<String, char[]> templateSeq = getMarkedSeq(markedContig);
-	Vector<Primer> primerCandidates = new Vector<Primer>();
-			int nCount =0;
-			String lastPlus12 = null;
-			String lastPlus22 = null;
-			for(String contigID : markedContig){
-				Integer direction = contigAndDirectionInfo.get(contigID);
-				char[] tempSeqChar = templateSeq.get(contigID);
-				int seqLength = tempSeqChar.length;
-				String templateSeqString = new String(tempSeqChar);
-				if(direction == 1){
-					//left primer
-					for(int start =0;start<=(templateSeqString.length()-max);start++){
-						int end = start+maxLength;
-						int offset=templateSeqString.length()-start;
-						String canidate = templateSeqString.substring(start,end);
-						String lastPlus1 = templateSeqString.substring(end, end+1);
-						String lastPlus2 = templateSeqString.substring(end+1, end+2);
-						char[] canidateSeq = canidate.toCharArray();
-			/*		for(char i :canidateSeq){
-							if(i==Bases.N|| i==Bases.n){
-								nCount++;
-						}
-					}*/
-						//if(nCount<2){
-							if(offset>minBorderOffset&&offset<maxBorderOffset){
-							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
-						for(int length = miniLength; length<canidate.length();length++){
-							String canidate2 = canidate.substring(0, length);
-							if(length ==23){
-								lastPlus12 = canidate.substring(length, length+1);
-								lastPlus22 = lastPlus1;
-							} else{
-								lastPlus12 = canidate.substring(length, length+1);
-								lastPlus22 = canidate.substring(length+1,length+2);
-							}
-							char[] canidateSeq2 = canidate2.toCharArray();
-							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq2,start,direction,length,lastPlus12, lastPlus22,offset));		
-							}
-							}
-						//}
-					}
-				}if(direction ==-1){
-					//right primer
-					for(int end = templateSeqString.length()-2;end>=max;end--){
-						int start = end-max;
-						int offset=end;
-						String canidate = templateSeqString.substring(start, end);
-						String lastPlus1= templateSeqString.substring(end,end+1);
-						String lastPlus2 = templateSeqString.substring(end+1,end+2);
-						char[] canidateArray = canidate.toCharArray();
-						char[] canidateSeq = getReverseComplement(canidateArray);
-			/*			for(char i :canidateSeq){
-							if(i==Bases.N|| i==Bases.n){
-								nCount++;
-						}
-					}*/
-		
-						//if(nCount<2){
-							if(offset>minBorderOffset&&offset<maxBorderOffset){
-							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
-						for(int length = miniLength; length<canidate.length();length++){
-							String canidate2 = canidate.substring((canidate.length()-length),canidate.length());
-							char[] canidateArray2 = canidate2.toCharArray();
-							char[] canidateSeq2 = getReverseComplement(canidateArray2);
-							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq2,start,direction,length,lastPlus12, lastPlus22,offset));		
-								}
-							}
-					//	}
-						}
-					}
-			}
-			this.calcScoreEachPrimerCandidate(primerCandidates);
-	}
+
 	/**
 	 * 
 	 * @param primerSeq
@@ -464,6 +407,17 @@ public class PrimerGenerator {
 		}*/
 	
 		return reverseComplement;
+	}
+	
+	/**
+	 * 
+	 * @param seq
+	 * @return
+	 */
+	public double getTempScore(char[] seq){
+		double scoreTemperature = 0;
+		scoreTemperature = scoring.calcScoreAnnealTemp(seq);
+		return scoreTemperature;
 	}
 	/**
 	 * 
@@ -636,6 +590,7 @@ public class PrimerGenerator {
 		scorePlus1Plus2 = scoring.calcScorePlus1(plus1, plus2);
 		return scorePlus1Plus2;
 	}
+	
 	/**
 	 * 
 	 * @param primerSeq
@@ -652,132 +607,79 @@ public class PrimerGenerator {
 		scoreRepeat = scoring.calcScoreRepeat(repeatCount);
 		return scoreRepeat;
 	}
-
-	/*	private char[] copyEachSequ(int start, int length){
-char[] tempSequ = new char[length];
-System.arraycopy(seq, start, tempSequ, 0, length-start);
-return tempSequ;
-
-}
-private void getEachSequ(){
-ArrayList test = new ArrayList();
-for(int i=0; i<offsetsInInput.length-1;i++){
-	char[] tempS=new char[offsetsInInput[i+1]];
-	//char[] sequ = copyEachSequ(offsetsInInput[i], offsetsInInput[i+1]);
-	System.arraycopy(seq, offsetsInInput[i], tempS, 0, (offsetsInInput[i+1]-offsetsInInput[i]));
-	test.add(tempS);
-}	
-}*/
-
-
-//info ob forward oder reverse
-
-/*public void getMarkedSeq(String[] m, boolean forward){
-	marked =m;
-	for(String i : marked){
-		for(int j =0;j<sequences.size();j++){
-			if(sequences.get(j).getId().matches(i)){
-				int length = (int)sequences.get(j).getSize();
-				int offset = (int)sequences.get(j).getOffset();
-				//getEachSequ(length, offset);
-				getPrimerCandidates(getEachSequ(length, offset));
+	
+	/**
+	 * sets up the output of the primer objects
+	 * @throws IOException 
+	 * 
+	 */
+ 	public void output(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException{
+		String NEW_LINE = System.getProperty("line.separator");
+		String TAB = "\t";
+		File outputDir = new File("C:\\Users\\Yvisunshine\\");
+		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
+			outputFile = File.createTempFile("r2cat Primerlist for contigs "+markedSeq[0]+" and "+markedSeq[1]+" ", ".txt",outputDir);
+			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
+			buffer.write("primer picking results for contig "+markedSeq[0]+" and "+markedSeq[1]+":");
+			buffer.write(NEW_LINE);
+			buffer.write(NEW_LINE);
+		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
+			if(i<100){
+			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence"+"\n");
+			buffer.write(NEW_LINE);
+			buffer.write(NEW_LINE);
+			buffer.write("forward primer: "+TAB+leftPrimer.elementAt(i).toString());
+			buffer.write(NEW_LINE);
+			buffer.write("reverse primer: "+TAB+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).toString());
+			buffer.write(NEW_LINE);
+			buffer.write(NEW_LINE);
+				}
+			if(!noPartnerLeft.isEmpty()&&!noPartnerRight.isEmpty()){
+				buffer.write("Could not find fitting pair for following primer candidates: ");
+				buffer.write(NEW_LINE);
+				buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+				buffer.write(NEW_LINE);
+				buffer.write(NEW_LINE);
+				for(Integer a : noPartnerLeft){
+					buffer.write("forward primer for contig "+leftPrimer.elementAt(a).getContigID() +": "+TAB+leftPrimer.elementAt(a).toString());
+					buffer.write(NEW_LINE);
+				}
+				for(Integer b : noPartnerRight){
+					buffer.write("reverse primer for contig "+rightPrimer.elementAt(b).getContigID()+": "+TAB+rightPrimer.elementAt(b).toString());
+					buffer.write(NEW_LINE);
+					}
 				}
 			}
-		}
-	}
-
-private char[] getEachSequ(int length, int offset){
-	char[] tempS = new char[length];
-	System.arraycopy(seq, offset, tempS, 0, length);
-	return tempS;
-}
-private int count2 =0;
-//Primer genierieren und als array zurückgeben
-public void getPrimerCandidates(char[] sequence){
-	
-	
-	int[] lengthen =new int[6];
-	lengthen[0] =19;
-	lengthen[1] =20;
-	lengthen[2] =21;
-	lengthen[3] =22;
-	lengthen[4] =23;
-	lengthen[5] =24;
-	
-	count2 =0;
-	String t = new String(sequence);
-	String[] test = new String[10000];
-	for(int i : lengthen){
-		System.out.println(i);
-		for(int j = 0;j<sequence.length;i++){
-			if(j+i<sequence.length){
-				test[i] =t.substring(j, i);
+		} if(!leftPrimer.isEmpty()&&rightPrimer.isEmpty()){
+			outputFile = File.createTempFile("r2cat Primerlist for contig "+markedSeq[0], ".txt",outputDir);
+			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
+			buffer.write("primer picking results for contig "+markedSeq[0]+":");
+			buffer.write(NEW_LINE);
+			buffer.write(NEW_LINE);
+			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+			buffer.write(NEW_LINE);
+			for(int j = 0; j<leftPrimer.size();j++){
+			
+				buffer.write("forward primer: "+TAB+leftPrimer.elementAt(j).toString());
+				buffer.write(NEW_LINE);
+				buffer.write(NEW_LINE);
 			}
 		}
-		//System.out.println(test[0]);
-	}
-	
-/*	for(int i =0; i<sequence.length;i++){
-		if(i+17<sequence.length){
-		test[i] = t.substring(i, i+17);
-		}if(i+18<sequence.length){
-		test[i+1] = t.substring(i, i+18);
-		}if(i+19<sequence.length){
-		test[i+2] = t.substring(i, i+19);
-		}if(i+20<sequence.length){
-		test[i+3] = t.substring(i, i+20);
-		}if(i+21<sequence.length){
-		test[i+4] = t.substring(i, i+21);
-		}if(i+22<sequence.length){
-		test[i+5] = t.substring(i, i+22);
-		}if(i+23<sequence.length){
-		test[i+6] = t.substring(i, i+23);
-		}if(i+24<sequence.length){
-		test[i+7] = t.substring(i, i+24);
+		if(!rightPrimer.isEmpty()&&leftPrimer.isEmpty()){
+			outputFile = File.createTempFile("r2cat Primerlist for contig "+markedSeq[0], ".txt",outputDir);
+			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
+			buffer.write("primer picking results for contig "+markedSeq[0]+":");
+			buffer.write(NEW_LINE);
+			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+			buffer.write(NEW_LINE);
+			for(int j = 0; j<leftPrimer.size();j++){
+				buffer.write("reverse primer: "+TAB+leftPrimer.elementAt(j).toString());
+				buffer.write(NEW_LINE);
+				buffer.write(NEW_LINE);
+			}
 		}
-		System.out.println(test[i]);
+		this.deleteDir(directory);
 	}
-
-	//return test;
-}
-
-public void scorePrimer(char[] seq){
-scoring.calcScoreTotalGCLevel(getGCRatio(seq, true));
-scoring.calcScoreGCLevel2A7(getGCRatio(seq, false));
-}*/
 	
-	/*public boolean filter(int offset,double meltingTemp){
-	boolean off = false;
-	int mu = 0;
-	double z = 0;
-	int sigma =0;
-	if(offset!=0){
-		mu =200;
-		sigma = 150;
-		z = offset;
-	} else{
-		mu = 60;
-		sigma = 20;
-		z = meltingTemp;
-	}
-	double phi = Phi((z - mu) / sigma);
-	if(phi<=0.7&&phi>=0.3){
-		off=true;
-		return off;
-	} else{
-		return off;
-	}
-}
-
-public double Phi(double z) {
-    if (z < -8.0) return 0.0;
-    if (z >  8.0) return 1.0;
-    double sum = 0.0, term = z;
-    for (int i = 3; sum + term != sum; i += 2) {
-        sum  = sum + term;
-        term = term * z * z / i;
-    }
-    return 0.5 + sum * Math.exp(-z*z / 2) / Math.sqrt(2 * Math.PI);
-}*/
 
 }

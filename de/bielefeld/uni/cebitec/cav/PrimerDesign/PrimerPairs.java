@@ -215,14 +215,6 @@ public class PrimerPairs {
 		}
 		
 		this.noPartnerCheck();
-		
-/*		System.out.println("countLeft: "+countLeft);
-		System.out.println("countRight: "+countRight);
-		System.out.println("kein partner links: "+noPartnerLeft);
-		System.out.println("kein partner rechts: "+noPartnerRight);
-		System.out.println("kein paar: "+notPairedPrimer.size());
-		System.out.println("paar2: "+pairsFirstRightPrimer.size());
-		System.out.println("paar: "+pairsFirstLeftPrimer.size());*/
 	}
 		
 	}

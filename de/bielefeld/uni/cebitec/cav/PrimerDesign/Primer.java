@@ -82,7 +82,9 @@ public class Primer{
 		String seq = new String(this.getPrimerSeq());
 		double temperature = this.getTemperature();
 		double temp = Math.round(temperature*100.0)/100.0;
-		result.append(this.getStart()+TAB+this.getPrimerLength()+TAB+this.getRealstart()+TAB+temp+TAB+this.getPrimerScore()+TAB+seq);
+		double scorePrimer=this.getPrimerScore();
+		double score = Math.round(scorePrimer*100.0)/100.0;
+		result.append(this.getStart()+TAB+this.getPrimerLength()+TAB+this.getRealstart()+TAB+temp+TAB+score+TAB+seq);
 		return result.toString();
 	}
 	

@@ -2,7 +2,6 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.File;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Vector;
 
 public class printTest {
