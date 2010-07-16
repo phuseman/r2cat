@@ -10,12 +10,12 @@ public class printTest {
 		File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
 		//File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
 		File fastaFile = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
-		Date start=new Date();
+		Date start = new Date();
 		boolean repeatMasking = false;
 		
 		repeatMasking = true;
 		//PrimerGenerator pg = new PrimerGenerator(fastaFile,configFile,repeatMasking);
-		PrimerGenerator pg = new PrimerGenerator(fastaFile,repeatMasking);
+		PrimerGenerator pg = new PrimerGenerator(fastaFile,configFile,repeatMasking);
 		Vector<String[]> contigPairs = new Vector<String[]>();
 		String[] pair1 = new String[4];
 		pair1[0] = "1";

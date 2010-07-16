@@ -43,8 +43,12 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		private Stack stack = null;
 		double temperature = 0;
 		
-		public RetrieveParametersAndScores(){
-			this.defaultParameters();
+		public RetrieveParametersAndScores(boolean configFile){
+			if(configFile){
+				
+			} else{
+				this.defaultParameters();
+			}
 		}
 
 		private void defaultParameters(){
