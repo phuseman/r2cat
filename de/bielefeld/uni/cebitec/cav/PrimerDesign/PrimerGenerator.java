@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Vector;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
@@ -636,7 +637,7 @@ public class PrimerGenerator {
 		String TAB = "\t";
 		File outputDir = new File("C:\\Users\\Yvisunshine\\");
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
-			outputFile = File.createTempFile("r2cat Primerlist for contigs "+markedSeq[0]+" and "+markedSeq[1]+" ", ".txt",outputDir);
+			outputFile = new File(outputDir,"r2cat Primerlist for contigs "+markedSeq[0]+" and "+markedSeq[1]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+" and "+markedSeq[1]+":");
 			buffer.write(NEW_LINE);
@@ -672,7 +673,7 @@ public class PrimerGenerator {
 		} 
 		
 		if(!leftPrimer.isEmpty()&&rightPrimer.isEmpty()){
-			outputFile = File.createTempFile("r2cat Primerlist for contig "+markedSeq[0], ".txt",outputDir);
+			outputFile = new File(outputDir,"r2cat Primerlist for contig "+markedSeq[0]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+":");
 			buffer.write(NEW_LINE);
@@ -690,7 +691,7 @@ public class PrimerGenerator {
 			buffer.close();
 		}
 		if(!rightPrimer.isEmpty()&&leftPrimer.isEmpty()){
-			outputFile = File.createTempFile("r2cat Primerlist for contig "+markedSeq[0], ".txt",outputDir);
+			outputFile = new File(outputDir,"r2cat Primerlist for contig "+markedSeq[0]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+":");
 			buffer.write(NEW_LINE);
