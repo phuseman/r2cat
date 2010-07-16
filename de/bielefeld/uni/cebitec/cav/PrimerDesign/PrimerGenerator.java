@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Vector;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
@@ -166,73 +165,58 @@ public class PrimerGenerator {
 	public void getPrimerCandidates(String[] markedContig,HashMap<String, Integer> contigAndDirectionInfo) throws IOException{
 	HashMap<String, char[]> templateSeq = getMarkedSeq(markedContig);
 	Vector<Primer> primerCandidates = new Vector<Primer>();
-			int nCount =0;
 			String lastPlus12 = null;
 			String lastPlus22 = null;
 			for(String contigID : markedContig){
-				Integer direction = contigAndDirectionInfo.get(contigID);
+				Integer directionOfPrimer = contigAndDirectionInfo.get(contigID);
 				char[] tempSeqChar = templateSeq.get(contigID);
 				int seqLength = tempSeqChar.length;
 				String templateSeqString = new String(tempSeqChar);
-				if(direction == 1){
+				if(directionOfPrimer == 1){
 					//left primer
 					for(int start =0;start<=(templateSeqString.length()-max);start++){
 						int end = start+maxLength;
-						int offset=templateSeqString.length()-start;
-						String canidate = templateSeqString.substring(start,end);
+						int offset = templateSeqString.length()-start;
+						String candidateForwardPrimerMaxLength = templateSeqString.substring(start,end);
 						String lastPlus1 = templateSeqString.substring(end, end+1);
 						String lastPlus2 = templateSeqString.substring(end+1, end+2);
-						char[] canidateSeq = canidate.toCharArray();
-			/*		for(char i :canidateSeq){
-							if(i==Bases.N|| i==Bases.n){
-								nCount++;
-						}
-					}*/
-						//if(nCount<2){
+						char[] candidateSeqForward = candidateForwardPrimerMaxLength.toCharArray();
+	
 							if(offset>minBorderOffset&&offset<maxBorderOffset){
-							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
-						for(int length = miniLength; length<canidate.length();length++){
-							String canidate2 = canidate.substring(0, length);
+							primerCandidates.add(new Primer(contigID,seqLength,candidateSeqForward,start,directionOfPrimer,maxLength,lastPlus1, lastPlus2,offset));
+						for(int length = miniLength; length<candidateForwardPrimerMaxLength.length();length++){
+							String candidateForwardPrimer = candidateForwardPrimerMaxLength.substring(0, length);
 							if(length ==23){
-								lastPlus12 = canidate.substring(length, length+1);
+								lastPlus12 = candidateForwardPrimerMaxLength.substring(length, length+1);
 								lastPlus22 = lastPlus1;
 							} else{
-								lastPlus12 = canidate.substring(length, length+1);
-								lastPlus22 = canidate.substring(length+1,length+2);
+								lastPlus12 = candidateForwardPrimerMaxLength.substring(length, length+1);
+								lastPlus22 = candidateForwardPrimerMaxLength.substring(length+1,length+2);
 							}
-							char[] canidateSeq2 = canidate2.toCharArray();
-							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq2,start,direction,length,lastPlus12, lastPlus22,offset));		
+							char[] candidateSeqForwardPrimer = candidateForwardPrimer.toCharArray();
+							primerCandidates.add(new Primer(contigID,seqLength,candidateSeqForwardPrimer,start,directionOfPrimer,length,lastPlus12, lastPlus22,offset));		
 							}
 							}
-						//}
 					}
-				}if(direction ==-1){
+				}if(directionOfPrimer ==-1){
 					//right primer
 					for(int end = templateSeqString.length()-2;end>=max;end--){
 						int start = end-max;
-						int offset=end;
-						String canidate = templateSeqString.substring(start, end);
+						int offset = end;
+						String candidateReversePrimerMaxLength = templateSeqString.substring(start, end);
 						String lastPlus1= templateSeqString.substring(end,end+1);
 						String lastPlus2 = templateSeqString.substring(end+1,end+2);
-						char[] canidateArray = canidate.toCharArray();
-						char[] canidateSeq = getReverseComplement(canidateArray);
-			/*			for(char i :canidateSeq){
-							if(i==Bases.N|| i==Bases.n){
-								nCount++;
-						}
-					}*/
-		
-						//if(nCount<2){
+						char[] candidateReversePrimerToArray = candidateReversePrimerMaxLength.toCharArray();
+						char[] candidateReversePrimerSeqReverseComplement = getReverseComplement(candidateReversePrimerToArray);
 							if(offset>minBorderOffset&&offset<maxBorderOffset){
-							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq,start,direction,maxLength,lastPlus1, lastPlus2,offset));
-						for(int length = miniLength; length<canidate.length();length++){
-							String canidate2 = canidate.substring((canidate.length()-length),canidate.length());
-							char[] canidateArray2 = canidate2.toCharArray();
-							char[] canidateSeq2 = getReverseComplement(canidateArray2);
-							primerCandidates.add(new Primer(contigID,seqLength,canidateSeq2,start,direction,length,lastPlus12, lastPlus22,offset));		
+							primerCandidates.add(new Primer(contigID,seqLength,candidateReversePrimerSeqReverseComplement,start,directionOfPrimer,maxLength,lastPlus1, lastPlus2,offset));
+						for(int length = miniLength; length<candidateReversePrimerMaxLength.length();length++){
+							String candidateReversePrimer = candidateReversePrimerMaxLength.substring((candidateReversePrimerMaxLength.length()-length),candidateReversePrimerMaxLength.length());
+							char[] candidateReversePrimerArray = candidateReversePrimer.toCharArray();
+							char[] candidateReversePrimerSeq = getReverseComplement(candidateReversePrimerArray);
+							primerCandidates.add(new Primer(contigID,seqLength,candidateReversePrimerSeq,start,directionOfPrimer,length,lastPlus12, lastPlus22,offset));		
 								}
 							}
-					//	}
 						}
 					}
 			}
