@@ -71,7 +71,7 @@ public class PrimerGenerator {
 	}
 	
 	
-/*	public PrimerGenerator(File fastaFile, boolean repeatMasking) throws IOException, InterruptedException{
+	public PrimerGenerator(File fastaFile, boolean repeatMasking) throws IOException, InterruptedException{
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			directory = rm.getDir();
@@ -83,8 +83,8 @@ public class PrimerGenerator {
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
 		}
-		scoring = new SaveParamAndCalc();
-	}*/
+		scoring = new RetrieveParametersAndScores();
+	}
 
 	public boolean idCheck(String[] contigID) throws IOException{
 		boolean checked = false;
@@ -419,7 +419,7 @@ public class PrimerGenerator {
 	 */
 	public double getTempScore(char[] seq){
 		double scoreTemperature = 0;
-		scoreTemperature = scoring.calcScoreAnnealTemp(seq);
+		scoreTemperature = scoring.calcScoreMeltingTemperature(seq);
 		return scoreTemperature;
 	}
 	/**

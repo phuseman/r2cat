@@ -4,17 +4,15 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Stack;
 
 
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 /**
  * 
  * @author yherrmann
@@ -45,22 +43,101 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		private Stack stack = null;
 		double temperature = 0;
 		
-		public double getTemperature() {
-			return temperature;
+		public RetrieveParametersAndScores(){
+			this.defaultParameters();
 		}
 
-
-		public void setTemperature(double temperature) {
-			this.temperature = temperature;
+		private void defaultParameters(){
+			
+			gc.put("10", "100");
+			gc.put("15", "-100");
+			gc.put("20", "-300");
+			gc.put("25", "-800");
+			gc.put("50", "-1500");
+			
+			gcArrayList = this.fillArrayListWithDefaultValues(gc);
+			
+			firstBase.put("A", "45");
+			firstBase.put("T", "45");
+			firstBase.put("C", "0");
+			firstBase.put("G", "0");
+			firstBase.put("N", "-1500");
+			
+			lastBase.put("A", "130");
+			lastBase.put("T", "100");
+			lastBase.put("C", "0");
+			lastBase.put("G", "0");
+			lastBase.put("N", "-1500");
+			
+			plus1Base.put("A", "130");
+			plus1Base.put("T", "100");
+			plus1Base.put("C", "0");
+			plus1Base.put("G", "0");
+			plus1Base.put("N", "0");
+			
+			plus2Base.put("A", "80");
+			plus2Base.put("T", "80");
+			plus2Base.put("C", "0");
+			plus2Base.put("G", "0");
+			plus2Base.put("N", "0");
+			
+			offset.put("0", "-1000");
+			offset.put("30", "-600");
+			offset.put("50", "-500");
+			offset.put("80", "-400");
+			offset.put("110", "-50");
+			offset.put("150", "250");
+			
+			offsetArrayList = this.fillArrayListWithDefaultValues(offset);
+			
+			gc0207.put("79", "156");
+			gc0207.put("60", "-83");
+			gc0207.put("50", "-320");
+			gc0207.put("0", "-1500");
+			
+			gc0207ArrayList = this.fillArrayListWithDefaultValues(gc0207);
+			
+			atLast6.put("79", "156");
+			atLast6.put("60", "-83");
+			atLast6.put("50", "-320");
+			atLast6.put("0", "-1500");
+			
+			atLast6ArrayList = this.fillArrayListWithDefaultValues(atLast6);
+			
+			maxOffset.put("DISTANCE", "150");
+			maxOffset.put("MULT","-2");
+			
+			repeatAndBackfoldAndNPenalty.put("REPEAT", "-78");
+			repeatAndBackfoldAndNPenalty.put("N_PENALTY", "-1500");
+			repeatAndBackfoldAndNPenalty.put("BACKFOLD", "-1500");
+			
+			homopoly.put("CNT", "3");
+			homopoly.put("SCORE", "-200");
+			
+			anneal.put("2", "200");
+			anneal.put("6","0");
+			anneal.put("100", "-1500");
+			
+			annealArrayList = this.fillArrayListWithDefaultValues(anneal);
+			
+			length.put("IDEAL", "20.5");
+			length.put("SCORE", "-2");
 		}
-
-
+		
+		private ArrayList<String> fillArrayListWithDefaultValues(HashMap<String,String> map){
+			ArrayList<String> keys = new ArrayList<String>();
+			Iterator iterator = (map.keySet()).iterator();
+			while(iterator.hasNext()){
+				keys.add(iterator.next().toString());
+			}
+			return keys;
+		}
 		/**
 		 * 
 		 * @param key
 		 * @param value
 		 */
-		private void fillingContainer(String key, String value){
+		private void loadParameters(String key, String value){
 			
 			if(currentParent.toString().equals("GC")){
 				gc.put(key, value);
@@ -168,11 +245,22 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 				String score = s;
 				String keyValue = value;
 				if(currentNode.getParent()==currentParent&&!value.isEmpty()){
-					fillingContainer(keyValue, score);
+					loadParameters(keyValue, score);
 				} else{
-					fillingContainer(currentTag,score);
+					loadParameters(currentTag,score);
 				}
 			}
+		}
+	
+		
+		public Integer[] makeIntArray(Object[] o){
+			Integer[] array = new Integer[o.length];
+			for(int i = 0; i<o.length;i++){
+			String t =	o[i].toString();
+			int temp = Integer.valueOf(t).intValue();
+			array[i] = temp;
+			}
+			return array ;
 		}
 		
 		/**
@@ -190,15 +278,7 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 			return scorePlus1Plus2;
 		}
 		
-		public Integer[] makeIntArray(Object[] o){
-			Integer[] array = new Integer[o.length];
-			for(int i = 0; i<o.length;i++){
-			String t =	o[i].toString();
-			int temp = Integer.valueOf(t).intValue();
-			array[i] = temp;
-			}
-			return array ;
-		}
+	
 		
 		/**
 		 * 
@@ -224,7 +304,7 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		 * @param seq
 		 * @return melting temperature score
 		 */
-		public double calcScoreAnnealTemp(char[] seq){
+		public double calcScoreMeltingTemperature(char[] seq){
 			double scoreTemperature = 0;
 			double temperature = 0;
 			double minBorder = 0;
@@ -419,7 +499,14 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 			scoreLength = (distance*factor);
 			return scoreLength;
 		}
-	
+		public double getTemperature() {
+			return temperature;
+		}
+
+
+		public void setTemperature(double temperature) {
+			this.temperature = temperature;
+		}
 		
 	}
 	

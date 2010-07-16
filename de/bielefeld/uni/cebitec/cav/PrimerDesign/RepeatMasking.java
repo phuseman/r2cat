@@ -17,7 +17,7 @@ public class RepeatMasking {
 	FastaFileReader ffr= null;
 	FastaFileReader ffrForpreprocessed = null;
 	Vector<DNASequence> sequences=null;
-	RunBlastToFindRepeats ctb =null;
+	RunBlastToFindRepeats runBlast =null;
 	File dir = null;
 	File blastOutput = null;
 	String dirName = "C:\\Users\\Yvisunshine\\r2catPrimer";
@@ -31,8 +31,8 @@ public class RepeatMasking {
 		this.setSeqToCapLetters();
 		dir = this.makeDir();
 		File tempFileToBlast=writeTempFile(toBlast,dir);
-		ctb = new RunBlastToFindRepeats(tempFileToBlast,dir);
-		blastOutput = ctb.getBlastOutput();
+		runBlast = new RunBlastToFindRepeats(tempFileToBlast,dir);
+		blastOutput = runBlast.getBlastOutput();
 		this.blastOutputParsen();
 		this.setUp(dir);
 	}
