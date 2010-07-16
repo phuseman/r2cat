@@ -12,7 +12,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
  * @author yherrmann
  *
  */
-public class ConfigParser {
+public class XMLParser {
 	class TagType{
 		private static final int
 				TEXT = 1,
@@ -54,7 +54,7 @@ public class ConfigParser {
 	 * @throws Exception
 	 */
 	
-	  public void parse(DocHandler doc,FileReader r) throws Exception {
+	  public void parse(DocumentHandler doc,FileReader r) throws Exception {
 		    Stack<Integer> st = new Stack<Integer>();
 		    StringBuffer sb = new StringBuffer();
 		   // StringBuffer etag = new StringBuffer();

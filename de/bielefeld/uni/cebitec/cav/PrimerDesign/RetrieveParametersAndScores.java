@@ -20,7 +20,7 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
  * @author yherrmann
  *
  */
-	final class SaveParamAndCalc implements DocHandler {
+	final class RetrieveParametersAndScores implements DocumentHandler {
 		private DefaultMutableTreeNode root, currentNode, currentParent;
 		private String currentTag = null;
 		private String value = null;
@@ -99,7 +99,7 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		
 		
 		/**
-		 * @see DocHandler
+		 * @see DocumentHandler
 		 */
 		@Override
 		public void startDocument() throws Exception {
@@ -108,7 +108,7 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		}
 		
 		/**
-		 * @see DocHandler
+		 * @see DocumentHandler
 		 */
 		@Override
 		public void endDocument() throws Exception {
@@ -148,7 +148,7 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 	}
 		
 		/**
-		 * @see DocHandler
+		 * @see DocumentHandler
 		 */
 		@Override
 		public void endElement(String st) throws Exception {
@@ -160,7 +160,7 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 		}
 
 		/**
-		 * @see DocHandler
+		 * @see DocumentHandler
 		 */
 		@Override
 		public void value(String s) throws Exception {
@@ -230,7 +230,7 @@ import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 			double minBorder = 0;
 			double maxBorder = 0;
 			Integer[] annealArray;
-			MeltingTemp melt = new MeltingTemp();
+			MeltingTemperature melt = new MeltingTemperature();
 			temperature = melt.calcTemp(seq);
 			this.setTemperature(temperature);
 			

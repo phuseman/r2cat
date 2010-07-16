@@ -10,7 +10,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
  *
  */
 
-public interface DocHandler {
+public interface DocumentHandler {
 	/**
 	 * method is called when a element of XML starts
 	 *

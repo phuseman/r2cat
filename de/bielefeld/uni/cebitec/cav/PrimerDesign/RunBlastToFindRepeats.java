@@ -6,12 +6,12 @@ import java.util.Scanner;
 
 
 
-public class RunBlast {
+public class RunBlastToFindRepeats {
 	File contigToBlast = null;
 	File directoryForTempFiles = null;
 	File blastOutput = null;
 
-	public RunBlast(File tempFile, File tempDir) throws IOException, InterruptedException {
+	public RunBlastToFindRepeats(File tempFile, File tempDir) throws IOException, InterruptedException {
 		contigToBlast = tempFile;
 		directoryForTempFiles = tempDir;
 		makeBlastDB();

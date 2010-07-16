@@ -27,7 +27,7 @@ public class PrimerGenerator {
 	private char[] seq;
 	private Vector<DNASequence> sequences;
 	private String[] markedSeq = null;
-	private SaveParamAndCalc scoring = null;
+	private RetrieveParametersAndScores scoring = null;
 	FastaFileReader fastaParser = null;
 	private int maxLength = 24;
 	private int miniLength = 19;
@@ -64,9 +64,9 @@ public class PrimerGenerator {
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
 		}
-		scoring = new SaveParamAndCalc();
+		scoring = new RetrieveParametersAndScores();
 		FileReader inConfig = new FileReader(configFile);
-		ConfigParser configParser= new ConfigParser();
+		XMLParser configParser= new XMLParser();
 		configParser.parse(scoring, inConfig);
 	}
 	
@@ -667,7 +667,11 @@ public class PrimerGenerator {
 					}
 				}
 			}
-		} if(!leftPrimer.isEmpty()&&rightPrimer.isEmpty()){
+		buffer.flush();
+		buffer.close();
+		} 
+		
+		if(!leftPrimer.isEmpty()&&rightPrimer.isEmpty()){
 			outputFile = File.createTempFile("r2cat Primerlist for contig "+markedSeq[0], ".txt",outputDir);
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+":");
@@ -682,6 +686,8 @@ public class PrimerGenerator {
 				buffer.write(NEW_LINE);
 				}
 			}
+			buffer.flush();
+			buffer.close();
 		}
 		if(!rightPrimer.isEmpty()&&leftPrimer.isEmpty()){
 			outputFile = File.createTempFile("r2cat Primerlist for contig "+markedSeq[0], ".txt",outputDir);
@@ -697,6 +703,8 @@ public class PrimerGenerator {
 				buffer.write(NEW_LINE);
 				}
 			}
+			buffer.flush();
+			buffer.close();
 		}
 		this.deleteDir(directory);
 	}

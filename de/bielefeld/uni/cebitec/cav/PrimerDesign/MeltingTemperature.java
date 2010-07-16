@@ -10,7 +10,7 @@ import java.util.HashMap;
  * @author yherrmann
  *
  */
-public class MeltingTemp {
+public class MeltingTemperature {
 
 	private double oligoConc;
 	private char base;
@@ -22,7 +22,7 @@ public class MeltingTemp {
 	 * oligoConc is set and the HasMaps enthalpie and entropie are set up through the method
 	 * fillingEnthalpieAndEntropieParam.
 	 */
-	public MeltingTemp(){
+	public MeltingTemperature(){
 	this.fillEnthalpieAndEntropieParam();
 	this.oligoConc = 0.0000025;
 	
