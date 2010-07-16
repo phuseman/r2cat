@@ -11,7 +11,14 @@ import java.util.Vector;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 
-
+/**
+ * This class is needed to mask the repeats of the given fasta file which include the selected
+ * contig sequences. It sets up the fasta file and a working directory for the BLAST programms.
+ * 
+ * It includes getter and setter methods for needed objects in the PrimerGenerator class.
+ * @author yherrman
+ *
+ */
 public class RepeatMasking {
 	private char[] seq;
 	FastaFileReader ffr= null;
@@ -24,7 +31,14 @@ public class RepeatMasking {
 	String preProcessedFastaFile ="preProcessedFastaFile";
 	String toBlast ="toBlast";
 	
-
+/**
+ * Constructor to set up the working directory and the fasta file.
+ * It also starts the RunBlast class in order to run the BLAST programms and parses the BLAST output
+ * in order to mask the bases of the repeats to lower cases.
+ * @param fasta
+ * @throws IOException
+ * @throws InterruptedException
+ */
 	public RepeatMasking(File fasta) throws IOException, InterruptedException {
 		ffr = new FastaFileReader(fasta);
 		sequences = ffr.getSequences();
@@ -37,6 +51,38 @@ public class RepeatMasking {
 		this.setUp(dir);
 	}
 	
+	/**
+	 * This method sets up a working directory.
+	 * 
+	 * @return dir
+	 */
+		public File makeDir(){
+			File dir = new File(dirName);
+			if(dir.isDirectory()){
+				File[] files = dir.listFiles();
+				if(files!=null){
+					for(int i = 0;i<files.length;i++){
+						File tempFile = files[i];
+							files[i].delete();
+					}
+				}
+				dir.delete();
+				dir.mkdir();
+				return dir;
+			} else{
+				dir.mkdir();
+				return dir;
+			}
+		}
+	
+	/**
+	 * This method writes a temporary file with the sequences, which are set to capital letters.
+	 * 
+	 * @param fileName
+	 * @param dir
+	 * @return temp_file
+	 * @throws IOException
+	 */
 	public File writeTempFile(String fileName, File dir) throws IOException{
 		
 		File temp_file = File.createTempFile(fileName, ".fas",dir);
@@ -57,25 +103,12 @@ public class RepeatMasking {
 		buffer=null;
 		return temp_file;
 	}
-
-	public File makeDir(){
-		File dir = new File(dirName);
-		if(dir.isDirectory()){
-			File[] files = dir.listFiles();
-			if(files!=null){
-				for(int i = 0;i<files.length;i++){
-					File tempFile = files[i];
-						files[i].delete();
-				}
-			}
-			dir.delete();
-			dir.mkdir();
-			return dir;
-		} else{
-			dir.mkdir();
-			return dir;
-		}
-	}
+	
+	/**
+	 * This method parses the output of the blastall programm in order to mask the repeats to lower cases.
+	 * 
+	 * @throws IOException
+	 */
 	
 	public void blastOutputParsen() throws IOException{
 		BufferedReader in = new BufferedReader(new FileReader(blastOutput));
@@ -86,7 +119,7 @@ public class RepeatMasking {
 				String queryID=tab[0];
 				String subjectID = tab[1];
 				if(!queryID.equals(subjectID)){
-					int alignmentLength = Integer.valueOf(tab[3]).intValue();
+					//int alignmentLength = Integer.valueOf(tab[3]).intValue();
 					int startQuery = Integer.valueOf(tab[6]).intValue();
 					int endQuery = Integer.valueOf(tab[7]).intValue();
 					int startSubject = Integer.valueOf(tab[8]).intValue();
@@ -98,12 +131,12 @@ public class RepeatMasking {
 							int offset = (int) sequences.elementAt(i).getOffset();
 							int size = (int) sequences.elementAt(i).getSize();
 						
-								this.setRepeatsToLowerLetters(alignmentLength, startQuery+offset, endQuery+offset);
+								this.setRepeatsToLowerLetters(startQuery+offset, endQuery+offset);
 					
 						} if(currentID.equals(subjectID)){
 							int offset = (int) sequences.elementAt(i).getOffset();
 							int size = (int) sequences.elementAt(i).getSize();
-								this.setRepeatsToLowerLetters(alignmentLength, startSubject+offset, endSubject+offset);
+								this.setRepeatsToLowerLetters(startSubject+offset, endSubject+offset);
 						}
 					}
 					
@@ -112,7 +145,11 @@ public class RepeatMasking {
 		}
 	
 
-
+	/**
+	 * This method sets the sequences of the fasta file to capital letters.
+	 * 
+	 * @throws IOException
+	 */
 	public void setSeqToCapLetters() throws IOException{
 		seq = ffr.getCharArray();
 		String temp = new String(seq);
@@ -120,7 +157,14 @@ public class RepeatMasking {
 		seq = temp.toCharArray();	
 	}
 	
-	public void setRepeatsToLowerLetters(int repeatLength, int repeatStartPos,int repeatEndPos){
+	/**
+	 * This method gets the repeat startposition and its end position in order to mask the bases of the repeats
+	 * to lower case letters.
+	 * 
+	 * @param repeatStartPos
+	 * @param repeatEndPos
+	 */
+	public void setRepeatsToLowerLetters(int repeatStartPos,int repeatEndPos){
 		if(repeatStartPos<repeatEndPos){
 		for(int j = repeatStartPos-1;j<=repeatEndPos;j++){
 			seq[j] = Character.toLowerCase(seq[j]);
@@ -132,7 +176,13 @@ public class RepeatMasking {
 		}
 
 	}
-	
+	/**
+	 * This method writes a temporary file with the repeat masked sequences which now can be
+	 * processed in the PrimerGenerator class.
+	 * 
+	 * @param dir
+	 * @throws IOException
+	 */
 	public void setUp(File dir) throws IOException{
 		File preProcessed = writeTempFile(preProcessedFastaFile,dir);
 		ffrForpreprocessed = new FastaFileReader(preProcessed);

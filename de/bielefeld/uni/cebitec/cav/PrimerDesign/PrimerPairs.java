@@ -6,15 +6,18 @@ import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Vector;
 
-import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator.Bases;
 /**
- * This class includes methods to make primer pairs from primer candidates of the left and right
- * contig end.
+ * This class includes methods to make primer pairs from primer candidates of the possible forward and reverse
+ * primer located on the according contig end.
+ * 
+ * It includes getter and setter methods for the HashMaps which include the information of
+ * which pairs are possible.
  * 
  * @author yherrman
  *
  */
 public class PrimerPairs {
+	
 	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
 	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
 	private ArrayList<Integer> notPairedPrimer = new ArrayList<Integer>();
@@ -22,10 +25,13 @@ public class PrimerPairs {
 	private ArrayList<Integer> noPartnerRight = new ArrayList<Integer>();
 
 	/**
-	 * 
+	 * This method is used to sort all primer candidates in a vector according to their scores and returns
+	 * a vector of sorted primer objects from highest to lowest.
+	 *  
 	 * @param primer
-	 * @return
+	 * @return primer
 	 */
+	
 	public Vector<Primer> sortPrimer(Vector<Primer> primer){
 		Comparator<Primer> comparator = new PrimerScoreComparator();
 		PriorityQueue<Primer> queue = new PriorityQueue<Primer>(100,comparator);
@@ -41,10 +47,12 @@ public class PrimerPairs {
 	}
 	
 	/**
+	 * This method is used to retrieve the complement of a given primer sequence.
 	 * 
 	 * @param primerSeq
-	 * @return
+	 * @return complement of primerSeq
 	 */
+	
 	public char[] getComplement(char[] primerSeq){
 
 		char[] alphabetMap= new char[256];
@@ -62,38 +70,48 @@ public class PrimerPairs {
 		alphabetMap['t']='a';
 		alphabetMap['T']='A';
 		
-
-		
-		//nur komplement
 		for (int j = 0; j<primerSeq.length; j++) {
 			complement[j]= alphabetMap[primerSeq[j]];
 		}
 	
 		return complement;
 	}
+	
 	/**
+	 * This method checks if the temperature difference of the forward and reverse primer (possible pair).
+	 * 
+	 * It returns true when the difference between the two temperatures is beneath 5 degrees.
 	 * 
 	 * @param firstTemperature
 	 * @param secondTemperature
-	 * @return
+	 * @return temperatureCheck
 	 */
-	public boolean tempCheck(double firstTemperature, double secondTemperature){
-		double tempDifference =0;
-		boolean tempCheck=false;
-		tempDifference = Math.abs(firstTemperature-secondTemperature);
-		if(tempDifference<5){
-			tempCheck =true;
+	public boolean temperatureCheck(double firstTemperature, double secondTemperature){
+		double temperatureDifference =0;
+		double temperatureDifferenceBorder = 5;
+		boolean temperatureCheck=false;
+		
+		temperatureDifference = Math.abs(firstTemperature-secondTemperature);
+		if(temperatureDifference<temperatureDifferenceBorder){
+			temperatureCheck =true;
 		} else{
-			tempCheck=false;
+			temperatureCheck=false;
 		}
-		return tempCheck;
+		return temperatureCheck;
 	}
+	
 	/**
+	 * This method checks if the sequences of the forward and reverse primer (possible pair)
+	 * include a complementary sequence of eight nucleotides somewhere in the primer sequences or four
+	 * nucleotides at the beginning of the primer sequences.
 	 * 
+	 * It returns true if the sequence are not complementary.
+	 *
 	 * @param firstSeq
 	 * @param secondSeq
-	 * @return
+	 * @return notComplement
 	 */
+	
 	public boolean seqCheck(char[] firstSeq,char[] secondSeq){
 		boolean notComplement = false;
 		String firstSeqLastBases = null;
@@ -120,56 +138,63 @@ public class PrimerPairs {
 		}
 		return notComplement;
 	}
+	
 	/**
+	 * This method goes through the given vector of the possible forward and reverse primers in order
+	 * to check if the primers are a fitting pair. (Has to check temperature difference and the property 
+	 * of complementary.
+	 * If one of the properties is violated those primers are saved (notPairedPrimer)
+	 * and then paired up with a fitting primer-candidate.
+	 * The pair information is saved in HashMaps with position in the forward primer vector as the key and
+	 * the position in the reverse primer vector as the value.
 	 * 
-	 * @param leftPrimer
-	 * @param rightPrimer
+	 * @param forwardPrimer
+	 * @param reversePrimer
 	 */
-	public void pairPrimer(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer){
-		char[] leftPrimerSeq;
-		char[] rightPrimerSeq;
-		boolean seqCheck = false;
-		boolean tempCheck =false;
+	
+	public void pairPrimer(Vector<Primer> forwardPrimer, Vector<Primer> reversePrimer){
+		char[] forwardPrimerSeq;
+		char[] reversePrimerSeq;
+		boolean sequenceCheck = false;
+		boolean temperatureCheck =false;
 		double leftPrimerTemperature=0;
 		double rightPrimerTemperature= 0;
 		int j = 0;
-		
-		for(int i = 0; i<leftPrimer.size();j++,i++){
-			leftPrimerSeq =  leftPrimer.elementAt(i).getPrimerSeq();
-			leftPrimerTemperature =  leftPrimer.elementAt(i).getTemperature();
-			if(j<rightPrimer.size()){
-				rightPrimerSeq = rightPrimer.elementAt(j).getPrimerSeq();
-				rightPrimerTemperature =  rightPrimer.elementAt(j).getTemperature();
-				tempCheck = this.tempCheck(leftPrimerTemperature, rightPrimerTemperature);
-					if(tempCheck){
-							seqCheck = this.seqCheck(leftPrimerSeq, rightPrimerSeq);
-								if(seqCheck&&!pairsFirstLeftPrimer.containsKey(i)){
+		for(int i = 0; i<forwardPrimer.size();j++,i++){
+			forwardPrimerSeq =  forwardPrimer.elementAt(i).getPrimerSeq();
+			leftPrimerTemperature =  forwardPrimer.elementAt(i).getTemperature();
+			if(j<reversePrimer.size()){
+				reversePrimerSeq = reversePrimer.elementAt(j).getPrimerSeq();
+				rightPrimerTemperature =  reversePrimer.elementAt(j).getTemperature();
+				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
+					if(temperatureCheck){
+							sequenceCheck = this.seqCheck(forwardPrimerSeq, reversePrimerSeq);
+								if(sequenceCheck&&!pairsFirstLeftPrimer.containsKey(i)){
 											pairsFirstLeftPrimer.put(i, j);
-										} else{
+								} else{
 											notPairedPrimer.add(i);
 									}
-						} else{
+					} else{
 							notPairedPrimer.add(i);
 						}
-				}else{
+			}else{
 					notPairedPrimer.add(i);
 				}
-	}
-	
+		}
 		if(!notPairedPrimer.isEmpty()){
 		int countLeft= 0;
 		for(Integer a : notPairedPrimer){
 			countLeft++;
-			if(a<leftPrimer.size()){
-			leftPrimerSeq = leftPrimer.elementAt(a).getPrimerSeq();
-			leftPrimerTemperature =leftPrimer.elementAt(a).getTemperature();
-			for(int m = 0; m<rightPrimer.size();m++){
-				rightPrimerSeq=rightPrimer.elementAt(m).getPrimerSeq();
-				rightPrimerTemperature=rightPrimer.elementAt(m).getTemperature();
-				tempCheck = this.tempCheck(leftPrimerTemperature, rightPrimerTemperature);
-				if(tempCheck){
-							seqCheck = this.seqCheck(leftPrimerSeq, rightPrimerSeq);
-							if(seqCheck&&!pairsFirstLeftPrimer.containsKey(a)){
+			if(a<forwardPrimer.size()){
+			forwardPrimerSeq = forwardPrimer.elementAt(a).getPrimerSeq();
+			leftPrimerTemperature =forwardPrimer.elementAt(a).getTemperature();
+			for(int m = 0; m<reversePrimer.size();m++){
+				reversePrimerSeq=reversePrimer.elementAt(m).getPrimerSeq();
+				rightPrimerTemperature=reversePrimer.elementAt(m).getTemperature();
+				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
+				if(temperatureCheck){
+							sequenceCheck = this.seqCheck(forwardPrimerSeq, reversePrimerSeq);
+							if(sequenceCheck&&!pairsFirstLeftPrimer.containsKey(a)){
 								pairsFirstLeftPrimer.put(a, m);
 							} else{
 								if(!noPartnerLeft.contains(a)&&!pairsFirstLeftPrimer.containsKey(a)){
@@ -187,18 +212,18 @@ public class PrimerPairs {
 	}
 		int countRight = 0;
 		for(Integer b :notPairedPrimer){
-			if(b<rightPrimer.size()){
+			if(b<reversePrimer.size()){
 				countRight++;
-			rightPrimerSeq=rightPrimer.elementAt(b).getPrimerSeq();
-			rightPrimerTemperature=rightPrimer.elementAt(b).getTemperature();
-			for(int m = 0; m<leftPrimer.size();m++){
-				leftPrimerSeq=leftPrimer.elementAt(m).getPrimerSeq();
-				leftPrimerTemperature=leftPrimer.elementAt(m).getTemperature();
-				tempCheck = this.tempCheck(leftPrimerTemperature, rightPrimerTemperature);
-				if(tempCheck){
-					seqCheck = this.seqCheck(rightPrimerSeq, leftPrimerSeq);
+			reversePrimerSeq=reversePrimer.elementAt(b).getPrimerSeq();
+			rightPrimerTemperature=reversePrimer.elementAt(b).getTemperature();
+			for(int m = 0; m<forwardPrimer.size();m++){
+				forwardPrimerSeq=forwardPrimer.elementAt(m).getPrimerSeq();
+				leftPrimerTemperature=forwardPrimer.elementAt(m).getTemperature();
+				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
+				if(temperatureCheck){
+					sequenceCheck = this.seqCheck(reversePrimerSeq, forwardPrimerSeq);
 					//b position im Rechten Primer Vektor und m position im linken Primer Vektor
-							if(seqCheck&&!pairsFirstRightPrimer.containsKey(b)){
+							if(sequenceCheck&&!pairsFirstRightPrimer.containsKey(b)){
 								pairsFirstRightPrimer.put(b, m);
 							} else{
 								if(!noPartnerRight.contains(b)&&!pairsFirstRightPrimer.containsKey(b)){
@@ -218,8 +243,9 @@ public class PrimerPairs {
 	}
 		
 	}
+	
 	/**
-	 * 
+	 * This method checks if all primer candidates (forward and reverse) got a fitting partner primer. 
 	 */
 	public void noPartnerCheck(){
 		int countR = 0;

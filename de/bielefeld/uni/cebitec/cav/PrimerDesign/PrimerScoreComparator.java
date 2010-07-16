@@ -1,13 +1,15 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.util.Comparator;
+
 /**
- * 
+ * This class is for sorting the primer candidates (primer objects) according to its scores.
  * 
  * @author yherrman
- *
  */
+
 public class PrimerScoreComparator implements Comparator<Primer>{
+
 /**
  * Override compare method
  * scores of each primer object are compared and order by the highest to lowest score

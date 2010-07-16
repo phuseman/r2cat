@@ -43,10 +43,19 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		private Stack stack = null;
 		double temperature = 0;
 		
+		/**
+		 * Constructor of the class.
+		 * Fills the parameter containers with default values.
+		 */
+		
 		public RetrieveParametersAndScores(){
 				this.defaultParameters();
 		}
 
+		/**
+		 * This method loads default parameters which are based on the primer_search_default_config file.
+		 * Parameters are chosen by Jochen Blom and Dr. Christian Rueckert.
+		 */
 		private void defaultParameters(){
 			
 			gc.put("10", "100");
@@ -124,6 +133,12 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			length.put("SCORE", "-2");
 		}
 		
+		/**
+		 * This method fills an ArrayList with the keys of the given HashMap
+		 * 
+		 * @param map
+		 * @return keys
+		 */
 		private ArrayList<String> fillArrayListWithDefaultValues(HashMap<String,String> map){
 			ArrayList<String> keys = new ArrayList<String>();
 			Iterator iterator = (map.keySet()).iterator();
@@ -132,7 +147,9 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			}
 			return keys;
 		}
+	
 		/**
+		 * This method loads the parameters which are given by a config XML file given by the user.
 		 * 
 		 * @param key
 		 * @param value
@@ -252,18 +269,25 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			}
 		}
 	
-		
-		public Integer[] makeIntArray(Object[] o){
-			Integer[] array = new Integer[o.length];
-			for(int i = 0; i<o.length;i++){
-			String t =	o[i].toString();
-			int temp = Integer.valueOf(t).intValue();
-			array[i] = temp;
+		/**
+		 * This method parses the string objects in the given array
+		 * to integers and returns them in an array.
+		 * 
+		 * @param object
+		 * @return array
+		 */
+		public Integer[] makeIntArray(Object[] object){
+			Integer[] intArray = new Integer[object.length];
+			for(int i = 0; i<object.length;i++){
+			String currentObject =	object[i].toString();
+			int temp = Integer.valueOf(currentObject).intValue();
+			intArray[i] = temp;
 			}
-			return array ;
+			return intArray ;
 		}
 		
 		/**
+		 * This method calculates the score for the bases which are given.
 		 * 
 		 * @param lastPlus1
 		 * @param lastPlus2
@@ -311,7 +335,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			double maxBorder = 0;
 			Integer[] annealArray;
 			MeltingTemperature melt = new MeltingTemperature();
-			temperature = melt.calcTemp(seq);
+			temperature = melt.calculateTemperature(seq);
 			this.setTemperature(temperature);
 			
 			Object[] tempArray = this.annealArrayList.toArray();
@@ -335,7 +359,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @param repeatCount
 		 * @return repeat-score
 		 */
-		//noch bearbeiten
+
 		public double calcScoreRepeat(double repeatCount){
 			double score = 0;
 			String tempScore = this.repeatAndBackfoldAndNPenalty.get("REPEAT");

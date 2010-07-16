@@ -5,21 +5,20 @@ import java.util.HashMap;
  * This class includes methods to calculate the melting-temperature of a given 
  * nucleotide sequence.
  * 
- * It is a reproduction of the function (Function.pm) used in the Perl-script written by Jochen Blom.
+ * It is a reproduction of the function (Function.pm) used in a perl-script written by Jochen Blom and Dr. Christian Rueckert.
  * 
  * @author yherrmann
  *
  */
 public class MeltingTemperature {
 
-	private double oligoConc;
+	private double oligoConc = 0;
 	private char base;
 	private HashMap<String,Double> enthalpie=new HashMap<String,Double>();
 	private HashMap<String,Double> entropie=new HashMap<String,Double>();
 
 	/**
-	 * Constructor of this class.
-	 * oligoConc is set and the HasMaps enthalpie and entropie are set up through the method
+	 * In the constructor the oligoConc variable is set and the HashMaps enthalpie and entropie are set up through the method
 	 * fillingEnthalpieAndEntropieParam.
 	 */
 	public MeltingTemperature(){
@@ -29,9 +28,8 @@ public class MeltingTemperature {
 }
 	
 	/**
-	 *	Methods fills HashMaps with the scores for a given pair of nucleotides regarding
+	 *	This method fills HashMaps with the numerical values for a given pair of nucleotides regarding
 	 *	the enthalpie and the entropie. 
-	 *
 	 */
 	public void fillEnthalpieAndEntropieParam(){
 		enthalpie.put("AA", -8.4);
@@ -73,7 +71,7 @@ public class MeltingTemperature {
 	/**
 	 * This method calculates the melting temperature with the base-stacking method.
 	 * A pair of bases of the sequence is compared to the entries of the HashMaps in order to
-	 * get the level of entropie and enthalpie of the whole sequence. This factors are used in 
+	 * get the level of entropie and enthalpie of the whole sequence. These factors are used in 
 	 * the formula of the base-stacking method to calculate the melting temperature.
 	 * 
 	 * If the sequence contains unknown letters the calculation can not proceed and returns -1.
@@ -82,34 +80,38 @@ public class MeltingTemperature {
 	 * @return melting temperature
 	 */
 	
-	public double calcTemp(char[] seq){
+	public double calculateTemperature(char[] seq){
 		base = seq[0];
-		double temp = 0;
+		double temparture = 0;
 		double errors = 0;
 		double ent = 0;
 		double enp = 0;
 		String tupel = null;
-		boolean test =false;
+		boolean firstBaseSet = false;
+		
 		for(char b : seq){
-			if(test==true){
-				char[] t = new char[2];
-				t[0] = base;
-				t[1] = b;
-				tupel = new String(t);
-				if(enthalpie.containsKey(tupel)&&entropie.containsKey(tupel)){
-					ent	+= enthalpie.get(tupel);
-					enp += entropie.get(tupel);
-				} else{
-					errors++;
-				}
-				base=b;
+			//needs to be true so the first base is set of the nucleotide tupel
+			if(firstBaseSet){
+				char[] tupelArray = new char[2];
+				tupelArray[0] = base;
+				tupelArray[1] = b;
+				tupel = new String(tupelArray);
+					if(enthalpie.containsKey(tupel)&&entropie.containsKey(tupel)){
+							ent	+= enthalpie.get(tupel);
+							enp += entropie.get(tupel);
+					} else{
+						errors++;
+					}
+					base=b;
 			} else{
-				test=true;
-			}
+				firstBaseSet=true;
+					}
 		}
+		
 		if(errors == 0){
-			temp = (ent*1000/(enp+(1.987*Math.log((oligoConc/4.0))))) - 273.15 - 21.59;
-			return temp;
+			//calculation of the melting temperature
+			temparture = (ent*1000/(enp+(1.987*Math.log((oligoConc/4.0))))) - 273.15 - 21.59;
+			return temparture;
 		} else {
 			return -1.0;
 		}

@@ -3,10 +3,12 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 /**
  * This class represents a primer object. This object includes information about
  * the following primer properties:
- * length, startposition, melting temperature, offset, primer sequence and contig id.
+ * length, startposition,endposition, melting temperature, offset, primer sequence, direction of the primer,
+ * score, two bases following the primer in the given sequence and the contig id.
+ * 
+ * This class includes getter and setter methods for each property.
  * 
  * @author yherrmann
- *
  */
 public class Primer{
 	private double primerScore = 0;
@@ -25,7 +27,7 @@ public class Primer{
 	private int realstart = 0;
 	
 	/**
-	 * Constructor for the primer candidates
+	 * Constructor for the primer candidates with following parameters given.
 	 * 
 	 * @param contigID
 	 * @param seqLength
@@ -51,7 +53,7 @@ public class Primer{
 	}
 	
 /**
- * constructor for the primer candidates
+ * constructor for the primer candidates with the following parameters given.
  * 
  * @param contigID
  * @param seq
@@ -72,6 +74,7 @@ public class Primer{
 		this.temperature = meltTemperature;
 		this.realstart = realstart;
 	}
+	
 	/**
 	 * Override the toString() method of this object
 	 * Setting up the output of the primer object

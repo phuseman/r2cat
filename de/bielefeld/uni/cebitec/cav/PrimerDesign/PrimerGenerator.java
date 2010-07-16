@@ -12,9 +12,9 @@ import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 
 /**
- * This class generates the primer candidate sequences given a contig-sequence.
+ * This class generates the primer candidates given contig-sequences.
  * The sequence of primer candidates has to be checked on certain biological 
- * properties and are scored according to the scoring-scheme from the "SaveParamAndCalc" class.
+ * properties and are scored according to the scoring-scheme from the "RetrievePArametersAndScores class".
  * 
  * @author yherrmann	
  *
@@ -29,14 +29,20 @@ public class PrimerGenerator {
 	private String[] markedSeq = null;
 	private RetrieveParametersAndScores scoring = null;
 	FastaFileReader fastaParser = null;
-	private int maxLength = 24;
-	private int miniLength = 19;
-	private int max = maxLength+5;
-	private int minBorderOffset = 80;
-	private int maxBorderOffset =400;
 	private int realstart = 0;
-	File directory = null;
-	File outputFile = null;
+	//max length a primer should have
+	private int maxLength = 24;
+	//min length a primer should have
+	private int miniLength = 19;
+	//min of how close the offset of a primer to the contig end should be
+	private int minBorderOffset = 80;
+	//max of how far away the offset of a primer to the contig end should be
+	private int maxBorderOffset =400;
+	private File directory = null;
+	private File outputFile = null;
+	private int max = maxLength+5;
+
+
 	
 	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
 	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
@@ -45,6 +51,7 @@ public class PrimerGenerator {
 	
 	
 	/**
+	 * Constructor of this class if a fasta file and a config file is given.
 	 * 
 	 * @param fastaFile
 	 * @param configFile
@@ -70,7 +77,14 @@ public class PrimerGenerator {
 		configParser.parse(scoring, inConfig);
 	}
 	
-	
+	/**
+	 * Constructor when only a fasta file is given.
+	 * 
+	 * @param fastaFile
+	 * @param repeatMasking
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public PrimerGenerator(File fastaFile, boolean repeatMasking) throws IOException, InterruptedException{
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
@@ -86,6 +100,15 @@ public class PrimerGenerator {
 		scoring = new RetrieveParametersAndScores();
 	}
 
+	/**
+	 * This method checks if the id of the selected contig is in the fasta file with the sequences of the contigs.
+	 * Returns true if the contig ID is in the fasta file.
+	 * 
+	 * @param contigID
+	 * @return checked
+	 * @throws IOException
+	 */
+	
 	public boolean idCheck(String[] contigID) throws IOException{
 		boolean checked = false;
 		for(int j = 0;j<contigID.length;j++){
@@ -97,6 +120,14 @@ public class PrimerGenerator {
 		}
 		return checked;
 	}
+	
+	/**
+	 * This method goes through the vector with the selection informations and starts to generate primers
+	 * for each contig pair which was selected.
+	 * 
+	 * @param contigPair
+	 * @throws IOException
+	 */
 	
 	public void generatePrimers(Vector<String[]> contigPair) throws IOException{
 		int directionContig1 = 0;
@@ -130,6 +161,14 @@ public class PrimerGenerator {
 		}
 	}
 	
+	/**
+	 * This methods checks which direction of the primer for the specific contig was selected.
+	 * If the primer is the forward primer a 1 is returned and if the primer is on the other contig as the
+	 * reverse primer the direction is -1.
+	 * @param directionInfo
+	 * @return direction
+	 */
+	
 	public int setPrimerDirection(String directionInfo){
 		int direction = 0;
 		if(directionInfo.equals("forward")){
@@ -141,8 +180,13 @@ public class PrimerGenerator {
 	}
 		
 	/**
+	 * This method goes through the sequence information of the fastaFileReader and returns the 
+	 * sequences and the id of the marked contigs in a HashMap.
 	 * 
+	 * @param markedContig
+	 * @return templateSeq
 	 */
+	
 		public HashMap<String,char[]> getMarkedSeq(String[] markedContig){
 			HashMap<String, char[]> templateSeq = new HashMap<String,char[]>();
 			for(String s:markedContig){
@@ -158,10 +202,16 @@ public class PrimerGenerator {
 			}
 			return templateSeq;
 		}
+		
 	/**
-	 * @throws IOException 
+	 * This method goes through the marked sequences of the selected contigs and fills a vector
+	 * with primer objects which are possible to be primers for each contig.
 	 * 
+	 * @param markedContig
+	 * @param contigAndDirectionInfo
+	 * @throws IOException
 	 */
+		
 	public void getPrimerCandidates(String[] markedContig,HashMap<String, Integer> contigAndDirectionInfo) throws IOException{
 	HashMap<String, char[]> templateSeq = getMarkedSeq(markedContig);
 	Vector<Primer> primerCandidates = new Vector<Primer>();
@@ -225,10 +275,14 @@ public class PrimerGenerator {
 	
 	
 	/**
-	 * Methods access each scoring method for each primer object and retrieves 
+	 * This methods access each scoring method for each primer object and retrieves 
 	 * the whole score for each primer candidate.
+	 * The primer candidates with a score higher than -200 are saved up in a vector according to
+	 * the direction of the primer.
+	 * 
 	 * @throws IOException 
 	 */
+	
 	public void calcScoreEachPrimerCandidate(Vector<Primer> primerCandidates) throws IOException{
 		Vector<Primer> leftPrimer=new Vector<Primer>();
 		Vector<Primer> rightPrimer=new Vector<Primer>();
@@ -339,10 +393,11 @@ public class PrimerGenerator {
 	
 	/**
 	 * Initializes a instance of the class PrimerPairs in order to pair the primer candidates
-	 * of each contig end.
+	 * from each contig end.
 	 * 
 	 * @throws IOException 
 	 */
+	
 	public void getPrimerPairs(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException{
 		PrimerPairs pp = new PrimerPairs();
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
@@ -358,9 +413,16 @@ public class PrimerGenerator {
 			leftPrimer = pp.sortPrimer(leftPrimer);
 			output(leftPrimer, rightPrimer);
 		} else{
+			//FEHLERMELDUNG
 			System.out.println("No Primer found");
 		}
 	}
+	
+	/**
+	 * This method is called to delete the working directory with its tempory files.
+	 * 
+	 * @param dir
+	 */
 	
 	public void deleteDir(File dir){
 		File[] files = dir.listFiles();
@@ -374,7 +436,7 @@ public class PrimerGenerator {
 	}
 
 	/**
-	 * 
+	 * This method retrieves the reverse complement of a given primer sequence.
 	 * @param primerSeq
 	 * @return
 	 */
@@ -400,33 +462,31 @@ public class PrimerGenerator {
 			reverseComplement[m]= alphabetMap[primerSeq[k]];
 			
 		}
-	/*	for(int m = 0; m<complement.length;m++){
-		System.out.print(complement[m]);
-		}*/
-		
-	/*	//nur komplement
-	 * for (int j = 0; j<primerSeq.length; j++) {
-			complement[j]= alphabetMap[primerSeq[j]];
-		}*/
 	
 		return reverseComplement;
 	}
 	
 	/**
+	 * This method returns the score for the temperature a given primer sequences has.
 	 * 
 	 * @param seq
-	 * @return
+	 * @return scoreTemperature
 	 */
+	
 	public double getTempScore(char[] seq){
 		double scoreTemperature = 0;
 		scoreTemperature = scoring.calcScoreMeltingTemperature(seq);
 		return scoreTemperature;
 	}
+	
 	/**
+	 * This method checks the following bases in the primer sequences and retrieves the score for
+	 * homopoly.
 	 * 
 	 * @param primerSeq
-	 * @return
+	 * @return scoreHomopoly
 	 */
+	
 	public double getHomopolyScore(char[] primerSeq){
 		double scoreHomopoly = 0;
 		double temp = 0;
@@ -447,11 +507,15 @@ public class PrimerGenerator {
 		scoreHomopoly = temp;
 		return scoreHomopoly;
 	}
+	
 	/**
+	 * This method retrieves each ends of the primer sequence and turns the last four bases into
+	 * the reverse complement, so the possibilty of a backfold within the primer can be scored.
 	 * 
 	 * @param primerSeq
-	 * @return
+	 * @return scoreBackfold
 	 */
+	
 	public double getBackfoldScore(char[] primerSeq){
 	double scoreBackfold = 0;
 	char[] last4 = new char[4];
@@ -464,12 +528,16 @@ public class PrimerGenerator {
 	scoreBackfold = scoring.calcScoreBackfold(last4Bases, leftSeq);
 	return scoreBackfold;
 }
+	
 /**
+ * This method retrieves the first and the last base of a primer sequence according to its direction
+ * and then returns the score for the given bases at those positions.
  * 
  * @param primerSeq
  * @param direction
- * @return
+ * @return scoreFirstLastBase
  */
+	
 	public double getFirstAndLastBaseScore(char[] primerSeq,Integer direction){
 	double scoreFirstLastBase = 0;
 		Object first = primerSeq[0];
@@ -481,10 +549,12 @@ public class PrimerGenerator {
 		scoreFirstLastBase = scoring.calcScoreFirstBaseAndLastBase(firstBase, lastBase);
 		return scoreFirstLastBase;	
 }	
+	
 /**
+ * This method counts the 'N's in a given primer sequence and returns the score for the N-penalty.
  * 
  * @param PrimerSeq
- * @return
+ * @return scoreNPenalty
  */
 	public double getNPenalty(char[] PrimerSeq){
 		double scoreNPenalty = 0;
@@ -497,22 +567,29 @@ public class PrimerGenerator {
 		scoreNPenalty = scoring.calcNPenalty(count);
 		return scoreNPenalty;
 	}
+	
 	/**
+	 * This method retrieves the score for the given primer length
 	 * 
 	 * @param primerLength
 	 * @return
 	 */
+	
 	public double getLengthScore(int primerLength){
 		double scoreLength = 0;
 		scoreLength = scoring.calcLengthScore(primerLength);
 		return scoreLength;
 	}
+	
 	/**
+	 * This method calculates the ratio of AT at the last six bases and then retrieves the score
+	 * for the ratio of the given primer sequences according to its direction.
 	 * 
 	 * @param primerSeq
 	 * @param direction
-	 * @return
+	 * @return scoreLast6Bases
 	 */
+	
 	public double getLast6Score(char[] primerSeq, Integer direction){
 	double scoreLast6Bases = 0;
 	double last6Ratio =0;
@@ -526,12 +603,15 @@ public class PrimerGenerator {
 	scoreLast6Bases = scoring.calcScoreLast6(last6Ratio);
 	return scoreLast6Bases;
 }
+	
 /**
+ * This method calculated the total GC-ratio and the ratio or the ratio for GC at positions 2-7 and then 
+ * retrieves the score for one of those ratios of the given sequence depending on the boolean totalGC
  * 
  * @param primerSeq
  * @param totalGC
  * @param direction
- * @return
+ * @return scoreTotalGC/scoreGC2A7
  */
 	public double getGCScore(char[] primerSeq,boolean totalGC,Integer direction){
 	double scoreTotalGC = 0;
@@ -561,11 +641,13 @@ public class PrimerGenerator {
 }	
 
 /**
+ * This method calculates the realstart position of the primer in the contig sequence
+ * and retrieves the score for the offset of the given primer.
  * 
  * @param offset
  * @param primerLength
  * @param direction
- * @return
+ * @return scoreOffset
  */
 	public double getOffsetsScore(int offset,int primerLength, Integer direction){
 	double scoreOffset = 0;
@@ -580,11 +662,13 @@ public class PrimerGenerator {
 		return scoreOffset;
 	}
 }
+	
 /**
+ * This method retrieves the score for the two bases which follow after the primer sequence.
  * 
  * @param plus1
  * @param plus2
- * @return
+ * @return scorePlus1Plus2
  */
 	public double getPlus1Plus2Score(String plus1,String plus2){
 		double scorePlus1Plus2 = 0;
@@ -595,10 +679,13 @@ public class PrimerGenerator {
 	}
 	
 	/**
+	 * This method counts the lowercase letters, which represents the repeats in the sequence and retrieves the
+	 * score for those repeats.
 	 * 
 	 * @param primerSeq
-	 * @return
+	 * @return scoreRepeat
 	 */
+	
 	public double getRepeatScore(char[] primerSeq){
 		double scoreRepeat = 0;
 		double repeatCount = 0;
@@ -612,10 +699,13 @@ public class PrimerGenerator {
 	}
 	
 	/**
-	 * sets up the output of the primer objects
+	 * sets up the output file of the primer objects and deletes the working directory created
+	 * for the repeatMasking with BLAST
+	 * 
 	 * @throws IOException 
 	 * 
 	 */
+	
  	public void output(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException{
 		String NEW_LINE = System.getProperty("line.separator");
 		String TAB = "\t";
@@ -691,6 +781,8 @@ public class PrimerGenerator {
 			buffer.flush();
 			buffer.close();
 		}
+		if(directory.exists()){
 		this.deleteDir(directory);
+		}
 	}
 }
