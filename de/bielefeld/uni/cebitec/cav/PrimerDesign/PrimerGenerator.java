@@ -64,7 +64,7 @@ public class PrimerGenerator {
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
 		}
-		scoring = new RetrieveParametersAndScores(true);
+		scoring = new RetrieveParametersAndScores();
 		FileReader inConfig = new FileReader(configFile);
 		XMLParser configParser= new XMLParser();
 		configParser.parse(scoring, inConfig);
@@ -83,7 +83,7 @@ public class PrimerGenerator {
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
 		}
-		scoring = new RetrieveParametersAndScores(false);
+		scoring = new RetrieveParametersAndScores();
 	}
 
 	public boolean idCheck(String[] contigID) throws IOException{
