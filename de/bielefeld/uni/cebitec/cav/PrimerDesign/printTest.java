@@ -1,12 +1,14 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Vector;
 
 public class printTest {
 	
-	public static void main(String args[]) throws Exception{
+	public static void main(String args[]){
 		File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
 		//File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
 		File fastaFile = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
@@ -14,11 +16,13 @@ public class printTest {
 		boolean repeatMasking = false;
 		
 		repeatMasking = true;
-		PrimerGenerator pg = new PrimerGenerator(fastaFile,configFile,repeatMasking);
+		PrimerGenerator pg;
+		pg = new PrimerGenerator(fastaFile,configFile,repeatMasking);
+	
 		//PrimerGenerator pg = new PrimerGenerator(fastaFile,repeatMasking);
 		Vector<String[]> contigPairs = new Vector<String[]>();
 		String[] pair1 = new String[4];
-		pair1[0] = "1";
+		pair1[0] = "00";
 		pair1[1] = "forward";
 		pair1[2] = "0";
 		pair1[3] = "reverse";
@@ -38,8 +42,7 @@ public class printTest {
 		contigPairs.add(pair3);
 		
 		
-		pg.generatePrimers(contigPairs);
-		
+			pg.generatePrimers(contigPairs);
 		System.out.println("Anzahl Sekunden: " + (System.currentTimeMillis() - start.getTime())/1000);	
 	}
 

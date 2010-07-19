@@ -1,6 +1,7 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -56,10 +57,10 @@ public class PrimerGenerator {
 	 * @param fastaFile
 	 * @param configFile
 	 * @param repeatMasking
-	 * @throws Exception
 	 */
 	public PrimerGenerator(File fastaFile, File configFile,
-			boolean repeatMasking) throws Exception {
+			boolean repeatMasking) {
+		try{
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			directory = rm.getDir();
@@ -71,10 +72,23 @@ public class PrimerGenerator {
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
 		}
+		}catch(FileNotFoundException e){
+			System.out.println("fasta file could not be found");
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		try{
 		scoring = new RetrieveParametersAndScores();
 		FileReader inConfig = new FileReader(configFile);
 		XMLParser configParser= new XMLParser();
 		configParser.parse(scoring, inConfig);
+		}catch(FileNotFoundException e){
+			System.out.println("config file could not be found! The default parameters were used");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -82,10 +96,9 @@ public class PrimerGenerator {
 	 * 
 	 * @param fastaFile
 	 * @param repeatMasking
-	 * @throws IOException
-	 * @throws InterruptedException
 	 */
-	public PrimerGenerator(File fastaFile, boolean repeatMasking) throws IOException, InterruptedException{
+	public PrimerGenerator(File fastaFile, boolean repeatMasking){
+		try{
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			directory = rm.getDir();
@@ -98,6 +111,11 @@ public class PrimerGenerator {
 			sequences = fastaParser.getSequences();
 		}
 		scoring = new RetrieveParametersAndScores();
+		}catch(FileNotFoundException e){
+			System.out.println("fasta file could not be found");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -109,15 +127,18 @@ public class PrimerGenerator {
 	 * @throws IOException
 	 */
 	
-	public boolean idCheck(String[] contigID) throws IOException{
+	public boolean idCheck(String contigID){
 		boolean checked = false;
-		for(int j = 0;j<contigID.length;j++){
-			if(fastaParser.containsId(contigID[j])){
+		try{
+			if(fastaParser.containsId(contigID)){
 				checked =true;
 			} else{
 				checked = false;
-			}
 		}
+		}catch(Exception e){
+			System.out.println("marked contig id could not be found in fasta file");
+		}
+		
 		return checked;
 	}
 	
@@ -126,38 +147,50 @@ public class PrimerGenerator {
 	 * for each contig pair which was selected.
 	 * 
 	 * @param contigPair
-	 * @throws IOException
 	 */
 	
-	public void generatePrimers(Vector<String[]> contigPair) throws IOException{
+	public void generatePrimers(Vector<String[]> contigPair){
 		int directionContig1 = 0;
 		int directionContig2 = 0;
-		boolean idCheck =false;
+		boolean idCheckContig1 =false;
+		boolean idCheckContig2 =false;
 		HashMap<String, Integer> contigAndDirectionInfo = new HashMap<String,Integer>();
+		try{
 		for(int i = 0; i<contigPair.size();i++){
 			String[] tempPair = contigPair.elementAt(i);
 			if(tempPair.length==4){
 			markedSeq = new String[2];
 			markedSeq[0] = tempPair[0];
 			markedSeq[1] = tempPair[2];
-			idCheck = idCheck(markedSeq);
-			if(idCheck){
+			idCheckContig1 = this.idCheck(markedSeq[0]);
+			idCheckContig2 = this.idCheck(markedSeq[1]);
+			if(idCheckContig1&&idCheckContig2){
 			directionContig1 = this.setPrimerDirection(tempPair[1].toString());
 			directionContig2 = this.setPrimerDirection(tempPair[3].toString());
 			contigAndDirectionInfo.put(markedSeq[0],directionContig1);
 			contigAndDirectionInfo.put(markedSeq[1],directionContig2);
 			this.getPrimerCandidates(markedSeq, contigAndDirectionInfo);
-				}
+			} else{
+				System.out.println("contig id could not be found");
+			}
 			} else if(tempPair.length==2){
 				markedSeq = new String[1];
 				markedSeq[0] = tempPair[0];
-				idCheck = idCheck(markedSeq);
-				if(idCheck){
+				idCheckContig1 = idCheck(markedSeq[0]);
+				if(idCheckContig1){
 				directionContig1 = this.setPrimerDirection(tempPair[1].toString());
 				contigAndDirectionInfo.put(markedSeq[0],directionContig1);
 				this.getPrimerCandidates(markedSeq, contigAndDirectionInfo);
 				}
 			}
+		}
+		} catch(FileNotFoundException e){
+			System.out.println("fasta file could not be found");
+		} catch (NullPointerException e) {
+			System.out.println("contig id could not be found");
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -406,8 +439,8 @@ public class PrimerGenerator {
 			leftPrimer = pp.sortPrimer(leftPrimer);
 			output(leftPrimer, rightPrimer);
 		} else{
-			//FEHLERMELDUNG
-			System.out.println("No Primer found");
+			 throw new NullPointerException("No primers could be found");
+
 		}
 	}
 	
