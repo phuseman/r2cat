@@ -33,29 +33,31 @@ public class XMLParser {
 	}
 	
 /**
- * This method goes through the stack containing the xml tags.
- * @param s
+ * This method goes through the stack containing integers representing the xml tags.
+ * @param stack
  * @return Interger which represents type of xml tag
  */
-	private int popMode(Stack<Integer> s){
-		if(!s.empty()){
-			return (s.pop()).intValue();
+	private int popMode(Stack<Integer> stack){
+		if(!stack.empty()){
+			return (stack.pop()).intValue();
 		} else{
 			return TagType.PRE;
 		}
 	}
 	
 	/**
-	 * This method gets a fileReader which contains a XML-file and parses the file according to the xml tags.
-	 * @param doc
-	 * @param r
+	 * This method gets a document handler and a fileReader which contains a XML-file and saves the xml tags types represented
+	 * by different Integers in a stack. Then according to this stack the method of the document handler are
+	 * called to parse the xml file.
+	 * 
+	 * @param documentHandler
+	 * @param filereader
 	 * @throws Exception
 	 */
 	
-	  public void parse(DocumentHandler doc,FileReader r) throws Exception {
-		    Stack<Integer> st = new Stack<Integer>();
-		    StringBuffer sb = new StringBuffer();
-		   // StringBuffer etag = new StringBuffer();
+	  public void parse(DocumentHandler documentHandler,FileReader filereader) throws Exception {
+		    Stack<Integer> stack = new Stack<Integer>();
+		    StringBuffer stringBuffer = new StringBuffer();
 		    int depth = 0;
 		    int mode = TagType.PRE;
 		    int character = 0;
@@ -64,127 +66,127 @@ public class XMLParser {
 		    String leftValue = null;
 		    String rightValue = null;
 		    Hashtable hash = null;
-		    doc.startDocument();
+		    documentHandler.startDocument();
 		    
-		    while((character = r.read()) != -1) {
+		    while((character = filereader.read()) != -1) {
 		      if(mode == TagType.DONE) {
-			doc.endDocument();
+			documentHandler.endDocument();
 		        return;
 		        
 		      } else if(mode == TagType.TEXT) {
 		        if(character == '<') {
-			  st.push(new Integer(mode));
+			  stack.push(new Integer(mode));
 			  mode = TagType.START_TAG;
-			  if(sb.length() > 0) {
-			    doc.value(sb.toString());
-			    sb.setLength(0);
+			  if(stringBuffer.length() > 0) {
+			    documentHandler.value(stringBuffer.toString());
+			    stringBuffer.setLength(0);
 			  }
 		        }else
-			  sb.append((char)character);
+			  stringBuffer.append((char)character);
 
 		      } else if(mode == TagType.CLOSE_TAG) {
 		        if(character == '>') {
-			  mode = popMode(st);
-			  tagName = sb.toString();
-			  sb.setLength(0);
+			  mode = popMode(stack);
+			  tagName = stringBuffer.toString();
+			  stringBuffer.setLength(0);
 			  depth--;
 			  if(depth==0)
 			    mode = TagType.DONE;
-			  doc.endElement(tagName);
+			  documentHandler.endElement(tagName);
 			} else {
-			  sb.append((char)character);
+			  stringBuffer.append((char)character);
 			}
 		      }
 
  			else if(mode == TagType.COMMENT) {
 		        if(character == '>'
-			&& sb.toString().endsWith("--")) {
-			  sb.setLength(0);
-			  mode = popMode(st);
+			&& stringBuffer.toString().endsWith("--")) {
+			  stringBuffer.setLength(0);
+			  mode = popMode(stack);
 			} else
-			  sb.append((char)character);
+			  stringBuffer.append((char)character);
 
 		      }else if(mode == TagType.PRE) {
 			if(character == '<') {
 				mode = TagType.TEXT;
-			  st.push(new Integer(mode));
+			  stack.push(new Integer(mode));
 			  mode = TagType.START_TAG;
 		        }
 
 		      } else if(mode == TagType.DOCTYPE) {
 			if(character == '>') {
-			  mode = popMode(st);
+			  mode = popMode(stack);
 			  if(mode == TagType.TEXT){
 				  mode = TagType.PRE;
 			  }
 			}
 
 		      } else if(mode == TagType.START_TAG) {
-		        mode = popMode(st);
+		        mode = popMode(stack);
 			if(character == '/') {
-			  st.push(new Integer(mode));
+			  stack.push(new Integer(mode));
 			  mode = TagType.CLOSE_TAG;
 			} else if (character == '?') {
 			  mode = TagType.DOCTYPE;
 		        } else {
-			  st.push(new Integer(mode));
+			  stack.push(new Integer(mode));
 			  mode = TagType.OPEN_TAG;
 			  tagName = null;
 			  hash = new Hashtable();
-			  sb.append((char)character);
+			  stringBuffer.append((char)character);
 		        }
 		      }
 		      else if(mode == TagType.SINGLE_TAG) {
 			if(tagName == null)
-			  tagName = sb.toString();
+			  tagName = stringBuffer.toString();
 		        if(character != '>')
-			doc.startElement(tagName,hash);
-			doc.endElement(tagName);
+			documentHandler.startElement(tagName,hash);
+			documentHandler.endElement(tagName);
 			if(depth==0) {
-			  doc.endDocument();
+			  documentHandler.endDocument();
 			  return;
 			}
-			sb.setLength(0);
+			stringBuffer.setLength(0);
 			hash = new Hashtable();
 			tagName = null;
-			mode = popMode(st);
+			mode = popMode(stack);
 		      } else if(mode == TagType.OPEN_TAG) {
 			if(character == '>') {
 			  if(tagName == null)
-		            tagName = sb.toString();
-			  sb.setLength(0);
+		            tagName = stringBuffer.toString();
+			  stringBuffer.setLength(0);
 			  depth++;
-			  doc.startElement(tagName,hash);
+			  documentHandler.startElement(tagName,hash);
 			  tagName = null;
 			  hash = new Hashtable();
-			  mode = popMode(st);
+			  mode = popMode(stack);
 			} else if(character == '/') {
 			  mode = TagType.SINGLE_TAG;
-			} else if(character == '-' && sb.toString().equals("!-")) {
+			} else if(character == '-' && stringBuffer.toString().equals("!-")) {
 			  mode = TagType.COMMENT;
-			} else if(character == '[' && sb.toString().equals("![CDATA")) {
+			} else if(character == '[' && stringBuffer.toString().equals("![CDATA")) {
 			  mode = TagType.CDATA;
-			  sb.setLength(0);
-			} else if(character == 'E' && sb.toString().equals("!DOCTYP")) {
-			  sb.setLength(0);
+			  stringBuffer.setLength(0);
+			} else if(character == 'E' && stringBuffer.toString().equals("!DOCTYP")) {
+			  stringBuffer.setLength(0);
 			  mode = TagType.DOCTYPE;
 			} else if(Character.isWhitespace((char)character)) {
-			  tagName = sb.toString();
-			  sb.setLength(0);
+			  tagName = stringBuffer.toString();
+			  stringBuffer.setLength(0);
 			  mode = TagType.IN_TAG;
 			} else {
-			  sb.append((char)character);
+			  stringBuffer.append((char)character);
 			}
 		      } else if(mode == TagType.QUOTE) {
 		        if(character == quotec) {
-			  rightValue = sb.toString();
-			  sb.setLength(0);
+			  rightValue = stringBuffer.toString();
+			  stringBuffer.setLength(0);
 			  hash.put(leftValue,rightValue);
 			  mode = TagType.IN_TAG;
 			} else if(" \r\n\u0009".indexOf(character)>=0) {
-			  sb.append(' ');
+			  stringBuffer.append(' ');
 			} else {
-				  sb.append((char)character);
+				  stringBuffer.append((char)character);
 				}
 			      } else if(mode == TagType.ATTRIBUTE_RIGHTVALUE) {
 		        if(character == '"' || character == '\'') {
@@ -193,15 +195,15 @@ public class XMLParser {
 			}
 		      } else if(mode == TagType.ATTRIBUTE_LEFTVALUE) {
 		        if(Character.isWhitespace((char)character)) {
-			  leftValue = sb.toString();
-			  sb.setLength(0);
+			  leftValue = stringBuffer.toString();
+			  stringBuffer.setLength(0);
 			  mode = TagType.ATTRIBUTE_EQUAL;
 			} else if(character == '=') {
-			  leftValue = sb.toString();
-			  sb.setLength(0);
+			  leftValue = stringBuffer.toString();
+			  stringBuffer.setLength(0);
 			  mode = TagType.ATTRIBUTE_RIGHTVALUE;
 			} else {
-			  sb.append((char)character);
+			  stringBuffer.append((char)character);
 			}
 		      } else if(mode ==TagType.ATTRIBUTE_EQUAL) {
 		        if(character == '=') {
@@ -209,8 +211,8 @@ public class XMLParser {
 			}
 		      } else if(mode == TagType.IN_TAG) {
 			if(character == '>') {
-			  mode = popMode(st);
-			  doc.startElement(tagName,hash);
+			  mode = popMode(stack);
+			  documentHandler.startElement(tagName,hash);
 			  depth++;
 			  tagName = null;
 			  hash = new Hashtable();
@@ -218,11 +220,11 @@ public class XMLParser {
 			  mode = TagType.SINGLE_TAG;
 		        } else {
 			  mode = TagType.ATTRIBUTE_LEFTVALUE;
-			  sb.append((char)character);
+			  stringBuffer.append((char)character);
 			}
 		      }
 		    }
 		    if(mode == TagType.DONE)
-		      doc.endDocument();
+		      documentHandler.endDocument();
 		  }
 }
