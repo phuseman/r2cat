@@ -32,13 +32,11 @@ public class XMLParser {
 				PRE = 15;
 	}
 	
-	/**
-	 * 
-	 * @param args
-	 * @throws Exception 
-	 * @throws SAXException 
-	 * @throws ParserConfigurationException 
-	 */
+/**
+ * This method goes through the stack containing the xml tags.
+ * @param s
+ * @return Interger which represents type of xml tag
+ */
 	private int popMode(Stack<Integer> s){
 		if(!s.empty()){
 			return (s.pop()).intValue();
@@ -48,7 +46,7 @@ public class XMLParser {
 	}
 	
 	/**
-	 * method gets a fileReader which contains a XML-file and parses the file.
+	 * This method gets a fileReader which contains a XML-file and parses the file according to the xml tags.
 	 * @param doc
 	 * @param r
 	 * @throws Exception

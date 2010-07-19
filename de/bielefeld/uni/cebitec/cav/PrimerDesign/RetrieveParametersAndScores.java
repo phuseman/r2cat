@@ -282,16 +282,18 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			String currentObject =	object[i].toString();
 			int temp = Integer.valueOf(currentObject).intValue();
 			intArray[i] = temp;
+			
 			}
 			return intArray ;
 		}
 		
 		/**
-		 * This method calculates the score for the bases which are given.
+		 * This method calculates the score for the bases which are in position +1 and +2 after the
+		 * primer sequence ended.
 		 * 
 		 * @param lastPlus1
 		 * @param lastPlus2
-		 * @return score for base at position +1
+		 * @return scorePlus1Plus2
 		 */
 		public double calcScorePlus1(String lastPlus1, String lastPlus2){
 			double scorePlus1Plus2 = 0;
@@ -305,6 +307,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 	
 		
 		/**
+		 * This method gets the ratio of G and C in the whole primer sequence and returns a score
+		 * according to the given scoring theme.
 		 * 
 		 * @param gcRatio
 		 * @return GC-Level score
@@ -324,18 +328,20 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		}
 
 		/**
+		 * This method gets the primer sequence and retrieves the melting temperature for this sequence.
+		 * According to the given scoring theme a score for the melting temperature is returned.
 		 * 
-		 * @param seq
+		 * @param primerSeq
 		 * @return melting temperature score
 		 */
-		public double calcScoreMeltingTemperature(char[] seq){
+		public double calcScoreMeltingTemperature(char[] primerSeq){
 			double scoreTemperature = 0;
 			double temperature = 0;
 			double minBorder = 0;
 			double maxBorder = 0;
 			Integer[] annealArray;
 			MeltingTemperature melt = new MeltingTemperature();
-			temperature = melt.calculateTemperature(seq);
+			temperature = melt.calculateTemperature(primerSeq);
 			this.setTemperature(temperature);
 			
 			Object[] tempArray = this.annealArrayList.toArray();
@@ -355,6 +361,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 
 		
 		/**
+		 * This method gets the number of repeats and calculates a score.
 		 * 
 		 * @param repeatCount
 		 * @return repeat-score
@@ -369,6 +376,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		}
 		
 		/**
+		 * This method gets the number of homopolys in the primer sequence and calculates a 
+		 * score.
 		 * 
 		 * @param homopolyCount
 		 * @return homopoly-score
@@ -388,6 +397,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		}
 		
 		/**
+		 * This method examines the given ratio of the bases G and C at the position 2 till 7 and returns a score
+		 * according to the given scoring scheme.
 		 * 
 		 * @param gcRatio2A7
 		 * @return GC-Level at position 2 and 7 score 
@@ -407,6 +418,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		}
 		
 		/**
+		 * This method examines the given ratio for AT in the last 6 positions of the primer sequence
+		 * and returns a score according to the given score-scheme.
 		 * 
 		 * @param ATLast6Ratio
 		 * @return AT at last 6 Base score
@@ -441,6 +454,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		}
 		
 		/**
+		 * This method returns the score for the given first base and last base in the primer sequence
+		 * according to the given scoring scheme.
 		 * 
 		 * @param firstBase
 		 * @param lastBase
@@ -457,7 +472,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		}
 		
 		/**
-		 * 		
+		 * This method tests if the primer sequence can perform a backfold. If that is the case a score
+		 * is set.
 		 * @param last4Base
 		 * @param leftseq
 		 * @return backfold-score
@@ -472,13 +488,13 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			if(primer.contains(last4Bases)){
 				scoreString = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD");
 				scoreBackfold = Double.valueOf(scoreString).doubleValue();
-			} else{
-				scoreBackfold = 0;
 			}
 			return scoreBackfold;
 		}
 		
 		/**
+		 * This method gets the starting position of the primer in the sequence and returns a score 
+		 * when the distance to the end of the contig is higher than a certain value.
 		 * 
 		 * @param realstart
 		 * @return max-offset score
@@ -497,7 +513,12 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			}
 			return scoreMaxOffset;
 		}
-
+		
+/**
+ * This method gets the number of 'N's occuring in the primer sequence and returns a penalty for each N.
+ * @param nCount
+ * @return nPenalty
+ */
 		public double calcNPenalty(int nCount) {
 			double nPenalty = 0;
 			String penaltyString = this.repeatAndBackfoldAndNPenalty.get("N_PENALTY").toString();
@@ -506,6 +527,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		}
 		
 		/**
+		 * This method gets the length of the primer sequence and calculates the length score
+		 * according to the given scoring scheme.
 		 * 
 		 * @param length
 		 * @return length-score

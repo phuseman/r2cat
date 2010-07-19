@@ -338,16 +338,10 @@ public class PrimerGenerator {
 			primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
 			temperature = scoring.getTemperature();
 				
-		/*	//Stichproben Test leftPrimer
+/*			//Stichproben Test leftPrimer
 			String temp = new String(primerSeq);
 			if(realstart==133&&start==86235&&primerLength==23){
-			//if(temp.contains("ACCGCAGAGACCTGCTGTTTA")&&primerLength==21){
-
-			//Stichproben Test right Primer
-				
-				//if(temp.contains("TGATCAGTGCAGCGGACAATCTT")&&primerLength==23){
-			//	if(temp.contains("TGCAGCGGACAATCTTTCACT")&&primerLength==21){
-			//if(primerScore==764){
+			//if(temp.contains("AGCGGCCATCGGTGTCCTTATCT")&&primerLength==23){
 				System.out.println("Total Primer score: "+primerScore);
 				System.out.println("length score "+scoreLength);
 				System.out.println("temperature score " +scoreTemp);
@@ -362,7 +356,6 @@ public class PrimerGenerator {
 				System.out.println("direction "+direction);
 				System.out.println("primer length "+primerLength);
 				System.out.println("start "+start);
-				//System.out.println("seqLength "+contigLength);
 				System.out.println("homopolyscore: "+scoreHomopoly);
 				System.out.println("repeatscore: "+scoreRepeat);
 				int	offset2 = offset - primerLength;
@@ -374,8 +367,8 @@ public class PrimerGenerator {
 					System.out.print(primerSeq[j]);
 				}
 				System.out.println(" /n");
-			}
-			*/
+			}*/
+			
 			if(primerScore>-200){
 				if(direction == 1){
 					leftPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature,realstart));
