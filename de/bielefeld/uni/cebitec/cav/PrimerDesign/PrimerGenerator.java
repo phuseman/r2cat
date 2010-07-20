@@ -1,5 +1,6 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -42,6 +43,9 @@ public class PrimerGenerator {
 	private File directory = null;
 	private File outputFile = null;
 	private int max = maxLength+5;
+	private File outputDir = new File("C:\\Users\\Yvisunshine\\");
+	private PrintWriter buffer;
+	private File logfile;
 
 
 	
@@ -61,6 +65,8 @@ public class PrimerGenerator {
 	public PrimerGenerator(File fastaFile, File configFile,
 			boolean repeatMasking) {
 		try{
+			logfile = new File(outputDir,"log file.txt");
+			buffer = new PrintWriter(new FileWriter(logfile));
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			directory = rm.getDir();
@@ -73,11 +79,14 @@ public class PrimerGenerator {
 			sequences = fastaParser.getSequences();
 		}
 		}catch(FileNotFoundException e){
-			System.out.println("fasta file could not be found");
+			buffer.write("fasta file could not be found");
+			buffer.write(System.getProperty("line.separator"));
 		} catch (IOException e) {
-			e.printStackTrace();
+			buffer.write("problem occured running BLAST2.2.23 programms");
+			buffer.write(System.getProperty("line.separator"));
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			buffer.write("problem occured running BLAST2.2.23 programms");
+			buffer.write(System.getProperty("line.separator"));
 		}
 		try{
 		scoring = new RetrieveParametersAndScores();
@@ -85,7 +94,8 @@ public class PrimerGenerator {
 		XMLParser configParser= new XMLParser();
 		configParser.parse(scoring, inConfig);
 		}catch(FileNotFoundException e){
-			System.out.println("config file could not be found! The default parameters were used");
+			buffer.write("config file could not be found! The default parameters were used");
+			buffer.write(System.getProperty("line.separator"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -99,6 +109,8 @@ public class PrimerGenerator {
 	 */
 	public PrimerGenerator(File fastaFile, boolean repeatMasking){
 		try{
+			logfile = new File(outputDir,"log file.txt");
+			buffer = new PrintWriter(new FileWriter(logfile));
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			directory = rm.getDir();
@@ -112,10 +124,18 @@ public class PrimerGenerator {
 		}
 		scoring = new RetrieveParametersAndScores();
 		}catch(FileNotFoundException e){
-			System.out.println("fasta file could not be found");
+			buffer.write("fasta file could not be found");
+			buffer.write(System.getProperty("line.separator"));
+		} catch (IOException e) {
+		buffer.write("problem occured running BLAST2.2.23 programms");
+		buffer.write(System.getProperty("line.separator"));
+		} catch (InterruptedException e) {
+		buffer.write("problem occured running BLAST2.2.23 programms");
+		buffer.write(System.getProperty("line.separator"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	
 	}
 
 	/**
@@ -136,7 +156,8 @@ public class PrimerGenerator {
 				checked = false;
 		}
 		}catch(Exception e){
-			System.out.println("marked contig id could not be found in fasta file");
+			buffer.write("marked contig id could not be found in fasta file");
+			buffer.write(System.getProperty("line.separator"));
 		}
 		
 		return checked;
@@ -155,9 +176,10 @@ public class PrimerGenerator {
 		boolean idCheckContig1 =false;
 		boolean idCheckContig2 =false;
 		HashMap<String, Integer> contigAndDirectionInfo = new HashMap<String,Integer>();
-		try{
-		for(int i = 0; i<contigPair.size();i++){
+
+		nextchar : for(int i = 0; i<contigPair.size();i++){
 			String[] tempPair = contigPair.elementAt(i);
+			try{
 			if(tempPair.length==4){
 			markedSeq = new String[2];
 			markedSeq[0] = tempPair[0];
@@ -165,13 +187,21 @@ public class PrimerGenerator {
 			idCheckContig1 = this.idCheck(markedSeq[0]);
 			idCheckContig2 = this.idCheck(markedSeq[1]);
 			if(idCheckContig1&&idCheckContig2){
+			if(markedSeq[0].equals(markedSeq[1])){
 			directionContig1 = this.setPrimerDirection(tempPair[1].toString());
 			directionContig2 = this.setPrimerDirection(tempPair[3].toString());
+			if(directionContig1!=directionContig2){
 			contigAndDirectionInfo.put(markedSeq[0],directionContig1);
 			contigAndDirectionInfo.put(markedSeq[1],directionContig2);
 			this.getPrimerCandidates(markedSeq, contigAndDirectionInfo);
+			}else{
+				throw new IllegalArgumentException("contigs were marked with the same direction for the primer");
+			}
 			} else{
-				System.out.println("contig id could not be found");
+				throw new IllegalArgumentException("contig was defined for forward and reverse primer");
+			}
+			} else{
+				throw new NullPointerException("contig id could not be found");
 			}
 			} else if(tempPair.length==2){
 				markedSeq = new String[1];
@@ -183,15 +213,24 @@ public class PrimerGenerator {
 				this.getPrimerCandidates(markedSeq, contigAndDirectionInfo);
 				}
 			}
-		}
+
 		} catch(FileNotFoundException e){
-			System.out.println("fasta file could not be found");
+			buffer.write("fasta file could not be found");
+			buffer.write(System.getProperty("line.separator"));
 		} catch (NullPointerException e) {
-			System.out.println("contig id could not be found");
-			e.printStackTrace();
+			buffer.write("contig id could not be found");
+			buffer.write(System.getProperty("line.separator"));
+			continue nextchar;
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch(IllegalArgumentException e){
+			buffer.write("contigs were marked with the same direction for the primer");
+			buffer.write(System.getProperty("line.separator"));
+			continue nextchar;
 		}
+		}
+		buffer.flush();
+		buffer.close();
 	}
 	
 	/**
@@ -735,7 +774,6 @@ public class PrimerGenerator {
  	public void output(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException{
 		String NEW_LINE = System.getProperty("line.separator");
 		String TAB = "\t";
-		File outputDir = new File("C:\\Users\\Yvisunshine\\");
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
 			outputFile = new File(outputDir,"r2cat Primerlist for contigs "+markedSeq[0]+" and "+markedSeq[1]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
