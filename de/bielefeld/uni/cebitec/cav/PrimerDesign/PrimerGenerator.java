@@ -187,7 +187,7 @@ public class PrimerGenerator {
 			idCheckContig1 = this.idCheck(markedSeq[0]);
 			idCheckContig2 = this.idCheck(markedSeq[1]);
 			if(idCheckContig1&&idCheckContig2){
-			if(markedSeq[0].equals(markedSeq[1])){
+			if(!(markedSeq[0].equals(markedSeq[1]))){
 			directionContig1 = this.setPrimerDirection(tempPair[1].toString());
 			directionContig2 = this.setPrimerDirection(tempPair[3].toString());
 			if(directionContig1!=directionContig2){
