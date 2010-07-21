@@ -128,6 +128,10 @@ public class QGramIndex {
 			// encode each q-gram for one sequence
 			for (int i = offsetsInInput[j]; i < offsetsInInput[j + 1]; i++) {
 				code = coder.updateEncoding(input[i]);
+				/*	if(offsetsInInput[j]==0){
+					System.out.print(code);
+					System.out.println(coder.decodeQgramCode(code));
+				}*/
 				if (code >= 0) {// if code is valid
 					// count the q-grams
 					hashTable[code]++;
@@ -205,24 +209,24 @@ public class QGramIndex {
 		indexGenerated = true;
 	}
 
-	// public void getQGramPositions(int code) {
-	// if (! indexGenerated) {
-	// this.generateIndex();
-	// }
-	//		
-	// System.out.println("code:" + code + " -> "
-	// + coder.decodeQgramCode(code));
-	// for (int i = hashTable[code] - 1; i < hashTable[code + 1] + 1; i++) {
-	// System.out.print("pos:" + occurrenceTable[i] + " ");
-	//
+	 //public void getQGramPositions(int code) {
+	 //if (! indexGenerated) {
+	 //this.generateIndex();
+	 //}
+			
+	 //System.out.println("code:" + code + " -> "
+	 //+ coder.decodeQgramCode(code));
+	 //for (int i = hashTable[code] - 1; i < hashTable[code + 1] + 1; i++) {
+	 //System.out.print("pos:" + occurrenceTable[i] + " ");
+	
 	// for (int j = 0; j < 11; j++) {
-	// System.out.print(input[occurrenceTable[i] - 10 + j]);
-	// }
-	//
-	// System.out.println();
-	// }
-	//
-	// }
+	 //System.out.print(input[occurrenceTable[i] -10 + j]);
+	//}
+	
+	//System.out.println();
+	 //}
+	
+	 //}
 
 	public char getCharFromInput(int pos) {
 		return input[pos];

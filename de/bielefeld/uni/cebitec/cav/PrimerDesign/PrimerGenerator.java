@@ -332,12 +332,12 @@ public class PrimerGenerator {
 					String nextPlus2Base =null;
 					String nextPlus1BaseForShortPrimers = null;
 					String nextPlus2BaseForShortPrimers = null;
-					for(int end = templateSeqString.length()-2;end>=max;end--){
+					for(int end = templateSeqString.length()-2;end>=max+2;end--){
 						int start = end-max;
 						int offset = end;
 						String candidateReversePrimerMaxLength = templateSeqString.substring(start, end);
-						nextPlus1Base = this.complementBase(templateSeqString.substring(start,start+1));
-						nextPlus2Base = this.complementBase(templateSeqString.substring(start,start+1));
+						nextPlus1Base = this.complementBase(templateSeqString.substring(start-1,start));
+						nextPlus2Base = this.complementBase(templateSeqString.substring(start-2,start-1));
 						char[] candidateReversePrimerToArray = candidateReversePrimerMaxLength.toCharArray();
 						char[] candidateReversePrimerSeqReverseComplement = getReverseComplement(candidateReversePrimerToArray);
 							if(offset>minBorderOffset&&offset<maxBorderOffset){
@@ -462,7 +462,7 @@ public class PrimerGenerator {
 			//Stichproben Test leftPrimer
 			String temp = new String(primerSeq);
 			//if(realstart==196&&start==81&&primerLength==19){
-			if(temp.contains("TGCAGCGGACAATCTTTCACT")&&primerLength==21){
+			if(temp.contains("TGATCAGTGCAGCGGACAATCTT")&&primerLength==23){
 				System.out.println("Total Primer score: "+primerScore);
 				System.out.println("length score "+scoreLength);
 				System.out.println("temperature score " +scoreTemp);
@@ -530,7 +530,7 @@ public class PrimerGenerator {
 			rightPrimer = pp.sortPrimer(rightPrimer);
 			output(leftPrimer,rightPrimer);
 		}if(rightPrimer.isEmpty()&&leftPrimer.isEmpty()){
-			// throw new NullPointerException("No primers could be found");
+			throw new NullPointerException("No primers could be found");
 		}
 	}
 	
@@ -773,7 +773,7 @@ public class PrimerGenerator {
 	scoreOffset = scoring.calcScoreOffset(realstart)+scoring.calcScoreMaxOffset(realstart);
 	return scoreOffset;
 	} else{
-		realstart = offset+max-primerLength;
+		realstart = offset-primerLength;
 		scoreOffset = scoring.calcScoreOffset(realstart)+scoring.calcScoreMaxOffset(realstart);
 		return scoreOffset;
 	}
