@@ -1,6 +1,5 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -198,7 +197,7 @@ public class PrimerGenerator {
 				throw new IllegalArgumentException("contigs were marked with the same direction for the primer");
 			}
 			} else{
-				throw new IllegalArgumentException("contig was defined for forward and reverse primer");
+				throw new IllegalStateException("contig was defined for forward and reverse primer");
 			}
 			} else{
 				throw new NullPointerException("contig id could not be found");
@@ -227,6 +226,8 @@ public class PrimerGenerator {
 			buffer.write("contigs were marked with the same direction for the primer");
 			buffer.write(System.getProperty("line.separator"));
 			continue nextchar;
+		} catch(IllegalStateException e){
+			buffer.write("contig was defined for forward and reverse primer");
 		}
 		}
 		buffer.flush();
@@ -779,7 +780,13 @@ public class PrimerGenerator {
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+" and "+markedSeq[1]+":");
 			buffer.write(NEW_LINE);
+			buffer.write("Information of the marked sequences: ");
 			buffer.write(NEW_LINE);
+			for(int i=0;i<markedSeq.length;i++){
+				String description = this.sequences.elementAt(i).getDescription();
+				buffer.write(description);
+				buffer.write(NEW_LINE);
+			}
 		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
 			if(i<=100){
 			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence"+"\n");
@@ -815,7 +822,13 @@ public class PrimerGenerator {
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+":");
 			buffer.write(NEW_LINE);
+			buffer.write("Information of the marked sequences: ");
 			buffer.write(NEW_LINE);
+			for(int i=0;i<markedSeq.length;i++){
+				String description = this.sequences.elementAt(i).getDescription();
+				buffer.write(description);
+				buffer.write(NEW_LINE);
+			}
 			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 			buffer.write(NEW_LINE);
 			for(int j = 0; j<leftPrimer.size();j++){
@@ -833,6 +846,13 @@ public class PrimerGenerator {
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+":");
 			buffer.write(NEW_LINE);
+			buffer.write("Information of the marked sequences: ");
+			buffer.write(NEW_LINE);
+			for(int i=0;i<markedSeq.length;i++){
+				String description = this.sequences.elementAt(i).getDescription();
+				buffer.write(description);
+				buffer.write(NEW_LINE);
+			}
 			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 			buffer.write(NEW_LINE);
 			for(int j = 0; j<leftPrimer.size();j++){
