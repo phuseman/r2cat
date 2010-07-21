@@ -219,7 +219,7 @@ public class PrimerGenerator {
 			buffer.write(e.getMessage());
 			buffer.write(System.getProperty("line.separator"));
 		} catch (NullPointerException e) {
-			buffer.write("test");
+			buffer.write(e.getMessage());
 			buffer.write(System.getProperty("line.separator"));
 			continue nextchar;
 		} catch (IOException e) {
@@ -332,7 +332,7 @@ public class PrimerGenerator {
 					String nextPlus2Base =null;
 					String nextPlus1BaseForShortPrimers = null;
 					String nextPlus2BaseForShortPrimers = null;
-					for(int end = templateSeqString.length()-2;end>=max+2;end--){
+					for(int end = templateSeqString.length();end>=max+2;end--){
 						int start = end-max;
 						int offset = end;
 						String candidateReversePrimerMaxLength = templateSeqString.substring(start, end);
@@ -459,7 +459,7 @@ public class PrimerGenerator {
 			primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
 			temperature = scoring.getTemperature();
 				
-			//Stichproben Test leftPrimer
+		/*	//Stichproben Test leftPrimer
 			String temp = new String(primerSeq);
 			//if(realstart==196&&start==81&&primerLength==19){
 			if(temp.contains("TGATCAGTGCAGCGGACAATCTT")&&primerLength==23){
@@ -488,7 +488,7 @@ public class PrimerGenerator {
 					System.out.print(primerSeq[j]);
 				}
 				System.out.println(" /n");
-			}
+			}*/
 			
 			if(primerScore>-200){
 				if(direction == 1){

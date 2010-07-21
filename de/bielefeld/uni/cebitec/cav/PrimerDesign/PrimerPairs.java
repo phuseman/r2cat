@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Vector;
 
+import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator.Bases;
+
 /**
  * This class includes methods to make primer pairs from primer candidates of the possible forward and reverse
  * primer located on the according contig end.
@@ -17,7 +19,9 @@ import java.util.Vector;
  *
  */
 public class PrimerPairs {
-	
+	class Bases{
+		private final static char A ='A',a='a',G ='G',g='g', C='C',c='c',T='T',t='t',N='N', n='n';
+	}
 	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
 	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
 	private ArrayList<Integer> notPairedPrimer = new ArrayList<Integer>();
@@ -46,12 +50,12 @@ public class PrimerPairs {
 			return primer;
 	}
 	
-	/**
+/*	*//**
 	 * This method is used to retrieve the complement of a given primer sequence.
 	 * 
 	 * @param primerSeq
 	 * @return complement of primerSeq
-	 */
+	 *//*
 	
 	public char[] getComplement(char[] primerSeq){
 
@@ -75,6 +79,37 @@ public class PrimerPairs {
 		}
 	
 		return complement;
+	}*/
+	
+	/**
+	 * This method retrieves the reverse complement of a given primer sequence.
+	 * @param primerSeq
+	 * @return
+	 */
+	public char[] getReverseComplement(char[] primerSeq){
+
+		char[] alphabetMap= new char[256];
+		char[] reverseComplement = new char[primerSeq.length];
+		
+		for (int j = 0; j < alphabetMap.length; j++) {
+			alphabetMap[j]= (char) j;
+		}
+		alphabetMap[Bases.a]=Bases.t;
+		alphabetMap[Bases.A]=Bases.T;
+		alphabetMap[Bases.c]=Bases.g;
+		alphabetMap[Bases.C]=Bases.G;
+		alphabetMap[Bases.g]=Bases.c;
+		alphabetMap[Bases.G]=Bases.C;
+		alphabetMap[Bases.t]=Bases.a;
+		alphabetMap[Bases.T]=Bases.A;
+		
+		int m = 0;
+		for (int k = primerSeq.length-1; k>=0; k--,m++) {
+			reverseComplement[m]= alphabetMap[primerSeq[k]];
+			
+		}
+	
+		return reverseComplement;
 	}
 	
 	/**
@@ -103,7 +138,7 @@ public class PrimerPairs {
 	/**
 	 * This method checks if the sequences of the forward and reverse primer (possible pair)
 	 * include a complementary sequence of eight nucleotides somewhere in the primer sequences or four
-	 * nucleotides at the beginning of the primer sequences.
+	 * nucleotides at the 3'end of forward primer and the 5'end of the reverse primer.
 	 * 
 	 * It returns true if the sequence are not complementary.
 	 *
@@ -118,20 +153,33 @@ public class PrimerPairs {
 		String secondSeqLastBases = null;
 		String firstSeqEightBases = null;
 		String secondSeqAsString  = null;
+		String firstSeqFirstBases =null;
+		String secondSeqFirstBases =null;
 		char[] eightBases = new char[8];
 		char[] leftLastBases = new char[4];
 		char[] rightLastBases = new char[4];
-		secondSeq = this.getComplement(secondSeq);
-		for(int k = 0;k<firstSeq.length-8;k++){
-			System.arraycopy(firstSeq, k, eightBases, 0, 8);
-			System.arraycopy(firstSeq, 0, leftLastBases, 0, 3);
-			System.arraycopy(secondSeq, 0, rightLastBases, 0, 3);
+		char[] leftFirstBases = new char[4];
+		char[] rightFirstBases = new char[4];
+		secondSeq = this.getReverseComplement(secondSeq);
+		for(int k = 0;k<=firstSeq.length-8;k++){
+			System.arraycopy(firstSeq, k, eightBases, 0, 7);
+			//last four bases of the 3'end of the forward primer
+			System.arraycopy(firstSeq, firstSeq.length-4, leftLastBases,0, 3);
+			//first four bases of the 5'end of the forward primer
+			System.arraycopy(firstSeq, 0, leftFirstBases, 0, 3);
+			//last four bases of the 5'end of the reverse primer
+			System.arraycopy(secondSeq, secondSeq.length-4, rightLastBases, 0, 3);
+			//first four bases of the 3'end of the reverse primer
+			System.arraycopy(secondSeq, 0, leftFirstBases, 0, 3);
 			firstSeqLastBases = new String(leftLastBases);
 			secondSeqLastBases = new String(rightLastBases);
+			firstSeqFirstBases=new String(leftFirstBases);
+			secondSeqFirstBases = new String(rightFirstBases);
 			firstSeqEightBases = new String(eightBases);
 			secondSeqAsString = new String(secondSeq);
-			if(secondSeqAsString.contains(firstSeqEightBases)||firstSeqLastBases.contains(secondSeqLastBases)){
+			if(secondSeqAsString.contains(firstSeqEightBases)||firstSeqLastBases.equals(secondSeqLastBases)||firstSeqFirstBases.equals(secondSeqFirstBases)){
 				notComplement = false;
+				return notComplement;
 			} else{
 				notComplement = true;
 			}
