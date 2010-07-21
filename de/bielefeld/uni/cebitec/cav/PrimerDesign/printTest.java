@@ -9,8 +9,8 @@ import java.util.Vector;
 public class printTest {
 	
 	public static void main(String args[]){
-		File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
-		//File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
+		//File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
+		File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
 		File fastaFile = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
 		Date start = new Date();
 		boolean repeatMasking = false;
@@ -22,9 +22,9 @@ public class printTest {
 		//PrimerGenerator pg = new PrimerGenerator(fastaFile,repeatMasking);
 		Vector<String[]> contigPairs = new Vector<String[]>();
 		String[] pair1 = new String[4];
-		pair1[0] = "0";
+		pair1[0] = "1";
 		pair1[1] = "forward";
-		pair1[2] = "1";
+		pair1[2] = "0";
 		pair1[3] = "reverse";
 		
 		String[] pair2 = new String[4];

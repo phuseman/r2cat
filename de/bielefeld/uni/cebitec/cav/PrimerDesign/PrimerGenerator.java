@@ -183,10 +183,10 @@ public class PrimerGenerator {
 			markedSeq = new String[2];
 			markedSeq[0] = tempPair[0];
 			markedSeq[1] = tempPair[2];
-			idCheckContig1 = this.idCheck(markedSeq[0]);
-			idCheckContig2 = this.idCheck(markedSeq[1]);
-			if(idCheckContig1&&idCheckContig2){
-			if(!(markedSeq[0].equals(markedSeq[1]))){
+			idCheckContig1 = this.idCheck(markedSeq[0].toString());
+			idCheckContig2 = this.idCheck(markedSeq[1].toString());
+		if(idCheckContig1&&idCheckContig2){
+			if(!(markedSeq[0].toString().equals(markedSeq[1].toString()))){
 			directionContig1 = this.setPrimerDirection(tempPair[1].toString());
 			directionContig2 = this.setPrimerDirection(tempPair[3].toString());
 			if(directionContig1!=directionContig2){
@@ -205,29 +205,33 @@ public class PrimerGenerator {
 			} else if(tempPair.length==2){
 				markedSeq = new String[1];
 				markedSeq[0] = tempPair[0];
-				idCheckContig1 = idCheck(markedSeq[0]);
+				idCheckContig1 = idCheck(markedSeq[0].toString());
 				if(idCheckContig1){
 				directionContig1 = this.setPrimerDirection(tempPair[1].toString());
 				contigAndDirectionInfo.put(markedSeq[0],directionContig1);
 				this.getPrimerCandidates(markedSeq, contigAndDirectionInfo);
+				}else{
+					throw new NullPointerException("contig id could not be found");
 				}
 			}
 
 		} catch(FileNotFoundException e){
-			buffer.write("fasta file could not be found");
+			buffer.write(e.getMessage());
 			buffer.write(System.getProperty("line.separator"));
 		} catch (NullPointerException e) {
-			buffer.write("contig id could not be found");
+			buffer.write("test");
 			buffer.write(System.getProperty("line.separator"));
 			continue nextchar;
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch(IllegalArgumentException e){
-			buffer.write("contigs were marked with the same direction for the primer");
+			buffer.write(e.getMessage());
 			buffer.write(System.getProperty("line.separator"));
 			continue nextchar;
 		} catch(IllegalStateException e){
-			buffer.write("contig was defined for forward and reverse primer");
+			buffer.write(e.getMessage());
+			buffer.write(System.getProperty("line.separator"));
+			continue nextchar;
 		}
 		}
 		buffer.flush();
@@ -288,62 +292,106 @@ public class PrimerGenerator {
 	public void getPrimerCandidates(String[] markedContig,HashMap<String, Integer> contigAndDirectionInfo) throws IOException{
 	HashMap<String, char[]> templateSeq = getMarkedSeq(markedContig);
 	Vector<Primer> primerCandidates = new Vector<Primer>();
-			String lastPlus12 = null;
-			String lastPlus22 = null;
 			for(String contigID : markedContig){
 				Integer directionOfPrimer = contigAndDirectionInfo.get(contigID);
 				char[] tempSeqChar = templateSeq.get(contigID);
 				int seqLength = tempSeqChar.length;
 				String templateSeqString = new String(tempSeqChar);
 				if(directionOfPrimer == 1){
+					String nextPlus1Base = null;
+					String nextPlus2Base =null;
+					String nextPlus1BaseForShortPrimers = null;
+					String nextPlus2BaseForShortPrimers = null;
 					//left primer
 					for(int start =0;start<=(templateSeqString.length()-max);start++){
 						int end = start+maxLength;
 						int offset = templateSeqString.length()-start;
 						String candidateForwardPrimerMaxLength = templateSeqString.substring(start,end);
-						String lastPlus1 = templateSeqString.substring(end, end+1);
-						String lastPlus2 = templateSeqString.substring(end+1, end+2);
+						nextPlus1Base = templateSeqString.substring(end, end+1);
+						nextPlus2Base = templateSeqString.substring(end+1, end+2);
 						char[] candidateSeqForward = candidateForwardPrimerMaxLength.toCharArray();
-	
 							if(offset>minBorderOffset&&offset<maxBorderOffset){
-							primerCandidates.add(new Primer(contigID,seqLength,candidateSeqForward,start,directionOfPrimer,maxLength,lastPlus1, lastPlus2,offset));
+							primerCandidates.add(new Primer(contigID,seqLength,candidateSeqForward,start,directionOfPrimer,maxLength,nextPlus1Base, nextPlus2Base,offset));
 						for(int length = miniLength; length<candidateForwardPrimerMaxLength.length();length++){
 							String candidateForwardPrimer = candidateForwardPrimerMaxLength.substring(0, length);
 							if(length ==23){
-								lastPlus12 = candidateForwardPrimerMaxLength.substring(length, length+1);
-								lastPlus22 = lastPlus1;
+								nextPlus1BaseForShortPrimers = candidateForwardPrimerMaxLength.substring(length, length+1);
+								nextPlus2BaseForShortPrimers = nextPlus1Base;
 							} else{
-								lastPlus12 = candidateForwardPrimerMaxLength.substring(length, length+1);
-								lastPlus22 = candidateForwardPrimerMaxLength.substring(length+1,length+2);
+								nextPlus1BaseForShortPrimers = candidateForwardPrimerMaxLength.substring(length, length+1);
+								nextPlus2BaseForShortPrimers = candidateForwardPrimerMaxLength.substring(length+1,length+2);
 							}
 							char[] candidateSeqForwardPrimer = candidateForwardPrimer.toCharArray();
-							primerCandidates.add(new Primer(contigID,seqLength,candidateSeqForwardPrimer,start,directionOfPrimer,length,lastPlus12, lastPlus22,offset));		
+							primerCandidates.add(new Primer(contigID,seqLength,candidateSeqForwardPrimer,start,directionOfPrimer,length,nextPlus1BaseForShortPrimers, nextPlus2BaseForShortPrimers,offset));		
 							}
 							}
 					}
 				}if(directionOfPrimer ==-1){
 					//right primer
+					String nextPlus1Base = null;
+					String nextPlus2Base =null;
+					String nextPlus1BaseForShortPrimers = null;
+					String nextPlus2BaseForShortPrimers = null;
 					for(int end = templateSeqString.length()-2;end>=max;end--){
 						int start = end-max;
 						int offset = end;
 						String candidateReversePrimerMaxLength = templateSeqString.substring(start, end);
-						String lastPlus1= templateSeqString.substring(end,end+1);
-						String lastPlus2 = templateSeqString.substring(end+1,end+2);
+						nextPlus1Base = this.complementBase(templateSeqString.substring(start,start+1));
+						nextPlus2Base = this.complementBase(templateSeqString.substring(start,start+1));
 						char[] candidateReversePrimerToArray = candidateReversePrimerMaxLength.toCharArray();
 						char[] candidateReversePrimerSeqReverseComplement = getReverseComplement(candidateReversePrimerToArray);
 							if(offset>minBorderOffset&&offset<maxBorderOffset){
-							primerCandidates.add(new Primer(contigID,seqLength,candidateReversePrimerSeqReverseComplement,start,directionOfPrimer,maxLength,lastPlus1, lastPlus2,offset));
-						for(int length = miniLength; length<candidateReversePrimerMaxLength.length();length++){
+							primerCandidates.add(new Primer(contigID,seqLength,candidateReversePrimerSeqReverseComplement,start,directionOfPrimer,maxLength,nextPlus1Base, nextPlus2Base,offset));
+						for(int length = miniLength; length<candidateReversePrimerMaxLength.length()-1;length++){
 							String candidateReversePrimer = candidateReversePrimerMaxLength.substring((candidateReversePrimerMaxLength.length()-length),candidateReversePrimerMaxLength.length());
+							if(length == 23){
+								nextPlus1BaseForShortPrimers = this.complementBase(candidateReversePrimerMaxLength.substring(candidateReversePrimerMaxLength.length()-length-1, candidateReversePrimerMaxLength.length()-length));
+								nextPlus2BaseForShortPrimers = nextPlus1Base;				
+						
+							} else{
+								nextPlus1BaseForShortPrimers = this.complementBase(candidateReversePrimerMaxLength.substring(candidateReversePrimerMaxLength.length()-length-1,candidateReversePrimerMaxLength.length()-length));
+								nextPlus2BaseForShortPrimers = this.complementBase(candidateReversePrimerMaxLength.substring(candidateReversePrimerMaxLength.length()-length-2,candidateReversePrimerMaxLength.length()-length-1));
+							}
 							char[] candidateReversePrimerArray = candidateReversePrimer.toCharArray();
 							char[] candidateReversePrimerSeq = getReverseComplement(candidateReversePrimerArray);
-							primerCandidates.add(new Primer(contigID,seqLength,candidateReversePrimerSeq,start,directionOfPrimer,length,lastPlus12, lastPlus22,offset));		
+							primerCandidates.add(new Primer(contigID,seqLength,candidateReversePrimerSeq,start,directionOfPrimer,length,nextPlus1BaseForShortPrimers, nextPlus2BaseForShortPrimers,offset));		
 								}
 							}
 						}
 					}
 			}
 			this.calcScoreEachPrimerCandidate(primerCandidates);
+	}
+	/**
+	 * This method returns the complement to one given base.
+	 * @param base
+	 * @return complementBase
+	 */
+	public String complementBase(String base){
+		String complementBase =null;
+	if(base.equals("A")){
+		complementBase="T";
+	} if(base.equals("a")){
+		complementBase="t";
+	}
+	if(base.equals("t")){
+		complementBase="a";
+	}if(base.equals("T")){
+		complementBase="A";
+	}
+	if(base.equals("G")){
+		complementBase="C";
+	}
+	if(base.equals("g")){
+		complementBase="c";
+	}
+	if(base.equals("C")){
+		complementBase="G";
+	}
+	if(base.equals("c")){
+		complementBase="g";
+	}
+		return complementBase;
 	}
 	
 	
@@ -411,10 +459,10 @@ public class PrimerGenerator {
 			primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
 			temperature = scoring.getTemperature();
 				
-/*			//Stichproben Test leftPrimer
+			//Stichproben Test leftPrimer
 			String temp = new String(primerSeq);
-			if(realstart==133&&start==86235&&primerLength==23){
-			//if(temp.contains("AGCGGCCATCGGTGTCCTTATCT")&&primerLength==23){
+			//if(realstart==196&&start==81&&primerLength==19){
+			if(temp.contains("TGCAGCGGACAATCTTTCACT")&&primerLength==21){
 				System.out.println("Total Primer score: "+primerScore);
 				System.out.println("length score "+scoreLength);
 				System.out.println("temperature score " +scoreTemp);
@@ -432,7 +480,7 @@ public class PrimerGenerator {
 				System.out.println("homopolyscore: "+scoreHomopoly);
 				System.out.println("repeatscore: "+scoreRepeat);
 				int	offset2 = offset - primerLength;
-				System.out.println(plus1+" "+ plus2);
+				System.out.println("Plus1= "+plus1+" Plus2= "+ plus2);
 				System.out.println("offset: "+offset);
 				System.out.println("real offset: "+ offset2);
 				System.out.println("temperature: "+temperature);
@@ -440,7 +488,7 @@ public class PrimerGenerator {
 					System.out.print(primerSeq[j]);
 				}
 				System.out.println(" /n");
-			}*/
+			}
 			
 			if(primerScore>-200){
 				if(direction == 1){
@@ -475,12 +523,14 @@ public class PrimerGenerator {
 			noPartnerLeft=pp.getNoPartnerLeft();
 			noPartnerRight=pp.getNoPartnerRight();
 			output(leftPrimer, rightPrimer);
-		} else if(!leftPrimer.isEmpty()){
+		}if(!leftPrimer.isEmpty()&&rightPrimer.isEmpty()){
 			leftPrimer = pp.sortPrimer(leftPrimer);
 			output(leftPrimer, rightPrimer);
-		} else{
-			 throw new NullPointerException("No primers could be found");
-
+		} if(leftPrimer.isEmpty()&&!rightPrimer.isEmpty()){
+			rightPrimer = pp.sortPrimer(rightPrimer);
+			output(leftPrimer,rightPrimer);
+		}if(rightPrimer.isEmpty()&&leftPrimer.isEmpty()){
+			// throw new NullPointerException("No primers could be found");
 		}
 	}
 	
@@ -607,7 +657,7 @@ public class PrimerGenerator {
 	public double getFirstAndLastBaseScore(char[] primerSeq,Integer direction){
 	double scoreFirstLastBase = 0;
 		Object first = primerSeq[0];
-		Object last =primerSeq[primerSeq.length-1];
+		Object last = primerSeq[primerSeq.length-1];
 		String firstBase = first.toString();
 		String lastBase = last.toString();
 		firstBase = firstBase.toUpperCase();
@@ -782,9 +832,11 @@ public class PrimerGenerator {
 			buffer.write(NEW_LINE);
 			buffer.write("Information of the marked sequences: ");
 			buffer.write(NEW_LINE);
+			buffer.write(NEW_LINE);
 			for(int i=0;i<markedSeq.length;i++){
 				String description = this.sequences.elementAt(i).getDescription();
 				buffer.write(description);
+				buffer.write(NEW_LINE);
 				buffer.write(NEW_LINE);
 			}
 		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
@@ -822,11 +874,14 @@ public class PrimerGenerator {
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+":");
 			buffer.write(NEW_LINE);
+			buffer.write(NEW_LINE);
 			buffer.write("Information of the marked sequences: ");
+			buffer.write(NEW_LINE);
 			buffer.write(NEW_LINE);
 			for(int i=0;i<markedSeq.length;i++){
 				String description = this.sequences.elementAt(i).getDescription();
 				buffer.write(description);
+				buffer.write(NEW_LINE);
 				buffer.write(NEW_LINE);
 			}
 			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
@@ -846,11 +901,14 @@ public class PrimerGenerator {
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+":");
 			buffer.write(NEW_LINE);
+			buffer.write(NEW_LINE);
 			buffer.write("Information of the marked sequences: ");
+			buffer.write(NEW_LINE);
 			buffer.write(NEW_LINE);
 			for(int i=0;i<markedSeq.length;i++){
 				String description = this.sequences.elementAt(i).getDescription();
 				buffer.write(description);
+				buffer.write(NEW_LINE);
 				buffer.write(NEW_LINE);
 			}
 			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");

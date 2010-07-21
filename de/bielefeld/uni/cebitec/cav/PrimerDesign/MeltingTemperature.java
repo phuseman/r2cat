@@ -111,6 +111,7 @@ public class MeltingTemperature {
 		if(errors == 0){
 			//calculation of the melting temperature
 			temparture = (ent*1000/(enp+(1.987*Math.log((oligoConc/4.0))))) - 273.15 - 21.59;
+			//temparture = (ent*1000/(enp+(1.987*Math.log((oligoConc/2000000000))))) - 273.15;
 			return temparture;
 		} else {
 			return -1.0;
