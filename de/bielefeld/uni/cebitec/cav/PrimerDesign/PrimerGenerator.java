@@ -512,7 +512,7 @@ public class PrimerGenerator {
 	 * @throws IOException 
 	 */
 	
-	public void getPrimerPairs(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException{
+	public void getPrimerPairs(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException,NullPointerException{
 		PrimerPairs pp = new PrimerPairs();
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
 			leftPrimer = pp.sortPrimer(leftPrimer);
