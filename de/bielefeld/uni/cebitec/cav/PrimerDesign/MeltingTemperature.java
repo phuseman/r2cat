@@ -23,7 +23,7 @@ public class MeltingTemperature {
 	 */
 	public MeltingTemperature(){
 	this.fillEnthalpieAndEntropieParam();
-	this.oligoConc = 0.00000025;
+	this.oligoConc = 0.0000025;
 	
 }
 	
