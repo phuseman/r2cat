@@ -27,7 +27,8 @@ public class RepeatMasking {
 	RunBlastToFindRepeats runBlast =null;
 	File dir = null;
 	File blastOutput = null;
-	String dirName = "C:\\Users\\Yvisunshine\\r2catPrimer";
+	String dirName = null;
+	//String dirName = "C:\\Users\\Yvisunshine\\r2catPrimer";
 	String preProcessedFastaFile ="preProcessedFastaFile";
 	String toBlast ="toBlast";
 	
@@ -57,6 +58,7 @@ public class RepeatMasking {
 	 * @return dir
 	 */
 		public File makeDir(){
+			dirName = "java.io.tmpdir";
 			File dir = new File(dirName);
 			if(dir.isDirectory()){
 				File[] files = dir.listFiles();

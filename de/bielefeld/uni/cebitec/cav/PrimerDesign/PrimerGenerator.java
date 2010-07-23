@@ -42,9 +42,10 @@ public class PrimerGenerator {
 	private File directory = null;
 	private File outputFile = null;
 	private int max = maxLength+5;
-	private File outputDir = new File("C:\\Users\\Yvisunshine\\");
+	private File outputDir = null;
+	//private File outputDir = new File("C:\\Users\\Yvisunshine\\");
 	private PrintWriter buffer;
-	private File logfile;
+	private File errorFile;
 
 
 	
@@ -63,9 +64,11 @@ public class PrimerGenerator {
 	 */
 	public PrimerGenerator(File fastaFile, File configFile,
 			boolean repeatMasking) {
+
 		try{
-			logfile = new File(outputDir,"log file.txt");
-			buffer = new PrintWriter(new FileWriter(logfile));
+			outputDir = new File(System.getProperty("user.home"));
+			errorFile = new File(outputDir,"error file.txt");
+			buffer = new PrintWriter(new FileWriter(errorFile));
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			directory = rm.getDir();
@@ -108,8 +111,9 @@ public class PrimerGenerator {
 	 */
 	public PrimerGenerator(File fastaFile, boolean repeatMasking){
 		try{
-			logfile = new File(outputDir,"log file.txt");
-			buffer = new PrintWriter(new FileWriter(logfile));
+			outputDir = new File(System.getProperty("user.home"));
+			errorFile = new File(outputDir,"error file.txt");
+			buffer = new PrintWriter(new FileWriter(errorFile));
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			directory = rm.getDir();
@@ -923,6 +927,7 @@ public class PrimerGenerator {
 			buffer.flush();
 			buffer.close();
 		}
+		
 		if(directory.exists()){
 		this.deleteDir(directory);
 		}
