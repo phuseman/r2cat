@@ -118,6 +118,16 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 
 		
 		fileMenu.addSeparator();
+		
+		JMenuItem primer = new JMenuItem("Generate Primer");
+		primer.getAccessibleContext()
+				.setAccessibleDescription("Generates Primer for adjacent contigs");
+		primer.setActionCommand("generate_primer");
+		primer.addActionListener(this);
+		fileMenu.add(primer);
+
+		
+		fileMenu.addSeparator();
 
 		
 		JMenuItem exit=new JMenuItem("Exit");
@@ -240,6 +250,8 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			guiController.loadProject();
 		} else if (e.getActionCommand().matches("save_project")) {
 			guiController.saveProject();
+		} else if (e.getActionCommand().matches("generate_primer")) {
+			guiController.showGeneratePrimerFrame(R2cat.dataModelController.getAlignmentPositionsList());
 		} else if (e.getActionCommand().matches("save_fasta")) {
 			guiController.exportAsFasta();
 		} else if (e.getActionCommand().matches("reverted")) {

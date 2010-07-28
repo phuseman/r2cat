@@ -45,6 +45,7 @@ import org.freehep.util.export.ExportDialog;
 import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.ContigSorter;
+import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
 import de.bielefeld.uni.cebitec.cav.datamodel.SequenceOrderTableModel;
 import de.bielefeld.uni.cebitec.cav.gui.AlignmentTable;
 import de.bielefeld.uni.cebitec.cav.gui.CustomFileFilter;
@@ -55,6 +56,7 @@ import de.bielefeld.uni.cebitec.cav.gui.HelpFrame;
 import de.bielefeld.uni.cebitec.cav.gui.MainMenu;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
 import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
+import de.bielefeld.uni.cebitec.cav.gui.PrimerTable;
 import de.bielefeld.uni.cebitec.cav.gui.SequenceOrderTable;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
@@ -517,6 +519,48 @@ public class GuiController {
 
 		export.showExportDialog(mainWindow, "Export view to file", dotPlotVisualisation, "r2catExport"+dateFormat.format(date));
 	}
-	
+
+	public void showGeneratePrimerFrame(AlignmentPositionsList alignmentPositionsList) {
+		if (alignmentPositionsList != null) {
+			JFrame primerFrame = new JFrame("Generate Primers");
+			primerFrame.setLayout(new BorderLayout());
+			PrimerTable primer = new PrimerTable(
+					alignmentPositionsList);
+			PrimerTableModel model = (PrimerTableModel) primer
+					.getModel();
+			JScrollPane tp = new JScrollPane(primer);
+			primerFrame.add(tp,BorderLayout.CENTER);
+
+			JPanel controlPanel = new JPanel();
+			controlPanel.add(new JLabel("Select"));
+			JButton select = new JButton("all");
+			select.setActionCommand("select_all");
+			controlPanel.add(select);
+			select.addActionListener(primer);
+			JButton remove = new JButton("none");
+			remove.setActionCommand("select_none");
+			controlPanel.add(remove);
+			remove.addActionListener(primer);
+
+			controlPanel.add(new JLabel("Generate Primers"));
+			JButton run = new JButton("Run!");
+			run.setActionCommand("generate_primer");
+			controlPanel.add(run);
+			run.addActionListener(primer);
+			
+			primerFrame.add(controlPanel,BorderLayout.SOUTH);
+			primerFrame.pack();
+			
+			int width = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
+			int height = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
+
+			primerFrame.setSize(new Dimension(width/3,height));
+
+			primerFrame.setIconImage(mainWindow.getIconImage());
+			primerFrame.setLocationByPlatform(true);
+			primerFrame.setVisible(true);
+
+		}
+	}	
 
 }
