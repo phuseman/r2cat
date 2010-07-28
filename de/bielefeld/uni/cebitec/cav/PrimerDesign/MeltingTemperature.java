@@ -6,6 +6,7 @@ import java.util.HashMap;
  * nucleotide sequence.
  * 
  * It is a reproduction of the function (Function.pm) used in a perl-script written by Jochen Blom and Dr. Christian Rueckert.
+ * The values of enthalpie and entropie are from the paper Santalucia 1996. !!! 
  * 
  * @author yherrmann
  *
