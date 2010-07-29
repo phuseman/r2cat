@@ -72,8 +72,9 @@ public class PrimerGenerator {
 			boolean repeatMasking) {
 		try{
 			this.setUpLogFile();
-			//kann übergeben werden...
-			outputDir = new File(System.getProperty("user.home"));
+			//kann übergeben werden...TESTEN
+			outputDir = new File("C:/Users/Yvisunsh/Uni");
+			//	outputDir = new File(System.getProperty("user.home"));
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			temporaryDirectory = rm.getDir();
@@ -553,14 +554,14 @@ public class PrimerGenerator {
 	 * @throws IOException
 	 */
 	public void output(Vector<String> outputVector) throws IOException {
-		if(outputDir.exists()&&markedSeq.length==2){
+		if(outputDir.isDirectory()&&markedSeq.length==2){
 			outputFile = new File(outputDir,"r2cat_Primerlist_for_contigs_"+markedSeq[0]+"_and_"+markedSeq[1]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			for(int i=0; i<outputVector.size();i++){
 			buffer.write(outputVector.elementAt(i).toString());
 			} 
 			//ausgabe im programm selbst!!!
-		} else if(outputDir.exists()&&markedSeq.length==1){
+		} else if(outputDir.isDirectory()&&markedSeq.length==1){
 			outputFile = new File(outputDir,"r2cat_Primerlist_for_contig_"+markedSeq[0]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			for(int i=0; i<outputVector.size();i++){
