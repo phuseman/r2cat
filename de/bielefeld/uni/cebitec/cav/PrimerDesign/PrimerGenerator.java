@@ -9,6 +9,11 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 
@@ -43,9 +48,8 @@ public class PrimerGenerator {
 	private File outputFile = null;
 	private int max = maxLength+5;
 	private File outputDir = null;
-	//private File outputDir = new File("C:\\Users\\Yvisunshine\\");
-	private PrintWriter buffer;
-	private File errorFile;
+	private FileHandler fHandler;
+	private Logger logger;
 
 
 	
@@ -62,13 +66,12 @@ public class PrimerGenerator {
 	 * @param configFile
 	 * @param repeatMasking
 	 */
+
 	public PrimerGenerator(File fastaFile, File configFile,
 			boolean repeatMasking) {
-
 		try{
+			this.setUpLogFile();
 			outputDir = new File(System.getProperty("user.home"));
-			errorFile = new File(outputDir,"error file.txt");
-			buffer = new PrintWriter(new FileWriter(errorFile));
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			directory = rm.getDir();
@@ -81,14 +84,11 @@ public class PrimerGenerator {
 			sequences = fastaParser.getSequences();
 		}
 		}catch(FileNotFoundException e){
-			buffer.write("fasta file could not be found");
-			buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, "fasta file could not be found", e);
 		} catch (IOException e) {
-			buffer.write("problem occured running BLAST2.2.23 programms");
-			buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, "problem occured running BLAST 2.2.23 programms", e);
 		} catch (InterruptedException e) {
-			buffer.write("problem occured running BLAST2.2.23 programms");
-			buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, "Uncaught exception", e);
 		}
 		try{
 		scoring = new RetrieveParametersAndScores();
@@ -96,11 +96,26 @@ public class PrimerGenerator {
 		XMLParser configParser= new XMLParser();
 		configParser.parse(scoring, inConfig);
 		}catch(FileNotFoundException e){
-			buffer.write("config file could not be found! The default parameters were used");
-			buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, "config file could not be found! The default parameters were used", e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "Uncaught exception", e);
 		}
+	}
+	
+	public void setUpLogFile() throws SecurityException, IOException{
+		SimpleFormatter formatterLogFile = new SimpleFormatter();
+		logger = Logger.getLogger("de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator");
+		
+		fHandler = new FileHandler("r2cat_primerDesign_log");
+
+		logger.addHandler(fHandler);
+        fHandler.setFormatter(formatterLogFile);
+
+		logger.setLevel(Level.SEVERE);
+		logger.severe("Info Log");
+		logger.warning("Info Log");
+		logger.info("Info Log");
+
 	}
 	
 	/**
@@ -112,8 +127,6 @@ public class PrimerGenerator {
 	public PrimerGenerator(File fastaFile, boolean repeatMasking){
 		try{
 			outputDir = new File(System.getProperty("user.home"));
-			errorFile = new File(outputDir,"error file.txt");
-			buffer = new PrintWriter(new FileWriter(errorFile));
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			directory = rm.getDir();
@@ -127,16 +140,13 @@ public class PrimerGenerator {
 		}
 		scoring = new RetrieveParametersAndScores();
 		}catch(FileNotFoundException e){
-			buffer.write("fasta file could not be found");
-			buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, "fasta file could not be found", e);
 		} catch (IOException e) {
-		buffer.write("problem occured running BLAST2.2.23 programms");
-		buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, "problem occured running BLAST 2.2.23 programms", e);
 		} catch (InterruptedException e) {
-		buffer.write("problem occured running BLAST2.2.23 programms");
-		buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, "problem occured running BLAST 2.2.23 programms", e);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "Uncaught exception", e);
 		}
 	
 	}
@@ -159,8 +169,7 @@ public class PrimerGenerator {
 				checked = false;
 		}
 		}catch(Exception e){
-			buffer.write("marked contig id could not be found in fasta file");
-			buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, "marked contig id could not be found in fasta file", e);
 		}
 		
 		return checked;
@@ -220,26 +229,20 @@ public class PrimerGenerator {
 			}
 
 		} catch(FileNotFoundException e){
-			buffer.write(e.getMessage());
-			buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		} catch (NullPointerException e) {
-			buffer.write(e.getMessage());
-			buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, e.getMessage(), e);
 			continue nextchar;
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		} catch(IllegalArgumentException e){
-			buffer.write(e.getMessage());
-			buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, e.getMessage(), e);
 			continue nextchar;
 		} catch(IllegalStateException e){
-			buffer.write(e.getMessage());
-			buffer.write(System.getProperty("line.separator"));
+			logger.log(Level.SEVERE, e.getMessage(), e);
 			continue nextchar;
 		}
 		}
-		buffer.flush();
-		buffer.close();
 	}
 	
 	/**
@@ -539,13 +542,14 @@ public class PrimerGenerator {
 	}
 	
 	/**
-	 * This method is called to delete the working directory with its tempory files.
+	 * This method is called to delete the temporary directory with its temporary files.
 	 * 
 	 * @param dir
 	 */
 	
 	public void deleteDir(File dir){
 		File[] files = dir.listFiles();
+		if(dir.getName().contains("tempDirectoryForBlast")){
 		if(files!=null){
 			for(int i = 0;i<files.length;i++){
 				File tempFile = files[i];
@@ -553,6 +557,7 @@ public class PrimerGenerator {
 			}
 		}
 		dir.delete();
+		}
 	}
 
 	/**
@@ -830,7 +835,7 @@ public class PrimerGenerator {
 		String NEW_LINE = System.getProperty("line.separator");
 		String TAB = "\t";
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
-			outputFile = new File(outputDir,"r2cat Primerlist for contigs "+markedSeq[0]+" and "+markedSeq[1]+".txt");
+			outputFile = new File(outputDir,"r2cat_Primerlist_for_contigs_"+markedSeq[0]+"_and_"+markedSeq[1]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+" and "+markedSeq[1]+":");
 			buffer.write(NEW_LINE);
@@ -874,7 +879,7 @@ public class PrimerGenerator {
 		} 
 		
 		if(!leftPrimer.isEmpty()&&rightPrimer.isEmpty()){
-			outputFile = new File(outputDir,"r2cat Primerlist for contig "+markedSeq[0]+".txt");
+			outputFile = new File(outputDir,"r2cat_Primerlist_for_contig_"+markedSeq[0]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+":");
 			buffer.write(NEW_LINE);
@@ -901,7 +906,7 @@ public class PrimerGenerator {
 			buffer.close();
 		}
 		if(!rightPrimer.isEmpty()&&leftPrimer.isEmpty()){
-			outputFile = new File(outputDir,"r2cat Primerlist for contig "+markedSeq[0]+".txt");
+			outputFile = new File(outputDir,"r2cat_Primerlist_for_contig_"+markedSeq[0]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			buffer.write("primer picking results for contig "+markedSeq[0]+":");
 			buffer.write(NEW_LINE);

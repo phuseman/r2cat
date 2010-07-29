@@ -11,7 +11,7 @@ public class printTest {
 	public static void main(String args[]){
 		//File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
 		File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
-		File fastaFile = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
+		File fastaFile = new File("C:/Users/Yvisunshine/Uni/contigs2.fas");
 		Date start = new Date();
 		boolean repeatMasking = false;
 		
@@ -42,7 +42,7 @@ public class printTest {
 		contigPairs.add(pair3);
 		
 		
-			pg.generatePrimers(contigPairs);
+		pg.generatePrimers(contigPairs);
 		System.out.println("Anzahl Sekunden: " + (System.currentTimeMillis() - start.getTime())/1000);	
 	}
 

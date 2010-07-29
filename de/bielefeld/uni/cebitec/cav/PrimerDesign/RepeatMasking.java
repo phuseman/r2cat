@@ -25,10 +25,9 @@ public class RepeatMasking {
 	FastaFileReader ffrForpreprocessed = null;
 	Vector<DNASequence> sequences=null;
 	RunBlastToFindRepeats runBlast =null;
-	File dir = null;
+	File tempDir = null;
 	File blastOutput = null;
-	String dirName = null;
-	//String dirName = "C:\\Users\\Yvisunshine\\r2catPrimer";
+	String dirName = "tempDirectoryForBlast";
 	String preProcessedFastaFile ="preProcessedFastaFile";
 	String toBlast ="toBlast";
 	
@@ -44,37 +43,26 @@ public class RepeatMasking {
 		ffr = new FastaFileReader(fasta);
 		sequences = ffr.getSequences();
 		this.setSeqToCapLetters();
-		dir = this.makeDir();
-		File tempFileToBlast=writeTempFile(toBlast,dir);
-		runBlast = new RunBlastToFindRepeats(tempFileToBlast,dir);
+		tempDir = this.createTempDir();
+		File tempFileToBlast=writeTempFile(toBlast,tempDir);
+		runBlast = new RunBlastToFindRepeats(tempFileToBlast,tempDir);
 		blastOutput = runBlast.getBlastOutput();
 		this.blastOutputParsen();
-		this.setUp(dir);
+		this.setUp(tempDir);
 	}
 	
 	/**
-	 * This method sets up a working directory.
+	 * This method sets up a temporary directory where the files of the BLAST programms are put.
 	 * 
 	 * @return dir
+	 * @throws IOException 
 	 */
-		public File makeDir(){
-			dirName = "java.io.tmpdir";
-			File dir = new File(dirName);
-			if(dir.isDirectory()){
-				File[] files = dir.listFiles();
-				if(files!=null){
-					for(int i = 0;i<files.length;i++){
-						File tempFile = files[i];
-							files[i].delete();
-					}
-				}
-				dir.delete();
-				dir.mkdir();
-				return dir;
-			} else{
-				dir.mkdir();
-				return dir;
-			}
+		public File createTempDir() throws IOException{
+			File tempDirectory;
+			tempDirectory = File.createTempFile(dirName, Long.toString(System.nanoTime()));
+			tempDirectory.delete();
+			tempDirectory.mkdir();
+			return tempDirectory;
 		}
 	
 	/**
@@ -208,11 +196,11 @@ public class RepeatMasking {
 	}
 	
 	public File getDir() {
-		return dir;
+		return tempDir;
 	}
 
 	public void setDir(File dir) {
-		this.dir = dir;
+		this.tempDir = dir;
 	}
 	
 	public char[] getSeq() {
