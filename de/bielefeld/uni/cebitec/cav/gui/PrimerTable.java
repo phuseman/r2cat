@@ -52,56 +52,78 @@ public class PrimerTable extends JTable implements Observer, ActionListener {
 		private boolean reverse = false;
 		private boolean repetitive = false;
 		private int size = 0;
-		
+
 		public ContigTableCellRenderer() {
 			super();
 			this.setHorizontalAlignment(CENTER);
 			this.setPreferredSize(getPreferredSize());
 		}
-		
 
 		public void setValue(Object value) {
 			DNASequence s = (DNASequence) value;
 			reverse = s.isReverseComplemented();
 			repetitive = s.isRepetitive();
-			size = (int)s.getSize();
+			size = (int) s.getSize();
 			setText(s.getId());
 		}
+
 		public void paintComponent(Graphics g) {
-			paintContig(g);
+			//if a table row is selected, then fore and background are overpainted by super.paintComponent(g)
+			// so, we first paint a solid contig representation...
+			paintContig(g,true);
+			// this will possibly be overpainted by the following method
 			super.paintComponent(g);
+			// and then we again draw the conture of the contig, again overwriting the paint component
+			paintContig(g,false);
 		}
-		
+
 		/**
 		 * Paints some kind of an arrow to depict a contig.
+		 * 
 		 * @param g
 		 */
-		private void paintContig(Graphics g) {
+		private void paintContig(Graphics g, boolean filled) {
 			int arrowsize = 10;
 			int border = 1;
 			
+			//TODO include size differences for the contigs
+
 			Color oldColor = g.getColor();
 			Color drawColor;
-			//select different colors for repetitive and non repetitive contigs
-			if(repetitive) {
-				drawColor=new Color(230,230,230);
+			// select different colors for repetitive and non repetitive contigs
+			if (repetitive) {
+				drawColor = new Color(230, 230, 230);
 			} else {
-				drawColor=new Color(220,220,220);
+				drawColor = new Color(220, 220, 220);
 			}
 
-	
 			g.setColor(drawColor);
-			int halfheight=(this.getHeight()-2*border)/2;
+			int halfheight = (this.getHeight() - 2 * border) / 2;
 			if (!reverse) {
 				// this draws an arrow pointing to the right |===>
-				int[] xcoords = {border,this.getWidth()-arrowsize,this.getWidth(),this.getWidth()-arrowsize,border,border};
-				int[] ycoords = {border,border,halfheight,this.getHeight()-border,this.getHeight()-border,0};
-				g.fillPolygon(xcoords, ycoords, xcoords.length);
+				int[] xcoords = { border, this.getWidth() - arrowsize,
+						this.getWidth(), this.getWidth() - arrowsize, border,
+						border };
+				int[] ycoords = { border, border, halfheight,
+						this.getHeight() - border, this.getHeight() - border, 0 };
+				if (filled) {
+					g.fillPolygon(xcoords, ycoords, xcoords.length);
+				} else {
+					g.drawPolygon(xcoords, ycoords, xcoords.length);
+				}
 			} else {
-				// if the contig was reverse complemented, this draws the arrow to the other side <===|
-				int[] xcoords = {0,arrowsize,this.getWidth()-border,this.getWidth()-border,arrowsize,0};
-				int[] ycoords = {halfheight,border,border,this.getHeight()-border,this.getHeight()-border,halfheight};
-				g.fillPolygon(xcoords, ycoords, xcoords.length);
+				// if the contig was reverse complemented, this draws the arrow
+				// to the other side <===|
+				int[] xcoords = { 0, arrowsize, this.getWidth() - border,
+						this.getWidth() - border, arrowsize, 0 };
+				int[] ycoords = { halfheight, border, border,
+						this.getHeight() - border, this.getHeight() - border,
+						halfheight };
+				if (filled) {
+					g.fillPolygon(xcoords, ycoords, xcoords.length);
+				} else {
+					g.drawPolygon(xcoords, ycoords, xcoords.length);
+				}
 			}
 			g.setColor(oldColor);
 		}
@@ -114,20 +136,20 @@ public class PrimerTable extends JTable implements Observer, ActionListener {
 	private boolean ignoreUpdate = false;
 
 	private int biggestContig;
-	
+
 	public PrimerTable(AlignmentPositionsList apl) {
 		super(new PrimerTableModel(apl));
 
 		this.apl = apl;
 		apl.addObserver(this);
-		
-		biggestContig = (int)apl.getStatistics().getMaximumQuerySize();
+
+		biggestContig = (int) apl.getStatistics().getMaximumQuerySize();
 
 		this.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.setColumnSelectionAllowed(false);
 		this.setAutoscrolls(true);
 		this.setRowSelectionAllowed(true);
-//		this.setDragEnabled(false);
+		// this.setDragEnabled(false);
 		// this.setDropMode(DropMode.INSERT_ROWS);
 		// this.setTransferHandler(new SequenceOrderTableTransferHandler());
 
@@ -188,6 +210,10 @@ public class PrimerTable extends JTable implements Observer, ActionListener {
 				this.invalidate();
 				this.repaint();
 			} else if (action == NotifyEvent.ORDER_CHANGED_OR_CONTIG_REVERSED) {
+				// if the order has changed, the selected contig pairs might
+				// have changed.
+				// -> deselect all
+				((PrimerTableModel) this.getModel()).selectNone();
 				this.invalidate();
 				this.repaint();
 			}
@@ -237,6 +263,11 @@ public class PrimerTable extends JTable implements Observer, ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("generate_primer")) {
 			System.out.println("Generate primer!!");
+			//TODO: Add the code to generate primer pairs
+			// For somewhat lengthy calculations we should use here a SwingWorker that does not block the GUI.
+			// Additionally a ProgressMonitor helps to estimate the waiting time.
+			System.out.println(((PrimerTableModel) this.getModel()).getSelectedPairs());
+
 		} else if (e.getActionCommand().equals("select_all")) {
 			((PrimerTableModel) this.getModel()).selectAll();
 		} else if (e.getActionCommand().equals("select_none")) {
