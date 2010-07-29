@@ -44,15 +44,16 @@ public class PrimerGenerator {
 	private int minBorderOffset = 80;
 	//max of how far away the offset of a primer to the contig end should be
 	private int maxBorderOffset =400;
-	private File directory = null;
+	private File temporaryDirectory = null;
 	private File outputFile = null;
 	private int max = maxLength+5;
 	private File outputDir = null;
 	private FileHandler fHandler;
 	private Logger logger;
+	private Vector<String> outputVectorPrimerPair =null;
+	private Vector<String> outputVectorForwardPrimer =null;
+	private Vector<String> outputVectorReversePrimer =null;
 
-
-	
 	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
 	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
 	private ArrayList<Integer> noPartnerLeft = new ArrayList<Integer>();
@@ -71,10 +72,11 @@ public class PrimerGenerator {
 			boolean repeatMasking) {
 		try{
 			this.setUpLogFile();
+			//kann übergeben werden...
 			outputDir = new File(System.getProperty("user.home"));
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
-			directory = rm.getDir();
+			temporaryDirectory = rm.getDir();
 			fastaParser = rm.getFfrForpreprocessed();
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
@@ -112,9 +114,6 @@ public class PrimerGenerator {
         fHandler.setFormatter(formatterLogFile);
 
 		logger.setLevel(Level.SEVERE);
-		logger.severe("Info Log");
-		logger.warning("Info Log");
-		logger.info("Info Log");
 
 	}
 	
@@ -129,7 +128,7 @@ public class PrimerGenerator {
 			outputDir = new File(System.getProperty("user.home"));
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
-			directory = rm.getDir();
+			temporaryDirectory = rm.getDir();
 			fastaParser = rm.getFfrForpreprocessed();
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
@@ -529,18 +528,56 @@ public class PrimerGenerator {
 			pairsFirstRightPrimer=pp.getPairsFirstRightPrimer();
 			noPartnerLeft=pp.getNoPartnerLeft();
 			noPartnerRight=pp.getNoPartnerRight();
-			output(leftPrimer, rightPrimer);
+			outputVectorPrimerPair=getOutputVector(leftPrimer, rightPrimer);
+			output(outputVectorPrimerPair);
 		}if(!leftPrimer.isEmpty()&&rightPrimer.isEmpty()){
 			leftPrimer = pp.sortPrimer(leftPrimer);
-			output(leftPrimer, rightPrimer);
+			outputVectorForwardPrimer=getOutputVector(leftPrimer, rightPrimer);
+			output(outputVectorForwardPrimer);
 		} if(leftPrimer.isEmpty()&&!rightPrimer.isEmpty()){
 			rightPrimer = pp.sortPrimer(rightPrimer);
-			output(leftPrimer,rightPrimer);
+			outputVectorReversePrimer=getOutputVector(leftPrimer,rightPrimer);
+			output(outputVectorReversePrimer);
 		}if(rightPrimer.isEmpty()&&leftPrimer.isEmpty()){
 			throw new NullPointerException("No primers could be found");
 		}
 	}
 	
+	/**
+	 * In case the user provided a directory the primer results are put into files and saved in the given
+	 * directory.
+	 * Otherwise the results can be viewed in the r2cat interface.
+	 * This method also deletes the temporary directory, which was set up for the RepeatMasking step.
+	 * 
+	 * @param outputVector
+	 * @throws IOException
+	 */
+	public void output(Vector<String> outputVector) throws IOException {
+		if(outputDir.exists()&&markedSeq.length==2){
+			outputFile = new File(outputDir,"r2cat_Primerlist_for_contigs_"+markedSeq[0]+"_and_"+markedSeq[1]+".txt");
+			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
+			for(int i=0; i<outputVector.size();i++){
+			buffer.write(outputVector.elementAt(i).toString());
+			} 
+			//ausgabe im programm selbst!!!
+		} else if(outputDir.exists()&&markedSeq.length==1){
+			outputFile = new File(outputDir,"r2cat_Primerlist_for_contig_"+markedSeq[0]+".txt");
+			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
+			for(int i=0; i<outputVector.size();i++){
+			buffer.write(outputVector.elementAt(i).toString());
+		}
+			//ausgabe im programm selbst!!!
+		}else{
+			//nur ausgabe im programm
+			for(int j = 0;j<outputVector.size();j++){
+			System.out.print(outputVector.elementAt(j).toString());
+			}
+		}
+		if(temporaryDirectory.exists()){
+			this.deleteDir(temporaryDirectory);
+			}
+	}
+
 	/**
 	 * This method is called to delete the temporary directory with its temporary files.
 	 * 
@@ -822,14 +859,149 @@ public class PrimerGenerator {
 		scoreRepeat = scoring.calcScoreRepeat(repeatCount);
 		return scoreRepeat;
 	}
-	
 	/**
+	 * This method sets up the format of the output of the primer objects, which is put into a vector object.
+	 * 
+	 * @param leftPrimer
+	 * @param rightPrimer
+	 * @return Vector<String>
+	 */
+	public Vector<String> getOutputVector(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer){
+		String NEW_LINE = System.getProperty("line.separator");
+		String TAB = "\t";
+		Vector<String> outputVector = null;
+		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
+			outputVector = new Vector<String>();
+			outputVector.add("primer picking results for contig "+markedSeq[0]+" and "+markedSeq[1]+":");
+			outputVector.add(NEW_LINE);
+			outputVector.add(NEW_LINE);
+			outputVector.add("Information of the marked sequences: ");
+			outputVector.add(NEW_LINE);
+			outputVector.add(NEW_LINE);
+			for(int i=0;i<markedSeq.length;i++){
+				String description = this.sequences.elementAt(i).getDescription();
+				outputVector.add(description);
+				outputVector.add(NEW_LINE);
+			}
+			outputVector.add(NEW_LINE);
+			outputVector.add("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+			outputVector.add(NEW_LINE);
+			outputVector.add(NEW_LINE);
+			for(int i=0;i<pairsFirstLeftPrimer.size();i++){
+				if(i<100){
+			outputVector.add("forward primer: "+TAB+leftPrimer.elementAt(i).toString());
+			outputVector.add(NEW_LINE);
+			outputVector.add("reverse primer: "+TAB+rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)).toString());
+			outputVector.add(NEW_LINE);
+			outputVector.add(NEW_LINE);
+				}
+			}
+			if(!noPartnerLeft.isEmpty()&&!noPartnerRight.isEmpty()){
+				outputVector.add("Could not find fitting pair for following primer candidates: ");
+				outputVector.add(NEW_LINE);
+				outputVector.add("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+				outputVector.add(NEW_LINE);
+				outputVector.add(NEW_LINE);
+				for(Integer a : noPartnerLeft){
+					outputVector.add("forward primer for contig "+leftPrimer.elementAt(a).getContigID() +": "+TAB+leftPrimer.elementAt(a).toString());
+					outputVector.add(NEW_LINE);
+				}
+				for(Integer b : noPartnerRight){
+					outputVector.add("reverse primer for contig "+rightPrimer.elementAt(b).getContigID()+": "+TAB+rightPrimer.elementAt(b).toString());
+					outputVector.add(NEW_LINE);
+					}
+				}
+			return outputVector;
+			}
+		else if(!leftPrimer.isEmpty()&&rightPrimer.isEmpty()){
+			outputVector = new Vector<String>();
+			outputVector.add("primer picking results for contig "+markedSeq[0]+":");
+			outputVector.add(NEW_LINE);
+			outputVector.add(NEW_LINE);
+			outputVector.add("Information of the marked sequences: ");
+			outputVector.add(NEW_LINE);
+			outputVector.add(NEW_LINE);
+			for(int i=0;i<markedSeq.length;i++){
+				String description = this.sequences.elementAt(i).getDescription();
+				outputVector.add(description);
+				outputVector.add(NEW_LINE);
+			}
+			outputVector.add(NEW_LINE);
+			outputVector.add("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+			outputVector.add(NEW_LINE);
+			for(int j = 0; j<leftPrimer.size();j++){
+				if(j<=100){
+				outputVector.add("forward primer: "+TAB+leftPrimer.elementAt(j).toString());
+				outputVector.add(NEW_LINE);
+				outputVector.add(NEW_LINE);
+				}
+			}
+			return outputVector;
+		}
+		else if(leftPrimer.isEmpty()&&!rightPrimer.isEmpty()){
+			outputVector = new Vector<String>();
+			outputVector.add("primer picking results for contig "+markedSeq[0]+":");
+			outputVector.add(NEW_LINE);
+			outputVector.add(NEW_LINE);
+			outputVector.add("Information of the marked sequences: ");
+			outputVector.add(NEW_LINE);
+			outputVector.add(NEW_LINE);
+			for(int i=0;i<markedSeq.length;i++){
+				String description = this.sequences.elementAt(i).getDescription();
+				outputVector.add(description);
+				outputVector.add(NEW_LINE);
+			}
+			outputVector.add(NEW_LINE);
+			outputVector.add("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
+			outputVector.add(NEW_LINE);
+			for(int j = 0; j<leftPrimer.size();j++){
+				if(j<=100){
+				outputVector.add("reverse primer: "+TAB+leftPrimer.elementAt(j).toString());
+				outputVector.add(NEW_LINE);
+				outputVector.add(NEW_LINE);
+				}
+			}
+		return outputVector;
+		} else{
+			outputVector = new Vector<String>();
+			outputVector.add("No primers found");
+			return outputVector;
+		}
+	}
+	
+	public Vector<String> getOutputVectorPrimerPair() {
+		return outputVectorPrimerPair;
+	}
+
+	public void setOutputVectorPrimerPair(Vector<String> outputVectorPrimerPair) {
+		this.outputVectorPrimerPair = outputVectorPrimerPair;
+	}
+
+	public Vector<String> getOutputVectorForwardPrimer() {
+		return outputVectorForwardPrimer;
+	}
+
+	public void setOutputVectorForwardPrimer(
+			Vector<String> outputVectorForwardPrimer) {
+		this.outputVectorForwardPrimer = outputVectorForwardPrimer;
+	}
+
+	public Vector<String> getOutputVectorReversePrimer() {
+		return outputVectorReversePrimer;
+	}
+
+	public void setOutputVectorReversePrimer(
+			Vector<String> outputVectorReversePrimer) {
+		this.outputVectorReversePrimer = outputVectorReversePrimer;
+	}
+	
+/*	*//**
 	 * sets up the output file of the primer objects and deletes the working directory created
 	 * for the repeatMasking with BLAST
 	 * 
 	 * @throws IOException 
 	 * 
-	 */
+	 *//*
 	
  	public void output(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException{
 		String NEW_LINE = System.getProperty("line.separator");
@@ -850,7 +1022,7 @@ public class PrimerGenerator {
 			}
 		for(int i = 0; i<pairsFirstLeftPrimer.size();i++){
 			if(i<=100){
-			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence"+"\n");
+			buffer.write("oligo "+TAB+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 			buffer.write(NEW_LINE);
 			buffer.write("forward primer: "+TAB+leftPrimer.elementAt(i).toString());
 			buffer.write(NEW_LINE);
@@ -936,5 +1108,7 @@ public class PrimerGenerator {
 		if(directory.exists()){
 		this.deleteDir(directory);
 		}
-	}
+	}*/
+	
+	
 }
