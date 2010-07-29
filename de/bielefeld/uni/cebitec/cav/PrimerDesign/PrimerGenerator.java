@@ -576,13 +576,14 @@ public class PrimerGenerator {
 			for(int i=0; i<outputVector.size();i++){
 			buffer.write(outputVector.elementAt(i).toString());
 			} 
+			buffer.flush();
+			buffer.close();
 			//ausgabe im programm selbst!!!
 		} else if(outputDirByUserExists&&markedSeq.length==1){
 			outputFile = new File(outputDir,"r2cat_Primerlist_for_contig_"+markedSeq[0]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
-			for(int i=0; i<outputVector.size();i++){
-			buffer.write(outputVector.elementAt(i).toString());
-		}
+			buffer.flush();
+			buffer.close();
 			//ausgabe im programm selbst!!!
 		}else{
 			//nur ausgabe im programm
