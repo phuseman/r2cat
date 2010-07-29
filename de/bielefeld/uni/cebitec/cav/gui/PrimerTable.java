@@ -21,6 +21,7 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -48,18 +49,61 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent
 public class PrimerTable extends JTable implements Observer, ActionListener {
 
 	static class ContigTableCellRenderer extends DefaultTableCellRenderer {
+		private boolean reverse = false;
+		private boolean repetitive = false;
+		private int size = 0;
+		
 		public ContigTableCellRenderer() {
 			super();
+			this.setHorizontalAlignment(CENTER);
+			this.setPreferredSize(getPreferredSize());
 		}
+		
 
 		public void setValue(Object value) {
 			DNASequence s = (DNASequence) value;
-			setText((s.isReverseComplemented()?"<":"|") + s.getId() + (s.isReverseComplemented()?"|":">"));
-			if(s.isRepetitive()) {
-				setBackground(Color.lightGray);
+			reverse = s.isReverseComplemented();
+			repetitive = s.isRepetitive();
+			size = (int)s.getSize();
+			setText(s.getId());
+		}
+		public void paintComponent(Graphics g) {
+			paintContig(g);
+			super.paintComponent(g);
+		}
+		
+		/**
+		 * Paints some kind of an arrow to depict a contig.
+		 * @param g
+		 */
+		private void paintContig(Graphics g) {
+			int arrowsize = 10;
+			int border = 1;
+			
+			Color oldColor = g.getColor();
+			Color drawColor;
+			//select different colors for repetitive and non repetitive contigs
+			if(repetitive) {
+				drawColor=new Color(230,230,230);
 			} else {
-				setBackground(Color.white);
+				drawColor=new Color(220,220,220);
 			}
+
+	
+			g.setColor(drawColor);
+			int halfheight=(this.getHeight()-2*border)/2;
+			if (!reverse) {
+				// this draws an arrow pointing to the right |===>
+				int[] xcoords = {border,this.getWidth()-arrowsize,this.getWidth(),this.getWidth()-arrowsize,border,border};
+				int[] ycoords = {border,border,halfheight,this.getHeight()-border,this.getHeight()-border,0};
+				g.fillPolygon(xcoords, ycoords, xcoords.length);
+			} else {
+				// if the contig was reverse complemented, this draws the arrow to the other side <===|
+				int[] xcoords = {0,arrowsize,this.getWidth()-border,this.getWidth()-border,arrowsize,0};
+				int[] ycoords = {halfheight,border,border,this.getHeight()-border,this.getHeight()-border,halfheight};
+				g.fillPolygon(xcoords, ycoords, xcoords.length);
+			}
+			g.setColor(oldColor);
 		}
 	}
 
@@ -69,17 +113,21 @@ public class PrimerTable extends JTable implements Observer, ActionListener {
 	// mutex to ignore an update
 	private boolean ignoreUpdate = false;
 
+	private int biggestContig;
+	
 	public PrimerTable(AlignmentPositionsList apl) {
 		super(new PrimerTableModel(apl));
 
 		this.apl = apl;
 		apl.addObserver(this);
+		
+		biggestContig = (int)apl.getStatistics().getMaximumQuerySize();
 
 		this.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.setColumnSelectionAllowed(false);
 		this.setAutoscrolls(true);
 		this.setRowSelectionAllowed(true);
-		this.setDragEnabled(false);
+//		this.setDragEnabled(false);
 		// this.setDropMode(DropMode.INSERT_ROWS);
 		// this.setTransferHandler(new SequenceOrderTableTransferHandler());
 
