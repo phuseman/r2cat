@@ -20,6 +20,7 @@
 
 package de.bielefeld.uni.cebitec.cav.datamodel;
 
+import java.util.Locale;
 import java.util.Vector;
 
 import javax.swing.table.AbstractTableModel;
@@ -164,16 +165,48 @@ public class PrimerTableModel extends AbstractTableModel {
 		apl.notifyObservers(NotifyEvent.ORDER_CHANGED_OR_CONTIG_REVERSED);
 	}
 
+	/**
+	 * Selects all pairs of contigs.
+	 */
 	public void selectAll() {
 		for (int i = 0; i < createPrimer.length; i++) {
 			createPrimer[i]=true;
 		}
 	}
 
+	/**
+	 * Unselects all contigs.
+	 */
 	public void selectNone(){
 		for (int i = 0; i < createPrimer.length; i++) {
 			createPrimer[i]=false;
 		}
+	}
+	
+	/**
+	 * Method to get all primer pairs that are selected.
+	 * (The return type string is only an example. Feel free to adopt it as necessary)
+	 * @return
+	 */
+	public String getSelectedPairs() {
+		StringBuilder out = new StringBuilder();
+		int secondIndex ;
+		for (int i = 0; i < createPrimer.length; i++) {
+			if (createPrimer[i]) {
+				//we look at all adjacent contigs, so the next contig has index+1, except for the last one, here it is the zero index.
+				secondIndex=(i+1)%dnaSequence().size();
+				
+				// the key information are the contig names and their direction
+				out.append( String.format((Locale) null,
+						"%s, %b, %s, %b\n",
+						dnaSequence().get(i).getId(),
+						dnaSequence().get(i).isReverseComplemented(),
+						dnaSequence().get(secondIndex).getId(),
+						dnaSequence().get(secondIndex).isReverseComplemented()
+						));
+			}
+		}
+		return out.toString();
 	}
 
 }
