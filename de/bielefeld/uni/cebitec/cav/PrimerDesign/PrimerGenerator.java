@@ -109,19 +109,6 @@ public class PrimerGenerator {
 		}
 	}
 	
-	public void setUpLogFile() throws SecurityException, IOException{
-		SimpleFormatter formatterLogFile = new SimpleFormatter();
-		logger = Logger.getLogger("de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator");
-		
-		fHandler = new FileHandler("r2cat_primerDesign_log");
-
-		logger.addHandler(fHandler);
-        fHandler.setFormatter(formatterLogFile);
-
-		logger.setLevel(Level.SEVERE);
-
-	}
-	
 	/**
 	 * Constructor when only a fasta file is given.
 	 * 
@@ -130,6 +117,7 @@ public class PrimerGenerator {
 	 */
 	public PrimerGenerator(File fastaFile, boolean repeatMasking,File outputDirectory){
 		try{
+			this.setUpLogFile();
 			if(outputDirectory!=null){
 				outputDir = outputDirectory;
 				outputDirByUserExists = true;
@@ -158,6 +146,25 @@ public class PrimerGenerator {
 			logger.log(Level.SEVERE, "Uncaught exception", e);
 		}
 	
+	}
+	
+	/**
+	 * This methods sets up the logging file.
+	 * 
+	 * @throws SecurityException
+	 * @throws IOException
+	 */
+	public void setUpLogFile() throws SecurityException, IOException{
+		SimpleFormatter formatterLogFile = new SimpleFormatter();
+		logger = Logger.getLogger("de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator");
+		
+		fHandler = new FileHandler("r2cat_primerDesign_log");
+
+		logger.addHandler(fHandler);
+        fHandler.setFormatter(formatterLogFile);
+
+		logger.setLevel(Level.SEVERE);
+
 	}
 
 	/**
