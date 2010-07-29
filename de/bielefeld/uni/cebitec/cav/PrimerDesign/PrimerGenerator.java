@@ -53,6 +53,7 @@ public class PrimerGenerator {
 	private Vector<String> outputVectorPrimerPair =null;
 	private Vector<String> outputVectorForwardPrimer =null;
 	private Vector<String> outputVectorReversePrimer =null;
+	private boolean outputDirByUserExists= false;
 
 	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
 	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
@@ -69,12 +70,15 @@ public class PrimerGenerator {
 	 */
 
 	public PrimerGenerator(File fastaFile, File configFile,
-			boolean repeatMasking) {
+			boolean repeatMasking,File outputDirectory) {
 		try{
 			this.setUpLogFile();
-			//kann übergeben werden...TESTEN
-			outputDir = new File("C:/Users/Yvisunsh/Uni");
-			//	outputDir = new File(System.getProperty("user.home"));
+			if(outputDirectory!=null){
+				outputDir = outputDirectory;
+				outputDirByUserExists = true;
+			}else{
+				outputDirByUserExists = false;
+			}
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			temporaryDirectory = rm.getDir();
@@ -124,9 +128,14 @@ public class PrimerGenerator {
 	 * @param fastaFile
 	 * @param repeatMasking
 	 */
-	public PrimerGenerator(File fastaFile, boolean repeatMasking){
+	public PrimerGenerator(File fastaFile, boolean repeatMasking,File outputDirectory){
 		try{
-			outputDir = new File(System.getProperty("user.home"));
+			if(outputDirectory!=null){
+				outputDir = outputDirectory;
+				outputDirByUserExists = true;
+			}else{
+				outputDirByUserExists = false;
+			}
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			temporaryDirectory = rm.getDir();
@@ -178,6 +187,12 @@ public class PrimerGenerator {
 	/**
 	 * This method goes through the vector with the selection informations and starts to generate primers
 	 * for each contig pair which was selected.
+	 * The information which contig was selected and which direction the primer has on the specific contig end
+	 * is put in a String Array. The contig IDs of the selected contigs are put in the first and third position
+	 * of the array. The direction (forward or reverse" is put in the second position for the first selected Contig
+	 * and in the fourth position for the second selected contig.
+	 * These information are processed and put into a HashMap where the key is the contigID and the value is the
+	 * direction (in form of Integers) of the primer of the selected contig.
 	 * 
 	 * @param contigPair
 	 */
@@ -554,14 +569,15 @@ public class PrimerGenerator {
 	 * @throws IOException
 	 */
 	public void output(Vector<String> outputVector) throws IOException {
-		if(outputDir.isDirectory()&&markedSeq.length==2){
+	
+		if(outputDirByUserExists&&markedSeq.length==2){
 			outputFile = new File(outputDir,"r2cat_Primerlist_for_contigs_"+markedSeq[0]+"_and_"+markedSeq[1]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			for(int i=0; i<outputVector.size();i++){
 			buffer.write(outputVector.elementAt(i).toString());
 			} 
 			//ausgabe im programm selbst!!!
-		} else if(outputDir.isDirectory()&&markedSeq.length==1){
+		} else if(outputDirByUserExists&&markedSeq.length==1){
 			outputFile = new File(outputDir,"r2cat_Primerlist_for_contig_"+markedSeq[0]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			for(int i=0; i<outputVector.size();i++){
