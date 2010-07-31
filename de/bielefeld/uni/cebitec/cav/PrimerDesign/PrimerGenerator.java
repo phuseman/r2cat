@@ -157,15 +157,15 @@ public class PrimerGenerator {
 	public void setUpLogFile() throws SecurityException, IOException{
 		SimpleFormatter formatterLogFile = new SimpleFormatter();
 		logger = Logger.getLogger("de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator");
-		
 		fHandler = new FileHandler("r2cat_primerDesign_log");
+		logger.setUseParentHandlers(false);
 
 		logger.addHandler(fHandler);
         fHandler.setFormatter(formatterLogFile);
 
 		logger.setLevel(Level.SEVERE);
-
 	}
+	
 
 	/**
 	 * This method checks if the id of the selected contig is in the fasta file with the sequences of the contigs.
@@ -293,7 +293,7 @@ public class PrimerGenerator {
 	 * @return templateSeq
 	 */
 	
-		public HashMap<String,char[]> getMarkedSeq(String[] markedContig){
+		public HashMap<String,char[]> getMarkedSeq(String[] markedContig,boolean isReveresedComplement){
 			HashMap<String, char[]> templateSeq = new HashMap<String,char[]>();
 			for(String s:markedContig){
 				for(int i = 0; i<sequences.size();i++){
@@ -302,7 +302,12 @@ public class PrimerGenerator {
 						int start = (int) sequences.get(i).getOffset();
 						char[] temp = new char[length];
 						System.arraycopy(seq, start, temp, 0, length);
+						if(isReveresedComplement){
+							this.getReverseComplement(temp);
+							templateSeq.put(s, temp);
+						} else{
 						templateSeq.put(s, temp);
+						}
 					}
 				}
 			}
@@ -319,8 +324,11 @@ public class PrimerGenerator {
 	 */
 		
 	public void getPrimerCandidates(String[] markedContig,HashMap<String, Integer> contigAndDirectionInfo) throws IOException{
-	HashMap<String, char[]> templateSeq = getMarkedSeq(markedContig);
-	Vector<Primer> primerCandidates = new Vector<Primer>();
+		//boolean isReverseComp = contigAndDirectionInfo.get(isReverseComplement);
+		boolean isReverseComp = false;
+		HashMap<String, char[]> templateSeq = getMarkedSeq(markedContig,isReverseComp);
+		Vector<Primer> primerCandidates = new Vector<Primer>();
+
 			for(String contigID : markedContig){
 				Integer directionOfPrimer = contigAndDirectionInfo.get(contigID);
 				char[] tempSeqChar = templateSeq.get(contigID);
