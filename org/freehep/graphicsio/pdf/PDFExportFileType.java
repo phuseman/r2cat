@@ -12,9 +12,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.freehep.graphics2d.VectorGraphics;
+import org.freehep.graphicsio.AbstractVectorGraphicsIO;
 import org.freehep.graphicsio.ImageConstants;
 import org.freehep.graphicsio.InfoConstants;
-import org.freehep.graphicsio.AbstractVectorGraphicsIO;
 import org.freehep.graphicsio.exportchooser.AbstractExportFileType;
 import org.freehep.graphicsio.exportchooser.BackgroundPanel;
 import org.freehep.graphicsio.exportchooser.FontPanel;

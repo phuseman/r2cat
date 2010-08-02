@@ -136,13 +136,30 @@ public class NeatoWriter {
 			return false;
 		}
 
-		return this.write(node1
-				+ " -- "
-				+ node2
-				+ ((params != null && !params.isEmpty()) ? " [" + params + "]"
-						: "") + ";\n");
+		return this.write(getConnectionString(node1, node2, params));
 
 	}
+	
+	/**
+	 * Creates a connection string of the following form:
+	 * 
+	 * @param node1
+	 *            first node
+	 * @param node2
+	 *            second node
+	 * @param params
+	 *            parameters of this connection. For possibilities see the neato
+	 *            manual.
+	 * @return The string.
+	 */
+	public static String getConnectionString(String node1, String node2, String params) {
+		return node1
+		+ " -- "
+		+ node2
+		+ ((params != null && !params.isEmpty()) ? " [" + params + "]"
+				: "") + ";\n";
+	}
+	
 
 	/**
 	 * Writes a node description to create enhanced nodes. The paramerter can
@@ -162,9 +179,18 @@ public class NeatoWriter {
 		if (!initialized) {
 			return false;
 		}
-		return this.write(node
-				+ ((params != null && !params.isEmpty()) ? " [" + params + "]"
-						: "") + ";\n");
+		return this.write(getNodeDescriptionString(node,params));
+	}
+	
+	/**
+	 * Produces the string for a node description. Same as nodeDescription(.) wit the difference, that it is not directly written, but the string is produced.
+	 * @param node
+	 * @param params
+	 * @return
+	 */
+	public static String getNodeDescriptionString(String node, String params) {
+		return node + ((params != null && !params.isEmpty()) ? " [" + params + "]"
+				: "") + ";\n";
 	}
 
 }

@@ -1,5 +1,7 @@
 #!/vol/gnu/bin/env perl -w
 use Bio::SeqIO;
+use File::Basename;
+
 use strict;
 
 my $reference;
@@ -18,8 +20,10 @@ die "usage: $0 <contigs.fasta> <references.fasta> \n" .
 }
 
 #Create an artificial filename to put the results in. consists of both filenames.
-my $outputfilename = $contigs . "-" . $reference;
-$outputfilename =~ s/[^a-z,A-Z,0-9,-]//g;
+my $contigBasename=(fileparse($contigs,qr{\..*}))[0];
+my $referenceBasename=(fileparse($reference,qr{\..*}))[0];
+my $outputfilename = $contigBasename . "-" . $referenceBasename;
+
 
 #Start the matching. First create a database for blast..
 if (! -e "$reference.nsq") {

@@ -162,16 +162,6 @@ public class QGramFilter {
 		CgcatPrefs preferences = new CgcatPrefs();
 		Preferences pref = CgcatPrefs.getPreferences();
 		
-//		
-//		File test = new File("test_co.r2c");
-//		AlignmentPositionsList apl2=new AlignmentPositionsList();
-//		apl2.readFromFile(test);
-//		apl2.generateNewStatistics();
-//		apl2.writeContigsOrderFasta(new File("test.order"));
-//		
-//		System.exit(0);
-//		
-//		
 		
 		
 		
@@ -179,9 +169,6 @@ public class QGramFilter {
 		Timer t = Timer.getInstance();
 		t.startTimer();//total
 //debugging
-//		File query = new File("/homes/phuseman/compassemb/test/cur7111_min500contigs.fas");
-//		File target = new File("/homes/phuseman/compassemb/test/DSM7109_mod.fas");
-//		File target = new File("/homes/phuseman/compassemb/test/DSM7109.fasta");
 //match the files stored in the preferences
 		File query = new File(pref.get("query", ""));
 		File target = new File(pref.get("target", ""));
@@ -904,20 +891,20 @@ public class QGramFilter {
 					 */
 					//this is for area x
 					left = -(bin << eZone.getDeltaExponent());
-					if (bin>border) {
+					if (bin>=border) {
 						// and for area y |A|+|B| has to be added
 						left += borderoffset;
 					}
 
 					if(!reverseComplementDirection){
 						//normal direction
-						reportMatch(left, top, bottom, bin, "remain");
+						reportMatch(left, top, bottom, bin, "remain_f");
 					} else  {
 						// for the reverse complement the length of the query has to be added to get
 						// the intersection of the diagonal on the i axis.
 						// since diagonal is i+(|query|-j) =  i-j +|query|
 						// also top and bottom have to be flipped
-						reportMatch( left+querySize, querySize-top, querySize-bottom, bin, "reset");
+						reportMatch( left+querySize, querySize-top, querySize-bottom, bin, "remain_b");
 					}
 				}
 			}
@@ -961,9 +948,9 @@ public class QGramFilter {
 //				+ " bottom:" + bottom 
 //				+ " (" + (top-bottom)+")"
 //				+ " hits:" + binCounts[bucketindex]
-////				+ " Mean:" + binMean[bucketindex]
-////				+ " (" + (left-binMean[bucketindex])+ ") "
-////				+" Variance:"+binVariance[bucketindex]
+//				+ " Mean:" + binMean[bucketindex]
+//				+ " (" + (left-binMean[bucketindex])+ ") "
+//				+" Variance:"+binVariance[bucketindex]
 //				                          );
 				
 		AlignmentPosition ap;
@@ -1014,7 +1001,6 @@ public class QGramFilter {
 		DNASequence dNASeqTarget=qGramIndex.getSequenceAtApproximatePosition((int)targetStart);
 		
 		
-		
 		ap = new AlignmentPosition(dNASeqTarget, targetStart, targetEnd,
 				dNASeqQuery, queryStart, queryEnd);
 		// due to the overlapping parallelograms some hits are recognised twice
@@ -1025,8 +1011,6 @@ public class QGramFilter {
 			ap.setVariance(binVariance[bucketindex]);
 		}
 
-		
-		
 		// check if a too similar hit (i.e. overlapping) was already added and
 		// merge these if necessary.
 		boolean alreadyAdded = false;

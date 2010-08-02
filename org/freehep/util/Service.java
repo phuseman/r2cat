@@ -1,9 +1,16 @@
 // Copyright 2003, FreeHEP.
 package org.freehep.util;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class does the same as sun.misc.Service, which may become public

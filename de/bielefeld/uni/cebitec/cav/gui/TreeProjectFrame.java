@@ -47,19 +47,27 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
-import de.bielefeld.uni.cebitec.cav.treebased.MultifurcatedTree;
-import de.bielefeld.uni.cebitec.cav.treebased.TreebasedContigSorterProject;
-import de.bielefeld.uni.cebitec.cav.treebased.MultifurcatedTree.UnproperTreeException;
+import de.bielefeld.uni.cebitec.cav.contigadjacencygraph.LayoutGraph;
+import de.bielefeld.uni.cebitec.cav.contigadjacencygraph.MultifurcatedTree;
+import de.bielefeld.uni.cebitec.cav.contigadjacencygraph.TreebasedContigSorterProject;
+import de.bielefeld.uni.cebitec.cav.contigadjacencygraph.MultifurcatedTree.UnproperTreeException;
 import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 import de.bielefeld.uni.cebitec.cav.utils.ProgressMonitorReporter;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 /**
+ * A gui to start the contig graph cration and the treecat algorithm.
  * 
  * @author phuseman
  */
-public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChangeListener {
+public class TreeProjectFrame extends javax.swing.JFrame implements
+		PropertyChangeListener {
+	/**
+	 * This is a special frame to select one reference genomes.
+	 * 
+	 * @author phuseman
+	 */
 	public class ReferenceSelection extends JPanel implements ActionListener,
 			FocusListener, KeyListener {
 		private JTextField tfReference;
@@ -77,23 +85,6 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 			init();
 		}
 
-		public String getInitialText() {
-			return initialText;
-		}
-
-		public boolean hasInitialText() {
-			return this.tfReference.getText().equals(initialText);
-		}
-
-		public String getFile() {
-			if(this.tfReference.getText().matches(initialText)) {
-				return "";
-			} else {
-				return this.tfReference.getText();
-			}
-			
-		}
-
 		public ReferenceSelection(File f) {
 			tfReference = new JTextField(f.getAbsolutePath());
 			tfReference.setCaretPosition(tfReference.getText().length());
@@ -104,6 +95,39 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 			buReference.addActionListener(this);
 
 			init();
+		}
+
+		/**
+		 * The common initial text that is displayed in the textfield
+		 * 
+		 * @return
+		 */
+		public String getInitialText() {
+			return initialText;
+		}
+
+		/**
+		 * Distinguish if the content of the textfield is the initial text, or
+		 * something custom, for example a specific file.
+		 * 
+		 * @return
+		 */
+		public boolean hasInitialText() {
+			return this.tfReference.getText().equals(initialText);
+		}
+
+		/**
+		 * Gives the filename that is displayed in the textfield.
+		 * 
+		 * @return string with filename
+		 */
+		public String getFile() {
+			if (this.tfReference.getText().matches(initialText)) {
+				return "";
+			} else {
+				return this.tfReference.getText();
+			}
+
 		}
 
 		private void init() {
@@ -160,6 +184,10 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 			setReferenceSelectionFromVector();
 		}
 
+		/**
+		 * Checks if the file that is shown in the textfield really is a proper
+		 * file. If not, the background of the textfield will be colored.
+		 */
 		public void markNonexistingFiles() {
 			if (hasInitialText()) {
 				tfReference.setBackground(Color.WHITE);
@@ -202,12 +230,15 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 					// if the string is a directory, open a dialog to specify a
 					// file in that directory
 				} else if (file.isDirectory()) {
-					File referenceFastaFile = MiscFileUtils.chooseFile(this,
-							"Select a FASTA file containing one reference genome",
-							file,true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
+					File referenceFastaFile = MiscFileUtils
+							.chooseFile(
+									this,
+									"Select a FASTA file containing one reference genome",
+									file, true, new CustomFileFilter(
+											".fas,.fna,.fasta", "FASTA File"));
 					if (referenceFastaFile != null
 							&& referenceFastaFile.canRead()) {
-						lastDir=referenceFastaFile.getParentFile();
+						lastDir = referenceFastaFile.getParentFile();
 						tfReference.setText(referenceFastaFile
 								.getAbsolutePath());
 						setReferenceSelectionFromVector();
@@ -224,50 +255,69 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 
 		@Override
 		public void keyTyped(KeyEvent e) {
-             ;//unsused
+			;// unused
 		}
 
 		@Override
 		public void keyPressed(KeyEvent e) {
-			;//unsused
+			;// unused
 		}
 	}
 
-	public class  TreebasedContigSorterTask extends SwingWorker<File, String> implements AbstractProgressReporter{
+	/**
+	 * Use the thread implementation to do the (lengthy) computations.
+	 * @author phuseman
+	 */
+	public class TreebasedContigSorterTask extends SwingWorker<File, String>
+			implements AbstractProgressReporter {
 
 		TreebasedContigSorterProject tcsp;
 		ProgressMonitorReporter secondLevelProgressMonitor;
-		
+
 		public TreebasedContigSorterTask(TreebasedContigSorterProject tscp) {
-			this.tcsp=tscp;
+			this.tcsp = tscp;
 			tscp.register(this);
 		}
 
 		@Override
 		protected File doInBackground() {
-			File result=null;
+			File result = null;
 			try {
 
-			Timer t = Timer.getInstance();
-			t.startTimer();
-			
-			t.startTimer();
-			publish("Generating matches");
+				Timer t = Timer.getInstance();
+				t.startTimer();
+
+				t.startTimer();
+				publish("Generating matches");
 				tcsp.generateMatches();
 
-			
-			publish(t.stopTimer());
-			
-			t.startTimer();
-			publish("Constructing layout graph");
-			result = tcsp.sortContigs();
-			publish(t.stopTimer());
-			publish("Total time: " + t.stopTimer());
-			
-			//Catch if the memory is exhausted. If so display a message and return
+				publish(t.stopTimer());
+
+				t.startTimer();
+				publish("Constructing layout graph");
+				LayoutGraph layout = tcsp.sortContigs();
+				result = new File(tcsp.suggestOutputFile());
+				layout.writeLayoutAsNeato(result,
+						LayoutGraph.NeatoOutputType.ONENODE);
+				publish(t.stopTimer());
+				publish("Total time: " + t.stopTimer());
+
+				// Catch if the memory is exhausted. If so display a message and
+				// return
 			} catch (OutOfMemoryError e) {
-				progress.append(e.getMessage());
-				errorAlert("The heap memory was exhausted.\nTry to start this program with '-Xmx400m'.");
+				int heapmem = (int) Math
+						.ceil((Runtime.getRuntime().maxMemory() / (1024. * 1024.)));
+
+				errorAlert("Sorry, the maximal heap memory (currently ~"
+						+ heapmem
+						+ "MB) was\n"
+						+ "exhausted. Probably a reference genome was too big.\n"
+						+ "Try to increase the heap size, e.g. to "
+						+ (2 * heapmem) + "MB, "
+						+ "by using the Java option '-Xmx" + (2 * heapmem)
+						+ "m'.");
+
+				progress.append(e.toString());
 				return null;
 			} catch (CannotProceedException e) {
 				errorAlert("Could not finish task.\nDetails see progress log");
@@ -278,23 +328,30 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 
 		@Override
 		protected void done() {
-			File result=null;
+			File result = null;
 			try {
 				result = this.get();
 			} catch (InterruptedException e) {
-				progress.append(e.getMessage()+"\n");
+				progress.append(e.getMessage() + "\n");
 			} catch (ExecutionException e) {
-				progress.append(e.getMessage()+"\n");
+				progress.append(e.getMessage() + "\n");
 			}
-			
-			if(result!=null && result.exists()) {
+
+			if (result != null && result.exists()) {
 				progressBar.setValue(100);
 				progress.append("************************************\n");
-				progress.append("The layout graph has been written to\n"+ result.getAbsolutePath() + "\n");
-				progress.append("The graph can be displayed using neato of the GraphViz package:\n" +
-						"neato -Tps -o graph.ps "+ result.getName() + "\n");
-				JOptionPane.showMessageDialog(TreeProjectFrame.this, "The resulting layout has been written in a \n*.neato file into the projects directory.", "Success",
-						JOptionPane.INFORMATION_MESSAGE);
+				progress.append("The layout graph has been written to\n"
+						+ result.getAbsolutePath() + "\n");
+				progress
+						.append("The graph can be displayed using neato of the GraphViz package:\n"
+								+ "neato -Tps -o graph.ps "
+								+ result.getName()
+								+ "\n");
+				JOptionPane
+						.showMessageDialog(
+								TreeProjectFrame.this,
+								"The resulting layout has been written in a \n*.neato file into the projects directory.",
+								"Success", JOptionPane.INFORMATION_MESSAGE);
 
 			}
 
@@ -302,57 +359,50 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 
 		@Override
 		protected void process(List<String> chunks) {
-		     for (String comment : chunks) {
-	             progress.append(comment + "\n");
-	         }
-             progress.setCaretPosition(progress.getDocument().getLength());
+			for (String comment : chunks) {
+				progress.append(comment + "\n");
+			}
+			progress.setCaretPosition(progress.getDocument().getLength());
 
 		}
 
 		@Override
 		public void reportProgress(double percentDone, String comment) {
-			if(percentDone>=0 && percentDone<=1) {
-				setProgress((int) (percentDone*100.));
+			if (percentDone >= 0 && percentDone <= 1) {
+				setProgress((int) (percentDone * 100.));
 			}
 			if (comment != null && !comment.isEmpty()) {
 				publish(comment);
 			}
 		}
-		
 
 		/**
-		 * Returns a progress monitor that implements the {@link AbstractProgressReporter}.
-		 * It can be used to display the progress while matching with another progressbar.
-		 * @param title string to display in the window
-		 * @return returns an ProgressMonitor, that only displays the progres from 0-100.
+		 * Returns a progress monitor that implements the
+		 * {@link AbstractProgressReporter}. It can be used to display the
+		 * progress while matching with another progressbar.
+		 * 
+		 * @param title
+		 *            string to display in the window
+		 * @return returns an ProgressMonitor, that only displays the progres
+		 *         from 0-100.
 		 */
-		public ProgressMonitorReporter showSecondLevelProgressMonitor(String title) {
-			secondLevelProgressMonitor = new ProgressMonitorReporter(TreeProjectFrame.this,title,null);
-			
+		public ProgressMonitorReporter showSecondLevelProgressMonitor(
+				String title) {
+			secondLevelProgressMonitor = new ProgressMonitorReporter(
+					TreeProjectFrame.this, title, null);
+
 			return secondLevelProgressMonitor;
 
 		}
 
-		
 	}
-	
 
-	
-
-
-	
-	
 	private Vector<ReferenceSelection> references;
 
 	private File lastDir;
-	
-	//light red, as background for wrong entries
-	private Color wrong = new Color(255,131,131);
-	
-	
-	
 
-
+	// light red, as background for wrong entries
+	private Color wrong = new Color(255, 131, 131);
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
@@ -361,7 +411,7 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 		// progress integer values from 0 - 100
 		if (evt.getPropertyName().matches("progress")) {
 			progressBar.setValue((Integer) evt.getNewValue());
-			
+
 			// or state changes, see SwingWorker.StateValue
 		} else if (evt.getPropertyName().matches("state")) {
 			if ((SwingWorker.StateValue) evt.getNewValue() == SwingWorker.StateValue.STARTED) {
@@ -382,8 +432,6 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 		}
 	}
 
-
-
 	/** Creates new form TreeProjectFrame */
 	public TreeProjectFrame() {
 		references = new Vector<ReferenceSelection>();
@@ -391,11 +439,9 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 		initComponents();
 	}
 
-
-
-
 	/**
 	 * Checks all given files and starts a background task to compute a layout.
+	 * 
 	 * @param evt
 	 */
 	private void runAlgorithm(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_runAlgorithm
@@ -467,11 +513,13 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 			}
 		} catch (IOException e) {
 
-			progress.append("Could not read the tree\n" + e.getMessage()+"\n");
+			progress
+					.append("Could not read the tree\n" + e.getMessage() + "\n");
 			errorOccured = true;
 			tfPhylogeneticTree.setBackground(wrong);
 		} catch (UnproperTreeException e) {
-			progress.append("Error parsing the phylogenetic tree:\n" + e.getMessage()+"\n");
+			progress.append("Error parsing the phylogenetic tree:\n"
+					+ e.getMessage() + "\n");
 			errorOccured = true;
 			tfPhylogeneticTree.setBackground(wrong);
 		}
@@ -522,11 +570,10 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 
 	}// GEN-LAST:event_runAlgorithm
 
-
-
 	/**
-	 * Creates a dynamic panel which shows the reference genomes from the vector references.
-	 * If a file is not existing the textfield will get a light red background.
+	 * Creates a dynamic panel which shows the reference genomes from the vector
+	 * references. If a file is not existing the textfield will get a light red
+	 * background.
 	 */
 	private void setReferenceSelectionFromVector() {
 		referenceGenomesFilesPanel.removeAll();
@@ -559,9 +606,10 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 
 	private void addContigsFile(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addContigsFile
 		File f = MiscFileUtils.chooseFile(this,
-				"Select a multi FASTA file that contains the contigs", lastDir, true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
+				"Select a multi FASTA file that contains the contigs", lastDir,
+				true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
 		if (f != null && f.canRead()) {
-			lastDir=f.getParentFile();
+			lastDir = f.getParentFile();
 			tfContigs.setBackground(Color.WHITE);
 			tfContigs.setText(f.getAbsolutePath());
 			tfContigs.setCaretPosition(tfContigs.getText().length());
@@ -569,9 +617,10 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 	}// GEN-LAST:event_addContigsFile
 
 	private void addProjectDir(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addProjectDir
-		File dir = MiscFileUtils.chooseDir(this,"Select a project directory", lastDir);
+		File dir = MiscFileUtils.chooseDir(this, "Select a project directory",
+				lastDir);
 		if (dir != null && dir.isDirectory() && dir.canWrite()) {
-			lastDir=dir;
+			lastDir = dir;
 			tfProjectdir.setBackground(Color.WHITE);
 			tfProjectdir.setText(dir.getAbsolutePath());
 			tfProjectdir.setCaretPosition(tfProjectdir.getText().length());
@@ -579,9 +628,12 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 	}// GEN-LAST:event_addProjectDir
 
 	private void addPhylogeneticTree(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addPhylogeneticTree
-		File f = MiscFileUtils.chooseFile(this,"Select phylogenetic tree in Newick format", lastDir, true, new CustomFileFilter(".newick,.txt,.tree,.phylip", "Newick Tree"));
+		File f = MiscFileUtils.chooseFile(this,
+				"Select phylogenetic tree in Newick format", lastDir, true,
+				new CustomFileFilter(".newick,.txt,.tree,.phylip",
+						"Newick Tree"));
 		if (f != null && f.canRead()) {
-			lastDir=f.getParentFile();
+			lastDir = f.getParentFile();
 			tfPhylogeneticTree.setBackground(Color.WHITE);
 			tfPhylogeneticTree.setText(f.getAbsolutePath());
 			tfPhylogeneticTree.setCaretPosition(tfPhylogeneticTree.getText()
@@ -591,10 +643,10 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 
 	private void addReferenceFile(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_addReferenceFile
 		File f = MiscFileUtils.chooseFile(this,
-				"Select a FASTA file containing one reference genome",
-				lastDir,true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
+				"Select a FASTA file containing one reference genome", lastDir,
+				true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
 		if (f != null && f.canRead()) {
-			lastDir=f.getParentFile();
+			lastDir = f.getParentFile();
 			references.add(new ReferenceSelection(f));
 			setReferenceSelectionFromVector();
 		}
@@ -628,36 +680,47 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 		}
 	}// GEN-LAST:event_saveProject
 
+	/**
+	 * Writes all patameters given in the forms to a file. The format is a
+	 * simple key value format also described in
+	 * {@link TreebasedContigSorterProject}
+	 * 
+	 * @param f
+	 *            file to write the project data in
+	 * @throws IOException
+	 */
 	private void writeProjectToFile(File f) throws IOException {
 		BufferedWriter out = new BufferedWriter(new FileWriter(f));
 
 		out.write("# treecat: Treebased contig arrangement tool\n"
-		+"# tcp - (t)ree(c)at (p)roject\n\n");
-		out.write("# directory where to cache the matchings between contigs and references\n");
+				+ "# tcp - (t)ree(c)at (p)roject\n\n");
+		out
+				.write("# directory where to cache the matchings between contigs and references\n");
 		out.write("projectdir=\"");
-		if(new File(tfProjectdir.getText()).exists()) {
+		if (new File(tfProjectdir.getText()).exists()) {
 			out.write(tfProjectdir.getText());
 		}
 		out.write("\"\n");
 
-		
-		out.write("\n# Phylogenetic tree of the species.\n# The species must have as name the filename of the fasta file without extension!\n");
+		out
+				.write("\n# Phylogenetic tree of the species.\n# The species must have as name the filename of the fasta file without extension!\n");
 		out.write("newicktreefile=\"");
-		if(new File(tfPhylogeneticTree.getText()).exists()) {
+		if (new File(tfPhylogeneticTree.getText()).exists()) {
 			out.write(tfPhylogeneticTree.getText());
 		}
 		out.write("\"\n");
 
 		out.write("\n# Contigs in multi fasta format\n");
 		out.write("contigs=\"");
-		if(new File(tfContigs.getText()).exists()) {
+		if (new File(tfContigs.getText()).exists()) {
 			out.write(tfContigs.getText());
 		}
 		out.write("\"\n");
 
-		out.write("\n# Reference genomes in (multi) fasta format. One entry per genome.\n");
+		out
+				.write("\n# Reference genomes in (multi) fasta format. One entry per genome.\n");
 		for (int i = 0; i < references.size(); i++) {
-			if(new File(references.get(i).getFile()).exists()) {
+			if (new File(references.get(i).getFile()).exists()) {
 				out.write("reference=\"");
 				out.write(references.get(i).getFile());
 				out.write("\"\n");
@@ -666,8 +729,7 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 		out.write(" ");
 		out.close();
 	}
-	
-	
+
 	/**
 	 * Pop up an error message
 	 * 
@@ -679,8 +741,14 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 				JOptionPane.ERROR_MESSAGE);
 	}
 
-
-
+	/**
+	 * Loads the parameters from a file. The format is a simple key value format
+	 * also described in {@link TreebasedContigSorterProject}
+	 * 
+	 * @param f
+	 *            file to read the project data from
+	 * @throws IOException
+	 */
 	public void loadProjectFromFile(File f) throws IOException {
 		BufferedReader in = new BufferedReader(new FileReader(f));
 		String line;
@@ -722,7 +790,9 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 			// check different keywords:
 			// ********************contigs*********************
 			if (propertyValue[0].matches("contigs")) {
-				if( value.isEmpty()) {continue;}
+				if (value.isEmpty()) {
+					continue;
+				}
 				if (contigsFileString.isEmpty()) {
 					File file = new File(value);
 
@@ -732,12 +802,12 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 								+ File.separator + value);
 					}
 
-					if (file.exists()&& file.isFile()) {
+					if (file.exists() && file.isFile()) {
 						contigsFileString = file.getAbsolutePath();
 					} else {
 						progress
 								.append("Specified contig file could not be found: "
-										+ file.getAbsoluteFile()+"\n");
+										+ file.getAbsoluteFile() + "\n");
 					}
 
 				} else { // contigs were already specified
@@ -749,7 +819,9 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 
 			// ********************reference*********************
 			if (propertyValue[0].matches("reference")) {
-				if( value.isEmpty()) {continue;}
+				if (value.isEmpty()) {
+					continue;
+				}
 
 				File file = new File(value);
 				// if not existant, try relative path
@@ -763,15 +835,16 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 				} else {
 					progress
 							.append("Specified reference file could not be found: "
-									+ file.getAbsoluteFile()+"\n");
+									+ file.getAbsoluteFile() + "\n");
 				}
-				
 
 			}
 
 			// ********************newicktree*********************
 			if (propertyValue[0].matches("newicktreefile")) {
-				if( value.isEmpty()) {continue;}
+				if (value.isEmpty()) {
+					continue;
+				}
 				if (phylogeneticTreeFileString.isEmpty()) {
 					File file = new File(value);
 
@@ -786,7 +859,7 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 					} else {
 						progress
 								.append("Specified newick file could not be found: "
-										+ file.getAbsoluteFile()+"\n");
+										+ file.getAbsoluteFile() + "\n");
 					}
 
 				} else { // contigs were already specified
@@ -798,7 +871,9 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 
 			// ********************projectdir*********************
 			if (propertyValue[0].matches("projectdir")) {
-				if( value.isEmpty()) {continue;}
+				if (value.isEmpty()) {
+					continue;
+				}
 
 				if (projectDirectoryFileString.isEmpty()) {
 					File dir = new File(value);
@@ -807,7 +882,7 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 					} else {
 						progress
 								.append("Project Directory not present or not writable: "
-										+ dir +"\n");
+										+ dir + "\n");
 					}
 				} else {
 					progress
@@ -823,7 +898,7 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 		tfContigs.setBackground(Color.WHITE);
 		tfPhylogeneticTree.setText(phylogeneticTreeFileString);
 		tfPhylogeneticTree.setBackground(Color.WHITE);
-		
+
 		references.clear();
 		for (File file : referenceFileStrings) {
 			references.add(new ReferenceSelection(file));
@@ -833,30 +908,30 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 
 	}
 
-	
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton buContigs;
-    private javax.swing.JButton buPhylogeneticTree;
-    private javax.swing.JButton buProjectDir;
-    private javax.swing.JButton buReferences;
-    private javax.swing.JPanel contigPanel;
-    private javax.swing.JButton loadButton;
-    private javax.swing.JLabel phylogeneticTreeLabel;
-    private javax.swing.JPanel phylogeneticTreePanel;
-    private javax.swing.JTextArea progress;
-    private javax.swing.JProgressBar progressBar;
-    private javax.swing.JPanel progressPanel;
-    private javax.swing.JScrollPane progressScrollPane;
-    private javax.swing.JPanel projectDirPanel;
-    private javax.swing.JPanel referenceGenomesFilesPanel;
-    private javax.swing.JPanel referenceGenomesPanel;
-    private javax.swing.JScrollPane referenceGenomesScrollPane;
-    private javax.swing.JButton runButton;
-    private javax.swing.JButton saveButton;
-    private javax.swing.JTextField tfContigs;
-    private javax.swing.JTextField tfPhylogeneticTree;
-    private javax.swing.JTextField tfProjectdir;
-    // End of variables declaration//GEN-END:variables
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JButton buContigs;
+	private javax.swing.JButton buPhylogeneticTree;
+	private javax.swing.JButton buProjectDir;
+	private javax.swing.JButton buReferences;
+	private javax.swing.JPanel contigPanel;
+	private javax.swing.JButton loadButton;
+	private javax.swing.JLabel phylogeneticTreeLabel;
+	private javax.swing.JPanel phylogeneticTreePanel;
+	private javax.swing.JTextArea progress;
+	private javax.swing.JProgressBar progressBar;
+	private javax.swing.JPanel progressPanel;
+	private javax.swing.JScrollPane progressScrollPane;
+	private javax.swing.JPanel projectDirPanel;
+	private javax.swing.JPanel referenceGenomesFilesPanel;
+	private javax.swing.JPanel referenceGenomesPanel;
+	private javax.swing.JScrollPane referenceGenomesScrollPane;
+	private javax.swing.JButton runButton;
+	private javax.swing.JButton saveButton;
+	private javax.swing.JTextField tfContigs;
+	private javax.swing.JTextField tfPhylogeneticTree;
+	private javax.swing.JTextField tfProjectdir;
+
+	// End of variables declaration//GEN-END:variables
 
 	/**
 	 * This method is called from within the constructor to initialize the form.
@@ -865,287 +940,521 @@ public class TreeProjectFrame extends javax.swing.JFrame implements PropertyChan
 	 */
 	@SuppressWarnings("unchecked")
 	// <editor-fold defaultstate="collapsed" desc="Generated
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private final void initComponents() {
+	// <editor-fold defaultstate="collapsed"
+	// desc="Generated Code">//GEN-BEGIN:initComponents
+	private final void initComponents() {
 
-        projectDirPanel = new javax.swing.JPanel();
-        tfProjectdir = new javax.swing.JTextField();
-        buProjectDir = new javax.swing.JButton();
-        contigPanel = new javax.swing.JPanel();
-        buContigs = new javax.swing.JButton();
-        tfContigs = new javax.swing.JTextField();
-        phylogeneticTreePanel = new javax.swing.JPanel();
-        tfPhylogeneticTree = new javax.swing.JTextField();
-        buPhylogeneticTree = new javax.swing.JButton();
-        phylogeneticTreeLabel = new javax.swing.JLabel();
-        progressPanel = new javax.swing.JPanel();
-        progressScrollPane = new javax.swing.JScrollPane();
-        progress = new javax.swing.JTextArea();
-        runButton = new javax.swing.JButton();
-        progressBar = new javax.swing.JProgressBar();
-        referenceGenomesPanel = new javax.swing.JPanel();
-        buReferences = new javax.swing.JButton();
-        referenceGenomesScrollPane = new javax.swing.JScrollPane();
-        referenceGenomesFilesPanel = new javax.swing.JPanel();
-        loadButton = new javax.swing.JButton();
-        saveButton = new javax.swing.JButton();
+		projectDirPanel = new javax.swing.JPanel();
+		tfProjectdir = new javax.swing.JTextField();
+		buProjectDir = new javax.swing.JButton();
+		contigPanel = new javax.swing.JPanel();
+		buContigs = new javax.swing.JButton();
+		tfContigs = new javax.swing.JTextField();
+		phylogeneticTreePanel = new javax.swing.JPanel();
+		tfPhylogeneticTree = new javax.swing.JTextField();
+		buPhylogeneticTree = new javax.swing.JButton();
+		phylogeneticTreeLabel = new javax.swing.JLabel();
+		progressPanel = new javax.swing.JPanel();
+		progressScrollPane = new javax.swing.JScrollPane();
+		progress = new javax.swing.JTextArea();
+		runButton = new javax.swing.JButton();
+		progressBar = new javax.swing.JProgressBar();
+		referenceGenomesPanel = new javax.swing.JPanel();
+		buReferences = new javax.swing.JButton();
+		referenceGenomesScrollPane = new javax.swing.JScrollPane();
+		referenceGenomesFilesPanel = new javax.swing.JPanel();
+		loadButton = new javax.swing.JButton();
+		saveButton = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Phylogenetic Comparative Assembly");
-        setLocationByPlatform(true);
-        setMinimumSize(new java.awt.Dimension(600, 400));
-        setName("Phylogenetic Comparative Assembly"); // NOI18N
+		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+		setTitle("Phylogenetic Comparative Assembly");
+		setLocationByPlatform(true);
+		setMinimumSize(new java.awt.Dimension(600, 400));
+		setName("Phylogenetic Comparative Assembly"); // NOI18N
 
-        projectDirPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Project Directory"));
-        projectDirPanel.setMinimumSize(new java.awt.Dimension(160, 47));
+		projectDirPanel.setBorder(javax.swing.BorderFactory
+				.createTitledBorder("Project Directory"));
+		projectDirPanel.setMinimumSize(new java.awt.Dimension(160, 47));
 
-        tfProjectdir.setText("Project Directory");
-        tfProjectdir.setToolTipText("Select a directory where several files can be stored");
-        tfProjectdir.setMinimumSize(new java.awt.Dimension(50, 20));
+		tfProjectdir.setText("Project Directory");
+		tfProjectdir
+				.setToolTipText("Select a directory where several files can be stored");
+		tfProjectdir.setMinimumSize(new java.awt.Dimension(50, 20));
 
-        buProjectDir.setText("Select Dir");
-        buProjectDir.setToolTipText("Select a directory where several files can be stored");
-        buProjectDir.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addProjectDir(evt);
-            }
-        });
+		buProjectDir.setText("Select Dir");
+		buProjectDir
+				.setToolTipText("Select a directory where several files can be stored");
+		buProjectDir.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				addProjectDir(evt);
+			}
+		});
 
-        javax.swing.GroupLayout projectDirPanelLayout = new javax.swing.GroupLayout(projectDirPanel);
-        projectDirPanel.setLayout(projectDirPanelLayout);
-        projectDirPanelLayout.setHorizontalGroup(
-            projectDirPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(projectDirPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(tfProjectdir, javax.swing.GroupLayout.DEFAULT_SIZE, 509, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(buProjectDir, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        projectDirPanelLayout.setVerticalGroup(
-            projectDirPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(projectDirPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(tfProjectdir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(buProjectDir, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+		javax.swing.GroupLayout projectDirPanelLayout = new javax.swing.GroupLayout(
+				projectDirPanel);
+		projectDirPanel.setLayout(projectDirPanelLayout);
+		projectDirPanelLayout
+				.setHorizontalGroup(projectDirPanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								projectDirPanelLayout
+										.createSequentialGroup()
+										.addContainerGap()
+										.addComponent(
+												tfProjectdir,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												509, Short.MAX_VALUE)
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+										.addComponent(
+												buProjectDir,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												138,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addContainerGap()));
+		projectDirPanelLayout
+				.setVerticalGroup(projectDirPanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								projectDirPanelLayout
+										.createParallelGroup(
+												javax.swing.GroupLayout.Alignment.BASELINE)
+										.addComponent(
+												tfProjectdir,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addComponent(
+												buProjectDir,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												21,
+												javax.swing.GroupLayout.PREFERRED_SIZE)));
 
-        contigPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Contigs"));
-        contigPanel.setMinimumSize(new java.awt.Dimension(160, 47));
+		contigPanel.setBorder(javax.swing.BorderFactory
+				.createTitledBorder("Contigs"));
+		contigPanel.setMinimumSize(new java.awt.Dimension(160, 47));
 
-        buContigs.setText("Select Contigs");
-        buContigs.setToolTipText("Select a FASTA file containing the contigs");
-        buContigs.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addContigsFile(evt);
-            }
-        });
+		buContigs.setText("Select Contigs");
+		buContigs.setToolTipText("Select a FASTA file containing the contigs");
+		buContigs.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				addContigsFile(evt);
+			}
+		});
 
-        tfContigs.setText("Contigs");
-        tfContigs.setToolTipText("Select a FASTA file containing the contigs");
-        tfContigs.setMinimumSize(new java.awt.Dimension(50, 20));
+		tfContigs.setText("Contigs");
+		tfContigs.setToolTipText("Select a FASTA file containing the contigs");
+		tfContigs.setMinimumSize(new java.awt.Dimension(50, 20));
 
-        javax.swing.GroupLayout contigPanelLayout = new javax.swing.GroupLayout(contigPanel);
-        contigPanel.setLayout(contigPanelLayout);
-        contigPanelLayout.setHorizontalGroup(
-            contigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(contigPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(tfContigs, javax.swing.GroupLayout.DEFAULT_SIZE, 507, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(buContigs, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        contigPanelLayout.setVerticalGroup(
-            contigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(contigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(tfContigs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(buContigs, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+		javax.swing.GroupLayout contigPanelLayout = new javax.swing.GroupLayout(
+				contigPanel);
+		contigPanel.setLayout(contigPanelLayout);
+		contigPanelLayout
+				.setHorizontalGroup(contigPanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								contigPanelLayout
+										.createSequentialGroup()
+										.addContainerGap()
+										.addComponent(
+												tfContigs,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												507, Short.MAX_VALUE)
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+										.addComponent(
+												buContigs,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												140,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addContainerGap()));
+		contigPanelLayout
+				.setVerticalGroup(contigPanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								contigPanelLayout
+										.createParallelGroup(
+												javax.swing.GroupLayout.Alignment.BASELINE)
+										.addComponent(
+												tfContigs,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addComponent(
+												buContigs,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												21,
+												javax.swing.GroupLayout.PREFERRED_SIZE)));
 
-        phylogeneticTreePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Phylogenetic Tree (optional)"));
-        phylogeneticTreePanel.setMinimumSize(new java.awt.Dimension(160, 82));
+		phylogeneticTreePanel.setBorder(javax.swing.BorderFactory
+				.createTitledBorder("Phylogenetic Tree (optional)"));
+		phylogeneticTreePanel.setMinimumSize(new java.awt.Dimension(160, 82));
 
-        tfPhylogeneticTree.setText("Phylogenetic tree in Newick format");
-        tfPhylogeneticTree.setToolTipText("Enter the path to a phylogenetic tree in Newick format");
-        tfPhylogeneticTree.setMinimumSize(new java.awt.Dimension(50, 20));
+		tfPhylogeneticTree.setText("Phylogenetic tree in Newick format");
+		tfPhylogeneticTree
+				.setToolTipText("Enter the path to a phylogenetic tree in Newick format");
+		tfPhylogeneticTree.setMinimumSize(new java.awt.Dimension(50, 20));
 
-        buPhylogeneticTree.setText("Select Tree");
-        buPhylogeneticTree.setToolTipText("Enter the path to a phylogenetic tree in Newick format");
-        buPhylogeneticTree.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addPhylogeneticTree(evt);
-            }
-        });
+		buPhylogeneticTree.setText("Select Tree");
+		buPhylogeneticTree
+				.setToolTipText("Enter the path to a phylogenetic tree in Newick format");
+		buPhylogeneticTree
+				.addActionListener(new java.awt.event.ActionListener() {
+					public void actionPerformed(java.awt.event.ActionEvent evt) {
+						addPhylogeneticTree(evt);
+					}
+				});
 
-        phylogeneticTreeLabel.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-        phylogeneticTreeLabel.setText("Note: The species name in the tree must be the name of the above files, without ending.");
+		phylogeneticTreeLabel.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
+		phylogeneticTreeLabel
+				.setText("Note: The species name in the tree must be the name of the above files, without ending.");
 
-        javax.swing.GroupLayout phylogeneticTreePanelLayout = new javax.swing.GroupLayout(phylogeneticTreePanel);
-        phylogeneticTreePanel.setLayout(phylogeneticTreePanelLayout);
-        phylogeneticTreePanelLayout.setHorizontalGroup(
-            phylogeneticTreePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(phylogeneticTreePanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(phylogeneticTreePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, phylogeneticTreePanelLayout.createSequentialGroup()
-                        .addComponent(tfPhylogeneticTree, javax.swing.GroupLayout.DEFAULT_SIZE, 509, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(buPhylogeneticTree, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
-                    .addGroup(phylogeneticTreePanelLayout.createSequentialGroup()
-                        .addComponent(phylogeneticTreeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 503, Short.MAX_VALUE)
-                        .addGap(162, 162, 162))))
-        );
-        phylogeneticTreePanelLayout.setVerticalGroup(
-            phylogeneticTreePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(phylogeneticTreePanelLayout.createSequentialGroup()
-                .addGroup(phylogeneticTreePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(tfPhylogeneticTree, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(buPhylogeneticTree, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(phylogeneticTreeLabel))
-        );
+		javax.swing.GroupLayout phylogeneticTreePanelLayout = new javax.swing.GroupLayout(
+				phylogeneticTreePanel);
+		phylogeneticTreePanel.setLayout(phylogeneticTreePanelLayout);
+		phylogeneticTreePanelLayout
+				.setHorizontalGroup(phylogeneticTreePanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								phylogeneticTreePanelLayout
+										.createSequentialGroup()
+										.addContainerGap()
+										.addGroup(
+												phylogeneticTreePanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING)
+														.addGroup(
+																javax.swing.GroupLayout.Alignment.TRAILING,
+																phylogeneticTreePanelLayout
+																		.createSequentialGroup()
+																		.addComponent(
+																				tfPhylogeneticTree,
+																				javax.swing.GroupLayout.DEFAULT_SIZE,
+																				509,
+																				Short.MAX_VALUE)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																		.addComponent(
+																				buPhylogeneticTree,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				138,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)
+																		.addContainerGap())
+														.addGroup(
+																phylogeneticTreePanelLayout
+																		.createSequentialGroup()
+																		.addComponent(
+																				phylogeneticTreeLabel,
+																				javax.swing.GroupLayout.DEFAULT_SIZE,
+																				503,
+																				Short.MAX_VALUE)
+																		.addGap(
+																				162,
+																				162,
+																				162)))));
+		phylogeneticTreePanelLayout
+				.setVerticalGroup(phylogeneticTreePanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								phylogeneticTreePanelLayout
+										.createSequentialGroup()
+										.addGroup(
+												phylogeneticTreePanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.BASELINE)
+														.addComponent(
+																tfPhylogeneticTree,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.PREFERRED_SIZE)
+														.addComponent(
+																buPhylogeneticTree,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																21,
+																javax.swing.GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+										.addComponent(phylogeneticTreeLabel)));
 
-        progressPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Progress"));
-        progressPanel.setMinimumSize(new java.awt.Dimension(160, 158));
+		progressPanel.setBorder(javax.swing.BorderFactory
+				.createTitledBorder("Progress"));
+		progressPanel.setMinimumSize(new java.awt.Dimension(160, 158));
 
-        progress.setColumns(20);
-        progress.setEditable(false);
-        progress.setLineWrap(true);
-        progress.setRows(5);
-        progress.setTabSize(2);
-        progress.setWrapStyleWord(true);
-        progress.setMargin(new java.awt.Insets(5, 5, 5, 5));
-        progressScrollPane.setViewportView(progress);
+		progress.setColumns(20);
+		progress.setEditable(false);
+		progress.setLineWrap(true);
+		progress.setRows(5);
+		progress.setTabSize(2);
+		progress.setWrapStyleWord(true);
+		progress.setMargin(new java.awt.Insets(5, 5, 5, 5));
+		progressScrollPane.setViewportView(progress);
 
-        runButton.setText("Run");
-        runButton.setToolTipText("<html>\nRuns the Phylogenetic Comparative Assembly algorithm to devise a layout graph for the contigs.<br />\nThe layout as well as the matchings are saved in the project directory.\n</html>");
-        runButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                runAlgorithm(evt);
-            }
-        });
+		runButton.setText("Run");
+		runButton
+				.setToolTipText("<html>\nRuns the Phylogenetic Comparative Assembly algorithm to devise a layout graph for the contigs.<br />\nThe layout as well as the matchings are saved in the project directory.\n</html>");
+		runButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				runAlgorithm(evt);
+			}
+		});
 
-        progressBar.setStringPainted(true);
+		progressBar.setStringPainted(true);
 
-        javax.swing.GroupLayout progressPanelLayout = new javax.swing.GroupLayout(progressPanel);
-        progressPanel.setLayout(progressPanelLayout);
-        progressPanelLayout.setHorizontalGroup(
-            progressPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, progressPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(progressPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(progressBar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE)
-                    .addComponent(progressScrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE))
-                .addGap(12, 12, 12)
-                .addComponent(runButton)
-                .addContainerGap())
-        );
-        progressPanelLayout.setVerticalGroup(
-            progressPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(progressPanelLayout.createSequentialGroup()
-                .addGroup(progressPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progressScrollPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE)
-                    .addComponent(runButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-        );
+		javax.swing.GroupLayout progressPanelLayout = new javax.swing.GroupLayout(
+				progressPanel);
+		progressPanel.setLayout(progressPanelLayout);
+		progressPanelLayout
+				.setHorizontalGroup(progressPanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								javax.swing.GroupLayout.Alignment.TRAILING,
+								progressPanelLayout
+										.createSequentialGroup()
+										.addContainerGap()
+										.addGroup(
+												progressPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.TRAILING)
+														.addComponent(
+																progressBar,
+																javax.swing.GroupLayout.Alignment.LEADING,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																585,
+																Short.MAX_VALUE)
+														.addComponent(
+																progressScrollPane,
+																javax.swing.GroupLayout.Alignment.LEADING,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																585,
+																Short.MAX_VALUE))
+										.addGap(12, 12, 12).addComponent(
+												runButton).addContainerGap()));
+		progressPanelLayout
+				.setVerticalGroup(progressPanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								progressPanelLayout
+										.createSequentialGroup()
+										.addGroup(
+												progressPanelLayout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING)
+														.addComponent(
+																progressScrollPane,
+																javax.swing.GroupLayout.Alignment.TRAILING,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																111,
+																Short.MAX_VALUE)
+														.addComponent(runButton))
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+										.addComponent(
+												progressBar,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												javax.swing.GroupLayout.PREFERRED_SIZE)));
 
-        referenceGenomesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Reference Genomes"));
+		referenceGenomesPanel.setBorder(javax.swing.BorderFactory
+				.createTitledBorder("Reference Genomes"));
 
-        buReferences.setText("Add Reference");
-        buReferences.setToolTipText("<html>Click here to add another reference genome.<br />\nPlease give each reference genome in a seperate file.</html>");
-        buReferences.setPreferredSize(new java.awt.Dimension(116, 26));
-        buReferences.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addReferenceFile(evt);
-            }
-        });
+		buReferences.setText("Add Reference");
+		buReferences
+				.setToolTipText("<html>Click here to add another reference genome.<br />\nPlease give each reference genome in a seperate file.</html>");
+		buReferences.setPreferredSize(new java.awt.Dimension(116, 26));
+		buReferences.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				addReferenceFile(evt);
+			}
+		});
 
-        referenceGenomesScrollPane.setBorder(null);
-        referenceGenomesScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        referenceGenomesScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        referenceGenomesScrollPane.setHorizontalScrollBar(null);
+		referenceGenomesScrollPane.setBorder(null);
+		referenceGenomesScrollPane
+				.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		referenceGenomesScrollPane
+				.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		referenceGenomesScrollPane.setHorizontalScrollBar(null);
 
-        referenceGenomesFilesPanel.setLayout(new java.awt.GridLayout(0, 1, 0, 2));
-        referenceGenomesScrollPane.setViewportView(referenceGenomesFilesPanel);
-        setReferenceSelectionFromVector();
+		referenceGenomesFilesPanel
+				.setLayout(new java.awt.GridLayout(0, 1, 0, 2));
+		referenceGenomesScrollPane.setViewportView(referenceGenomesFilesPanel);
+		setReferenceSelectionFromVector();
 
-        javax.swing.GroupLayout referenceGenomesPanelLayout = new javax.swing.GroupLayout(referenceGenomesPanel);
-        referenceGenomesPanel.setLayout(referenceGenomesPanelLayout);
-        referenceGenomesPanelLayout.setHorizontalGroup(
-            referenceGenomesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(referenceGenomesScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 677, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, referenceGenomesPanelLayout.createSequentialGroup()
-                .addContainerGap(531, Short.MAX_VALUE)
-                .addComponent(buReferences, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        referenceGenomesPanelLayout.setVerticalGroup(
-            referenceGenomesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(referenceGenomesPanelLayout.createSequentialGroup()
-                .addComponent(buReferences, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(referenceGenomesScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE))
-        );
+		javax.swing.GroupLayout referenceGenomesPanelLayout = new javax.swing.GroupLayout(
+				referenceGenomesPanel);
+		referenceGenomesPanel.setLayout(referenceGenomesPanelLayout);
+		referenceGenomesPanelLayout
+				.setHorizontalGroup(referenceGenomesPanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addComponent(referenceGenomesScrollPane,
+								javax.swing.GroupLayout.DEFAULT_SIZE, 677,
+								Short.MAX_VALUE)
+						.addGroup(
+								javax.swing.GroupLayout.Alignment.TRAILING,
+								referenceGenomesPanelLayout
+										.createSequentialGroup()
+										.addContainerGap(531, Short.MAX_VALUE)
+										.addComponent(
+												buReferences,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												134,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addContainerGap()));
+		referenceGenomesPanelLayout
+				.setVerticalGroup(referenceGenomesPanelLayout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								referenceGenomesPanelLayout
+										.createSequentialGroup()
+										.addComponent(
+												buReferences,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addGap(18, 18, 18)
+										.addComponent(
+												referenceGenomesScrollPane,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												98, Short.MAX_VALUE)));
 
-        loadButton.setText("Load");
-        loadButton.setToolTipText("Load a treecat project from file");
-        loadButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loadProject(evt);
-            }
-        });
+		loadButton.setText("Load");
+		loadButton.setToolTipText("Load a treecat project from file");
+		loadButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				loadProject(evt);
+			}
+		});
 
-        saveButton.setText("Save");
-        saveButton.setToolTipText("Saves a the given information to a file");
-        saveButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveProject(evt);
-            }
-        });
+		saveButton.setText("Save");
+		saveButton.setToolTipText("Saves a the given information to a file");
+		saveButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				saveProject(evt);
+			}
+		});
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(loadButton)
-                    .addComponent(saveButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progressPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(phylogeneticTreePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(referenceGenomesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(contigPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(projectDirPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(projectDirPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(contigPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(referenceGenomesPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(phylogeneticTreePanel, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(progressPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(loadButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(saveButton)))
-                .addContainerGap())
-        );
+		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
+				getContentPane());
+		getContentPane().setLayout(layout);
+		layout
+				.setHorizontalGroup(layout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								layout
+										.createSequentialGroup()
+										.addContainerGap()
+										.addGroup(
+												layout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING)
+														.addComponent(
+																loadButton)
+														.addComponent(
+																saveButton))
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+										.addGroup(
+												layout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING)
+														.addComponent(
+																progressPanel,
+																javax.swing.GroupLayout.Alignment.TRAILING,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																Short.MAX_VALUE)
+														.addComponent(
+																phylogeneticTreePanel,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																Short.MAX_VALUE)
+														.addComponent(
+																referenceGenomesPanel,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																Short.MAX_VALUE)
+														.addComponent(
+																contigPanel,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																Short.MAX_VALUE)
+														.addComponent(
+																projectDirPanel,
+																javax.swing.GroupLayout.Alignment.TRAILING,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																Short.MAX_VALUE))
+										.addContainerGap()));
+		layout
+				.setVerticalGroup(layout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								layout
+										.createSequentialGroup()
+										.addGroup(
+												layout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING)
+														.addGroup(
+																layout
+																		.createSequentialGroup()
+																		.addComponent(
+																				projectDirPanel,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				46,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																		.addComponent(
+																				contigPanel,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				46,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																		.addComponent(
+																				referenceGenomesPanel,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				javax.swing.GroupLayout.DEFAULT_SIZE,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																		.addComponent(
+																				phylogeneticTreePanel,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				68,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																		.addComponent(
+																				progressPanel,
+																				javax.swing.GroupLayout.DEFAULT_SIZE,
+																				javax.swing.GroupLayout.DEFAULT_SIZE,
+																				Short.MAX_VALUE))
+														.addGroup(
+																layout
+																		.createSequentialGroup()
+																		.addContainerGap()
+																		.addComponent(
+																				loadButton)
+																		.addPreferredGap(
+																				javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																		.addComponent(
+																				saveButton)))
+										.addContainerGap()));
 
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
+		pack();
+	}// </editor-fold>//GEN-END:initComponents
 
 }

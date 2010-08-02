@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-package de.bielefeld.uni.cebitec.cav.treebased;
+package de.bielefeld.uni.cebitec.cav.contigadjacencygraph;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
 
@@ -29,13 +29,14 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPosition;
  * 
  */
 public class ProjectedContig {
-	public int contigIndex = 0;
+	public transient int contigIndex = 0;
 	public int referenceIndex = 0;
 	public int start = 0;
 	public int stop = 0;
 	public int hitLength = 0;
 	public boolean forwardMatch = true;
 	public int qhits = 0;
+	public int estimatedBitscore=0;
 
 	// debugging
 	public AlignmentPosition ap;
@@ -84,6 +85,11 @@ public class ProjectedContig {
 		this.hitLength = (int) ap.size();
 		this.forwardMatch = !ap.isReverseHit();
 		this.qhits = ap.getNumberOfQHits();
+		
+		int queryMatchSize =(int)(ap.getQueryLargerIndex()-ap.getQuerySmallerIndex());
+		int targetMatchSize = (int)(ap.getTargetLargerIndex()-ap.getTargetSmallerIndex()); 
+		
+//		this.estimatedBitscore=estimateBitScore(queryMatchSize, targetMatchSize); 
 	}
 
 	/*
@@ -94,10 +100,10 @@ public class ProjectedContig {
 	public String toString() {
 		return String
 				.format(
-						"Idx:%d, start:%d, stop:%d, hitlen:%d (%.2f%%), forward:%b, qhits:%d",
+						"Idx:%d, start:%d, stop:%d, hitlen:%d (%.2f%%), forward:%b, qhits:%d, bitscore:%d",
 						contigIndex, start, stop, hitLength,
 						(100. * (double) hitLength / ap.getQuery().getSize()),
-						forwardMatch, qhits);
+						forwardMatch, qhits, estimatedBitscore);
 	}
 
 	/**
@@ -121,16 +127,16 @@ public class ProjectedContig {
 		}
 		// case 2a: one starts before the other
 		// |------|
-		// |----|
-		// d: xxx
+		//            |----|
+		// d:      xxx
 
 		// case 2b:
 		// |------|
-		// |----|
+		//    |----|
 		// d: -xxx
 
 		// // case 2c:
-		// |---|
+		//  |---|
 		// |------------|
 		// d: -xxxxxxxxx
 
@@ -139,6 +145,9 @@ public class ProjectedContig {
 		// |------------|
 		// d: -xxxxx
 
+		
+		//something happended here with the whitespaces...
+		
 		// I would take the end of the first one up to the start of the second
 		// one
 		if (this.start < other.start) {
@@ -148,13 +157,25 @@ public class ProjectedContig {
 		}
 	}
 
-	// this is most probable nonsense... compare with the sequence analysis
-	// script chapter 7.2
-	// public int estimateBitScore(int queryLength, int targetLength) {
-	// double pValue = 1-(Math.exp(-targetLength*queryLength*Math.pow(0.25,
-	// qhits+10)));
-	// return (int) (Math.log(pValue)/Math.log(2));
-	//			
-	// }
+	
+//	// at the moment, this method causes problems. this is mainly due to a limited accuracy of the floating numbers.
+//	// this is probably nonsense but could get a rough estimation of a p-value / bitscore
+//	// ... compare with the sequence analysis script chapter 7.2
+//	 public int estimateBitScore(int queryLength, int targetLength) {
+//
+//		 // 1-e^(-mnp^(t+q-1)) where m and n are the target and query sizes, p is 1/4, t is the number of qhits and q ist the q-gram length.
+//		 //normally it should be like this:
+////		 double pValue = 1.-(Math.exp(-(targetLength*queryLength*Math.pow(0.25,
+////				 qhits+10))));
+////		 return (int) -(Math.log(pValue)/Math.log(2));
+////but Math.exp() very fast becomes 1 for values below E-50, resulting in an pvalue of zero.
+//		 //1-e^(-a) is approximately a if a is much smaller than 1 
+//		 //so we can use the simplified approximation
+//		 
+//		 return (int)(-(Math.log((targetLength*queryLength*Math.pow(0.25,
+//				 qhits+10)))/Math.log(2)));
+//
+//				
+//	 }
 
 }

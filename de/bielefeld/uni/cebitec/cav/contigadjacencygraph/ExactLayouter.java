@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-package de.bielefeld.uni.cebitec.cav.treebased;
+package de.bielefeld.uni.cebitec.cav.contigadjacencygraph;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -27,6 +27,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 
 /**
+ * FIXME: This class is untested since a big refactoring in 2010<br>
  * Several methods of the TreebasedContigSorter are used here. This enhances the
  * heuristic of that class to an exact branch and bound traveling salesman
  * algorithm which computes one optimal tour. This tour can be applied to an
@@ -38,7 +39,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
  * 
  * @author phuseman
  */
-public class TreebasedContigSorterExact extends TreebasedContigSorter {
+public class ExactLayouter implements LayouterInterface{
 	//sort the entries of each row/column to access the next best edge
 	// starting from a contig end
 	private Vector<Vector<Integer>> sortedAdjacencyRank;
@@ -61,6 +62,10 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 	//contig index where the tsp should start
 	private int startContig=0;
 
+	private ContigAdjacencyGraph contigAdjacencyGraph;
+
+	private LayoutGraph layoutGraph;
+
 	/**
 	 * Creates an instance of a treebased contig sorter
 	 * which computes a optimal tsp tour 
@@ -71,64 +76,10 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 	 *            genomes. Use the {@link TreebasedContigSorterProject} to
 	 *            generate this.
 	 */
-	public TreebasedContigSorterExact(
-			Vector<AlignmentPositionsList> matchesToReferenceGenomes) {
-		super(matchesToReferenceGenomes);
-
+	public ExactLayouter() {
+		super();
 	}
 
-	/* (non-Javadoc)
-	 * @see de.bielefeld.uni.cebitec.cav.treebased.TreebasedContigSorter#findPath()
-	 */
-	public void findPath() {
-		
-		travelingSalesmanBranchAndBound();
-
-		
-		//display the result
-		for (int j = 0; j < bestTravelingSalesmanTour.length; j++) {
-			if (j == numberOfContigs) {
-				System.out.print("| ");
-			}
-			System.out.print(bestTravelingSalesmanTour[j] + " ");
-		}
-		System.out.println();
-		System.out.println("Optimal cost:"+bestTravelingSalesmanTourCost);
-
-		//direct the result to a file, or order an alignmentPositionsList
-		System.out.println(showTourAsNeatoGraph(bestTravelingSalesmanTour));
-	}
-
-
-	/* (non-Javadoc)
-	 * @see de.bielefeld.uni.cebitec.cav.treebased.TreebasedContigSorter#fillWeightMatrix()
-	 * 
-	 * Override. We want to find a node which is suited to be a startpoint for a tsp.
-	 */
-	public void fillWeightMatrix() {
-		nearToOriginWeight = new double[numberOfContigs * 2];
-		
-		//do the actual filling
-		super.fillWeightMatrix();
-		
-		
-		
-		//check which contig has the best distance to the origin
-		double maximum = 0;
-		int maxIndex = 0;
-		for (int i = 0; i < nearToOriginWeight.length; i++) {
-			if (maximum < nearToOriginWeight[i]) {
-				maximum = nearToOriginWeight[i];
-				maxIndex = i;
-			}
-		}
-		this.startContig = maxIndex;
-		
-		//after all weights have been computed, convert these to distances
-		convertScoresToDistances();
-		// and create a helping table which contains the nearest neighbors
-		createNearestNeighborTable();
-	}
 	
 	/**
 	 * The tsp algorithm works with distances and not with scores. We modify the scores to distances here.
@@ -136,17 +87,18 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 	 */
 	private void convertScoresToDistances() {
 		// get the minimum and maximum weight
+		double maximumWeight=Double.MIN_VALUE;
 		double min = Double.MAX_VALUE;
-		for (int i = 0; i < adjacencyWeightMatrix.length; i++) {
-			for (int j = 0; j < adjacencyWeightMatrix[i].length; j++) {
-				// adjacencyWeightMatrix[i][j]++;
-				// adjacencyWeightMatrix[i][j]=Math.log(adjacencyWeightMatrix[i][j]);
+		for (int i = 0; i < contigAdjacencyGraph.adjacencyWeightMatrix.length; i++) {
+			for (int j = 0; j < contigAdjacencyGraph.adjacencyWeightMatrix[i].length; j++) {
+				// contigAdjacencyGraph.adjacencyWeightMatrix[i][j]++;
+				// contigAdjacencyGraph.adjacencyWeightMatrix[i][j]=Math.log(contigAdjacencyGraph.adjacencyWeightMatrix[i][j]);
 	
-				if (maximumWeight < adjacencyWeightMatrix[i][j]) {
-					maximumWeight = adjacencyWeightMatrix[i][j];
+				if (maximumWeight < contigAdjacencyGraph.adjacencyWeightMatrix[i][j]) {
+					maximumWeight = contigAdjacencyGraph.adjacencyWeightMatrix[i][j];
 				}
-				if (min > adjacencyWeightMatrix[i][j]) {
-					min = adjacencyWeightMatrix[i][j];
+				if (min > contigAdjacencyGraph.adjacencyWeightMatrix[i][j]) {
+					min = contigAdjacencyGraph.adjacencyWeightMatrix[i][j];
 				}
 			}
 		}
@@ -157,23 +109,23 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 	
 		// change the weights to a distance, in order to use a branch and bound
 		// algorithm to find the best path
-		for (int i = 0; i < adjacencyWeightMatrix.length; i++) { // column
+		for (int i = 0; i < contigAdjacencyGraph.adjacencyWeightMatrix.length; i++) { // column
 			// number
-			for (int j = i; j < adjacencyWeightMatrix[i].length; j++) { // row
+			for (int j = i; j < contigAdjacencyGraph.adjacencyWeightMatrix[i].length; j++) { // row
 				// number
 	
-				adjacencyWeightMatrix[i][j] = maximumWeight
-						- adjacencyWeightMatrix[i][j];
+				contigAdjacencyGraph.adjacencyWeightMatrix[i][j] = maximumWeight
+						- contigAdjacencyGraph.adjacencyWeightMatrix[i][j];
 	
 				// make it symmetric. its easier to use with the tsp algorithm.
-				adjacencyWeightMatrix[j][i] = adjacencyWeightMatrix[i][j];
+				contigAdjacencyGraph.adjacencyWeightMatrix[j][i] = contigAdjacencyGraph.adjacencyWeightMatrix[i][j];
 			}
 		}
 	
 		// set the tail to head connections to distance 0
-		for (int i = 0; i < numberOfContigs; i++) {
-			adjacencyWeightMatrix[i][i + numberOfContigs] = 0;
-			adjacencyWeightMatrix[i + numberOfContigs][i] = 0;
+		for (int i = 0; i < contigAdjacencyGraph.getNumberOfContigs(); i++) {
+			contigAdjacencyGraph.adjacencyWeightMatrix[i][i + contigAdjacencyGraph.getNumberOfContigs()] = 0;
+			contigAdjacencyGraph.adjacencyWeightMatrix[i + contigAdjacencyGraph.getNumberOfContigs()][i] = 0;
 		}
 	
 	}
@@ -184,17 +136,17 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 	 */
 	private void createNearestNeighborTable() {
 		sortedAdjacencyRank = new Vector<Vector<Integer>>();
-		for (int i = 0; i < adjacencyWeightMatrix.length; i++) { // column
+		for (int i = 0; i < contigAdjacencyGraph.adjacencyWeightMatrix.length; i++) { // column
 			// number
 			sortedAdjacencyRank.add(new Vector<Integer>());
-			for (int j = 0; j < adjacencyWeightMatrix[i].length; j++) { // row
+			for (int j = 0; j < contigAdjacencyGraph.adjacencyWeightMatrix[i].length; j++) { // row
 				// number
 				// compute the index where the position of the actual element
 				// has to be placed
 				int r = 0;
 				while (r < sortedAdjacencyRank.get(i).size()
-						&& adjacencyWeightMatrix[i][sortedAdjacencyRank.get(i)
-								.get(r)] < adjacencyWeightMatrix[i][j]) {
+						&& contigAdjacencyGraph.adjacencyWeightMatrix[i][sortedAdjacencyRank.get(i)
+								.get(r)] < contigAdjacencyGraph.adjacencyWeightMatrix[i][j]) {
 					r++;
 				}
 				sortedAdjacencyRank.get(i).insertElementAt(j, r);
@@ -204,38 +156,6 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see de.bielefeld.uni.cebitec.cav.treebased.TreebasedContigSorter#fillWeightMatrixForOneReference(java.util.Vector, double)
-	 * Before filling the weights we calculate how far each contig is from the origin.
-	 */
-	protected void fillWeightMatrixForOneReference(
-			Vector<ProjectedContig> matchesList, double treeDistance) {
-		determineBestStartContig(matchesList);
-		super.fillWeightMatrixForOneReference(matchesList,treeDistance);
-
-	}
-
-	/**
-	 * Calculates for a set of projected contigs which contig end is nearest to the origin (i.e. has the highest score).
-	 * the result is stored in nearToOriginWeight. There in the end the maximum has to be determined.
-	 * @param matchesList
-	 */
-	private void determineBestStartContig(Vector<ProjectedContig> matchesList) {
-		ProjectedContig origin = new ProjectedContig();
-
-		// get information which should be the fist node
-		for (int a = 0; a < matchesList.size(); a++) {
-			ProjectedContig match = matchesList.get(a);
-			int distanceToOrigin = origin.distance(match);
-			double weight = Math.exp(-(Math.pow(
-					((double) distanceToOrigin / 5000.), 2.)));
-			if (match.forwardMatch) {
-				nearToOriginWeight[match.contigIndex] += weight;
-			} else {
-				nearToOriginWeight[match.contigIndex + numberOfContigs] += weight;
-			}
-		}
-	}
 	
 	/**
 	 * 	Find path through the graph (=matrix) with maximum weight (min distance) such that each contig
@@ -248,15 +168,15 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 	 */
 	private void travelingSalesmanBranchAndBound() {
 		//will contain the best solution so far.
-		bestTravelingSalesmanTour = new int[numberOfContigs * 2];
+		bestTravelingSalesmanTour = new int[contigAdjacencyGraph.getNumberOfContigs() * 2];
 		// will contain the best distance so far. start with the highest possible value
 		bestTravelingSalesmanTourCost = Double.MAX_VALUE;
 
 		// start with the empty tour, first node to use has index 0, zero
 		// incorporated nodes and the actual distance is 0;
-		int[] initialTour = new int[numberOfContigs * 2];
+		int[] initialTour = new int[contigAdjacencyGraph.getNumberOfContigs() * 2];
 		
-		// we start at the contig which was determined to be closest to the origin
+		// we start at the contig with id 1
 		initialTour[startContig] = 1;
 		
 		//start the recursion
@@ -288,13 +208,13 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 			int lastNode, int nodesUsed, double distance) {
 	
 		// incorporate the contig.head -> contig.tail (or vice versa) connection
-		if (nodesUsed < 2 * numberOfContigs) {
-			if (lastNode < numberOfContigs) {
+		if (nodesUsed < 2 * contigAdjacencyGraph.getNumberOfContigs()) {
+			if (lastNode < contigAdjacencyGraph.getNumberOfContigs()) {
 				// if the node was head, go to tail
-				lastNode += numberOfContigs;
+				lastNode += contigAdjacencyGraph.getNumberOfContigs();
 			} else {
 				// if the last node was tail, go to head
-				lastNode -= numberOfContigs;
+				lastNode -= contigAdjacencyGraph.getNumberOfContigs();
 			}
 			nodesUsed++;
 	
@@ -305,7 +225,7 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 		// if the tour is complete (all nodes are used once)
 		// close the circle (edgecost from last to first)
 		// and check if this tour is better than the best so far.
-		if (nodesUsed == 2 * numberOfContigs) {
+		if (nodesUsed == 2 * contigAdjacencyGraph.getNumberOfContigs()) {
 			// find the first node
 			int firstNode = 0;
 			for (int j = 0; j < visitedNodes.length; j++) {
@@ -314,7 +234,7 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 					break;
 				}
 			}
-			double circleClosingWeight = adjacencyWeightMatrix[lastNode][firstNode];
+			double circleClosingWeight = contigAdjacencyGraph.adjacencyWeightMatrix[lastNode][firstNode];
 	
 			// check if the total distance is the smallest so far
 			// if so, replace the best solution by this
@@ -350,7 +270,7 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 				return;
 			}
 			// ... else incorporate this node in the tour
-			distanceToNextNeighbor = adjacencyWeightMatrix[lastNode][nextNeighbor];
+			distanceToNextNeighbor = contigAdjacencyGraph.adjacencyWeightMatrix[lastNode][nextNeighbor];
 	
 			// if (distanceToNextNeighbor == Double.MAX_VALUE) {
 			// return;
@@ -391,12 +311,12 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 					+ " node [ fontsize=\"14\", shape = record];\n\n");
 			
 			// write a "record" for each contig. the ports head and tail can then be used for connections
-			for (int k = 0; k < contigs.size(); k++) {
+			for (int k = 0; k < layoutGraph.getNodes().size(); k++) {
 				//head part of a contig
-				tourStr.append(k + " [label=\"<tail>tail|" + contigs.get(k).getId() + "\\n"
-						+ String.format("%.1f", contigs.get(k).getSize()/1000.) + "kb|<head>head\\>\",");
+				tourStr.append(k + " [label=\"<tail>tail|" + layoutGraph.getNodes().get(k).getId() + "\\n"
+						+ String.format("%.1f", layoutGraph.getNodes().get(k).getSize()/1000.) + "kb|<head>head\\>\",");
 				
-				if((startContig%numberOfContigs)==k) {
+				if((startContig%contigAdjacencyGraph.getNumberOfContigs())==k) {
 					tourStr.append("color=black,fontcolor=white, style=filled");
 				}
 				
@@ -405,10 +325,10 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 	
 			
 			int lastContigNode = startContig;
-			for (int i = 2; i <= numberOfContigs * 2; i++) {
+			for (int i = 2; i <= contigAdjacencyGraph.getNumberOfContigs() * 2; i++) {
 				for (int j = 0; j < tour.length; j++) {
 					if (tour[j] == i) {
-						if((j%numberOfContigs) == (lastContigNode%numberOfContigs)) {
+						if((j%contigAdjacencyGraph.getNumberOfContigs()) == (lastContigNode%contigAdjacencyGraph.getNumberOfContigs())) {
 							lastContigNode = j;
 							continue;
 						}
@@ -417,7 +337,7 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 						
 						tourStr.append( " [label=\""
 								+ String.format("%.2f",
-										adjacencyWeightMatrix[lastContigNode][j])
+										contigAdjacencyGraph.adjacencyWeightMatrix[lastContigNode][j])
 								+ "\"]\n");
 						
 						lastContigNode = j;
@@ -427,7 +347,7 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 			tourStr.append(showContigConnectionAsNeatoString(lastContigNode, startContig));
 			tourStr.append( " [label=\""
 					+ String.format("%.2f",
-							adjacencyWeightMatrix[lastContigNode][startContig])
+							contigAdjacencyGraph.adjacencyWeightMatrix[lastContigNode][startContig])
 					+ "\"]\n");
 			
 			tourStr.append("}\n");
@@ -445,16 +365,16 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 		// since it is symmetric only half of the matrix will be used.
 	
 		StringBuilder connection = new StringBuilder();
-		if (i >= numberOfContigs) {
-			connection.append((i -numberOfContigs) + ":tail");
+		if (i >= contigAdjacencyGraph.getNumberOfContigs()) {
+			connection.append((i -contigAdjacencyGraph.getNumberOfContigs()) + ":tail");
 		} else {
 			connection.append( i + ":head");
 		}
 	
 		connection.append(" -> ");
 	
-		if (j >= numberOfContigs) {
-			connection.append((j - numberOfContigs) + ":tail");
+		if (j >= contigAdjacencyGraph.getNumberOfContigs()) {
+			connection.append((j - contigAdjacencyGraph.getNumberOfContigs()) + ":tail");
 		} else {
 			connection.append(j + ":head");
 		}
@@ -471,10 +391,10 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 	private boolean checkConsistencyOfTour(int[] tour) {
 		for (int i = 0; i < (tour.length / 2); i++) {
 			if (tour[i] != 0) {
-				if (tour[i] == (tour[i + numberOfContigs] - 1)) {
+				if (tour[i] == (tour[i + contigAdjacencyGraph.getNumberOfContigs()] - 1)) {
 					return true;
 				}
-				if (tour[i] == (tour[i + numberOfContigs] + 1)) {
+				if (tour[i] == (tour[i + contigAdjacencyGraph.getNumberOfContigs()] + 1)) {
 					return true;
 				}
 
@@ -482,8 +402,8 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 						.println(String
 								.format(
 										"Consistency of a tsp-tour failed: index %d and %d shourld be consecutive, but are %d and %d",
-										i, i + numberOfContigs, tour[i], tour[i
-												+ numberOfContigs]));
+										i, i + contigAdjacencyGraph.getNumberOfContigs(), tour[i], tour[i
+												+ contigAdjacencyGraph.getNumberOfContigs()]));
 				return false;
 			}
 		}
@@ -519,26 +439,26 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 
 		// order the original contigs in contigLayout
 
-		for (int i = 1; i <= numberOfContigs * 2; i += 2) {
+		for (int i = 1; i <= contigAdjacencyGraph.getNumberOfContigs() * 2; i += 2) {
 			for (int j = 0; j < tour.length; j++) {
 				if (tour[j] == i) {
-					if (j < numberOfContigs) {
+					if (j < contigAdjacencyGraph.getNumberOfContigs()) {
 						contigId = j;
 						reverseComplement = true;
 
 					} else {
-						contigId = j - numberOfContigs;
+						contigId = j - contigAdjacencyGraph.getNumberOfContigs();
 						reverseComplement = false;
 
 					}
 
-					System.out.println(contigs.get(contigId).getId()
+					System.out.println(layoutGraph.getNodes().get(contigId).getId()
 							+ (reverseComplement ? " reversed" : ""));
 
-					contig = originalContigs.get(contigs.get(contigId).getId());
+					contig = originalContigs.get(layoutGraph.getNodes().get(contigId).getId());
 					if (contig == null) {
 						System.err.println("Contig "
-								+ contigs.get(contigId).getId()
+								+ layoutGraph.getNodes().get(contigId).getId()
 								+ " was not present in the given list");
 					} else {
 						contig.setReverseComplemented(reverseComplement);
@@ -548,5 +468,34 @@ public class TreebasedContigSorterExact extends TreebasedContigSorter {
 			}
 		}
 		return contigLayout;
+	}
+
+	//FIXME this class has been converted an was not tested at all.
+	@Override
+	public void findLayout(ContigAdjacencyGraph g, LayoutGraph l) {
+		this.contigAdjacencyGraph = g;
+		this.layoutGraph = l;
+
+		//after all weights have been computed, convert these to distances
+		convertScoresToDistances();
+		// and create a helping table which contains the nearest neighbors
+		createNearestNeighborTable();
+		
+		travelingSalesmanBranchAndBound();
+
+		
+		//display the result
+		for (int j = 0; j < bestTravelingSalesmanTour.length; j++) {
+			if (j == contigAdjacencyGraph.getNumberOfContigs()) {
+				System.out.print("| ");
+			}
+			System.out.print(bestTravelingSalesmanTour[j] + " ");
+		}
+		System.out.println();
+		System.out.println("Optimal cost:"+bestTravelingSalesmanTourCost);
+
+		//direct the result to a file, or order an alignmentPositionsList
+		System.out.println(showTourAsNeatoGraph(bestTravelingSalesmanTour));
+		
 	}
 }

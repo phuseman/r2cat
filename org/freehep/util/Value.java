@@ -7,9 +7,9 @@
 package org.freehep.util;
 
 import java.lang.reflect.Constructor;
-import java.util.Date;
-import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * A class that can represent any Java object or primitive. Unlike the

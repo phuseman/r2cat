@@ -1,12 +1,12 @@
 // Copyright 2000-2007 FreeHEP
 package org.freehep.graphicsio.pdf;
 
+import java.awt.Color;
+import java.awt.image.RenderedImage;
+import java.io.IOException;
+
 import org.freehep.graphicsio.ImageConstants;
 import org.freehep.graphicsio.ImageGraphics2D;
-
-import java.awt.image.RenderedImage;
-import java.awt.Color;
-import java.io.IOException;
 
 /**
  * PDF writes images as ZLIB or JPEG. This class converts an image to a

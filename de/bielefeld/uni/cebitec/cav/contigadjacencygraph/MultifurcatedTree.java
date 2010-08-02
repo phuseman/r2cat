@@ -17,7 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-package de.bielefeld.uni.cebitec.cav.treebased;
+package de.bielefeld.uni.cebitec.cav.contigadjacencygraph;
 
 import java.io.BufferedReader;
 import java.io.File;
