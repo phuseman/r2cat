@@ -85,6 +85,7 @@ public class PrimerGenerator {
 			fastaParser = rm.getFfrForpreprocessed();
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
+			//temporaryDirectory.deleteOnExit();
 		} else{
 			fastaParser = new FastaFileReader(fastaFile);
 			seq = fastaParser.getCharArray();
@@ -127,6 +128,7 @@ public class PrimerGenerator {
 		if(repeatMasking){
 			RepeatMasking rm = new RepeatMasking(fastaFile);
 			temporaryDirectory = rm.getDir();
+			//temporaryDirectory.deleteOnExit();
 			fastaParser = rm.getFfrForpreprocessed();
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
@@ -574,45 +576,6 @@ public class PrimerGenerator {
 		}
 	}
 	
-	/**
-	 * In case the user provided a directory the primer results are put into files and saved in the given
-	 * directory.
-	 * Otherwise the results can be viewed in the r2cat interface.
-	 * This method also deletes the temporary directory, which was set up for the RepeatMasking step.
-	 * 
-	 * @param outputVector
-	 * @throws IOException
-	 */
-	public void output(Vector<String> outputVector) throws IOException {
-	
-		if(outputDirByUserExists&&markedSeq.length==2){
-			outputFile = new File(outputDir,"r2cat_Primerlist_for_contigs_"+markedSeq[0]+"_and_"+markedSeq[1]+".txt");
-			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
-			for(int i=0; i<outputVector.size();i++){
-			buffer.write(outputVector.elementAt(i).toString());
-			} 
-			buffer.flush();
-			buffer.close();
-			//ausgabe im programm selbst!!!
-		} else if(outputDirByUserExists&&markedSeq.length==1){
-			outputFile = new File(outputDir,"r2cat_Primerlist_for_contig_"+markedSeq[0]+".txt");
-			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
-			for(int i=0; i<outputVector.size();i++){
-				buffer.write(outputVector.elementAt(i).toString());
-				} 
-			buffer.flush();
-			buffer.close();
-			//ausgabe im programm selbst!!!
-		}else{
-			//nur ausgabe im programm
-			for(int j = 0;j<outputVector.size();j++){
-			System.out.print(outputVector.elementAt(j).toString());
-			}
-		}
-		if(temporaryDirectory.exists()){
-			this.deleteDir(temporaryDirectory);
-			}
-	}
 
 	/**
 	 * This method is called to delete the temporary directory with its temporary files.
@@ -621,8 +584,9 @@ public class PrimerGenerator {
 	 */
 	
 	public void deleteDir(File dir){
-		File[] files = dir.listFiles();
-		if(dir.getName().contains("tempDirectoryForBlast")){
+		System.out.println(dir.getAbsolutePath());
+		if(dir.getName().contains("tempDirectoryForBlast")&&dir.exists()){
+			File[] files = dir.listFiles();
 		if(files!=null){
 			for(int i = 0;i<files.length;i++){
 				File tempFile = files[i];
@@ -1004,6 +968,47 @@ public class PrimerGenerator {
 			return outputVector;
 		}
 	}
+	
+	/**
+	 * In case the user provided a directory the primer results are put into files and saved in the given
+	 * directory.
+	 * Otherwise the results can be viewed in the r2cat interface.
+	 * This method also deletes the temporary directory, which was set up for the RepeatMasking step.
+	 * 
+	 * @param outputVector
+	 * @throws IOException
+	 */
+	public void output(Vector<String> outputVector) throws IOException {
+	
+		if(outputDirByUserExists&&markedSeq.length==2){
+			outputFile = new File(outputDir,"r2cat_Primerlist_for_contigs_"+markedSeq[0]+"_and_"+markedSeq[1]+".txt");
+			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
+			for(int i=0; i<outputVector.size();i++){
+			buffer.write(outputVector.elementAt(i).toString());
+			} 
+			buffer.flush();
+			buffer.close();
+			//ausgabe im programm selbst!!!
+		} else if(outputDirByUserExists&&markedSeq.length==1){
+			outputFile = new File(outputDir,"r2cat_Primerlist_for_contig_"+markedSeq[0]+".txt");
+			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
+			for(int i=0; i<outputVector.size();i++){
+				buffer.write(outputVector.elementAt(i).toString());
+				} 
+			buffer.flush();
+			buffer.close();
+			//ausgabe im programm selbst!!!
+		}else{
+			//nur ausgabe im programm
+			for(int j = 0;j<outputVector.size();j++){
+			System.out.print(outputVector.elementAt(j).toString());
+			}
+		}
+		if(temporaryDirectory.exists()){
+			this.deleteDir(temporaryDirectory);
+			}
+	}
+
 	
 	public Vector<String> getOutputVectorPrimerPair() {
 		return outputVectorPrimerPair;
