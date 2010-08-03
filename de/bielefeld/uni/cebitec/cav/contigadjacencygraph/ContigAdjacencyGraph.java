@@ -327,7 +327,7 @@ public class ContigAdjacencyGraph {
 		 * @return boolean is right connector
 		 */
 		protected boolean matrixIndexIsRightConnector(int index) {
-			if (index <= numberOfContigs) {
+			if (index < numberOfContigs) {
 				return true;
 			} else {
 				return false;
