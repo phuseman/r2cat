@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Vector;
 
-public class printTest {
+public class RunSetUp {
 	
 	public static void main(String args[]){
 		//Path to the config file, which contains the parameters.
