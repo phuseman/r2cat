@@ -9,19 +9,36 @@ import java.util.Vector;
 public class printTest {
 	
 	public static void main(String args[]){
-		//File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
+		//Path to the config file, which contains the parameters.
 		File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
+		//File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
+		
+		//Path to fasta file containing a list of contigs
 		File fastaFile = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
+		
+		//location of output files
 		File outputDir = new File(System.getProperty("user.home"));
-		Date start = new Date();
+		
+		//marks if the user wants to do preprocessing step for the masking of repeats.
+		//If so, the user has to have BLAST 2.2.23 installed and included in the path-variable
+		//Note: While doing this step a temporary directory for the BLAST output files is generated.
 		boolean repeatMasking = false;
 		
 		repeatMasking = true;
+
+		//Creating a new instance of the PrimerGenerator class.
 		PrimerGenerator pg;
 		pg = new PrimerGenerator(fastaFile,configFile,repeatMasking,outputDir);
 	
+		//Creating a new instance of the PrimerGenerator with using a different constructor. In this case default
+		//parameters are used to calculate the primer scores.
 		//PrimerGenerator pg = new PrimerGenerator(fastaFile,repeatMasking,outputDir);
+		
+		//This vector contains the IDs of the marked sequence for the primer design. For each sequence, the direction of the primer is given.
+		//Also only on contig can be selected to generate only possible primers for one of the contig ends.
 		Vector<String[]> contigPairs = new Vector<String[]>();
+		
+		//This String[] are set up to let the programm run. And give 3 output files.
 		String[] pair1 = new String[4];
 		pair1[0] = "1";
 		pair1[1] = "forward";
@@ -44,7 +61,6 @@ public class printTest {
 		
 		
 		pg.generatePrimers(contigPairs);
-		System.out.println("Anzahl Sekunden: " + (System.currentTimeMillis() - start.getTime())/1000);	
 	}
 
 }
