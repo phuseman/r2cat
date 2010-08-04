@@ -25,15 +25,19 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Vector;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
@@ -253,7 +257,7 @@ public class PrimerTable extends JTable implements Observer, ActionListener {
 		}
 	}
 
-	/*
+/**	
 	 * (non-Javadoc)
 	 * 
 	 * @see
@@ -267,6 +271,7 @@ public class PrimerTable extends JTable implements Observer, ActionListener {
 			// For somewhat lengthy calculations we should use here a SwingWorker that does not block the GUI.
 			// Additionally a ProgressMonitor helps to estimate the waiting time.
 			System.out.println(((PrimerTableModel) this.getModel()).getSelectedPairs());
+			
 
 		} else if (e.getActionCommand().equals("select_all")) {
 			((PrimerTableModel) this.getModel()).selectAll();
@@ -277,5 +282,48 @@ public class PrimerTable extends JTable implements Observer, ActionListener {
 		this.repaint();
 
 	}
+/*
+	//other set up for actionPerformed method
+	private SwingWorker<String,Void> worker = null;
+	private PrimerGenerator pg = null;
+	private Vector<String[]> contigPairs = null;
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand().equals("generate_primer")) {
+			System.out.println("Generate primer!!");
+			//TODO: Add the code to generate primer pairs
+			// For somewhat lengthy calculations we should use here a SwingWorker that does not block the GUI.
+			// Additionally a ProgressMonitor helps to estimate the waiting time.
+			
+			File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
+			File fastaFile = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
+			File outputDir = new File(System.getProperty("user.home"));
+			//checkbox?!  fürs RepeatMasking
+			boolean repeatMasking = true;
+			pg = new PrimerGenerator(fastaFile,configFile,repeatMasking,outputDir);
+			contigPairs = (Vector<String[]>)((PrimerTableModel)this.getModel()).getSelectedPairs();
+			worker = new SwingWorker<String,Void>(){
+				
+				@Override
+				protected String doInBackground() throws Exception {
+					pg.generatePrimers(contigPairs);
 
+					return null;
+				}
+				
+			};
+			worker.execute();
+
+		} else if (e.getActionCommand().equals("select_all")) {
+			((PrimerTableModel) this.getModel()).selectAll();
+		} else if (e.getActionCommand().equals("select_none")) {
+			((PrimerTableModel) this.getModel()).selectNone();
+		}
+		this.invalidate();
+		this.repaint();
+
+	}*/
+
+	
 }
