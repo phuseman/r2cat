@@ -39,21 +39,26 @@ public class RunSetUp {
 		Vector<String[]> contigPairs = new Vector<String[]>();
 		
 		//This String[] are set up to let the programm run. And give 3 output files.
-		String[] pair1 = new String[4];
-		pair1[0] = "1";
-		pair1[1] = "forward";
-		pair1[2] = "0";
-		pair1[3] = "reverse";
+		String[] pair1 = new String[6];
+		pair1[0] = "0";
+		pair1[1] = "false";
+		pair1[2] = "forward";
+		pair1[3] = "1";
+		pair1[4] = "false";
+		pair1[5] = "reverse";
 		
-		String[] pair2 = new String[4];
-		pair2[0] = "2";
-		pair2[1] = "forward";
-		pair2[2] = "0";
-		pair2[3] = "reverse";
+		String[] pair2 = new String[6];
+		pair2[0] = "3";
+		pair2[1] = "false";
+		pair2[2] = "forward";
+		pair2[3] = "4";
+		pair2[4] = "false";
+		pair2[5] = "reverse";
 		
-		String[] pair3=new String[2];
+		String[] pair3=new String[3];
 		pair3[0] = "1";
-		pair3[1] ="forward";
+		pair3[1] = "false";
+		pair3[2] ="forward";
 		
 		contigPairs.add(pair1);
 		contigPairs.add(pair2);

@@ -160,7 +160,7 @@ public class PrimerGenerator {
 		SimpleFormatter formatterLogFile = new SimpleFormatter();
 		logger = Logger.getLogger("de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator");
 		fHandler = new FileHandler("r2cat_primerDesign_log");
-		logger.setUseParentHandlers(false);
+		//logger.setUseParentHandlers(false);
 
 		logger.addHandler(fHandler);
         fHandler.setFormatter(formatterLogFile);
@@ -211,25 +211,31 @@ public class PrimerGenerator {
 		int directionContig2 = 0;
 		boolean idCheckContig1 =false;
 		boolean idCheckContig2 =false;
+		String isReverseComContig1 = null;
+		String isReverseComContig2 = null;
 		HashMap<String, Integer> contigAndDirectionInfo = new HashMap<String,Integer>();
-
+		HashMap<String, String> contigAndisReverseComplementInfo = new HashMap<String,String>();
 		nextchar : for(int i = 0; i<contigPair.size();i++){
 			String[] tempPair = contigPair.elementAt(i);
 			try{
-			if(tempPair.length==4){
+			if(tempPair.length==6){
 			markedSeq = new String[2];
 			markedSeq[0] = tempPair[0];
-			markedSeq[1] = tempPair[2];
+			markedSeq[1] = tempPair[3];
 			idCheckContig1 = this.idCheck(markedSeq[0].toString());
 			idCheckContig2 = this.idCheck(markedSeq[1].toString());
 		if(idCheckContig1&&idCheckContig2){
 			if(!(markedSeq[0].toString().equals(markedSeq[1].toString()))){
-			directionContig1 = this.setPrimerDirection(tempPair[1].toString());
-			directionContig2 = this.setPrimerDirection(tempPair[3].toString());
+			directionContig1 = this.setPrimerDirection(tempPair[2].toString());
+			directionContig2 = this.setPrimerDirection(tempPair[5].toString());
+			isReverseComContig1 = tempPair[1].toString();
+			isReverseComContig2 = tempPair[4].toString();
 			if(directionContig1!=directionContig2){
 			contigAndDirectionInfo.put(markedSeq[0],directionContig1);
 			contigAndDirectionInfo.put(markedSeq[1],directionContig2);
-			this.getPrimerCandidates(markedSeq, contigAndDirectionInfo);
+			contigAndisReverseComplementInfo.put(markedSeq[0],isReverseComContig1);
+			contigAndisReverseComplementInfo.put(markedSeq[1],isReverseComContig2);
+			this.getPrimerCandidates(markedSeq, contigAndDirectionInfo,contigAndisReverseComplementInfo);
 			}else{
 				throw new IllegalArgumentException("contigs were marked with the same direction for the primer");
 			}
@@ -239,14 +245,16 @@ public class PrimerGenerator {
 			} else{
 				throw new NullPointerException("contig id could not be found");
 			}
-			} else if(tempPair.length==2){
+			} else if(tempPair.length==3){
 				markedSeq = new String[1];
 				markedSeq[0] = tempPair[0];
 				idCheckContig1 = idCheck(markedSeq[0].toString());
 				if(idCheckContig1){
-				directionContig1 = this.setPrimerDirection(tempPair[1].toString());
+				directionContig1 = this.setPrimerDirection(tempPair[2].toString());
+				isReverseComContig1 = tempPair[1].toString();
+				contigAndisReverseComplementInfo.put(markedSeq[0],isReverseComContig1);
 				contigAndDirectionInfo.put(markedSeq[0],directionContig1);
-				this.getPrimerCandidates(markedSeq, contigAndDirectionInfo);
+				this.getPrimerCandidates(markedSeq, contigAndDirectionInfo,contigAndisReverseComplementInfo);
 				}else{
 					throw new NullPointerException("contig id could not be found");
 				}
@@ -289,22 +297,27 @@ public class PrimerGenerator {
 		
 	/**
 	 * This method goes through the sequence information of the fastaFileReader and returns the 
-	 * sequences and the id of the marked contigs in a HashMap.
+	 * sequences and the id of the marked contigs in a HashMap. It is also checked if the sequences are reverse complemented
+	 * if so they get turned into the previous state.
 	 * 
 	 * @param markedContig
 	 * @return templateSeq
 	 */
 	
-		public HashMap<String,char[]> getMarkedSeq(String[] markedContig,boolean isReveresedComplement){
+		public HashMap<String,char[]> getMarkedSeq(String[] markedContig,HashMap<String, String> contigAndisReverseCompInfo){
 			HashMap<String, char[]> templateSeq = new HashMap<String,char[]>();
+			boolean isReverseComplemented = false;
+			String isReverseCom = null;
 			for(String s:markedContig){
+				isReverseCom = contigAndisReverseCompInfo.get(s);
+				isReverseComplemented = this.stringToBoolean(isReverseCom);
 				for(int i = 0; i<sequences.size();i++){
 					if(sequences.get(i).getId().matches(s)){
 						int length = (int) sequences.get(i).getSize();
 						int start = (int) sequences.get(i).getOffset();
 						char[] temp = new char[length];
 						System.arraycopy(seq, start, temp, 0, length);
-						if(isReveresedComplement){
+						if(isReverseComplemented){
 							this.getReverseComplement(temp);
 							templateSeq.put(s, temp);
 						} else{
@@ -316,6 +329,18 @@ public class PrimerGenerator {
 			return templateSeq;
 		}
 		
+		public boolean stringToBoolean(String s){
+			boolean bool = false;
+			if(s.equals("true")){
+				bool = true;
+				return bool;
+			} else{
+				bool = false;
+				return bool;
+			}
+			
+		}
+		
 	/**
 	 * This method goes through the marked sequences of the selected contigs and fills a vector
 	 * with primer objects which are possible to be primers for each contig.
@@ -325,12 +350,9 @@ public class PrimerGenerator {
 	 * @throws IOException
 	 */
 		
-	public void getPrimerCandidates(String[] markedContig,HashMap<String, Integer> contigAndDirectionInfo) throws IOException{
-		//boolean isReverseComp = contigAndDirectionInfo.get(isReverseComplement);
-		boolean isReverseComp = false;
-		HashMap<String, char[]> templateSeq = getMarkedSeq(markedContig,isReverseComp);
+	public void getPrimerCandidates(String[] markedContig,HashMap<String, Integer> contigAndDirectionInfo,HashMap<String, String> contigAndisReverseCompInfo) throws IOException{
+		HashMap<String, char[]> templateSeq = getMarkedSeq(markedContig,contigAndisReverseCompInfo);
 		Vector<Primer> primerCandidates = new Vector<Primer>();
-
 			for(String contigID : markedContig){
 				Integer directionOfPrimer = contigAndDirectionInfo.get(contigID);
 				char[] tempSeqChar = templateSeq.get(contigID);
