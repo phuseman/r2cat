@@ -191,22 +191,53 @@ public class PrimerTableModel extends AbstractTableModel {
 	public String getSelectedPairs() {
 		StringBuilder out = new StringBuilder();
 		int secondIndex ;
+		Vector<String[]> contigPairVector = new Vector<String[]>();
+		int j = 0;
 		for (int i = 0; i < createPrimer.length; i++) {
+			String[] contigPair = new String[6];
 			if (createPrimer[i]) {
 				//we look at all adjacent contigs, so the next contig has index+1, except for the last one, here it is the zero index.
 				secondIndex=(i+1)%dnaSequence().size();
 				
 				// the key information are the contig names and their direction
 				out.append( String.format((Locale) null,
-						"%s, %b, %s, %b\n",
+						"%s, %b,%s, %s, %b,%s\n",
 						dnaSequence().get(i).getId(),
 						dnaSequence().get(i).isReverseComplemented(),
+						"forward",
 						dnaSequence().get(secondIndex).getId(),
-						dnaSequence().get(secondIndex).isReverseComplemented()
+						dnaSequence().get(secondIndex).isReverseComplemented(),
+						"reverse"
 						));
 			}
 		}
 		return out.toString();
 	}
+	
+//other setup for getSelectedParis... works with my setup of actionperformed in primertable
+/*	public Vector<String[]> getSelectedPairs() {
+		int secondIndex ;
+		Vector<String[]> contigPairVector = new Vector<String[]>();
+		int j = 0;
+		for (int i = 0; i < createPrimer.length; i++) {
+			String[] contigPair = new String[6];
+			if (createPrimer[i]) {
+				//we look at all adjacent contigs, so the next contig has index+1, except for the last one, here it is the zero index.
+				secondIndex=(i+1)%dnaSequence().size();
+				
+				contigPair[0] = dnaSequence().get(i).getId();
+				contigPair[1] = new Boolean(dnaSequence().get(i).isReverseComplemented()).toString();
+				contigPair[2] = "forward";
+				contigPair[3] = dnaSequence().get(secondIndex).getId();
+				contigPair[4] = new Boolean(dnaSequence().get(secondIndex).isReverseComplemented()).toString();
+				contigPair[5] = "reverse";
+				contigPairVector.add(j, contigPair);
+
+				j++;
+				
+			}
+		}
+		return contigPairVector;
+	}*/
 
 }
