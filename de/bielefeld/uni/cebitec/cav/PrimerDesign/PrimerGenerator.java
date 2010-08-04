@@ -54,7 +54,7 @@ public class PrimerGenerator {
 	private Vector<String> outputVectorForwardPrimer =null;
 	private Vector<String> outputVectorReversePrimer =null;
 	private boolean outputDirByUserExists= false;
-
+	private boolean rm = false;
 	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
 	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
 	private ArrayList<Integer> noPartnerLeft = new ArrayList<Integer>();
@@ -117,6 +117,7 @@ public class PrimerGenerator {
 	 * @param repeatMasking
 	 */
 	public PrimerGenerator(File fastaFile, boolean repeatMasking,File outputDirectory){
+		rm = repeatMasking;
 		try{
 			this.setUpLogFile();
 			if(outputDirectory!=null){
@@ -1026,9 +1027,11 @@ public class PrimerGenerator {
 			System.out.print(outputVector.elementAt(j).toString());
 			}
 		}
+		if(rm){
 		if(temporaryDirectory.exists()){
 			this.deleteDir(temporaryDirectory);
 			}
+		}
 	}
 
 	

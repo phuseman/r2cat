@@ -183,7 +183,7 @@ public class PrimerTableModel extends AbstractTableModel {
 		}
 	}
 	
-	/**
+/**
 	 * Method to get all primer pairs that are selected.
 	 * (The return type string is only an example. Feel free to adopt it as necessary)
 	 * @return
@@ -214,7 +214,7 @@ public class PrimerTableModel extends AbstractTableModel {
 		return out.toString();
 	}
 	
-//other setup for getSelectedParis... works with my setup of actionperformed in primertable
+	//other setup for getSelectedParis... works with my setup of actionperformed in primertable
 /*	public Vector<String[]> getSelectedPairs() {
 		int secondIndex ;
 		Vector<String[]> contigPairVector = new Vector<String[]>();

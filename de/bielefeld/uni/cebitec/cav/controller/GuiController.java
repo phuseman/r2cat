@@ -21,6 +21,7 @@
 package de.bielefeld.uni.cebitec.cav.controller;
 
 import java.awt.BorderLayout;
+import java.awt.Checkbox;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -30,6 +31,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
@@ -541,7 +543,12 @@ public class GuiController {
 			remove.setActionCommand("select_none");
 			controlPanel.add(remove);
 			remove.addActionListener(primer);
-
+			
+			/*//controlPanel.add(new JLabel("Repeat Masking"));
+			Checkbox rp = new Checkbox("Repeat Masking");
+			controlPanel.add(rp);
+			rp.addItemListener(primer);*/
+			
 			controlPanel.add(new JLabel("Generate Primers"));
 			JButton run = new JButton("Run!");
 			run.setActionCommand("generate_primer");
