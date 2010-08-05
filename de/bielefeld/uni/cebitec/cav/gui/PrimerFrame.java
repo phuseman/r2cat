@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -20,13 +21,17 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 
 import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
+import de.bielefeld.uni.cebitec.cav.controller.SequenceNotFoundException;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
+import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
+import de.bielefeld.uni.cebitec.cav.utils.ProgressMonitorReporter;
 
 public class PrimerFrame extends JFrame implements ActionListener, ItemListener {
 	
 	private AlignmentPositionsList alignmentPositionsList;
+	private DNASequence contigs;
 	private PrimerTableModel model;
 	private PrimerTable primer;
 	private JButton setConfig;
@@ -38,6 +43,7 @@ public class PrimerFrame extends JFrame implements ActionListener, ItemListener 
 	private Checkbox rp;
 	
 	public PrimerFrame(AlignmentPositionsList alignmentPositionsList){
+		this.alignmentPositionsList = alignmentPositionsList;
 		primer = new PrimerTable(alignmentPositionsList);
 		model = (PrimerTableModel) primer.getModel();
 		init();
@@ -93,7 +99,13 @@ public class PrimerFrame extends JFrame implements ActionListener, ItemListener 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("generate_primer")) {
-			System.out.println("Generate primer!!");
+			
+			if(alignmentPositionsList.getQueries() != null && !alignmentPositionsList.getQueries().isEmpty()) {
+				contigs = alignmentPositionsList.getQueries().get(0);
+			} else {
+				contigs = new DNASequence("dummy");
+			}
+			
 			PrimerGeneratorTask pgT = new PrimerGeneratorTask();
 			contigPairs = (Vector<String[]>)((PrimerTableModel)primer.getModel()).getSelectedPairs();
 			pgT.execute();
@@ -115,11 +127,15 @@ public class PrimerFrame extends JFrame implements ActionListener, ItemListener 
 		this.repaint();
 	}
 	
-	class PrimerGeneratorTask extends SwingWorker<Void,Void>{
+	class PrimerGeneratorTask extends SwingWorker<PrimerGenerator,String>{
 		@Override
-		protected Void doInBackground() throws Exception {
-		//File configFile = new File("C:/Users/Mini-Yvi/Uni/primer_search_default_config_original.xml");
-		File fastaFile = new File("C:/Users/Mini-Yvi/Uni/contigs.fas");
+		protected PrimerGenerator doInBackground() throws Exception,IOException {
+			System.out.println("Generating Primers");
+			if (!contigs.getFile().exists() || !contigs.getFile().canRead()) {
+				throw new SequenceNotFoundException("Could not find or read the contigs file",contigs);
+			}
+
+		File fastaFile = contigs.getFile();
 		File outputDir = new File(System.getProperty("user.home"));
 		boolean rm = false;
 		if(repeatMasking){
@@ -131,14 +147,16 @@ public class PrimerFrame extends JFrame implements ActionListener, ItemListener 
 			}
 		} else{
 			rm = repeatMasking;
-			if(configFile.exists()){
+			if(configFile != null && configFile.exists()){
 			pg = new PrimerGenerator(fastaFile,configFile,rm,outputDir);
 			}else{
 				pg = new PrimerGenerator(fastaFile,rm,outputDir);
 			}
 		}
+		ProgressMonitorReporter progressReporter = new ProgressMonitorReporter(PrimerFrame.this,"Generating Primers","Generating primers");
+		pg.registerProgressReporter(progressReporter);
 			pg.generatePrimers(contigPairs);
-			return null;
+			return pg;
 		}
 		
 	}

@@ -16,6 +16,7 @@ import java.util.logging.SimpleFormatter;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
+import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 
 /**
  * This class generates the primer candidates given contig-sequences.
@@ -59,6 +60,7 @@ public class PrimerGenerator {
 	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
 	private ArrayList<Integer> noPartnerLeft = new ArrayList<Integer>();
 	private ArrayList<Integer> noPartnerRight = new ArrayList<Integer>();
+	private AbstractProgressReporter progress;
 	
 	
 	/**
@@ -1060,6 +1062,23 @@ public class PrimerGenerator {
 			Vector<String> outputVectorReversePrimer) {
 		this.outputVectorReversePrimer = outputVectorReversePrimer;
 	}
+
+	public void registerProgressReporter(
+			AbstractProgressReporter progressReporter) {
+		this.progress = progressReporter;
+	}
+	/**
+	 * If a progress reporter is registered progress changes are shown with is.
+	 * @param percentDone how far are we?
+	 * @param s explaining sentence
+	 */
+	public void reportProgress(double percentDone, String s) {
+		if (progress != null) {
+			progress.reportProgress(percentDone, s);
+		}
+	
+	}
+
 	
 /*	*//**
 	 * sets up the output file of the primer objects and deletes the working directory created
