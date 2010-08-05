@@ -42,7 +42,9 @@ import java.awt.geom.Point2D.Double;
 import java.util.Observable;
 
 import javax.swing.JComponent;
+import javax.swing.JTextField;
 import javax.swing.JToolTip;
+import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 
@@ -50,6 +52,7 @@ import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
+import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
 /**
  * This should be an interface for different views on the data. at the moment it
@@ -80,6 +83,8 @@ public class DotPlotVisualisation extends DataViewPlugin {
 
 	// class members
 
+	private AlignmentPositionsList alignmentPositionsList;
+
 	private AlignmentPositionDisplayerList alignmentPositionDisplayerList;
 
 	private Graphics2D g2d;
@@ -107,6 +112,9 @@ public class DotPlotVisualisation extends DataViewPlugin {
 	private double[] histogram = {};
 
 	private boolean drawGrid = false;
+	
+	private JTextField referenceLabel;
+	private JTextField contigsLabel;
 
 	/**
 	 * Constructor of the main drawing canvas for the alignments.<br>
@@ -123,7 +131,33 @@ public class DotPlotVisualisation extends DataViewPlugin {
 		this.setFocusable(true);
 //		   Register to display tooltips
 		   ToolTipManager.sharedInstance().registerComponent(this);
+		   
+		   
+		   
+		   //add a textfield for the contigs name and the reference sequence name
+		   SpringLayout layout = new SpringLayout();
 
+		   referenceLabel = new JTextField("Reference");
+		   referenceLabel.setEditable(true); //can be changes
+		   referenceLabel.setHorizontalAlignment(JTextField.RIGHT);
+		   referenceLabel.setOpaque(false);//sets the background transparent. otherwise some parts of the visualisation would be covered.
+		   referenceLabel.setBorder(null); // no boder; integrates better in the dotplot.
+		   //put the reference label bottom right.
+		   layout.putConstraint(SpringLayout.WEST, referenceLabel,border,SpringLayout.WEST, this);
+		   layout.putConstraint(SpringLayout.EAST, referenceLabel,-border,SpringLayout.EAST, this);
+     	   layout.putConstraint(SpringLayout.SOUTH, referenceLabel,0,SpringLayout.SOUTH, this);
+		   
+		   contigsLabel = new JTextField("Contigs");
+		   contigsLabel.setEditable(true);
+		   contigsLabel.setOpaque(false);
+		   contigsLabel.setBorder(null);
+		   //put the contigs label top left
+     	   layout.putConstraint(SpringLayout.WEST, contigsLabel,border,SpringLayout.WEST, this);
+		   layout.putConstraint(SpringLayout.EAST, contigsLabel,-border,SpringLayout.EAST, this);
+
+		   this.setLayout(layout);
+		   this.add(referenceLabel);
+		   this.add(contigsLabel);
 	}
 
 	/**
@@ -134,6 +168,44 @@ public class DotPlotVisualisation extends DataViewPlugin {
 	public DotPlotVisualisation(AlignmentPositionsList ap) {
 		this();
 		setAlignmentsPositionsList(ap);
+		this.setLables();
+}
+
+	/**
+	 * Set the lables for contigs and reference to the filenames without extension.
+	 * If these are not available, set fixed names.
+	 */
+	private void setLables() {
+
+		String refLabel;
+		DNASequence ref = null;
+		if (this.alignmentPositionsList.getTargets().size()>0) {
+			ref = this.alignmentPositionsList.getTargets().get(0);
+		}
+		if (ref != null && ref.getFile() != null) {
+			refLabel = MiscFileUtils.getFileNameWithoutExtension(ref.getFile());
+		} else {
+			if (alignmentPositionsList.getStatistics().getNumberOfTargets() <= 2) {
+				refLabel = "Reference Sequences";
+			} else {
+				refLabel = "Reference Genome";
+			}
+		}
+		referenceLabel.setText(refLabel);
+		
+
+		
+		String contigLabel;
+		DNASequence cont = null;
+		if (this.alignmentPositionsList.getQueries().size()>0) {
+			cont = this.alignmentPositionsList.getQueries().get(0);
+		}
+		if(cont != null && cont.getFile() != null) {
+			contigLabel = MiscFileUtils.getFileNameWithoutExtension(cont.getFile());
+		} else {
+			contigLabel = "Contigs";
+		}
+		contigsLabel.setText(contigLabel);
 	}
 
 	/*
@@ -143,8 +215,10 @@ public class DotPlotVisualisation extends DataViewPlugin {
 	 */
 	public void setAlignmentsPositionsList(AlignmentPositionsList ap) {
 		ap.addObserver(this);
+		this.alignmentPositionsList = ap;
 		this.alignmentPositionDisplayerList = new AlignmentPositionDisplayerList(
 				ap);
+
 	}
 
 	/**
@@ -237,8 +311,7 @@ public class DotPlotVisualisation extends DataViewPlugin {
 				drawingWidth = this.getParent().getWidth() - 2 * border;
 			}
 
-			for (DNASequence q : R2cat.dataModelController
-					.getAlignmentPositionsList().getQueries()) {
+			for (DNASequence q : this.alignmentPositionsList.getQueries()) {
 				horizontalOffset = (q.getOffset() * AlignmentPositionDisplayer
 						.getNormalisationFactorY());
 				separator = new Line2D.Double(0, -horizontalOffset,
@@ -248,8 +321,7 @@ public class DotPlotVisualisation extends DataViewPlugin {
 
 			double verticalOffset = 0;
 			// vertical
-			for (DNASequence t : R2cat.dataModelController
-					.getAlignmentPositionsList().getTargets()) {
+			for (DNASequence t : this.alignmentPositionsList.getTargets()) {
 				verticalOffset = (t.getOffset() * AlignmentPositionDisplayer
 						.getNormalisationFactorX());
 				separator = new Line2D.Double(verticalOffset, 0,
@@ -279,22 +351,21 @@ public class DotPlotVisualisation extends DataViewPlugin {
 		// xaxis
 		g2d.drawLine(0, 0, drawingWidth, 0);
 
-		g2d
-				.drawString("Contigs", -(border / 2), -this.getHeight() + 2
-						* border);
-
-		
-		String xLabel="";
-		if(R2cat.dataModelController.getAlignmentPositionsStatistics().getNumberOfTargets()>=2) {
-			xLabel = "Reference Sequences";
-		} else {
-			xLabel = "Reference Genome";
-		}
-		
-		int xLabelSize = SwingUtilities.computeStringWidth(this
-				.getFontMetrics(this.getFont()), xLabel);
-
-		g2d.drawString(xLabel, drawingWidth - xLabelSize, border / 2 + 5);
+//		g2d
+//				.drawString("Contigs", -(border / 2), -this.getHeight() + 2
+//						* border);
+//		
+//		String xLabel="";
+//		if(R2cat.dataModelController.getAlignmentPositionsStatistics().getNumberOfTargets()>=2) {
+//			xLabel = "Reference Sequences";
+//		} else {
+//			xLabel = "Reference Genome";
+//		}
+//		
+//		int xLabelSize = SwingUtilities.computeStringWidth(this
+//				.getFontMetrics(this.getFont()), xLabel);
+//
+//		g2d.drawString(xLabel, drawingWidth - xLabelSize, border / 2 + 5);
 
 		g2d.setColor(last);
 	}
@@ -518,6 +589,9 @@ public class DotPlotVisualisation extends DataViewPlugin {
 				alignmentPositionDisplayerList.clear();
 				// reset histogramm so that it will be recomputed with repaint()
 				histogram = new double[0];
+				
+				//set the lables for contigs and references
+				this.setLables();
 				this.repaint();
 			} else if (action == NotifyEvent.ORDER_CHANGED_OR_CONTIG_REVERSED) {
 				alignmentPositionDisplayerList.regenerate();
@@ -708,8 +782,7 @@ public class DotPlotVisualisation extends DataViewPlugin {
 			// check which contig we are pointing at
 			String contig = "";
 
-			for (DNASequence q : R2cat.dataModelController
-					.getAlignmentPositionsList().getQueries()) {
+			for (DNASequence q : this.alignmentPositionsList.getQueries()) {
 
 				lower = (q.getOffset() * AlignmentPositionDisplayer
 						.getNormalisationFactorY());
@@ -717,15 +790,14 @@ public class DotPlotVisualisation extends DataViewPlugin {
 						.getNormalisationFactorY());
 
 				if (y >= lower && y < upper) {
-					contig = "Contig: " + q.getId();
+					contig = "Contig: " + q.getId() + (q.isReverseComplemented()?" (reverse complemented)":"");
 					break;
 				}
 			}
 
 			// check on which reference sequence we are
 			String reference = "";
-			for (DNASequence t : R2cat.dataModelController
-					.getAlignmentPositionsList().getTargets()) {
+			for (DNASequence t : this.alignmentPositionsList.getTargets()) {
 
 				lower = (t.getOffset() * AlignmentPositionDisplayer
 						.getNormalisationFactorX());
@@ -743,6 +815,15 @@ public class DotPlotVisualisation extends DataViewPlugin {
 			String separator = "";
 			if (!contig.isEmpty() && !reference.isEmpty()) {
 				separator = "<br>";
+			}
+
+			
+			//sanity check; truncate if the sequence names are too big
+			if (contig.length()>100){
+				contig = contig.substring(0, 97)+"...";
+			}
+			if (reference.length()>100){
+				reference = contig.substring(0, 97)+"...";
 			}
 
 			//if contig or reference is given, set tooltip. else it is null
