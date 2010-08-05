@@ -95,10 +95,12 @@ public class PrimerGenerator {
 	}
 	
 	public void runRepeatMaskingAndSetParameters(){
+
 		if(config==null){
 		try{
 			this.setUpLogFile();
 		if(repeatMaskingBool){
+			this.reportProgress(0.10, "repeatMasking");
 			RepeatMasking rm = new RepeatMasking(fasta);
 			rm.runBLAST();
 			temporaryDirectory = rm.getDir();
@@ -111,6 +113,7 @@ public class PrimerGenerator {
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
 		}
+		this.reportProgress(0.15, "retrieve parameters");
 		scoring = new RetrieveParametersAndScores();
 		}catch(FileNotFoundException e){
 			logger.log(Level.SEVERE, "fasta file could not be found", e);
@@ -125,6 +128,7 @@ public class PrimerGenerator {
 			try{
 				this.setUpLogFile();
 			if(repeatMaskingBool){
+				this.reportProgress(0.10, "repeatMasking");
 				RepeatMasking rm = new RepeatMasking(fasta);
 				rm.runBLAST();
 				temporaryDirectory = rm.getDir();
@@ -145,6 +149,7 @@ public class PrimerGenerator {
 				logger.log(Level.SEVERE, "Uncaught exception", e);
 			}
 			try{
+				this.reportProgress(0.15, "retrieve parameters");
 			scoring = new RetrieveParametersAndScores();
 			FileReader inConfig = new FileReader(config);
 			XMLParser configParser= new XMLParser();
@@ -224,6 +229,9 @@ public class PrimerGenerator {
 		HashMap<String, Integer> contigAndDirectionInfo = new HashMap<String,Integer>();
 		HashMap<String, String> contigAndisReverseComplementInfo = new HashMap<String,String>();
 		nextchar : for(int i = 0; i<contigPair.size();i++){
+			
+			this.reportProgress(0.25, "generate primers for contig pair: "+i);
+			
 			String[] tempPair = contigPair.elementAt(i);
 			try{
 			if(tempPair.length==6){
@@ -367,12 +375,16 @@ public class PrimerGenerator {
 				int seqLength = tempSeqChar.length;
 				String templateSeqString = new String(tempSeqChar);
 				if(directionOfPrimer == 1){
+					
 					String nextPlus1Base = null;
 					String nextPlus2Base =null;
 					String nextPlus1BaseForShortPrimers = null;
 					String nextPlus2BaseForShortPrimers = null;
 					//left primer
 					for(int start =0;start<=(templateSeqString.length()-max);start++){
+						
+						this.reportProgress(0.50, "generate forward primer candidates");
+						
 						int end = start+maxLength;
 						int offset = templateSeqString.length()-start;
 						String candidateForwardPrimerMaxLength = templateSeqString.substring(start,end);
@@ -396,6 +408,9 @@ public class PrimerGenerator {
 							}
 					}
 				}if(directionOfPrimer ==-1){
+					
+					this.reportProgress(0.60, "generate reverse primer candidates");
+					
 					//right primer
 					String nextPlus1Base = null;
 					String nextPlus2Base =null;
@@ -502,6 +517,9 @@ public class PrimerGenerator {
 		double scoreRepeat = 0;
 	
 		for(int i = 0; i<primerCandidates.size();i++){
+			
+			this.reportProgress(0.70, "calculating primer scores");
+			
 			contigID = primerCandidates.elementAt(i).getContigID();
 			primerLength = primerCandidates.elementAt(i).getPrimerLength();
 			primerSeq = primerCandidates.elementAt(i).getPrimerSeq();
@@ -583,6 +601,9 @@ public class PrimerGenerator {
 	
 	public void getPrimerPairs(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException,NullPointerException{
 		PrimerPairs pp = new PrimerPairs();
+		
+		this.reportProgress(0.80, "find primer pairs");
+		
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
 			leftPrimer = pp.sortPrimer(leftPrimer);
 			rightPrimer = pp.sortPrimer(rightPrimer);
@@ -900,6 +921,8 @@ public class PrimerGenerator {
 		String NEW_LINE = System.getProperty("line.separator");
 		String TAB = "\t";
 		Vector<String> outputVector = null;
+		this.reportProgress(0.95, "done");
+
 		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
 			outputVector = new Vector<String>();
 			outputVector.add("primer picking results for contig "+markedSeq[0]+" and "+markedSeq[1]+":");
@@ -1068,6 +1091,10 @@ public class PrimerGenerator {
 		this.outputVectorReversePrimer = outputVectorReversePrimer;
 	}
 
+	/**
+	 * Registers a ProgressReporter for this class.
+	 * @param progressReporter
+	 */
 	public void registerProgressReporter(
 			AbstractProgressReporter progressReporter) {
 		this.progress = progressReporter;
