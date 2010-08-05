@@ -21,8 +21,6 @@
 package de.bielefeld.uni.cebitec.cav.controller;
 
 import java.awt.BorderLayout;
-import java.awt.Checkbox;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -31,8 +29,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Vector;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
@@ -40,13 +38,13 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.ProgressMonitor;
 import javax.swing.filechooser.FileFilter;
 
 import org.freehep.util.export.ExportDialog;
 
 import de.bielefeld.uni.cebitec.cav.R2cat;
+import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.ContigSorter;
 import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
@@ -61,6 +59,7 @@ import de.bielefeld.uni.cebitec.cav.gui.MainMenu;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
 import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
 import de.bielefeld.uni.cebitec.cav.gui.PrimerFrame;
+import de.bielefeld.uni.cebitec.cav.gui.PrimerResults;
 import de.bielefeld.uni.cebitec.cav.gui.PrimerTable;
 import de.bielefeld.uni.cebitec.cav.gui.SequenceOrderTable;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
@@ -512,7 +511,7 @@ public class GuiController {
 	}
 	
 	public void showGeneratePrimerFrame(AlignmentPositionsList alignmentPositionsList) {
-		if (alignmentPositionsList != null) {
+		if (alignmentPositionsList != null) {	
 			PrimerFrame primer = new PrimerFrame(alignmentPositionsList);
 			primer.setIconImage(mainWindow.getIconImage());
 			primer.pack();
@@ -520,4 +519,11 @@ public class GuiController {
 			primer.setVisible(true);
 		}	
 	}
+/*	public void showPrimerResults(PrimerGenerator pg, Vector<String> output){
+		PrimerResults pr = new PrimerResults(pg, output);
+		pr.setIconImage(mainWindow.getIconImage());
+		pr.pack();
+		pr.setLocationByPlatform(true);
+		pr.setVisible(true);
+	}*/
 }
