@@ -277,7 +277,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			System.exit(0);
 		} else if (e.getActionCommand().matches("export_image")) {
 		guiController.exportAlignmentPositionsListAsImage();
-	}
+	}  
 		
 		
 	}

@@ -188,7 +188,7 @@ public class PrimerTableModel extends AbstractTableModel {
 	 * (The return type string is only an example. Feel free to adopt it as necessary)
 	 * @return
 	 */
-	public String getSelectedPairs() {
+/*	public String getSelectedPairs() {
 		StringBuilder out = new StringBuilder();
 		int secondIndex ;
 		Vector<String[]> contigPairVector = new Vector<String[]>();
@@ -212,10 +212,10 @@ public class PrimerTableModel extends AbstractTableModel {
 			}
 		}
 		return out.toString();
-	}
+	}*/
 	
 	//other setup for getSelectedParis... works with my setup of actionperformed in primertable
-/*	public Vector<String[]> getSelectedPairs() {
+	public Vector<String[]> getSelectedPairs() {
 		int secondIndex ;
 		Vector<String[]> contigPairVector = new Vector<String[]>();
 		int j = 0;
@@ -238,6 +238,6 @@ public class PrimerTableModel extends AbstractTableModel {
 			}
 		}
 		return contigPairVector;
-	}*/
+	}
 
 }

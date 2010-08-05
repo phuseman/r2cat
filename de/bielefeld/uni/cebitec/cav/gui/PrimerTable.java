@@ -20,32 +20,35 @@
 
 package de.bielefeld.uni.cebitec.cav.gui;
 
-import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
+import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
 /**
  * This table shows the order of queries of an AlignmentPositionsList Elements
@@ -54,7 +57,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent
  * @author phuseman
  * 
  */
-public class PrimerTable extends JTable implements Observer, ActionListener, ItemListener {
+public class PrimerTable extends JTable implements Observer, ActionListener{
 
 	static class ContigTableCellRenderer extends DefaultTableCellRenderer {
 		private boolean reverse = false;
@@ -270,79 +273,13 @@ public class PrimerTable extends JTable implements Observer, ActionListener, Ite
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals("generate_primer")) {
-			System.out.println("Generate primer!!");
-			//TODO: Add the code to generate primer pairs
-			// For somewhat lengthy calculations we should use here a SwingWorker that does not block the GUI.
-			// Additionally a ProgressMonitor helps to estimate the waiting time.
-			System.out.println(((PrimerTableModel) this.getModel()).getSelectedPairs());
-			
-
-		} else if (e.getActionCommand().equals("select_all")) {
+	 if (e.getActionCommand().equals("select_all")) {
 			((PrimerTableModel) this.getModel()).selectAll();
 		} else if (e.getActionCommand().equals("select_none")) {
 			((PrimerTableModel) this.getModel()).selectNone();
 		}
 		this.invalidate();
 		this.repaint();
-
-	}
-
-/*	//other set up for actionPerformed method
-	private PrimerGenerator pg = null;
-	private Vector<String[]> contigPairs = null;
-	private boolean repeatMasking = false;
-	
-	class PrimerGeneratorTask extends SwingWorker<Void,Void>{
-		@Override
-		protected Void doInBackground() throws Exception {
-		File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
-		File fastaFile = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
-		File outputDir = new File(System.getProperty("user.home"));
-		boolean rm = false;
-		if(repeatMasking){
-			rm = repeatMasking;
-		pg = new PrimerGenerator(fastaFile,configFile,rm,outputDir);
-		} else{
-			rm = repeatMasking;
-			pg = new PrimerGenerator(fastaFile,configFile,rm,outputDir);
-		}
-			pg.generatePrimers(contigPairs);
-			return null;
-		}
-		
-	}
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals("generate_primer")) {
-			System.out.println("Generate primer!!");
-			//TODO: Add the code to generate primer pairs
-			// For somewhat lengthy calculations we should use here a SwingWorker that does not block the GUI.
-			// Additionally a ProgressMonitor helps to estimate the waiting time.
-			PrimerGeneratorTask pgT = new PrimerGeneratorTask();
-			contigPairs = (Vector<String[]>)((PrimerTableModel)this.getModel()).getSelectedPairs();
-			pgT.execute();
-
-		} else if (e.getActionCommand().equals("select_all")) {
-			((PrimerTableModel) this.getModel()).selectAll();
-		} else if (e.getActionCommand().equals("select_none")) {
-			((PrimerTableModel) this.getModel()).selectNone();
-		}
-		this.invalidate();
-		this.repaint();
-
-	}*/
-
-	@Override
-	public void itemStateChanged(ItemEvent arg0) {
-/*		if(arg0.getItem()=="Repeat Masking"){
-		if(arg0.getStateChange()==1){
-			repeatMasking = true;
-		} else{
-			repeatMasking = false;
-		}
-		}*/
-		
 	}
 }
 
