@@ -54,13 +54,15 @@ public class PrimerGenerator {
 	private Vector<String> outputVectorPrimerPair =null;
 	private Vector<String> outputVectorForwardPrimer =null;
 	private Vector<String> outputVectorReversePrimer =null;
-	private boolean outputDirByUserExists= false;
-	private boolean rm = false;
+	private boolean repeatMaskingBool = false;
+	private RepeatMasking repeatMasking;
 	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
 	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
 	private ArrayList<Integer> noPartnerLeft = new ArrayList<Integer>();
 	private ArrayList<Integer> noPartnerRight = new ArrayList<Integer>();
 	private AbstractProgressReporter progress;
+	private File fasta;
+	private File config;
 	
 	
 	/**
@@ -73,43 +75,10 @@ public class PrimerGenerator {
 
 	public PrimerGenerator(File fastaFile, File configFile,
 			boolean repeatMasking,File outputDirectory) {
-		try{
-			this.setUpLogFile();
-			if(outputDirectory!=null){
-				outputDir = outputDirectory;
-				outputDirByUserExists = true;
-			}else{
-				outputDirByUserExists = false;
-			}
-		if(repeatMasking){
-			RepeatMasking rm = new RepeatMasking(fastaFile);
-			temporaryDirectory = rm.getDir();
-			fastaParser = rm.getFfrForpreprocessed();
-			seq = fastaParser.getCharArray();
-			sequences = fastaParser.getSequences();
-			//temporaryDirectory.deleteOnExit();
-		} else{
-			fastaParser = new FastaFileReader(fastaFile);
-			seq = fastaParser.getCharArray();
-			sequences = fastaParser.getSequences();
-		}
-		}catch(FileNotFoundException e){
-			logger.log(Level.SEVERE, "fasta file could not be found", e);
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "problem occured running BLAST 2.2.23 programms", e);
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Uncaught exception", e);
-		}
-		try{
-		scoring = new RetrieveParametersAndScores();
-		FileReader inConfig = new FileReader(configFile);
-		XMLParser configParser= new XMLParser();
-		configParser.parse(scoring, inConfig);
-		}catch(FileNotFoundException e){
-			logger.log(Level.SEVERE, "config file could not be found! The default parameters were used", e);
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Uncaught exception", e);
-		}
+		fasta = fastaFile;
+		config = configFile;
+		repeatMaskingBool = repeatMasking;
+		outputDir = outputDirectory;
 	}
 	
 	/**
@@ -119,24 +88,26 @@ public class PrimerGenerator {
 	 * @param repeatMasking
 	 */
 	public PrimerGenerator(File fastaFile, boolean repeatMasking,File outputDirectory){
-		rm = repeatMasking;
+		repeatMaskingBool = repeatMasking;
+		fasta = fastaFile;
+		outputDir = outputDirectory;
+		config = null;
+	}
+	
+	public void runRepeatMaskingAndSetParameters(){
+		if(config==null){
 		try{
 			this.setUpLogFile();
-			if(outputDirectory!=null){
-				outputDir = outputDirectory;
-				outputDirByUserExists = true;
-			}else{
-				outputDirByUserExists = false;
-			}
-		if(repeatMasking){
-			RepeatMasking rm = new RepeatMasking(fastaFile);
+		if(repeatMaskingBool){
+			RepeatMasking rm = new RepeatMasking(fasta);
+			rm.runBLAST();
 			temporaryDirectory = rm.getDir();
 			//temporaryDirectory.deleteOnExit();
 			fastaParser = rm.getFfrForpreprocessed();
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
 		} else{
-			fastaParser = new FastaFileReader(fastaFile);
+			fastaParser = new FastaFileReader(fasta);
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
 		}
@@ -149,6 +120,40 @@ public class PrimerGenerator {
 			logger.log(Level.SEVERE, "problem occured running BLAST 2.2.23 programms", e);
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Uncaught exception", e);
+		}
+		}else{
+			try{
+				this.setUpLogFile();
+			if(repeatMaskingBool){
+				RepeatMasking rm = new RepeatMasking(fasta);
+				rm.runBLAST();
+				temporaryDirectory = rm.getDir();
+				fastaParser = rm.getFfrForpreprocessed();
+				seq = fastaParser.getCharArray();
+				sequences = fastaParser.getSequences();
+				//temporaryDirectory.deleteOnExit();
+			} else{
+				fastaParser = new FastaFileReader(fasta);
+				seq = fastaParser.getCharArray();
+				sequences = fastaParser.getSequences();
+			}
+			}catch(FileNotFoundException e){
+				logger.log(Level.SEVERE, "fasta file could not be found", e);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "problem occured running BLAST 2.2.23 programms", e);
+			} catch (InterruptedException e) {
+				logger.log(Level.SEVERE, "Uncaught exception", e);
+			}
+			try{
+			scoring = new RetrieveParametersAndScores();
+			FileReader inConfig = new FileReader(config);
+			XMLParser configParser= new XMLParser();
+			configParser.parse(scoring, inConfig);
+			}catch(FileNotFoundException e){
+				logger.log(Level.SEVERE, "config file could not be found! The default parameters were used", e);
+			} catch (Exception e) {
+				logger.log(Level.SEVERE, "Uncaught exception", e);
+			}
 		}
 	
 	}
@@ -609,7 +614,7 @@ public class PrimerGenerator {
 	 */
 	
 	public void deleteDir(File dir){
-		System.out.println(dir.getAbsolutePath());
+		//System.out.println(dir.getAbsolutePath());
 		if(dir.getName().contains("tempDirectoryForBlast")&&dir.exists()){
 			File[] files = dir.listFiles();
 		if(files!=null){
@@ -1005,7 +1010,7 @@ public class PrimerGenerator {
 	 */
 	public void output(Vector<String> outputVector) throws IOException {
 	
-		if(outputDirByUserExists&&markedSeq.length==2){
+		if(markedSeq.length==2){
 			outputFile = new File(outputDir,"r2cat_Primerlist_for_contigs_"+markedSeq[0]+"_and_"+markedSeq[1]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			for(int i=0; i<outputVector.size();i++){
@@ -1014,7 +1019,7 @@ public class PrimerGenerator {
 			buffer.flush();
 			buffer.close();
 			//ausgabe im programm selbst!!!
-		} else if(outputDirByUserExists&&markedSeq.length==1){
+		} else if(markedSeq.length==1){
 			outputFile = new File(outputDir,"r2cat_Primerlist_for_contig_"+markedSeq[0]+".txt");
 			PrintWriter buffer = new PrintWriter(new FileWriter(outputFile));
 			for(int i=0; i<outputVector.size();i++){
@@ -1029,7 +1034,7 @@ public class PrimerGenerator {
 			System.out.print(outputVector.elementAt(j).toString());
 			}
 		}
-		if(rm){
+		if(repeatMaskingBool){
 		if(temporaryDirectory.exists()){
 			this.deleteDir(temporaryDirectory);
 			}
