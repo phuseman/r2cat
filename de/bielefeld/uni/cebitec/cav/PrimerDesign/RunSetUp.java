@@ -1,20 +1,18 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Vector;
 
 public class RunSetUp {
 	
-	public static void main(String args[]){
+	public static void main(String args[]) throws IOException{
 		//Path to the config file, which contains the parameters.
-		File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
+		File configFile = new File("C:/Users/Mini-Yvi/Uni/primer_search_default_config_original.xml");
 		//File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
 		
 		//Path to fasta file containing a list of contigs
-		File fastaFile = new File("C:/Users/Yvisunshine/Uni/contigs.fas");
+		File fastaFile = new File("C:/Users/Mini-Yvi/Uni/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.fas");
 		
 		//location of output files
 		File outputDir = new File(System.getProperty("user.home"));
@@ -40,23 +38,23 @@ public class RunSetUp {
 		
 		//This String[] are set up to let the programm run. And give 3 output files.
 		String[] pair1 = new String[6];
-		pair1[0] = "0";
+		pair1[0] = "000";
 		pair1[1] = "false";
 		pair1[2] = "forward";
-		pair1[3] = "1";
+		pair1[3] = "001";
 		pair1[4] = "false";
 		pair1[5] = "reverse";
 		
 		String[] pair2 = new String[6];
-		pair2[0] = "3";
+		pair2[0] = "003";
 		pair2[1] = "false";
 		pair2[2] = "forward";
-		pair2[3] = "4";
+		pair2[3] = "004";
 		pair2[4] = "false";
 		pair2[5] = "reverse";
 		
 		String[] pair3=new String[3];
-		pair3[0] = "1";
+		pair3[0] = "001";
 		pair3[1] = "false";
 		pair3[2] ="forward";
 		
@@ -64,7 +62,7 @@ public class RunSetUp {
 		contigPairs.add(pair2);
 		contigPairs.add(pair3);
 		
-		
+		pg.runRepeatMaskingAndSetParameters();
 		pg.generatePrimers(contigPairs);
 	}
 
