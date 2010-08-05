@@ -28,24 +28,26 @@ import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 import de.bielefeld.uni.cebitec.cav.utils.ProgressMonitorReporter;
 
-public class PrimerFrame extends JFrame implements ActionListener, ItemListener {
+public class PrimerFrame extends JFrame implements ActionListener {
 	
 	private AlignmentPositionsList alignmentPositionsList;
 	private DNASequence contigs;
 	private PrimerTableModel model;
 	private PrimerTable primer;
-	private JButton setConfig;
-	private boolean repeatMasking = false;
+	private JButton setConfigButton;
 	private File configFile;
 	private File lastDir;
 	private PrimerGenerator pg;
 	private Vector<String[]> contigPairs = null;
-	private Checkbox rp;
+	private Checkbox repeatMaskingCheckBox;
+	private File fastaFile;
 	
 	public PrimerFrame(AlignmentPositionsList alignmentPositionsList){
 		this.alignmentPositionsList = alignmentPositionsList;
 		primer = new PrimerTable(alignmentPositionsList);
 		model = (PrimerTableModel) primer.getModel();
+		//übprüfen ob leer... dann FILE
+		Vector<DNASequence> seq = alignmentPositionsList.getQueries();
 		init();
 	}
 	private void init(){
@@ -65,14 +67,13 @@ public class PrimerFrame extends JFrame implements ActionListener, ItemListener 
 		controlPanel.add(remove);
 		remove.addActionListener(primer);
 		
-		rp= new Checkbox("Repeat Masking");
-		controlPanel.add(rp);
-		rp.addItemListener(this);
+		repeatMaskingCheckBox= new Checkbox("Repeat Masking");
+		controlPanel.add(repeatMaskingCheckBox);
 		
-		setConfig = new JButton("Set Config");
-		setConfig.setActionCommand("setConfig");
-		controlPanel.add(setConfig);
-		setConfig.addActionListener(this);
+		setConfigButton = new JButton("Set Config");
+		setConfigButton.setActionCommand("setConfig");
+		controlPanel.add(setConfigButton);
+		setConfigButton.addActionListener(this);
 		
 		controlPanel.add(new JLabel("Generate Primers"));
 		JButton run = new JButton("Run!");
@@ -102,6 +103,7 @@ public class PrimerFrame extends JFrame implements ActionListener, ItemListener 
 			
 			if(alignmentPositionsList.getQueries() != null && !alignmentPositionsList.getQueries().isEmpty()) {
 				contigs = alignmentPositionsList.getQueries().get(0);
+				System.out.println(contigs.getFile().getAbsolutePath());
 			} else {
 				contigs = new DNASequence("dummy");
 			}
@@ -115,11 +117,11 @@ public class PrimerFrame extends JFrame implements ActionListener, ItemListener 
 			"Select config (xml format)");
 			this.setConfig(config, false);
 			if(config!=null){
-				this.setConfig.setText(configFile.getName());
-				this.setConfig.setBackground(Color.LIGHT_GRAY);
+				this.setConfigButton.setText(configFile.getName());
+				this.setConfigButton.setBackground(Color.LIGHT_GRAY);
 			} else{
-				this.setConfig.setText("Set Config");
-				this.setConfig.setBackground(null);
+				this.setConfigButton.setText("Set Config");
+				this.setConfigButton.setBackground(null);
 				configFile = null;
 			}
 		}
@@ -134,33 +136,24 @@ public class PrimerFrame extends JFrame implements ActionListener, ItemListener 
 			if (!contigs.getFile().exists() || !contigs.getFile().canRead()) {
 				throw new SequenceNotFoundException("Could not find or read the contigs file",contigs);
 			}
-
+			//repeatMaskingCheckBox.setEnabled(false);
+			//setConfigButton.setEnabled(false);
+			
 		File fastaFile = contigs.getFile();
 		File outputDir = new File(System.getProperty("user.home"));
-		boolean rm = false;
-		if(repeatMasking){
-			rm = repeatMasking;
-		if(configFile.exists()){
-			pg = new PrimerGenerator(fastaFile,configFile,rm,outputDir);
-			}else{
-				pg = new PrimerGenerator(fastaFile,rm,outputDir);
+		
+	if(configFile!=null&&configFile.exists()){
+		pg = new PrimerGenerator(fastaFile,configFile,repeatMaskingCheckBox.getState(),outputDir);
+		}else{
+			pg = new PrimerGenerator(fastaFile,repeatMaskingCheckBox.getState(),outputDir);
 			}
-		} else{
-			rm = repeatMasking;
-			if(configFile != null && configFile.exists()){
-			pg = new PrimerGenerator(fastaFile,configFile,rm,outputDir);
-			}else{
-				pg = new PrimerGenerator(fastaFile,rm,outputDir);
-			}
-		}
-		ProgressMonitorReporter progressReporter = new ProgressMonitorReporter(PrimerFrame.this,"Generating Primers","Generating primers");
-		pg.registerProgressReporter(progressReporter);
+			ProgressMonitorReporter progressReporter = new ProgressMonitorReporter(PrimerFrame.this,"Generating Primers","Generating primers");
+			pg.registerProgressReporter(progressReporter);
+			pg.runRepeatMaskingAndSetParameters();
 			pg.generatePrimers(contigPairs);
 			return pg;
 		}
-		
 	}
-
 	
 	private void setConfig(File q, boolean silent){
 		if (q == null || q.getName().equalsIgnoreCase("")) {
@@ -180,9 +173,4 @@ public class PrimerFrame extends JFrame implements ActionListener, ItemListener 
 		JOptionPane.showMessageDialog(this, error, "Error",
 				JOptionPane.ERROR_MESSAGE);
 	}
-	
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		
-		}
-	}
+}
