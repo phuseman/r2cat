@@ -20,7 +20,6 @@
 
 package de.bielefeld.uni.cebitec.cav.datamodel;
 
-import java.util.Locale;
 import java.util.Vector;
 
 import javax.swing.table.AbstractTableModel;
@@ -188,33 +187,6 @@ public class PrimerTableModel extends AbstractTableModel {
 	 * (The return type string is only an example. Feel free to adopt it as necessary)
 	 * @return
 	 */
-/*	public String getSelectedPairs() {
-		StringBuilder out = new StringBuilder();
-		int secondIndex ;
-		Vector<String[]> contigPairVector = new Vector<String[]>();
-		int j = 0;
-		for (int i = 0; i < createPrimer.length; i++) {
-			String[] contigPair = new String[6];
-			if (createPrimer[i]) {
-				//we look at all adjacent contigs, so the next contig has index+1, except for the last one, here it is the zero index.
-				secondIndex=(i+1)%dnaSequence().size();
-				
-				// the key information are the contig names and their direction
-				out.append( String.format((Locale) null,
-						"%s, %b,%s, %s, %b,%s\n",
-						dnaSequence().get(i).getId(),
-						dnaSequence().get(i).isReverseComplemented(),
-						"forward",
-						dnaSequence().get(secondIndex).getId(),
-						dnaSequence().get(secondIndex).isReverseComplemented(),
-						"reverse"
-						));
-			}
-		}
-		return out.toString();
-	}*/
-	
-	//other setup for getSelectedParis... works with my setup of actionperformed in primertable
 	public Vector<String[]> getSelectedPairs() {
 		int secondIndex ;
 		Vector<String[]> contigPairVector = new Vector<String[]>();
