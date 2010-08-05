@@ -26,9 +26,8 @@ public class RunBlastToFindRepeats {
 	public RunBlastToFindRepeats(File tempFile, File tempDir) throws IOException, InterruptedException {
 		contigToBlast = tempFile;
 		directoryForTempFiles = tempDir;
-		makeBlastDB();
-		runBlastCommand();
 	}
+	
 /**
  * This method executes the programm formatdb and makes a nucleotide database from the given
  * fasta file.
@@ -37,7 +36,6 @@ public class RunBlastToFindRepeats {
  * @throws InterruptedException
  */
 	public void makeBlastDB() throws IOException, InterruptedException{
-		contigToBlast.setWritable(true);
 		String command = new String("formatdb -i "+contigToBlast.getName()+" -p F");
 		Process p = Runtime.getRuntime().exec(command,null,directoryForTempFiles);
 		p.waitFor();
