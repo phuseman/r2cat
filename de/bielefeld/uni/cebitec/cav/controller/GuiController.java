@@ -21,7 +21,6 @@
 package de.bielefeld.uni.cebitec.cav.controller;
 
 import java.awt.BorderLayout;
-import java.awt.Checkbox;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -31,7 +30,6 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
@@ -396,11 +394,7 @@ public class GuiController {
 
 	private void exportAsFastaFile(File f, boolean ignoreMissingFiles) {
 		try {
-			if (!f.getName().endsWith(".fas")) {
-				f = new File(f.getAbsolutePath() + ".fas");
-			}
-
-			// TODO check if all files are existent
+			MiscFileUtils.enforceExtension(f, ".fas");
 
 			// mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			int contigsWritten = R2cat.dataModelController
@@ -415,20 +409,10 @@ public class GuiController {
 
 		} catch (IOException e) {
 			if (e.getClass() == SequenceNotFoundException.class) {
+				int answer = SequenceNotFoundException.handleSequenceNotFoundException((SequenceNotFoundException)e);
 				
-				SequenceNotFoundException seqNotFoundException = (SequenceNotFoundException)e;
-
-				Object[] options = { "Yes", "No, leave out missing sequences", "Abort" };
-				int n = JOptionPane.showOptionDialog(this.getMainWindow(),
-						e.getMessage()+"\nDo you want to select a file?",
-						"Sequence not found", JOptionPane.YES_NO_CANCEL_OPTION,
-						JOptionPane.WARNING_MESSAGE, null,
-						options,
-						options[0]);
-				
-				switch (n) {
+				switch (answer) {
 				case JOptionPane.YES_OPTION:
-				seqNotFoundException.getDNASequence().setFile(this.chooseFile("Choose a new file",true, new CustomFileFilter(".fas,.fna,.fasta", "Fasta file")));
 					this.exportAsFastaFile(f, ignoreMissingFiles);
 					break;
 				case JOptionPane.NO_OPTION:
