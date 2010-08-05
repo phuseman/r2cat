@@ -6,11 +6,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 
+import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
 import de.bielefeld.uni.cebitec.cav.controller.SequenceNotFoundException;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
@@ -103,14 +103,29 @@ public class PrimerFrame extends JFrame implements ActionListener {
 			
 			if(alignmentPositionsList.getQueries() != null && !alignmentPositionsList.getQueries().isEmpty()) {
 				contigs = alignmentPositionsList.getQueries().get(0);
-				System.out.println(contigs.getFile().getAbsolutePath());
 			} else {
 				contigs = new DNASequence("dummy");
 			}
 			
 			PrimerGeneratorTask pgT = new PrimerGeneratorTask();
 			contigPairs = (Vector<String[]>)((PrimerTableModel)primer.getModel()).getSelectedPairs();
+			PrimerGenerator primerG = null;
 			pgT.execute();
+	/*		try {
+			primerG = pgT.get();
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ExecutionException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				System.out.println(pgT.isDone());
+				if(pgT.isDone()){
+					Vector<String> output = primerG.getOutputVectorPrimerPair();
+						R2cat.guiController.showPrimerResults(primerG,output);
+						//this.dispose();
+			}*/
 
 		} else if(e.getActionCommand().matches("setConfig")){
 			File config = this.chooseFile(configFile,
@@ -149,8 +164,10 @@ public class PrimerFrame extends JFrame implements ActionListener {
 			}
 			ProgressMonitorReporter progressReporter = new ProgressMonitorReporter(PrimerFrame.this,"Generating Primers","Generating primers");
 			pg.registerProgressReporter(progressReporter);
+			progressReporter.setProgress(5);
 			pg.runRepeatMaskingAndSetParameters();
 			pg.generatePrimers(contigPairs);
+			progressReporter.close();
 			return pg;
 		}
 	}
