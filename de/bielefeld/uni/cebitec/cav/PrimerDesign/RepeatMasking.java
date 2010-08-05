@@ -21,15 +21,14 @@ import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
  */
 public class RepeatMasking {
 	private char[] seq;
-	FastaFileReader ffr= null;
-	FastaFileReader ffrForpreprocessed = null;
-	Vector<DNASequence> sequences=null;
-	RunBlastToFindRepeats runBlast =null;
-	File tempDir = null;
-	File blastOutput = null;
-	String dirName = "tempDirectoryForBlast";
-	String preProcessedFastaFile ="preProcessedFastaFile";
-	String toBlast ="toBlast";
+	private FastaFileReader ffr= null;
+	private FastaFileReader ffrForpreprocessed = null;
+	private Vector<DNASequence> sequences=null;
+	private File tempDir = null;
+	private File blastOutput = null;
+	private String dirName = "tempDirectoryForBlast";
+	private String preProcessedFastaFile ="preProcessedFastaFile";
+	private String toBlast ="toBlast";
 	
 /**
  * Constructor to set up the working directory and the fasta file.
@@ -42,10 +41,15 @@ public class RepeatMasking {
 	public RepeatMasking(File fasta) throws IOException, InterruptedException {
 		ffr = new FastaFileReader(fasta);
 		sequences = ffr.getSequences();
+	}
+	
+	public void runBLAST()throws IOException, InterruptedException{
 		this.setSeqToCapLetters();
 		tempDir = this.createTempDir();
 		File tempFileToBlast=writeTempFile(toBlast,tempDir);
-		runBlast = new RunBlastToFindRepeats(tempFileToBlast,tempDir);
+		RunBlastToFindRepeats runBlast = new RunBlastToFindRepeats(tempFileToBlast,tempDir);
+		runBlast.makeBlastDB();
+		runBlast.runBlastCommand();
 		blastOutput = runBlast.getBlastOutput();
 		this.blastOutputParsen();
 		this.setUp(tempDir);
