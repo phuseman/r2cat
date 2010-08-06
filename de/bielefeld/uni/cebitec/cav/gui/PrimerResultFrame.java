@@ -17,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -119,8 +120,13 @@ public class PrimerResultFrame extends JFrame implements ActionListener{
 			writeToFile.flush();
 			writeToFile.close();
 		}
+		popUpDialog();
 		
-		
+	}
+
+	private void popUpDialog() {
+		      JOptionPane.showMessageDialog(this, "Saving of Files is done",
+						                       "Saving Status", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	protected void saveOneFile(boolean allResultsToFile) {
