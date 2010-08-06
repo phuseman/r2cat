@@ -284,6 +284,20 @@ public class FastaFileReader {
 		return sequences.get(index);
 	}
 
+	/**
+	 * Gives the DNASequence Object, if this id exists.
+	 * @param id to be found
+	 * @return {@link DNASequence} object. if not existant, thhis method returns null
+	 */
+	public DNASequence getSequence(String id) {
+		if(offsetsInCharArray.containsKey(id)) {
+			return sequences.get(offsetsInCharArray.get(id));
+		} else {
+			return null;
+		}
+	}
+
+	
 	public File getSource() {
 		return source;
 	}
