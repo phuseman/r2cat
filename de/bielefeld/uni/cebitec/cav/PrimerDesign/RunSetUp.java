@@ -13,9 +13,7 @@ public class RunSetUp {
 		
 		//Path to fasta file containing a list of contigs
 		File fastaFile = new File("C:/Users/Mini-Yvi/Uni/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.fas");
-		
-		//location of output files
-		File outputDir = new File(System.getProperty("user.home"));
+	
 		
 		//marks if the user wants to do preprocessing step for the masking of repeats.
 		//If so, the user has to have BLAST 2.2.23 installed and included in the path-variable
@@ -26,11 +24,11 @@ public class RunSetUp {
 
 		//Creating a new instance of the PrimerGenerator class.
 		PrimerGenerator pg;
-		pg = new PrimerGenerator(fastaFile,configFile,repeatMasking,outputDir);
+		pg = new PrimerGenerator(fastaFile,configFile,repeatMasking);
 	
 		//Creating a new instance of the PrimerGenerator with using a different constructor. In this case default
 		//parameters are used to calculate the primer scores.
-		//PrimerGenerator pg = new PrimerGenerator(fastaFile,repeatMasking,outputDir);
+		//PrimerGenerator pg = new PrimerGenerator(fastaFile,repeatMasking);
 		
 		//This vector contains the IDs of the marked sequence for the primer design. For each sequence, the direction of the primer is given.
 		//Also only on contig can be selected to generate only possible primers for one of the contig ends.

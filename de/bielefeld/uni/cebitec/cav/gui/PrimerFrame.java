@@ -178,12 +178,11 @@ public class PrimerFrame extends JFrame implements ActionListener {
 			}
 			
 		File fastaFile = contigs.getFile();
-		File outputDir = new File(System.getProperty("user.home"));
 		
 	if(configFile!=null&&configFile.exists()){
-		pg = new PrimerGenerator(fastaFile,configFile,repeatMaskingCheckBox.getState(),outputDir);
+		pg = new PrimerGenerator(fastaFile,configFile,repeatMaskingCheckBox.getState());
 		}else{
-			pg = new PrimerGenerator(fastaFile,repeatMaskingCheckBox.getState(),outputDir);
+			pg = new PrimerGenerator(fastaFile,repeatMaskingCheckBox.getState());
 			}
 			ProgressMonitorReporter progressReporter = new ProgressMonitorReporter(PrimerFrame.this,"Generating Primers","Generating primers");
 			pg.registerProgressReporter(progressReporter);
