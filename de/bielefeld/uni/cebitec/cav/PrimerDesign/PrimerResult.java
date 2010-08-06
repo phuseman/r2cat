@@ -55,7 +55,7 @@ public class PrimerResult {
 		String id1 = contigLeft.getId();
 		String id2 = contigRight.getId();
 		
-		String ids = id1+" "+id2;
+		String ids = id1+"_"+id2;
 		
 		return ids;
 	}
