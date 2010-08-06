@@ -59,7 +59,7 @@ import de.bielefeld.uni.cebitec.cav.gui.MainMenu;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
 import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
 import de.bielefeld.uni.cebitec.cav.gui.PrimerFrame;
-import de.bielefeld.uni.cebitec.cav.gui.PrimerResults;
+import de.bielefeld.uni.cebitec.cav.gui.PrimerResultFrame;
 import de.bielefeld.uni.cebitec.cav.gui.PrimerTable;
 import de.bielefeld.uni.cebitec.cav.gui.SequenceOrderTable;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;

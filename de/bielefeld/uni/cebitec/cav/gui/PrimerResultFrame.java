@@ -9,18 +9,19 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
+import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerResult;
 
-public class PrimerResults extends JFrame implements ActionListener{
+public class PrimerResultFrame extends JFrame implements ActionListener{
 	
 	private PrimerGenerator primerGenerator;
-	private Vector<String> outputVector;
+	private Vector<PrimerResult> primerResults;
 	
-	public PrimerResults(PrimerGenerator pg, Vector<String> output){
-		primerGenerator = pg;
-		outputVector = output;
+	public PrimerResultFrame(Vector<PrimerResult> pr){
+		primerResults = pr;
 		init();
 	}
 	
@@ -28,13 +29,15 @@ public class PrimerResults extends JFrame implements ActionListener{
 		this.setTitle("Primer Results");
 		this.setLayout(new BorderLayout());
 		JPanel results = new JPanel();
+	
 		String out = null;
 		JTextArea resultText = new JTextArea();
 		
-		for(int i=0;i<outputVector.size();i++){
-			out = outputVector.elementAt(i).toString();
+		for(int i=0;i<primerResults.size();i++){
+			out = primerResults.elementAt(i).toString();
 		}
 		resultText.setText(out);
+		
 		results.add(resultText,BorderLayout.CENTER);
 		
 		JButton exportResults = new JButton("Save Results");
@@ -42,7 +45,7 @@ public class PrimerResults extends JFrame implements ActionListener{
 		exportResults.addActionListener(this);
 		results.add(exportResults);
 		
-		this.add(results, BorderLayout.SOUTH);
+		this.add(new JScrollPane(results), BorderLayout.CENTER);
 		this.pack();
 		
 		int width = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;

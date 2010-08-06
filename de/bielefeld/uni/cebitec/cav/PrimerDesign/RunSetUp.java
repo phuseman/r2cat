@@ -6,7 +6,7 @@ import java.util.Vector;
 
 public class RunSetUp {
 	
-	public static void main(String args[]) throws IOException{
+	public static void main(String args[]) throws Exception{
 		//Path to the config file, which contains the parameters.
 		File configFile = new File("C:/Users/Mini-Yvi/Uni/primer_search_default_config_original.xml");
 		//File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
@@ -22,7 +22,7 @@ public class RunSetUp {
 		//Note: While doing this step a temporary directory for the BLAST output files is generated.
 		boolean repeatMasking = false;
 		
-		repeatMasking = true;
+		repeatMasking = false;
 
 		//Creating a new instance of the PrimerGenerator class.
 		PrimerGenerator pg;
@@ -53,14 +53,8 @@ public class RunSetUp {
 		pair2[4] = "false";
 		pair2[5] = "reverse";
 		
-		String[] pair3=new String[3];
-		pair3[0] = "001";
-		pair3[1] = "false";
-		pair3[2] ="forward";
-		
 		contigPairs.add(pair1);
-		contigPairs.add(pair2);
-		contigPairs.add(pair3);
+		//contigPairs.add(pair2);
 		
 		pg.runRepeatMaskingAndSetParameters();
 		pg.generatePrimers(contigPairs);

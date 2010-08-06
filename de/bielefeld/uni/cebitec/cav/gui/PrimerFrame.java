@@ -21,6 +21,7 @@ import javax.swing.SwingWorker;
 
 import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
+import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerResult;
 import de.bielefeld.uni.cebitec.cav.controller.SequenceNotFoundException;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
@@ -111,21 +112,7 @@ public class PrimerFrame extends JFrame implements ActionListener {
 			contigPairs = (Vector<String[]>)((PrimerTableModel)primer.getModel()).getSelectedPairs();
 			PrimerGenerator primerG = null;
 			pgT.execute();
-	/*		try {
-			primerG = pgT.get();
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (ExecutionException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				System.out.println(pgT.isDone());
-				if(pgT.isDone()){
-					Vector<String> output = primerG.getOutputVectorPrimerPair();
-						R2cat.guiController.showPrimerResults(primerG,output);
-						//this.dispose();
-			}*/
+			
 
 		} else if(e.getActionCommand().matches("setConfig")){
 			File config = this.chooseFile(configFile,
@@ -143,16 +130,41 @@ public class PrimerFrame extends JFrame implements ActionListener {
 		this.invalidate();
 		this.repaint();
 	}
+	public void showResults(Vector<PrimerResult> pResult){
+		PrimerResultFrame pr = new PrimerResultFrame(pResult);
+		//pr.setIconImage(mainWindow.getIconImage());
+		pr.pack();
+		pr.setLocationByPlatform(true);
+		pr.setVisible(true);
+	}
 	
-	class PrimerGeneratorTask extends SwingWorker<PrimerGenerator,String>{
+	class PrimerGeneratorTask extends SwingWorker<Vector<PrimerResult>,String>{
+		
 		@Override
-		protected PrimerGenerator doInBackground() throws Exception,IOException {
+		public void done(){
+			
+			Vector<PrimerResult> pResult = null;
+				try {
+					pResult = this.get();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if(pResult!=null&&pResult.size()>0){
+					showResults(pResult);
+					PrimerFrame.this.dispose();
+				}
+		}
+		@Override
+		protected Vector<PrimerResult> doInBackground() throws Exception,IOException {
 			System.out.println("Generating Primers");
 			if (!contigs.getFile().exists() || !contigs.getFile().canRead()) {
 				throw new SequenceNotFoundException("Could not find or read the contigs file",contigs);
 			}
-			//repeatMaskingCheckBox.setEnabled(false);
-			//setConfigButton.setEnabled(false);
 			
 		File fastaFile = contigs.getFile();
 		File outputDir = new File(System.getProperty("user.home"));
@@ -166,9 +178,9 @@ public class PrimerFrame extends JFrame implements ActionListener {
 			pg.registerProgressReporter(progressReporter);
 			progressReporter.setProgress(5);
 			pg.runRepeatMaskingAndSetParameters();
-			pg.generatePrimers(contigPairs);
+			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
 			progressReporter.close();
-			return pg;
+			return primerResult;
 		}
 	}
 	
