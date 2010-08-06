@@ -166,6 +166,7 @@ public class PrimerFrame extends JFrame implements ActionListener {
 				if(pResult!=null&&pResult.size()>0){
 					showResults(pResult);
 					PrimerFrame.this.dispose();
+					//pg =null;
 				}
 			}
 		}
