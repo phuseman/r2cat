@@ -63,7 +63,6 @@ public class PrimerGenerator {
 	private AbstractProgressReporter progress;
 	private File fasta;
 	private File config;
-	private PrimerResult primerResult = null;
 	
 	
 	/**
@@ -214,6 +213,7 @@ public class PrimerGenerator {
 	
 	public Vector<PrimerResult> generatePrimers(Vector<String[]> contigPair){
 		Vector<PrimerResult> prV = new Vector<PrimerResult>();
+		PrimerResult pr = new PrimerResult();
 		int directionContig1 = 0;
 		int directionContig2 = 0;
 		boolean idCheckContig1 =false;
@@ -222,6 +222,7 @@ public class PrimerGenerator {
 		String isReverseComContig2 = null;
 		HashMap<String, Integer> contigAndDirectionInfo = new HashMap<String,Integer>();
 		HashMap<String, String> contigAndisReverseComplementInfo = new HashMap<String,String>();
+		
 		nextchar : for(int i = 0; i<contigPair.size();i++){
 			
 			this.reportProgress(i/contigPair.size(), "generate primers for contig pair: "+i);
@@ -245,7 +246,8 @@ public class PrimerGenerator {
 			contigAndDirectionInfo.put(markedSeq[1],directionContig2);
 			contigAndisReverseComplementInfo.put(markedSeq[0],isReverseComContig1);
 			contigAndisReverseComplementInfo.put(markedSeq[1],isReverseComContig2);
-			prV.add(this.generatePrimerFor1ContigPair(markedSeq, contigAndDirectionInfo,contigAndisReverseComplementInfo));
+			pr = this.generatePrimerFor1ContigPair(markedSeq, contigAndDirectionInfo,contigAndisReverseComplementInfo);
+			prV.add(pr);
 			}else{
 				throw new IllegalArgumentException("contigs were marked with the same direction for the primer");
 			}

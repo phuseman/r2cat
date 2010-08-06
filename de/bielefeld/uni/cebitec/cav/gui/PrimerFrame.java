@@ -36,6 +36,7 @@ public class PrimerFrame extends JFrame implements ActionListener {
 	private PrimerTableModel model;
 	private PrimerTable primer;
 	private JButton setConfigButton;
+	private JButton run;
 	private File configFile;
 	private File lastDir;
 	private PrimerGenerator pg;
@@ -77,7 +78,7 @@ public class PrimerFrame extends JFrame implements ActionListener {
 		setConfigButton.addActionListener(this);
 		
 		controlPanel.add(new JLabel("Generate Primers"));
-		JButton run = new JButton("Run!");
+		run = new JButton("Run!");
 		run.setActionCommand("generate_primer");
 		controlPanel.add(run);
 		run.addActionListener(this);
@@ -111,8 +112,12 @@ public class PrimerFrame extends JFrame implements ActionListener {
 			PrimerGeneratorTask pgT = new PrimerGeneratorTask();
 			contigPairs = (Vector<String[]>)((PrimerTableModel)primer.getModel()).getSelectedPairs();
 			PrimerGenerator primerG = null;
-			pgT.execute();
 			
+			this.repeatMaskingCheckBox.setEnabled(false);
+			this.run.setEnabled(false);
+			this.setConfigButton.setEnabled(false);
+			
+			pgT.execute();
 
 		} else if(e.getActionCommand().matches("setConfig")){
 			File config = this.chooseFile(configFile,
@@ -132,7 +137,6 @@ public class PrimerFrame extends JFrame implements ActionListener {
 	}
 	public void showResults(Vector<PrimerResult> pResult){
 		PrimerResultFrame pr = new PrimerResultFrame(pResult);
-		//pr.setIconImage(mainWindow.getIconImage());
 		pr.pack();
 		pr.setLocationByPlatform(true);
 		pr.setVisible(true);
@@ -142,7 +146,12 @@ public class PrimerFrame extends JFrame implements ActionListener {
 		
 		@Override
 		public void done(){
-			
+			if(this.isCancelled()){
+				PrimerFrame.this.run.setEnabled(true);
+				PrimerFrame.this.repeatMaskingCheckBox.setEnabled(true);
+				PrimerFrame.this.setConfigButton.setEnabled(true);
+			}
+			if(!this.isCancelled()){
 			Vector<PrimerResult> pResult = null;
 				try {
 					pResult = this.get();
@@ -158,6 +167,7 @@ public class PrimerFrame extends JFrame implements ActionListener {
 					showResults(pResult);
 					PrimerFrame.this.dispose();
 				}
+			}
 		}
 		@Override
 		protected Vector<PrimerResult> doInBackground() throws Exception,IOException {

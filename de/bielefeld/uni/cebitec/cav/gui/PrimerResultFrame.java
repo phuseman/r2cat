@@ -1,15 +1,18 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
 import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
@@ -25,27 +28,54 @@ public class PrimerResultFrame extends JFrame implements ActionListener{
 		init();
 	}
 	
+	
 	public void init(){
 		this.setTitle("Primer Results");
 		this.setLayout(new BorderLayout());
+		JPanel controlPanel = new JPanel();
 		JPanel results = new JPanel();
-	
-		String out = null;
-		JTextArea resultText = new JTextArea();
-		
-		for(int i=0;i<primerResults.size();i++){
-			out = primerResults.elementAt(i).toString();
+		JTabbedPane tabbedPane = new JTabbedPane();
+		//VECTOR?!
+		JPanel[] panelTemp = new JPanel[primerResults.size()];
+
+
+		for(int j = 0; j<primerResults.size();j++){
+			//tabbedPane.add("TAB "+j,results);
+			JComponent tabPanel = new JPanel();
+			
+			tabbedPane.add("Primer Results for Contigs "+primerResults.elementAt(j).getContigIDs(),new JTextArea(primerResults.elementAt(j).toString()));
+			tabPanel.setOpaque(true); 
+			tabPanel.add(tabbedPane);
+			this.add(tabPanel,BorderLayout.NORTH);
+			panelTemp[j] = (JPanel) tabPanel;
 		}
-		resultText.setText(out);
 		
+		JTextArea resultText = new JTextArea();
+		StringBuilder sb = new StringBuilder();
+		for(int i=0;i<primerResults.size();i++){
+			sb.append(primerResults.elementAt(i).toString());
+		}
+		
+		resultText.setText(sb.toString());
 		results.add(resultText,BorderLayout.CENTER);
 		
-		JButton exportResults = new JButton("Save Results");
-		exportResults.setActionCommand("save");
-		exportResults.addActionListener(this);
-		results.add(exportResults);
+		JButton exportCurrentResult = new JButton("Save current result");
+		exportCurrentResult.setActionCommand("saveCurrentResult");
+		exportCurrentResult.addActionListener(this);
+		controlPanel.add(exportCurrentResult);
 		
-		this.add(new JScrollPane(results), BorderLayout.CENTER);
+		JButton exportAllResults = new JButton("Save all results to one file");
+		exportAllResults.setActionCommand("saveAllResultsToOneFile");
+		exportAllResults.addActionListener(this);
+		controlPanel.add(exportAllResults);
+		
+		JButton exportEachResultToSeperateFile = new JButton("Save all results to different files");
+		exportEachResultToSeperateFile.setActionCommand("saveAllResultsToSeperateFile");
+		exportEachResultToSeperateFile.addActionListener(this);
+		controlPanel.add(exportEachResultToSeperateFile);
+		
+		this.add(controlPanel,BorderLayout.SOUTH);
+		//this.add(new JScrollPane(results), BorderLayout.CENTER);
 		this.pack();
 		
 		int width = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
@@ -56,7 +86,12 @@ public class PrimerResultFrame extends JFrame implements ActionListener{
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand().equals("save")){
+		
+		if(e.getActionCommand().equals("saveCurrentResult")){
+			
+		} else if(e.getActionCommand().equals("Save all results to one file")){
+			
+		}else if(e.getActionCommand().equals("Save all results to different files")){
 			
 		}
 		

@@ -37,22 +37,27 @@ public class PrimerResult {
 		String contigIDRight =contigRight.getId();
 		String descriptionLeft = contigLeft.getDescription();
 		String descriptionRight = contigRight.getDescription();
-		String infoDes = "Description of ";
-		String legend = ("primer direction "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence"+NEW_LINE);
+		String infoDes = "Description of: ";
+		String legend = ("primer pair "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 		results.append(infos+" "+contigIDLeft+" and "+contigIDRight+NEW_LINE+NEW_LINE);
 		results.append(infoDes+contigIDLeft+" "+descriptionLeft+NEW_LINE+infoDes+contigIDRight+" "+descriptionRight+NEW_LINE+NEW_LINE);
-		results.append(legend);
+		results.append(legend+NEW_LINE+NEW_LINE);
 		for(int i = 0;i<this.forwardPrimer.size();i++){
 			if(i<50){
-			results.append("forward primer: "+TAB+forwardPrimer.elementAt(i).toString()+NEW_LINE);
-			results.append("reverse primer: "+TAB+reversePrimer.elementAt(i).toString()+NEW_LINE);
+			results.append("forward primer: "+TAB+TAB+forwardPrimer.elementAt(i).toString()+NEW_LINE);
+			results.append("reverse primer: "+TAB+TAB+reversePrimer.elementAt(i).toString()+NEW_LINE+NEW_LINE);
 				}
 			}
-		
-		
-		//System.out.println(results.toString());
 		return results.toString();
 	}
-	//header erstellen
+	
+	public String getContigIDs(){
+		String id1 = contigLeft.getId();
+		String id2 = contigRight.getId();
+		
+		String ids = id1+" "+id2;
+		
+		return ids;
+	}
 
 }
