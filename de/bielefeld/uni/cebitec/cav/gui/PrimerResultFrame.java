@@ -1,20 +1,15 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Vector;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -22,18 +17,22 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.JViewport;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
 import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerResult;
-import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
-public class PrimerResultFrame extends JFrame implements ActionListener{
+public class PrimerResultFrame extends JFrame implements ActionListener,ChangeListener{
 	
 	private PrimerGenerator primerGenerator;
 	private Vector<PrimerResult> primerResults;
 	private JButton exportEachResultToSeperateFile;
 	private JButton exportAllResults;
 	private JButton exportCurrentResult ;
+	private int selectedTab;
+	private String tabName;
 	
 	public PrimerResultFrame(Vector<PrimerResult> pr){
 		primerResults = pr;
@@ -46,15 +45,17 @@ public class PrimerResultFrame extends JFrame implements ActionListener{
 		this.setLayout(new BorderLayout());
 		JPanel controlPanel = new JPanel();
 		 tabbedPane= new JTabbedPane();
-		//VECTOR?!
-		//JTabbedPane[] tabPanelArray = new JTabbedPane[primerResults.size()];
 
 		for(int j = 0; j<primerResults.size();j++){
 			JTextArea primerResultText = new JTextArea(primerResults.elementAt(j).toString());
-			String tabName = "Primer Results for Contigs "+primerResults.elementAt(j).getContigIDs();
+			tabName = "Primer Results for Contigs "+primerResults.elementAt(j).getContigIDs();
+			primerResultText.setEditable(false);
 			JScrollPane scrollPane = new JScrollPane(primerResultText);
-			tabbedPane.add(tabName,scrollPane);
+			tabbedPane.addTab(tabName,scrollPane);
+
 		}
+		tabbedPane.addChangeListener(this);
+		tabbedPane.setSelectedIndex(0);
 		this.add(tabbedPane);
 		
 		exportCurrentResult = new JButton("Save current result");
@@ -86,12 +87,16 @@ public class PrimerResultFrame extends JFrame implements ActionListener{
 		boolean allResultsToFile = false;
 		
 		if(e.getActionCommand().equals("saveCurrentResult")){
+			allResultsToFile = false;
 			saveOneFile(allResultsToFile);
+
 		} else if(e.getActionCommand().equals("saveAllResultsToOneFile")){
+			//Output in Files überprüfen
 			allResultsToFile = true;
 			saveOneFile(allResultsToFile);
 		}else if(e.getActionCommand().equals("saveAllResultsToSeperateFile")){
 			try {
+				//Output in Files überprüfen
 				saveMoreFiles();
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
@@ -135,12 +140,11 @@ public class PrimerResultFrame extends JFrame implements ActionListener{
 	 
 	      if (returnValue == JFileChooser.APPROVE_OPTION) {
 	          File file = fc.getSelectedFile();
-	        //  MiscFileUtils.enforceExtension(file, ".txt");
-	          saveText(file, allResultsToFile);
+	          saveResult(file, allResultsToFile);
 	      }
 	}
 	      
-	      private void saveText(File file, boolean allResultsToFile) {
+	      private void saveResult(File file, boolean allResultsToFile) {
 	    	  String NEW_LINE = System.getProperty("line.separator");
 	    	    try {
 	    	        FileWriter writeFile = new FileWriter(file);
@@ -154,14 +158,14 @@ public class PrimerResultFrame extends JFrame implements ActionListener{
 	 	    	        writeFile.write(allResults);
 	 	    	        writeFile.flush( );
 	 	    	        writeFile.close( );
-	    	        }else{
-	    	        	String tempName = this.tabbedPane.getName();
-	    	        	System.out.println("tempName "+tempName);
-	    	        	Component tempComponent = tabbedPane.getComponent( tabbedPane.indexOfTab(tempName));
-	    	        	JTextArea tempText = (JTextArea) tempComponent;
-	    	        	writeFile.write(tempText.toString());
-	    	        	writeFile.flush( );
-		 	    	    writeFile.close( );
+	    	        }else if(!allResultsToFile){
+	    						JScrollPane selectedPanel = (JScrollPane) tabbedPane.getComponentAt(selectedTab);
+	    						JViewport currentView = (JViewport)selectedPanel.getComponent(0);
+	    						JTextArea currentTextArea = (JTextArea) currentView.getComponent(0);
+	    						String tempText = currentTextArea.getText();
+	    	    	        	writeFile.write(tempText);
+	    	    	        	writeFile.flush( );
+	    		 	    	    writeFile.close( );
 		    	    }
 	    	    }
 	    	    catch (IOException e) {
@@ -169,5 +173,13 @@ public class PrimerResultFrame extends JFrame implements ActionListener{
 	    	    }
 
 	}
+	      
+
+		
+@Override
+		public void stateChanged(ChangeEvent e) {
+			JTabbedPane pane = (JTabbedPane)e.getSource();
+			selectedTab = pane.getSelectedIndex();
+		}
 
 }
