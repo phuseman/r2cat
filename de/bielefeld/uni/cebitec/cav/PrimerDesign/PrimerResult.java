@@ -43,10 +43,10 @@ public class PrimerResult {
 		results.append(infoDes+contigIDLeft+" "+descriptionLeft+NEW_LINE+infoDes+contigIDRight+" "+descriptionRight+NEW_LINE+NEW_LINE);
 		results.append(legend+NEW_LINE+NEW_LINE);
 		for(int i = 0;i<this.forwardPrimer.size();i++){
-			if(i<50){
+			//if(i<50){
 			results.append("forward primer: "+TAB+TAB+forwardPrimer.elementAt(i).toString()+NEW_LINE);
 			results.append("reverse primer: "+TAB+TAB+reversePrimer.elementAt(i).toString()+NEW_LINE+NEW_LINE);
-				}
+			//	}
 			}
 		return results.toString();
 	}
