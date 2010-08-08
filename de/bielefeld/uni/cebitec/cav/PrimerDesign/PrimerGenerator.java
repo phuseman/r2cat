@@ -8,15 +8,20 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import javax.swing.JFrame;
+
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
+import de.bielefeld.uni.cebitec.cav.gui.PrimerFrame;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
+import de.bielefeld.uni.cebitec.cav.utils.ProgressMonitorReporter;
 
 /**
  * This class generates the primer candidates given contig-sequences.
@@ -89,18 +94,22 @@ public class PrimerGenerator {
 		config = null;
 	}
 	
-	public void runRepeatMaskingAndSetParameters() throws Exception{
+	public void runRepeatMaskingAndSetParameters(JFrame primerFrame) throws Exception{
 
 		if(config==null){
 		try{
 			this.setUpLogFile();
 		if(repeatMaskingBool){
+			//ProgressMonitorReporter progressReporter = new ProgressMonitorReporter(primerFrame,"Repeat Masking","Running BLAST");
 			RepeatMasking rm = new RepeatMasking(fasta);
+			//rm.registerProgressReporter(progressReporter);
+			//progressReporter.setProgress(5);
 			rm.runBLAST();
 			temporaryDirectory = rm.getDir();
 			fastaParser = rm.getFfrForpreprocessed();
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
+			//progressReporter.close();
 		} else{
 			fastaParser = new FastaFileReader(fasta);
 			seq = fastaParser.getCharArray();
@@ -118,13 +127,16 @@ public class PrimerGenerator {
 			try{
 				this.setUpLogFile();
 			if(repeatMaskingBool){
-				this.reportProgress(0.10, "repeatMasking");
 				RepeatMasking rm = new RepeatMasking(fasta);
+				//ProgressMonitorReporter progressReporter = new ProgressMonitorReporter(primerFrame,"Repeat Masking","Running BLAST");
+				//rm.registerProgressReporter(progressReporter);
+				//progressReporter.setProgress(5);
 				rm.runBLAST();
 				temporaryDirectory = rm.getDir();
 				fastaParser = rm.getFfrForpreprocessed();
 				seq = fastaParser.getCharArray();
 				sequences = fastaParser.getSequences();
+				//progressReporter.close();
 			} else{
 				fastaParser = new FastaFileReader(fasta);
 				seq = fastaParser.getCharArray();
@@ -289,8 +301,8 @@ public class PrimerGenerator {
 		pairsFirstLeftPrimer = this.getPrimerPairs(leftRightPrimerScoredCandidates.elementAt(0),leftRightPrimerScoredCandidates.elementAt(1));
 		if(pairsFirstLeftPrimer!=null){
 		pr = this.setResult(leftRightPrimerScoredCandidates.elementAt(0), leftRightPrimerScoredCandidates.elementAt(1));
-		}else{
-			//Exception -> No Primers Found
+		}else if(pairsFirstLeftPrimer==null&&pairsFirstRightPrimer == null){
+				
 		}
 		return pr;	
 	}
@@ -887,6 +899,15 @@ public class PrimerGenerator {
 		
 		for(int i=0;i<pairsFirstLeftPrimer.size();i++){
 			primerResult.addPair(leftPrimer.elementAt(i), rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)));
+		}
+		if(pairsFirstRightPrimer!=null&&pairsFirstRightPrimer.size()>0){
+			
+			Iterator iterator = (pairsFirstRightPrimer.keySet()).iterator();
+			while(iterator.hasNext()) {
+			int key = Integer.parseInt(iterator.next().toString());
+			int value = Integer.parseInt(pairsFirstRightPrimer.get(key).toString());
+			primerResult.addPair(leftPrimer.elementAt(value), rightPrimer.elementAt(key));
+			}
 		}
 		primerResult.toString();
 		return primerResult;
