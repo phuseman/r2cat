@@ -6,6 +6,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
@@ -16,6 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 
@@ -29,7 +32,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 import de.bielefeld.uni.cebitec.cav.utils.ProgressMonitorReporter;
 
-public class PrimerFrame extends JFrame implements ActionListener {
+public class PrimerFrame extends JFrame implements ActionListener, PropertyChangeListener {
 	
 	private AlignmentPositionsList alignmentPositionsList;
 	private DNASequence contigs;
@@ -43,6 +46,9 @@ public class PrimerFrame extends JFrame implements ActionListener {
 	private Vector<String[]> contigPairs = null;
 	private Checkbox repeatMaskingCheckBox;
 	private File fastaFile;
+	private JProgressBar progressBar;
+	private JButton select;
+	private JButton remove;
 	
 	public PrimerFrame(AlignmentPositionsList alignmentPositionsList){
 		this.alignmentPositionsList = alignmentPositionsList;
@@ -59,31 +65,42 @@ public class PrimerFrame extends JFrame implements ActionListener {
 		this.add(tp,BorderLayout.CENTER);
 
 		JPanel controlPanel = new JPanel();
-		controlPanel.add(new JLabel("Select"));
-		JButton select = new JButton("all");
+		//controlPanel.add(new JLabel("Select"));
+		select = new JButton("Select all");
 		select.setActionCommand("select_all");
 		controlPanel.add(select);
 		select.addActionListener(primer);
-		JButton remove = new JButton("none");
+		remove = new JButton("Select none");
 		remove.setActionCommand("select_none");
 		controlPanel.add(remove);
 		remove.addActionListener(primer);
 		
-		repeatMaskingCheckBox= new Checkbox("Repeat Masking");
-		controlPanel.add(repeatMaskingCheckBox);
-		
 		setConfigButton = new JButton("Set Config");
 		setConfigButton.setActionCommand("setConfig");
+		setConfigButton.setToolTipText("Choose a XML file of primer design parameters");
 		controlPanel.add(setConfigButton);
 		setConfigButton.addActionListener(this);
 		
-		controlPanel.add(new JLabel("Generate Primers"));
-		run = new JButton("Run!");
+		repeatMaskingCheckBox= new Checkbox("Repeat Masking");
+		controlPanel.add(repeatMaskingCheckBox);
+		
+		progressBar = new JProgressBar();
+		progressBar.setString("Repeat Masking");
+		progressBar.setStringPainted(true);
+		progressBar.setToolTipText("Progress of Repeat Masking");
+		progressBar.setVisible(false);
+		
+		controlPanel.add(progressBar, BorderLayout.SOUTH);
+	
+		//controlPanel.add(new JLabel("Generate Primers"));
+		run = new JButton("Generate Primers");
 		run.setActionCommand("generate_primer");
 		controlPanel.add(run);
 		run.addActionListener(this);
 		
+		
 		this.add(controlPanel,BorderLayout.SOUTH);
+	
 		this.pack();
 		
 		int width = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
@@ -116,6 +133,8 @@ public class PrimerFrame extends JFrame implements ActionListener {
 			this.repeatMaskingCheckBox.setEnabled(false);
 			this.run.setEnabled(false);
 			this.setConfigButton.setEnabled(false);
+			this.select.setEnabled(false);
+			this.remove.setEnabled(false);
 			
 			pgT.execute();
 
@@ -125,7 +144,7 @@ public class PrimerFrame extends JFrame implements ActionListener {
 			this.setConfig(config, false);
 			if(config!=null){
 				this.setConfigButton.setText(configFile.getName());
-				this.setConfigButton.setBackground(Color.LIGHT_GRAY);
+				this.setConfigButton.setBackground(Color.decode("#90EE90"));
 			} else{
 				this.setConfigButton.setText("Set Config");
 				this.setConfigButton.setBackground(null);
@@ -150,6 +169,10 @@ public class PrimerFrame extends JFrame implements ActionListener {
 				PrimerFrame.this.run.setEnabled(true);
 				PrimerFrame.this.repeatMaskingCheckBox.setEnabled(true);
 				PrimerFrame.this.setConfigButton.setEnabled(true);
+				PrimerFrame.this.progressBar.setValue(0);
+				PrimerFrame.this.progressBar.setVisible(false);
+				PrimerFrame.this.select.setEnabled(true);
+				PrimerFrame.this.remove.setEnabled(true);
 			}
 			if(!this.isCancelled()){
 			Vector<PrimerResult> pResult = null;
@@ -167,12 +190,13 @@ public class PrimerFrame extends JFrame implements ActionListener {
 					showResults(pResult);
 					PrimerFrame.this.dispose();
 					//pg =null;
+				} else{
+					//No Primers found
 				}
 			}
 		}
 		@Override
 		protected Vector<PrimerResult> doInBackground() throws Exception,IOException {
-			System.out.println("Generating Primers");
 			if (!contigs.getFile().exists() || !contigs.getFile().canRead()) {
 				throw new SequenceNotFoundException("Could not find or read the contigs file",contigs);
 			}
@@ -187,10 +211,20 @@ public class PrimerFrame extends JFrame implements ActionListener {
 			ProgressMonitorReporter progressReporter = new ProgressMonitorReporter(PrimerFrame.this,"Generating Primers","Generating primers");
 			pg.registerProgressReporter(progressReporter);
 			progressReporter.setProgress(5);
+			
+			if(repeatMaskingCheckBox.getState()){
+				PrimerFrame.this.progressBar.setVisible(true);
+				PrimerFrame.this.progressBar.setIndeterminate(true);
+				PrimerFrame.this.repaint();
+			}
 			pg.runRepeatMaskingAndSetParameters();
+			PrimerFrame.this.progressBar.setValue(100);
+			PrimerFrame.this.progressBar.setVisible(false);
+			PrimerFrame.this.repaint();
 			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
 			progressReporter.close();
-			return primerResult;
+				return primerResult;
+
 		}
 	}
 	
@@ -211,5 +245,10 @@ public class PrimerFrame extends JFrame implements ActionListener {
 	private void errorAlert(String error) {
 		JOptionPane.showMessageDialog(this, error, "Error",
 				JOptionPane.ERROR_MESSAGE);
+	}
+	@Override
+	public void propertyChange(PropertyChangeEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 }

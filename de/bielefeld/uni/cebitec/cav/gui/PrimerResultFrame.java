@@ -52,8 +52,8 @@ public class PrimerResultFrame extends JFrame implements ActionListener,ChangeLi
 			primerResultText.setEditable(false);
 			JScrollPane scrollPane = new JScrollPane(primerResultText);
 			tabbedPane.addTab(tabName,scrollPane);
-
 		}
+		
 		tabbedPane.addChangeListener(this);
 		tabbedPane.setSelectedIndex(0);
 		this.add(tabbedPane);

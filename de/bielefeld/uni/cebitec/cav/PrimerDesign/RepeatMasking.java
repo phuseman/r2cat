@@ -6,10 +6,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
+import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 
 /**
  * This class is needed to mask the repeats of the given fasta file which include the selected
@@ -29,6 +31,7 @@ public class RepeatMasking {
 	private String dirName = "tempDirectoryForBlast";
 	private String preProcessedFastaFile ="preProcessedFastaFile";
 	private String toBlast ="toBlast";
+	private AbstractProgressReporter progress;
 	
 /**
  * Constructor to set up the working directory and the fasta file.
@@ -170,6 +173,26 @@ public class RepeatMasking {
 		}
 
 	}
+	
+	/**
+	 * Registers a ProgressReporter for this class.
+	 * @param progressReporter
+	 */
+/*	public void registerProgressReporter(
+			AbstractProgressReporter progressReporter) {
+		this.progress = progressReporter;
+	}
+	*//**
+	 * If a progress reporter is registered progress changes are shown with is.
+	 * @param percentDone how far are we?
+	 * @param s explaining sentence
+	 *//*
+	public void reportProgress(double percentDone, String s) {
+		if (progress != null) {
+			progress.reportProgress(percentDone, s);
+		}
+	
+	}*/
 	/**
 	 * This method writes a temporary file with the repeat masked sequences which now can be
 	 * processed in the PrimerGenerator class.

@@ -3,9 +3,7 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,13 +13,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import javax.swing.JFrame;
-
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
-import de.bielefeld.uni.cebitec.cav.gui.PrimerFrame;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
-import de.bielefeld.uni.cebitec.cav.utils.ProgressMonitorReporter;
 
 /**
  * This class generates the primer candidates given contig-sequences.
@@ -94,7 +88,7 @@ public class PrimerGenerator {
 		config = null;
 	}
 	
-	public void runRepeatMaskingAndSetParameters(JFrame primerFrame) throws Exception{
+	public void runRepeatMaskingAndSetParameters() throws Exception{
 
 		if(config==null){
 		try{
