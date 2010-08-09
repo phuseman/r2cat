@@ -1,12 +1,11 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Date;
 import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
@@ -83,20 +82,20 @@ public class RepeatMasking {
 	public File writeTempFile(String fileName, File dir) throws IOException{
 		
 		File temp_file = File.createTempFile(fileName, ".fas",dir);
-		PrintWriter buffer = new PrintWriter(new FileWriter(temp_file));
+		BufferedWriter buffer = new BufferedWriter(new FileWriter(temp_file));
 		for (int i = 0;i<sequences.size();i++){
 			String id = sequences.elementAt(i).getId();
 			String description = sequences.elementAt(i).getDescription();
 			int offset = (int) sequences.elementAt(i).getOffset();
 			int size = (int) sequences.elementAt(i).getSize();
-			buffer.print(">"+id+" "+description);
-			buffer.write('\n');
+			buffer.write(">"+id+" "+description + "\n");
 			for(int j=offset;j<=size+offset-1;j++){
 				buffer.write(seq[j]);
 			}
 			buffer.write('\n');
 		}
 		
+		buffer.close();
 		buffer=null;
 		return temp_file;
 	}

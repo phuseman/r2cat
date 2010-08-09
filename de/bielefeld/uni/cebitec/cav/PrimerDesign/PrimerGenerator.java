@@ -118,15 +118,11 @@ public class PrimerGenerator {
 				this.setUpLogFile();
 			if(repeatMaskingBool){
 				RepeatMasking rm = new RepeatMasking(fasta);
-				//ProgressMonitorReporter progressReporter = new ProgressMonitorReporter(primerFrame,"Repeat Masking","Running BLAST");
-				//rm.registerProgressReporter(progressReporter);
-				//progressReporter.setProgress(5);
 				rm.runBLAST();
 				temporaryDirectory = rm.getDir();
 				fastaParser = rm.getFfrForpreprocessed();
 				seq = fastaParser.getCharArray();
 				sequences = fastaParser.getSequences();
-				//progressReporter.close();
 			} else{
 				fastaParser = new FastaFileReader(fasta);
 				seq = fastaParser.getCharArray();
@@ -239,6 +235,8 @@ public class PrimerGenerator {
 			contigAndDirectionInfo.put(markedSeq[1],directionContig2);
 			contigAndisReverseComplementInfo.put(markedSeq[0],isReverseComContig1);
 			contigAndisReverseComplementInfo.put(markedSeq[1],isReverseComContig2);
+			
+			
 			pr = this.generatePrimerFor1ContigPair(markedSeq, contigAndDirectionInfo,contigAndisReverseComplementInfo);
 			prV.add(pr);
 			}else{
