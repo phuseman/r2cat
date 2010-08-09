@@ -130,7 +130,9 @@ public class PrimerFrame extends JFrame implements ActionListener,
 			pgT.addPropertyChangeListener(this);
 			contigPairs = (Vector<String[]>) ((PrimerTableModel) primer
 					.getModel()).getSelectedPairs();
-			pgT.execute();
+			if(contigPairs.size()>0) {
+				pgT.execute();
+			}
 
 		} else if (e.getActionCommand().matches("setConfig")) {
 			File config = this.chooseFile(configFile,
@@ -205,12 +207,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		@Override
 		public void done() {
 			if (this.isCancelled()) {
-				PrimerFrame.this.run.setEnabled(true);
-				PrimerFrame.this.repeatMaskingCheckBox.setEnabled(true);
-				PrimerFrame.this.setConfigButton.setEnabled(true);
 				PrimerFrame.this.progressBar.setValue(0);
-				PrimerFrame.this.select.setEnabled(true);
-				PrimerFrame.this.remove.setEnabled(true);
 			} else {
 				Vector<PrimerResult> pResult = null;
 				try {
