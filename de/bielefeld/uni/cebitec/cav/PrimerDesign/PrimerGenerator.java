@@ -235,8 +235,6 @@ public class PrimerGenerator {
 			contigAndDirectionInfo.put(markedSeq[1],directionContig2);
 			contigAndisReverseComplementInfo.put(markedSeq[0],isReverseComContig1);
 			contigAndisReverseComplementInfo.put(markedSeq[1],isReverseComContig2);
-			
-			
 			pr = this.generatePrimerFor1ContigPair(markedSeq, contigAndDirectionInfo,contigAndisReverseComplementInfo);
 			prV.add(pr);
 			}else{
@@ -386,8 +384,6 @@ public class PrimerGenerator {
 					//left primer
 					for(int start =0;start<=(templateSeqString.length()-max);start++){
 						
-						//this.reportProgress(0.50, "generate forward primer candidates");
-						
 						int end = start+maxLength;
 						int offset = templateSeqString.length()-start;
 						String candidateForwardPrimerMaxLength = templateSeqString.substring(start,end);
@@ -411,8 +407,6 @@ public class PrimerGenerator {
 							}
 					}
 				}if(directionOfPrimer ==-1){
-					
-//					this.reportProgress(0.60, "generate reverse primer candidates");
 					
 					//right primer
 					String nextPlus1Base = null;
