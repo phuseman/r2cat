@@ -39,7 +39,7 @@ import javax.swing.ProgressMonitor;
 public class ProgressMonitorReporter extends ProgressMonitor implements AbstractProgressReporter {
 
 	
-	StringBuilder log = null;
+	private StringBuilder log = null;
 
 	
 	public ProgressMonitorReporter(Component parentComponent, Object message,
@@ -79,6 +79,7 @@ public class ProgressMonitorReporter extends ProgressMonitor implements Abstract
 		fileWriter.write(log.toString());
 		fileWriter.close();
 	}
+	
 
 
 }

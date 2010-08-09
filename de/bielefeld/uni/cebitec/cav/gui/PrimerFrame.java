@@ -3,6 +3,7 @@ package de.bielefeld.uni.cebitec.cav.gui;
 import java.awt.BorderLayout;
 import java.awt.Checkbox;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,62 +11,62 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 
-import de.bielefeld.uni.cebitec.cav.R2cat;
 import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
 import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerResult;
 import de.bielefeld.uni.cebitec.cav.controller.SequenceNotFoundException;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
+import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
-import de.bielefeld.uni.cebitec.cav.utils.ProgressMonitorReporter;
 
-public class PrimerFrame extends JFrame implements ActionListener, PropertyChangeListener {
-	
+public class PrimerFrame extends JFrame implements ActionListener,
+		PropertyChangeListener {
+
 	private AlignmentPositionsList alignmentPositionsList;
 	private DNASequence contigs;
-	private PrimerTableModel model;
 	private PrimerTable primer;
 	private JButton setConfigButton;
 	private JButton run;
 	private File configFile;
 	private File lastDir;
-	private PrimerGenerator pg;
 	private Vector<String[]> contigPairs = null;
 	private Checkbox repeatMaskingCheckBox;
-	private File fastaFile;
 	private JProgressBar progressBar;
 	private JButton select;
 	private JButton remove;
-	
-	public PrimerFrame(AlignmentPositionsList alignmentPositionsList){
+	private PrimerTableModel model;
+	private JPanel controlPanel;
+
+	public PrimerFrame(AlignmentPositionsList alignmentPositionsList) {
 		this.alignmentPositionsList = alignmentPositionsList;
 		primer = new PrimerTable(alignmentPositionsList);
 		model = (PrimerTableModel) primer.getModel();
-		//übprüfen ob leer... dann FILE
+		// uebpruefen ob leer... dann FILE
 		Vector<DNASequence> seq = alignmentPositionsList.getQueries();
 		init();
 	}
-	private void init(){
+
+	private void init() {
 		this.setTitle("Generate Primers");
 		this.setLayout(new BorderLayout());
 		JScrollPane tp = new JScrollPane(primer);
-		this.add(tp,BorderLayout.CENTER);
+		this.add(tp, BorderLayout.CENTER);
 
-		JPanel controlPanel = new JPanel();
-		//controlPanel.add(new JLabel("Select"));
+		controlPanel = new JPanel();
+		// controlPanel.add(new JLabel("Select"));
 		select = new JButton("Select all");
 		select.setActionCommand("select_all");
 		controlPanel.add(select);
@@ -74,78 +75,71 @@ public class PrimerFrame extends JFrame implements ActionListener, PropertyChang
 		remove.setActionCommand("select_none");
 		controlPanel.add(remove);
 		remove.addActionListener(primer);
-		
+
 		setConfigButton = new JButton("Set Config");
 		setConfigButton.setActionCommand("setConfig");
-		setConfigButton.setToolTipText("Choose a XML file of primer design parameters");
+		setConfigButton
+				.setToolTipText("Choose a XML file of primer design parameters");
 		controlPanel.add(setConfigButton);
 		setConfigButton.addActionListener(this);
-		
-		repeatMaskingCheckBox= new Checkbox("Repeat Masking");
+
+		repeatMaskingCheckBox = new Checkbox("Repeat Masking");
 		controlPanel.add(repeatMaskingCheckBox);
-		
+
 		progressBar = new JProgressBar();
-		progressBar.setString("Repeat Masking");
+		progressBar.setToolTipText("Generating possible primer pairs for the contigs");
 		progressBar.setStringPainted(true);
-		progressBar.setToolTipText("Progress of Repeat Masking");
-		progressBar.setVisible(false);
-		
-		controlPanel.add(progressBar, BorderLayout.SOUTH);
-	
-		//controlPanel.add(new JLabel("Generate Primers"));
+
+		// controlPanel.add(new JLabel("Generate Primers"));
 		run = new JButton("Generate Primers");
 		run.setActionCommand("generate_primer");
 		controlPanel.add(run);
 		run.addActionListener(this);
-		
-		
-		this.add(controlPanel,BorderLayout.SOUTH);
-	
+
+		this.add(controlPanel, BorderLayout.SOUTH);
+
 		this.pack();
-		
+
 		int width = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
 		int height = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
 
-		this.setSize(new Dimension(width/3,height));
+		this.setSize(new Dimension(width / 3, height));
 
 	}
-	
+
 	private File chooseFile(File prevFile, String dialogTitle) {
 		if (prevFile != null && prevFile.getParentFile().exists()) {
-			lastDir=prevFile.getParentFile();
+			lastDir = prevFile.getParentFile();
 		}
-		return MiscFileUtils.chooseFile(this, dialogTitle, lastDir, true, new CustomFileFilter(".xml", "XML File"));
+		return MiscFileUtils.chooseFile(this, dialogTitle, lastDir, true,
+				new CustomFileFilter(".xml", "XML File"));
 	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("generate_primer")) {
-			
-			if(alignmentPositionsList.getQueries() != null && !alignmentPositionsList.getQueries().isEmpty()) {
+
+			if (alignmentPositionsList.getQueries() != null
+					&& !alignmentPositionsList.getQueries().isEmpty()) {
 				contigs = alignmentPositionsList.getQueries().get(0);
 			} else {
 				contigs = new DNASequence("dummy");
 			}
-			
+
 			PrimerGeneratorTask pgT = new PrimerGeneratorTask();
-			contigPairs = (Vector<String[]>)((PrimerTableModel)primer.getModel()).getSelectedPairs();
-			PrimerGenerator primerG = null;
-			
-			this.repeatMaskingCheckBox.setEnabled(false);
-			this.run.setEnabled(false);
-			this.setConfigButton.setEnabled(false);
-			this.select.setEnabled(false);
-			this.remove.setEnabled(false);
-			
+			pgT.addPropertyChangeListener(this);
+			contigPairs = (Vector<String[]>) ((PrimerTableModel) primer
+					.getModel()).getSelectedPairs();
 			pgT.execute();
 
-		} else if(e.getActionCommand().matches("setConfig")){
+		} else if (e.getActionCommand().matches("setConfig")) {
 			File config = this.chooseFile(configFile,
-			"Select config (xml format)");
+					"Select config (xml format)");
 			this.setConfig(config, false);
-			if(config!=null){
+			if (config != null) {
 				this.setConfigButton.setText(configFile.getName());
 				this.setConfigButton.setBackground(Color.decode("#90EE90"));
-			} else{
+			} else {
 				this.setConfigButton.setText("Set Config");
 				this.setConfigButton.setBackground(null);
 				configFile = null;
@@ -154,28 +148,71 @@ public class PrimerFrame extends JFrame implements ActionListener, PropertyChang
 		this.invalidate();
 		this.repaint();
 	}
-	public void showResults(Vector<PrimerResult> pResult){
+
+	public void showResults(Vector<PrimerResult> pResult) {
 		PrimerResultFrame pr = new PrimerResultFrame(pResult);
 		pr.pack();
 		pr.setLocationByPlatform(true);
 		pr.setVisible(true);
 	}
-	
-	class PrimerGeneratorTask extends SwingWorker<Vector<PrimerResult>,String>{
-		
+
+	class PrimerGeneratorTask extends SwingWorker<Vector<PrimerResult>, String>
+			implements AbstractProgressReporter {
+
 		@Override
-		public void done(){
-			if(this.isCancelled()){
+		protected Vector<PrimerResult> doInBackground() throws Exception,
+				IOException {
+			if (!contigs.getFile().exists() || !contigs.getFile().canRead()) {
+				throw new SequenceNotFoundException(
+						"Could not find or read the contigs file", contigs);
+			}
+			PrimerGenerator pg;
+			File fastaFile = contigs.getFile();
+
+			if (configFile != null && configFile.exists()) {
+				pg = new PrimerGenerator(fastaFile, configFile, repeatMaskingCheckBox.getState());
+			} else {
+				pg = new PrimerGenerator(fastaFile, repeatMaskingCheckBox.getState());
+			}
+			pg.registerProgressReporter(this);
+
+			if (repeatMaskingCheckBox.getState()) {
+				PrimerFrame.this.progressBar.setIndeterminate(true);
+				PrimerFrame.this.progressBar
+						.setString("Repeat masking using BLAST");
+			}
+			
+			//TODO this should be separated such that repeat masking and parameter setting are distinct tasks.
+				pg.runRepeatMaskingAndSetParameters();
+
+			if (repeatMaskingCheckBox.getState()) {
+				PrimerFrame.this.progressBar.setString(null);
+			}
+
+			PrimerFrame.this.progressBar.setIndeterminate(false);
+			
+			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
+			return primerResult;
+
+		}
+
+		@Override
+		protected void process(List<String> chunks) {
+			//this method is called occasionally when a few temporary results were publish() ed. 
+			progressBar.setString( chunks.get(chunks.size()-1));
+		}
+
+		@Override
+		public void done() {
+			if (this.isCancelled()) {
 				PrimerFrame.this.run.setEnabled(true);
 				PrimerFrame.this.repeatMaskingCheckBox.setEnabled(true);
 				PrimerFrame.this.setConfigButton.setEnabled(true);
 				PrimerFrame.this.progressBar.setValue(0);
-				PrimerFrame.this.progressBar.setVisible(false);
 				PrimerFrame.this.select.setEnabled(true);
 				PrimerFrame.this.remove.setEnabled(true);
-			}
-			if(!this.isCancelled()){
-			Vector<PrimerResult> pResult = null;
+			} else {
+				Vector<PrimerResult> pResult = null;
 				try {
 					pResult = this.get();
 				} catch (InterruptedException e) {
@@ -185,50 +222,65 @@ public class PrimerFrame extends JFrame implements ActionListener, PropertyChang
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				if(pResult!=null&&pResult.size()>0){
+
+				if (pResult != null && pResult.size() > 0) {
 					showResults(pResult);
 					PrimerFrame.this.dispose();
-					//pg =null;
-				} else{
-					//No Primers found
+					// pg =null;
+				} else {
+					// No Primers found
 				}
 			}
 		}
-		@Override
-		protected Vector<PrimerResult> doInBackground() throws Exception,IOException {
-			if (!contigs.getFile().exists() || !contigs.getFile().canRead()) {
-				throw new SequenceNotFoundException("Could not find or read the contigs file",contigs);
-			}
-			
-		File fastaFile = contigs.getFile();
 		
-	if(configFile!=null&&configFile.exists()){
-		pg = new PrimerGenerator(fastaFile,configFile,repeatMaskingCheckBox.getState());
-		}else{
-			pg = new PrimerGenerator(fastaFile,repeatMaskingCheckBox.getState());
+		@Override
+		public void reportProgress(double percentDone, String comment) {
+			if (percentDone >= 0 && percentDone <= 1) {
+				// set progress fires an propertyChangeEvent to all registered
+				// listeners
+				setProgress((int) (percentDone * 100.));
 			}
-			ProgressMonitorReporter progressReporter = new ProgressMonitorReporter(PrimerFrame.this,"Generating Primers","Generating primers");
-			pg.registerProgressReporter(progressReporter);
-			progressReporter.setProgress(5);
-			
-			if(repeatMaskingCheckBox.getState()){
-				PrimerFrame.this.progressBar.setVisible(true);
-				PrimerFrame.this.progressBar.setIndeterminate(true);
-				PrimerFrame.this.repaint();
+			if (comment != null) {
+				publish(comment);
 			}
-			pg.runRepeatMaskingAndSetParameters();
-			PrimerFrame.this.progressBar.setValue(100);
-			PrimerFrame.this.progressBar.setVisible(false);
-			PrimerFrame.this.repaint();
-			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
-			progressReporter.close();
-				return primerResult;
-
 		}
 	}
-	
-	private void setConfig(File q, boolean silent){
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		// these "progress" events are generated by the SwingWorker thread
+		// method setProgress(int)
+		// and delivered to any registered propertychangelistener.
+		// (progress integer values from 0 - 100)
+		if (evt.getPropertyName().matches("progress")) {
+			progressBar.setValue((Integer) evt.getNewValue());
+
+			// Additionally these "state" events are generated bay a SwingWorker
+			// just before it starts
+			// the doInBackground method invoked by execute() and after this
+			// method has finished
+			// (see SwingWorker.StateValue )
+		} else if (evt.getPropertyName().matches("state")) {
+			if ((SwingWorker.StateValue) evt.getNewValue() == SwingWorker.StateValue.STARTED) {
+				progressBar.setIndeterminate(true);
+				progressBar.setValue(0);
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				this.remove(controlPanel);
+				this.add(progressBar, BorderLayout.SOUTH);
+				progressBar.setVisible(true);
+				this.validate();
+			} else if ((SwingWorker.StateValue) evt.getNewValue() == SwingWorker.StateValue.DONE) {
+				progressBar.setIndeterminate(false);
+				setCursor(null);
+				this.remove(progressBar);
+				this.add(controlPanel, BorderLayout.SOUTH);
+				controlPanel.setVisible(true);
+				this.validate();
+			}
+		}
+	}
+
+	private void setConfig(File q, boolean silent) {
 		if (q == null || q.getName().equalsIgnoreCase("")) {
 			return;
 		}
@@ -241,14 +293,10 @@ public class PrimerFrame extends JFrame implements ActionListener, PropertyChang
 			}
 		}
 	}
-	
+
 	private void errorAlert(String error) {
 		JOptionPane.showMessageDialog(this, error, "Error",
 				JOptionPane.ERROR_MESSAGE);
 	}
-	@Override
-	public void propertyChange(PropertyChangeEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+
 }

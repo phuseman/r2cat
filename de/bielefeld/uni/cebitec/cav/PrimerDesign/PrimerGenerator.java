@@ -94,16 +94,12 @@ public class PrimerGenerator {
 		try{
 			this.setUpLogFile();
 		if(repeatMaskingBool){
-			//ProgressMonitorReporter progressReporter = new ProgressMonitorReporter(primerFrame,"Repeat Masking","Running BLAST");
 			RepeatMasking rm = new RepeatMasking(fasta);
-			//rm.registerProgressReporter(progressReporter);
-			//progressReporter.setProgress(5);
 			rm.runBLAST();
 			temporaryDirectory = rm.getDir();
 			fastaParser = rm.getFfrForpreprocessed();
 			seq = fastaParser.getCharArray();
 			sequences = fastaParser.getSequences();
-			//progressReporter.close();
 		} else{
 			fastaParser = new FastaFileReader(fasta);
 			seq = fastaParser.getCharArray();
@@ -220,15 +216,16 @@ public class PrimerGenerator {
 		HashMap<String, String> contigAndisReverseComplementInfo = new HashMap<String,String>();
 		
 		nextchar : for(int i = 0; i<contigPair.size();i++){
-			
-			this.reportProgress(i/contigPair.size(), "generate primers for contig pair: "+i);
-			
 			String[] tempPair = contigPair.elementAt(i);
 			try{
 			//if(tempPair.length==6){
 			markedSeq = new String[2];
 			markedSeq[0] = tempPair[0];
 			markedSeq[1] = tempPair[3];
+			
+			this.reportProgress((double)(i+1)/(contigPair.size()+1), "Generating primers for contig pair "+markedSeq[0] + " and " + markedSeq[1]);
+
+			
 			idCheckContig1 = this.idCheck(markedSeq[0].toString());
 			idCheckContig2 = this.idCheck(markedSeq[1].toString());
 		if(idCheckContig1&&idCheckContig2){
@@ -391,7 +388,7 @@ public class PrimerGenerator {
 					//left primer
 					for(int start =0;start<=(templateSeqString.length()-max);start++){
 						
-						this.reportProgress(0.50, "generate forward primer candidates");
+						//this.reportProgress(0.50, "generate forward primer candidates");
 						
 						int end = start+maxLength;
 						int offset = templateSeqString.length()-start;
@@ -417,7 +414,7 @@ public class PrimerGenerator {
 					}
 				}if(directionOfPrimer ==-1){
 					
-					this.reportProgress(0.60, "generate reverse primer candidates");
+//					this.reportProgress(0.60, "generate reverse primer candidates");
 					
 					//right primer
 					String nextPlus1Base = null;
