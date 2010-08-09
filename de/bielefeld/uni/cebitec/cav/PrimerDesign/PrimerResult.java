@@ -1,6 +1,5 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
-import java.util.HashMap;
 import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
@@ -55,7 +54,7 @@ public class PrimerResult {
 		String id1 = contigLeft.getId();
 		String id2 = contigRight.getId();
 		
-		String ids = id1+"_"+id2;
+		String ids = id1+"-"+id2;
 		
 		return ids;
 	}
