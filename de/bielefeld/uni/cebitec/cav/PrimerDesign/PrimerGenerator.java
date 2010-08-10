@@ -41,6 +41,7 @@ public class PrimerGenerator {
 	private Logger logger;
 	private AbstractProgressReporter progress;
 	private File fasta;
+	private Bases base = new Bases();
 	
 	/**
 	 * Constructor when only a fasta file is given.
@@ -224,7 +225,6 @@ public class PrimerGenerator {
 	
 		public HashMap<String,char[]> getMarkedSeq(String[] markedContig,HashMap<String, String> contigAndisReverseCompInfo) throws IOException{
 			HashMap<String, char[]> templateSeq = new HashMap<String,char[]>();
-			Bases base = new Bases();
 			boolean isReverseComplemented = false;
 			String isReverseCom = null;
 			char[] seq = fastaParser.getCharArray();
@@ -274,7 +274,6 @@ public class PrimerGenerator {
 	public Vector<Primer> getPrimerCandidates(String[] markedContig,HashMap<String, Integer> contigAndDirectionInfo,HashMap<String, String> contigAndisReverseCompInfo) throws IOException{
 		HashMap<String, char[]> templateSeq = getMarkedSeq(markedContig,contigAndisReverseCompInfo);
 		Vector<Primer> primerCandidates = new Vector<Primer>();
-		Bases base = new Bases();
 			for(String contigID : markedContig){
 				Integer directionOfPrimer = contigAndDirectionInfo.get(contigID);
 				char[] tempSeqChar = templateSeq.get(contigID);
@@ -485,7 +484,6 @@ public class PrimerGenerator {
 	
 	public double getBackfoldScore(char[] primerSeq){
 	double scoreBackfold = 0;
-	Bases base = new Bases();
 	char[] last4 = new char[4];
 	char[] last4Bases;
 	char[] primerSeqMinusEight = new char[primerSeq.length-8];
