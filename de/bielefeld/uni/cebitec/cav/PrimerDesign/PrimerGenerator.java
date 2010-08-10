@@ -280,17 +280,14 @@ public class PrimerGenerator {
 	}
 	
 	public PrimerResult generatePrimerFor1ContigPair(String[] markedContig,HashMap<String, Integer> contigAndDirectionInfo,HashMap<String, String> contigAndisReverseCompInfo) throws IOException{
-		PrimerResult pr = new PrimerResult();
-		Vector<Primer> primerCandidates =null;
+		//all possible primers
+		Vector<Primer> primerCandidates = this.getPrimerCandidates(markedSeq, contigAndDirectionInfo,contigAndisReverseCompInfo);
+
+		//
 		Vector<Vector> leftRightPrimerScoredCandidates = null;
-		primerCandidates = this.getPrimerCandidates(markedSeq, contigAndDirectionInfo,contigAndisReverseCompInfo);
 		leftRightPrimerScoredCandidates = this.calcScoreEachPrimerCandidate(primerCandidates);
 		pairsFirstLeftPrimer = this.getPrimerPairs(leftRightPrimerScoredCandidates.elementAt(0),leftRightPrimerScoredCandidates.elementAt(1));
-		if(pairsFirstLeftPrimer!=null){
-		pr = this.setResult(leftRightPrimerScoredCandidates.elementAt(0), leftRightPrimerScoredCandidates.elementAt(1));
-		}else if(pairsFirstLeftPrimer==null&&pairsFirstRightPrimer == null){
-				
-		}
+			PrimerResult pr = this.setResult(leftRightPrimerScoredCandidates.elementAt(0), leftRightPrimerScoredCandidates.elementAt(1));
 		return pr;	
 	}
 	
@@ -892,7 +889,6 @@ public class PrimerGenerator {
 			primerResult.addPair(leftPrimer.elementAt(value), rightPrimer.elementAt(key));
 			}
 		}
-		primerResult.toString();
 		return primerResult;
 	}
 	
