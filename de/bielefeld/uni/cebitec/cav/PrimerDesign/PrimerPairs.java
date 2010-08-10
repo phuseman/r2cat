@@ -16,9 +16,6 @@ import java.util.Vector;
  *
  */
 public class PrimerPairs {
-	class Bases{
-		private final static char A ='A',a='a',G ='G',g='g', C='C',c='c',T='T',t='t',N='N', n='n';
-	}
 	private char[] alphabetMap= new char[256];
 	private double[][] smithWatermanScoreMatrix = new double[30][30];
 	private double currentMaxScore = 0;
@@ -44,33 +41,6 @@ public class PrimerPairs {
 		
 		}
 			return primer;
-	}
-	
-	
-	/**
-	 * This method retrieves the reverse complement of a given primer sequence.
-	 * @param primerSeq
-	 * @return
-	 */
-	public char[] getReverseComplement(char[] primerSeq){
-		char[] reverseComplement = new char[primerSeq.length];
-		
-		for (int j = 0; j < alphabetMap.length; j++) {
-			alphabetMap[j]= (char) j;
-		}
-		alphabetMap[Bases.a]=Bases.t;
-		alphabetMap[Bases.A]=Bases.T;
-		alphabetMap[Bases.c]=Bases.g;
-		alphabetMap[Bases.C]=Bases.G;
-		alphabetMap[Bases.g]=Bases.c;
-		alphabetMap[Bases.G]=Bases.C;
-		alphabetMap[Bases.t]=Bases.a;
-		alphabetMap[Bases.T]=Bases.A;
-		int m = 0;
-		for (int k = primerSeq.length-1; k>=0; k--,m++) {
-			reverseComplement[m]= alphabetMap[primerSeq[k]];
-		}
-		return reverseComplement;
 	}
 	
 	/**
@@ -103,6 +73,7 @@ public class PrimerPairs {
 	 */
 	
 	public boolean seqCheck(char[] firstSeq,char[] secondSeq){
+		Bases base = new Bases();
 		//auf true gesetzt, damit es noch results gibt...
 		boolean notComplement = true;
 		//score considering diagonal cell (H_i-1/j-1)
@@ -115,7 +86,7 @@ public class PrimerPairs {
 		double currentCellScore = 0;
 		currentMaxScore = 0;
 		
-		secondSeq = this.getReverseComplement(secondSeq);
+		secondSeq = base.getReverseComplement(secondSeq);
 
 		//Frage: In den Konstruktor der Klasse?!
 		//first row filled with zeros
