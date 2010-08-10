@@ -8,19 +8,15 @@ import java.io.IOException;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 
 /**
- * This class is needed to mask the repeats of the given fasta file which
- * include the selected contig sequences. It sets up the fasta file and a
- * working directory for the BLAST programms.
+ * This class can mask the repetitive regions in a given fasta file  object.
+ * The object should contain  the contig sequences.
+ * After the repeat masking, repetitive regions are in lowercase letters.
  * 
- * It includes getter and setter methods for needed objects in the
- * PrimerGenerator class.
- * 
- * @author yherrman
+ * @author yherrman / phuseman
  * 
  */
 public class BLASTRepeatMasker implements RepeatMasker {
 	private FastaFileReader fastaFile = null;
-	private File tempDir = null;
 
 	/**
 	 * Constructor to set up the working directory and the fasta file. It also
@@ -39,55 +35,17 @@ public class BLASTRepeatMasker implements RepeatMasker {
 	@Override
 	public FastaFileReader doRepeatMasking() throws IOException,
 			InterruptedException {
-		try {
-			fastaFile.checkInitialisation();
-			fastaFile.setAllToUppercaseLetters();
-			tempDir = this.createTempDir();
-			BLASTExecutor runBlast = new BLASTExecutor(
-					fastaFile.getSource(), tempDir);
-			runBlast.makeBlastDB();
-			runBlast.runBlastCommand();
-			this.markRepeatsFromBlastOutput(runBlast.getBlastOutput());
-		} finally {
-			this.deleteTempDir();
-		}
+		fastaFile.checkInitialisation();
+		fastaFile.setAllToUppercaseLetters();
+
+		BLASTExecutor runBlast = new BLASTExecutor(fastaFile.getSource());
+		runBlast.createTempDir();
+		runBlast.makeBlastDB();
+		runBlast.runBlastCommand();
+		this.markRepeatsFromBlastOutput(runBlast.getBlastOutput());
+		runBlast.deleteTempDir();
 
 		return this.fastaFile;
-	}
-
-	/**
-	 * This method is called to delete the temporary directory with its
-	 * temporary files.
-	 * 
-	 * @param dir
-	 */
-	private void deleteTempDir() {
-		if (tempDir.getName().contains("tempDirectoryForBlast")
-				&& tempDir.exists()) {
-			File[] files = tempDir.listFiles();
-			if (files != null) {
-				for (int i = 0; i < files.length; i++) {
-					files[i].delete();
-				}
-			}
-			tempDir.delete();
-		}
-	}
-
-	/**
-	 * This method sets up a temporary directory where the files of the BLAST
-	 * programms are put.
-	 * 
-	 * @return dir
-	 * @throws IOException
-	 */
-	public File createTempDir() throws IOException {
-		File tempDirectory;
-		tempDirectory = File.createTempFile("r2cat_temp_BLAST_dir", Long.toString(System
-				.nanoTime()));
-		tempDirectory.delete();
-		tempDirectory.mkdir();
-		return tempDirectory;
 	}
 
 	/**
@@ -112,11 +70,12 @@ public class BLASTRepeatMasker implements RepeatMasker {
 				int startSubject = Integer.valueOf(tab[8]).intValue();
 				int endSubject = Integer.valueOf(tab[9]).intValue();
 
-				//the -1 is because blast positions start at 1 while ours start at zero.
-				fastaFile.setRegionToLowercaseLetters(queryID, startQuery-1,
-						endQuery-1);
-				fastaFile.setRegionToLowercaseLetters(subjectID, startSubject-1,
-						endSubject-1);
+				// the -1 is because blast positions start at 1 while ours start
+				// at zero.
+				fastaFile.setRegionToLowercaseLetters(queryID, startQuery - 1,
+						endQuery - 1);
+				fastaFile.setRegionToLowercaseLetters(subjectID,
+						startSubject - 1, endSubject - 1);
 
 			}
 

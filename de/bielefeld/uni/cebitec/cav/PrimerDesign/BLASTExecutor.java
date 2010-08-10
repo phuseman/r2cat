@@ -4,29 +4,55 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * This class handels the execution of the external programms of BLAST 2.2.23.
+ * This class handels the execution of the external programm BLAST 2.2.23.
  * 
  * @author yherrman
  *
  */
 
 public class BLASTExecutor {
-	private File contigToBlast = null;
-	private File directoryForTempFiles = null;
+	private File queryFastaFile = null;
+	private File targetFastaFile = null;
+	private File temporaryDirectoryForBLAST = null;
 	private File blastOutput = null;
-/**
- * This method starts to execute formatdb and blastall of BLAST 2.2.23 with the given files in the given directory.
- * 
- * @param tempFile
- * @param tempDir
- * @throws IOException
- * @throws InterruptedException
- */
-	public BLASTExecutor(File tempFile, File tempDir) throws IOException, InterruptedException {
-		contigToBlast = tempFile;
-		directoryForTempFiles = tempDir;
+
+	/**
+	 * Use this constructor, if you want to blast a fasta file against itself. This is usefull for example for
+	 * blasting a set of contigs against it self in order to repeatmask them.
+	 * (internally query and target will be set the same)
+	 * @param query
+	 */
+	public BLASTExecutor(File query) {
+		queryFastaFile = query;
+		targetFastaFile = query;
 	}
-	
+
+	/**
+	 * This is the constructor for blasting the query file against the target file. both files have to be in fasta format.
+	 * 
+	 * @param query
+	 * @param target
+	 */
+	public BLASTExecutor(File query, File target) {
+		queryFastaFile = query;
+		targetFastaFile = target;
+	}
+
+/**
+	 * This method sets up a temporary directory where the files of the BLAST
+	 * run are put.
+	 * 
+	 * @return dir
+	 * @throws IOException
+	 */
+	public File createTempDir() throws IOException {
+		temporaryDirectoryForBLAST = File.createTempFile("r2cat_temp_BLAST_dir", Long.toString(System
+				.nanoTime()));
+		temporaryDirectoryForBLAST.delete();
+		temporaryDirectoryForBLAST.mkdir();
+		return temporaryDirectoryForBLAST;
+	}
+
 /**
  * This method executes the programm formatdb and makes a nucleotide database from the given
  * fasta file.
@@ -34,10 +60,15 @@ public class BLASTExecutor {
  * @throws IOException
  * @throws InterruptedException
  */
-	public void makeBlastDB() throws IOException, InterruptedException{
-		String command = new String("formatdb -i "+contigToBlast.getAbsolutePath()+" -p F");
-		Process p = Runtime.getRuntime().exec(command,null,directoryForTempFiles);
-		p.waitFor();
+	public int makeBlastDB() throws IOException, InterruptedException{
+		if (temporaryDirectoryForBLAST == null) {
+			//failsafe: creat temp dir, if this has hot happened yet
+			this.createTempDir();
+		}
+		String command = new String("formatdb -i "+targetFastaFile.getAbsolutePath()+" -p F -n blastdb");
+//		System.out.println(command);
+		Process p = Runtime.getRuntime().exec(command,null,temporaryDirectoryForBLAST);
+		return p.waitFor();
 	}
 	
 	/**
@@ -48,18 +79,51 @@ public class BLASTExecutor {
 	 * @throws InterruptedException
 	 */
 	
-	public void runBlastCommand() throws IOException, InterruptedException{
-		blastOutput = new File(directoryForTempFiles,"blastout.txt");
-		String command = new String("blastall -p blastn -i "+contigToBlast.getAbsolutePath()+" -d "+contigToBlast.getAbsolutePath()+" -F F -m 8 -e 1e-04 -o " +blastOutput.getName());
-		Process p = Runtime.getRuntime().exec(command,null,directoryForTempFiles);
-		p.waitFor();
+	public int runBlastCommand() throws IOException, InterruptedException{
+		if(temporaryDirectoryForBLAST == null) {
+			//failsafe: create blast database if there is no temporary directory (and thus no blastdb)
+			this.makeBlastDB();
+		}
+		blastOutput = new File(temporaryDirectoryForBLAST,"blastout.txt");
+		String command = new String("blastall -p blastn -i "+queryFastaFile.getAbsolutePath()+" -d blastdb -F F -m 8 -e 1e-04 -o " +blastOutput.getAbsolutePath());
+//		System.out.println(command);
+		Process p = Runtime.getRuntime().exec(command,null,temporaryDirectoryForBLAST);
+		return p.waitFor();
 	}
 
-	public File getBlastOutput() {
-		return blastOutput;
+	/**
+	 * Returns the output file of the blast run.
+	 * Make sure to remove the temporary files with deleteTempDir() after the result was parsed.
+	 * If a blast run is not sucessful, then null can be returned.
+	 * 
+	 * @return File blast results in a temporary directory.
+	 * 
+	 */
+	public File getBlastOutput() throws IOException, InterruptedException{
+		if(blastOutput == null) {
+			//failsafe: run blast, if ther is no result file
+			this.runBlastCommand();
+		}
+			return blastOutput;
 	}
 
-	public void setBlastOutput(File blastOutput) {
-		this.blastOutput = blastOutput;
+	
+	/**
+	 * Removes the temporary directory of this object and all first level files.
+	 * @return if the oparation was successfull
+	 */
+	public boolean deleteTempDir() {
+		if (temporaryDirectoryForBLAST.exists()) {
+			File[] files = temporaryDirectoryForBLAST.listFiles();
+			if (files != null) {
+				for (int i = 0; i < files.length; i++) {
+//					System.out.println("removing "+files[i].getName());
+					files[i].delete();
+				}
+			}
+			return temporaryDirectoryForBLAST.delete();
+		}
+		return false;
 	}
+
 }
