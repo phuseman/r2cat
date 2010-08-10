@@ -10,7 +10,7 @@ import java.io.IOException;
  *
  */
 
-public class RunBlastToFindRepeats {
+public class BLASTExecutor {
 	private File contigToBlast = null;
 	private File directoryForTempFiles = null;
 	private File blastOutput = null;
@@ -22,7 +22,7 @@ public class RunBlastToFindRepeats {
  * @throws IOException
  * @throws InterruptedException
  */
-	public RunBlastToFindRepeats(File tempFile, File tempDir) throws IOException, InterruptedException {
+	public BLASTExecutor(File tempFile, File tempDir) throws IOException, InterruptedException {
 		contigToBlast = tempFile;
 		directoryForTempFiles = tempDir;
 	}
@@ -36,7 +36,6 @@ public class RunBlastToFindRepeats {
  */
 	public void makeBlastDB() throws IOException, InterruptedException{
 		String command = new String("formatdb -i "+contigToBlast.getAbsolutePath()+" -p F");
-		System.out.println(command);
 		Process p = Runtime.getRuntime().exec(command,null,directoryForTempFiles);
 		p.waitFor();
 	}
@@ -52,7 +51,6 @@ public class RunBlastToFindRepeats {
 	public void runBlastCommand() throws IOException, InterruptedException{
 		blastOutput = new File(directoryForTempFiles,"blastout.txt");
 		String command = new String("blastall -p blastn -i "+contigToBlast.getAbsolutePath()+" -d "+contigToBlast.getAbsolutePath()+" -F F -m 8 -e 1e-04 -o " +blastOutput.getName());
-		System.out.println(command);
 		Process p = Runtime.getRuntime().exec(command,null,directoryForTempFiles);
 		p.waitFor();
 	}

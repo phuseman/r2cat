@@ -40,10 +40,10 @@ public class BLASTRepeatMasker implements RepeatMasker {
 	public FastaFileReader doRepeatMasking() throws IOException,
 			InterruptedException {
 		try {
-
+			fastaFile.checkInitialisation();
 			fastaFile.setAllToUppercaseLetters();
 			tempDir = this.createTempDir();
-			RunBlastToFindRepeats runBlast = new RunBlastToFindRepeats(
+			BLASTExecutor runBlast = new BLASTExecutor(
 					fastaFile.getSource(), tempDir);
 			runBlast.makeBlastDB();
 			runBlast.runBlastCommand();
@@ -112,10 +112,11 @@ public class BLASTRepeatMasker implements RepeatMasker {
 				int startSubject = Integer.valueOf(tab[8]).intValue();
 				int endSubject = Integer.valueOf(tab[9]).intValue();
 
-				fastaFile.setRegionToLowercaseLetters(queryID, startQuery,
-						endQuery);
-				fastaFile.setRegionToLowercaseLetters(subjectID, startSubject,
-						endSubject);
+				//the -1 is because blast positions start at 1 while ours start at zero.
+				fastaFile.setRegionToLowercaseLetters(queryID, startQuery-1,
+						endQuery-1);
+				fastaFile.setRegionToLowercaseLetters(subjectID, startSubject-1,
+						endSubject-1);
 
 			}
 

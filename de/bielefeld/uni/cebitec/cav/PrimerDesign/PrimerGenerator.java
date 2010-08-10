@@ -27,7 +27,7 @@ public class PrimerGenerator {
 		private final static char A ='A',a='a',G ='G',g='g', C='C',c='c',T='T',t='t',N='N', n='n';
 	}
 	private String[] markedSeq = null;
-	private RetrieveParametersAndScores scoring = null;
+	private PrimerScoringScheme scoring = null;
 	FastaFileReader fastaParser;
 	private int realstart = 0;
 	//max length a primer should have
@@ -63,13 +63,13 @@ public class PrimerGenerator {
 		if(config!=null){
 			this.setUpLogFile();
 
-			scoring = new RetrieveParametersAndScores();
+			scoring = new PrimerScoringScheme();
 			FileReader inConfig = new FileReader(config);
 			XMLParser configParser= new XMLParser();
 			configParser.parse(scoring, inConfig);
 			}else{
 				this.setUpLogFile();
-				scoring = new RetrieveParametersAndScores();
+				scoring = new PrimerScoringScheme();
 			}
 		return true;
 		}

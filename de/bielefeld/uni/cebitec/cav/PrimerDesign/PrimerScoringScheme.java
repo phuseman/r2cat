@@ -18,7 +18,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
  * @author yherrmann
  *
  */
-	final class RetrieveParametersAndScores implements DocumentHandler {
+	final class PrimerScoringScheme implements DocumentHandler {
 		private DefaultMutableTreeNode root, currentNode, currentParent;
 		private String currentTag = null;
 		private String value = null;
@@ -48,7 +48,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * Fills the parameter containers with default values.
 		 */
 		
-		public RetrieveParametersAndScores(){
+		public PrimerScoringScheme(){
 				this.defaultParameters();
 		}
 

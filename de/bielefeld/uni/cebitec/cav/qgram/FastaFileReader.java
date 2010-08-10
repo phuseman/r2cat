@@ -398,7 +398,7 @@ public class FastaFileReader {
 	 * If the contents of the file were not read in, resume this.
 	 * @throws IOException
 	 */
-	private void checkInitialisation() throws IOException {
+	public void checkInitialisation() throws IOException {
 		if (!initialized || chararray == null) {
 			this.scanContents(true);
 		}
