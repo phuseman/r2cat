@@ -41,7 +41,6 @@ public class PrimerGenerator {
 	private Logger logger;
 	private AbstractProgressReporter progress;
 	private File fasta;
-	private char[] alphabetMap= new char[256];
 	
 	/**
 	 * Constructor when only a fasta file is given.

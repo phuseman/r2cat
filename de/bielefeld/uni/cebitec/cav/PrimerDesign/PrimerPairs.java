@@ -16,7 +16,6 @@ import java.util.Vector;
  *
  */
 public class PrimerPairs {
-	private char[] alphabetMap= new char[256];
 	private double[][] smithWatermanScoreMatrix = new double[30][30];
 	private double currentMaxScore = 0;
 
