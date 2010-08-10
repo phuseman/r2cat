@@ -54,16 +54,15 @@ public class PrimerGenerator {
 		fasta = fastaFile;
 		fastaParser = new FastaFileReader(fastaFile);
 	}
-	public boolean runRepeatMasking() throws IOException, InterruptedException{
-		RepeatMasking rm = new RepeatMasking(fasta);
-		rm.runBLAST();
-		temporaryDirectory = rm.getDir();
-		fastaParser = rm.getFfrForpreprocessed();
-		return true;
+	public void runRepeatMasking() throws IOException, InterruptedException{
+		BLASTRepeatMasker rm = new BLASTRepeatMasker(fastaParser);
+		fastaParser = rm.doRepeatMasking();
 	}
+	
 	public boolean setParameters(File config) throws Exception{
 		if(config!=null){
 			this.setUpLogFile();
+
 			scoring = new RetrieveParametersAndScores();
 			FileReader inConfig = new FileReader(config);
 			XMLParser configParser= new XMLParser();

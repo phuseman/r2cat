@@ -425,7 +425,7 @@ public class FastaFileReader {
 
 	/**
 	 * Sets the characters in a specified region to lowercase.
-	 * This can be used as a kind of repeat masking: Uppercase letters indicate nonrepetitive parts.
+	 * This can be used as a kind of repeat masking: Lowercase sequences indicate repetitive parts.
 	 * In this sense, this function sets the given sequences to repetitive.
 	 * A functionality of these repeatmasked sequences must be implemented in the classes that want to use it.
 	 * 

@@ -2,7 +2,6 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
 
 /**
  * This class handels the execution of the external programms of BLAST 2.2.23.
@@ -12,9 +11,9 @@ import java.util.Scanner;
  */
 
 public class RunBlastToFindRepeats {
-	File contigToBlast = null;
-	File directoryForTempFiles = null;
-	File blastOutput = null;
+	private File contigToBlast = null;
+	private File directoryForTempFiles = null;
+	private File blastOutput = null;
 /**
  * This method starts to execute formatdb and blastall of BLAST 2.2.23 with the given files in the given directory.
  * 
@@ -31,18 +30,15 @@ public class RunBlastToFindRepeats {
 /**
  * This method executes the programm formatdb and makes a nucleotide database from the given
  * fasta file.
- * 
+ * TODO: formatdb creates the database files in the directory of the given file. find a way to do this in the temp dir.
  * @throws IOException
  * @throws InterruptedException
  */
 	public void makeBlastDB() throws IOException, InterruptedException{
-		String command = new String("formatdb -i "+contigToBlast.getName()+" -p F");
+		String command = new String("formatdb -i "+contigToBlast.getAbsolutePath()+" -p F");
+		System.out.println(command);
 		Process p = Runtime.getRuntime().exec(command,null,directoryForTempFiles);
 		p.waitFor();
-		Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
-		 if(s.hasNext()){
-			 System.out.println(s.next());
-		 }
 	}
 	
 	/**
@@ -54,14 +50,11 @@ public class RunBlastToFindRepeats {
 	 */
 	
 	public void runBlastCommand() throws IOException, InterruptedException{
-		blastOutput = File.createTempFile("blastout",".txt",directoryForTempFiles);
-		String command = new String("blastall -p blastn -i "+contigToBlast.getName()+" -d "+contigToBlast.getName()+" -F F -m 8 -e 1e-04 -o " +blastOutput.getName());
+		blastOutput = new File(directoryForTempFiles,"blastout.txt");
+		String command = new String("blastall -p blastn -i "+contigToBlast.getAbsolutePath()+" -d "+contigToBlast.getAbsolutePath()+" -F F -m 8 -e 1e-04 -o " +blastOutput.getName());
+		System.out.println(command);
 		Process p = Runtime.getRuntime().exec(command,null,directoryForTempFiles);
 		p.waitFor();
-		Scanner s = new Scanner(p.getErrorStream()).useDelimiter( "\\Z" ); 
-		 if(s.hasNext()){
-			 System.out.println(s.next());
-		 }
 	}
 
 	public File getBlastOutput() {
