@@ -9,7 +9,6 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
  * This class reports what kind of tag was met in the XML-file in order to store the
  * information of the XML-file in the same structure.
  * 
- * @author yherrmann
  *
  */
 public class XMLParser {
@@ -30,6 +29,18 @@ public class XMLParser {
 				DONE = 11,
 				DOCTYPE = 14,
 				PRE = 15;
+	}
+	private int countOpening = 0;
+	private int countClosing = 0;
+	
+	public boolean checkXML(){
+		boolean isXML = false;
+		if(countOpening == countClosing){
+			isXML = true;
+			return isXML;
+		}else{
+			return isXML;
+		}
 	}
 	
 /**

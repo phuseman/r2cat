@@ -1,5 +1,7 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
+import java.util.Comparator;
+
 /**
  * This class represents a primer object. This object includes information about
  * the following primer properties:

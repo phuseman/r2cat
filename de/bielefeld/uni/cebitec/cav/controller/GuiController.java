@@ -44,7 +44,6 @@ import javax.swing.filechooser.FileFilter;
 import org.freehep.util.export.ExportDialog;
 
 import de.bielefeld.uni.cebitec.cav.R2cat;
-import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.ContigSorter;
 import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
@@ -62,6 +61,7 @@ import de.bielefeld.uni.cebitec.cav.gui.PrimerFrame;
 import de.bielefeld.uni.cebitec.cav.gui.PrimerResultFrame;
 import de.bielefeld.uni.cebitec.cav.gui.PrimerTable;
 import de.bielefeld.uni.cebitec.cav.gui.SequenceOrderTable;
+import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
 public class GuiController {

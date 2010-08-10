@@ -2,11 +2,8 @@ package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Vector;
-
-import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator.Bases;
 
 /**
  * This class includes methods to make primer pairs from primer candidates of the possible forward and reverse
@@ -22,9 +19,10 @@ public class PrimerPairs {
 	class Bases{
 		private final static char A ='A',a='a',G ='G',g='g', C='C',c='c',T='T',t='t',N='N', n='n';
 	}
-	private ArrayList<Integer> notPairedPrimer = new ArrayList<Integer>();
-	private ArrayList<Integer> noPartnerLeft = new ArrayList<Integer>();
-	private ArrayList<Integer> noPartnerRight = new ArrayList<Integer>();
+	private char[] alphabetMap= new char[256];
+	private double[][] smithWatermanScoreMatrix = new double[30][30];
+	private double currentMaxScore = 0;
+
 
 	/**
 	 * This method is used to sort all primer candidates in a vector according to their scores and returns
@@ -48,36 +46,6 @@ public class PrimerPairs {
 			return primer;
 	}
 	
-/*	*//**
-	 * This method is used to retrieve the complement of a given primer sequence.
-	 * 
-	 * @param primerSeq
-	 * @return complement of primerSeq
-	 *//*
-	
-	public char[] getComplement(char[] primerSeq){
-
-		char[] alphabetMap= new char[256];
-		char[] complement = new char[primerSeq.length];
-		
-		for (int j = 0; j < alphabetMap.length; j++) {
-			alphabetMap[j]= (char) j;
-		}
-		alphabetMap['a']='t';
-		alphabetMap['A']='T';
-		alphabetMap['c']='g';
-		alphabetMap['C']='G';
-		alphabetMap['g']='c';
-		alphabetMap['G']='C';
-		alphabetMap['t']='a';
-		alphabetMap['T']='A';
-		
-		for (int j = 0; j<primerSeq.length; j++) {
-			complement[j]= alphabetMap[primerSeq[j]];
-		}
-	
-		return complement;
-	}*/
 	
 	/**
 	 * This method retrieves the reverse complement of a given primer sequence.
@@ -85,8 +53,6 @@ public class PrimerPairs {
 	 * @return
 	 */
 	public char[] getReverseComplement(char[] primerSeq){
-
-		char[] alphabetMap= new char[256];
 		char[] reverseComplement = new char[primerSeq.length];
 		
 		for (int j = 0; j < alphabetMap.length; j++) {
@@ -100,13 +66,10 @@ public class PrimerPairs {
 		alphabetMap[Bases.G]=Bases.C;
 		alphabetMap[Bases.t]=Bases.a;
 		alphabetMap[Bases.T]=Bases.A;
-		
 		int m = 0;
 		for (int k = primerSeq.length-1; k>=0; k--,m++) {
 			reverseComplement[m]= alphabetMap[primerSeq[k]];
-			
 		}
-	
 		return reverseComplement;
 	}
 	
@@ -123,7 +86,6 @@ public class PrimerPairs {
 		double temperatureDifference =0;
 		double temperatureDifferenceBorder = 5;
 		boolean temperatureCheck=false;
-		
 		temperatureDifference = Math.abs(firstTemperature-secondTemperature);
 		if(temperatureDifference<temperatureDifferenceBorder){
 			temperatureCheck =true;
@@ -131,14 +93,9 @@ public class PrimerPairs {
 			temperatureCheck=false;
 		}
 		return temperatureCheck;
-	}
-	
+	}	
 	/**
-	 * This method checks if the sequences of the forward and reverse primer (possible pair)
-	 * include a complementary sequence of eight nucleotides somewhere in the primer sequences or four
-	 * nucleotides at the 3'end of forward primer and the 5'end of the reverse primer.
-	 * 
-	 * It returns true if the sequence are not complementary.
+	 * This method aligns the two sequences of the possible primer pair by using the smith-waterman algorithm.
 	 *
 	 * @param firstSeq
 	 * @param secondSeq
@@ -146,43 +103,81 @@ public class PrimerPairs {
 	 */
 	
 	public boolean seqCheck(char[] firstSeq,char[] secondSeq){
-		boolean notComplement = false;
-		String firstSeqLastBases = null;
-		String secondSeqLastBases = null;
-		String firstSeqEightBases = null;
-		String secondSeqAsString  = null;
-		String firstSeqFirstBases =null;
-		String secondSeqFirstBases =null;
-		char[] eightBases = new char[8];
-		char[] leftLastBases = new char[4];
-		char[] rightLastBases = new char[4];
-		char[] leftFirstBases = new char[4];
-		char[] rightFirstBases = new char[4];
+		//auf true gesetzt, damit es noch results gibt...
+		boolean notComplement = true;
+		//score considering diagonal cell (H_i-1/j-1)
+		double substiutionScore = 0;
+		//score considering cell to the left (H_i/j-1)
+		double deletionScore = 0;
+		//score considering cell above (H_i-1/j)
+		double insertionScore = 0;
+		//absolut score for current cell
+		double currentCellScore = 0;
+		currentMaxScore = 0;
+		
 		secondSeq = this.getReverseComplement(secondSeq);
-		for(int k = 0;k<=firstSeq.length-8;k++){
-			System.arraycopy(firstSeq, k, eightBases, 0, 7);
-			//last four bases of the 3'end of the forward primer
-			System.arraycopy(firstSeq, firstSeq.length-4, leftLastBases,0, 3);
-			//first four bases of the 5'end of the forward primer
-			System.arraycopy(firstSeq, 0, leftFirstBases, 0, 3);
-			//last four bases of the 5'end of the reverse primer
-			System.arraycopy(secondSeq, secondSeq.length-4, rightLastBases, 0, 3);
-			//first four bases of the 3'end of the reverse primer
-			System.arraycopy(secondSeq, 0, leftFirstBases, 0, 3);
-			firstSeqLastBases = new String(leftLastBases);
-			secondSeqLastBases = new String(rightLastBases);
-			firstSeqFirstBases=new String(leftFirstBases);
-			secondSeqFirstBases = new String(rightFirstBases);
-			firstSeqEightBases = new String(eightBases);
-			secondSeqAsString = new String(secondSeq);
-			if(secondSeqAsString.contains(firstSeqEightBases)||firstSeqLastBases.equals(secondSeqLastBases)||firstSeqFirstBases.equals(secondSeqFirstBases)){
-				notComplement = false;
-				return notComplement;
-			} else{
-				notComplement = true;
-			}
+
+		//Frage: In den Konstruktor der Klasse?!
+		//first row filled with zeros
+		for(int k = 0; k<smithWatermanScoreMatrix.length;k++){
+				smithWatermanScoreMatrix[0][k] = 0;
 		}
+		//first column filled with zeros
+			for(int m = 0; m<smithWatermanScoreMatrix.length; m++){
+				smithWatermanScoreMatrix[m][0] = 0;
+		}
+			//calculation of the scores for the remaining cells in the score matrix
+			for(int i = 1; i<=firstSeq.length;i++){
+				for(int j = 1; j<=secondSeq.length; j++){
+					substiutionScore = smithWatermanScoreMatrix[i-1][j-1] + checkBases(firstSeq[i-1], secondSeq[j-1]);
+					deletionScore = smithWatermanScoreMatrix[i][j-1]-gapScoring(1);
+					insertionScore = smithWatermanScoreMatrix[i-1][j]-gapScoring(1);
+					
+					//maximum of the above scores is put into the considering cell
+					 currentCellScore = Math.max(Math.max(substiutionScore, insertionScore), Math.max(deletionScore, 0));
+					 smithWatermanScoreMatrix[i][j] = currentCellScore;
+					 
+					 //save highest score
+					 if(currentMaxScore  < currentCellScore){
+						 currentMaxScore  = currentCellScore;
+					 }
+					 //alignment of the first three bases should not get a high score
+					if(smithWatermanScoreMatrix[3][3]>=3){
+						notComplement = false;
+						return notComplement;
+					}
+					
+				}
+			}
+			//score übergeben?! <--> verhältnis zur länge berechnen
 		return notComplement;
+	}
+	
+	/**
+	 * Method checks if the bases of the sequences matches if so it returns 1 and if the don't match it returns -1/3.
+	 * 
+	 * @param baseOfFirstSeq
+	 * @param baseOfSecondSeq
+	 * @return score for match or a substitution
+	 */
+	public double checkBases(char baseOfFirstSeq, char baseOfSecondSeq){
+		if(baseOfFirstSeq == baseOfSecondSeq){
+			//for a match
+			return 1;
+		} else{
+			//for a substitution
+			return (-1/3);
+		}
+	}
+	/**
+	 * This method calculates the score considering the gap scoring scheme of the smith-waterman algorithm.
+	 * @param gapLength
+	 * @return gapScore
+	 */
+	public double gapScoring(int gapLength){
+		double gapScore = 0;
+		gapScore = 1+(-1/3)*gapLength;
+		return gapScore;
 	}
 	
 	
@@ -200,18 +195,15 @@ public class PrimerPairs {
 	 */
 	
 	public PrimerResult pairPrimer(Vector<Primer> primerCandidates, PrimerResult primerResult, String[] contigIDs){
-		HashMap<Integer,Integer> primerPairIndexLeftPrimerFirst = new HashMap<Integer,Integer>();
-		HashMap<Integer,Integer> primerPairIndexRightPrimerFirst = new HashMap<Integer,Integer>();
-		Vector<HashMap<Integer,Integer>> primerPairIndexMaps = new Vector<HashMap<Integer,Integer>>();
+		
+		//andere Lösung fürs pairing...
+		
+		ArrayList<Integer> notPairedPrimer = new ArrayList<Integer>();
 		Vector<Primer> leftPrimer = new Vector<Primer>();
 		Vector<Primer> rightPrimer = new Vector<Primer>();
-		char[] forwardPrimerSeq;
-		char[] reversePrimerSeq;
 		boolean sequenceCheck = false;
 		boolean temperatureCheck =false;
-		double leftPrimerTemperature=0;
-		double rightPrimerTemperature= 0;
-		int j = 0;
+
 		for(int k = 0; k<primerCandidates.size();k++){
 			if(primerCandidates.elementAt(k).getContigID().equals(contigIDs[0])){
 				leftPrimer.add(primerCandidates.elementAt(k));
@@ -219,18 +211,18 @@ public class PrimerPairs {
 				rightPrimer.add(primerCandidates.elementAt(k));
 			}
 		}
+		int j = 0;
 		for(int i = 0; i<leftPrimer.size();j++,i++){
-			forwardPrimerSeq =  leftPrimer.elementAt(i).getPrimerSeq();
-			leftPrimerTemperature =  leftPrimer.elementAt(i).getTemperature();
+			char[] leftPrimerSeq =  leftPrimer.elementAt(i).getPrimerSeq();
+			double leftPrimerTemperature =  leftPrimer.elementAt(i).getTemperature();
 			if(j<rightPrimer.size()){
-				reversePrimerSeq = rightPrimer.elementAt(j).getPrimerSeq();
-				rightPrimerTemperature =  rightPrimer.elementAt(j).getTemperature();
+				char[] rightPrimerSeq = rightPrimer.elementAt(j).getPrimerSeq();
+				double rightPrimerTemperature = rightPrimer.elementAt(j).getTemperature();
 				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
 					if(temperatureCheck){
-							sequenceCheck = this.seqCheck(forwardPrimerSeq, reversePrimerSeq);
-								if(sequenceCheck&&!primerPairIndexLeftPrimerFirst.containsKey(i)){
+							sequenceCheck = this.seqCheck(leftPrimerSeq, rightPrimerSeq);
+								if(sequenceCheck){
 									primerResult.addPair(leftPrimer.elementAt(i), rightPrimer.elementAt(j));
-									primerPairIndexLeftPrimerFirst.put(i, j);
 								} else{
 											notPairedPrimer.add(i);
 									}
@@ -241,93 +233,48 @@ public class PrimerPairs {
 					notPairedPrimer.add(i);
 				}
 		}
+
 		if(!notPairedPrimer.isEmpty()){
-		int countLeft= 0;
 		for(Integer a : notPairedPrimer){
-			countLeft++;
 			if(a<leftPrimer.size()){
-			forwardPrimerSeq = leftPrimer.elementAt(a).getPrimerSeq();
-			leftPrimerTemperature =leftPrimer.elementAt(a).getTemperature();
+			char[] leftPrimerSeq = leftPrimer.elementAt(a).getPrimerSeq();
+			double leftPrimerTemperature =leftPrimer.elementAt(a).getTemperature();
 			for(int m = 0; m<rightPrimer.size();m++){
-				reversePrimerSeq=rightPrimer.elementAt(m).getPrimerSeq();
-				rightPrimerTemperature=rightPrimer.elementAt(m).getTemperature();
+				char[] rightPrimerSeq=rightPrimer.elementAt(m).getPrimerSeq();
+				double rightPrimerTemperature=rightPrimer.elementAt(m).getTemperature();
 				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
 				if(temperatureCheck){
-							sequenceCheck = this.seqCheck(forwardPrimerSeq, reversePrimerSeq);
-							if(sequenceCheck&&!primerPairIndexLeftPrimerFirst.containsKey(a)){
+							sequenceCheck = this.seqCheck(leftPrimerSeq, rightPrimerSeq);
+							if(sequenceCheck){
 								primerResult.addPair(leftPrimer.elementAt(a), rightPrimer.elementAt(m));
-								primerPairIndexLeftPrimerFirst.put(a, m);
-							} else{
-								if(!noPartnerLeft.contains(a)&&!primerPairIndexLeftPrimerFirst.containsKey(a)){
-									noPartnerLeft.add(a);
-								}
 							}
-				}else{
-					if(!noPartnerLeft.contains(a)&&!primerPairIndexLeftPrimerFirst.containsKey(a)){
-						noPartnerLeft.add(a);
-						}
-				}
 			}
 			
 		}
 	}
-		int countRight = 0;
 		for(Integer b :notPairedPrimer){
 			if(b<rightPrimer.size()){
-				countRight++;
-			reversePrimerSeq=rightPrimer.elementAt(b).getPrimerSeq();
-			rightPrimerTemperature=rightPrimer.elementAt(b).getTemperature();
+			char[] rightPrimerSeq=rightPrimer.elementAt(b).getPrimerSeq();
+			double rightPrimerTemperature=rightPrimer.elementAt(b).getTemperature();
 			for(int m = 0; m<leftPrimer.size();m++){
-				forwardPrimerSeq=leftPrimer.elementAt(m).getPrimerSeq();
-				leftPrimerTemperature=leftPrimer.elementAt(m).getTemperature();
+				char[] leftPrimerSeq=leftPrimer.elementAt(m).getPrimerSeq();
+				double leftPrimerTemperature=leftPrimer.elementAt(m).getTemperature();
 				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
 				if(temperatureCheck){
-					sequenceCheck = this.seqCheck(reversePrimerSeq, forwardPrimerSeq);
+					sequenceCheck = this.seqCheck(rightPrimerSeq, leftPrimerSeq);
 					//b position im Rechten Primer Vektor und m position im linken Primer Vektor
-							if(sequenceCheck&&!primerPairIndexRightPrimerFirst.containsKey(b)){
+							if(sequenceCheck){
 								primerResult.addPair(leftPrimer.elementAt(m), rightPrimer.elementAt(b));
-								primerPairIndexRightPrimerFirst.put(b, m);
-							} else{
-								if(!noPartnerRight.contains(b)&&!primerPairIndexRightPrimerFirst.containsKey(b)){
-									noPartnerRight.add(b);
-								}
 							}
-				}else{
-				if(!noPartnerRight.contains(b)&&!primerPairIndexRightPrimerFirst.containsKey(b)){
-					noPartnerRight.add(b);
 				}
 				}
 			}
 		}
 		}
 		
-		this.noPartnerCheck(primerPairIndexLeftPrimerFirst,primerPairIndexRightPrimerFirst);
 	}
 		return primerResult;
-		
+	}	
+
 	}
 	
-	/**
-	 * This method checks if all primer candidates (forward and reverse) got a fitting partner primer. 
-	 */
-	public void noPartnerCheck(HashMap<Integer,Integer> pairsFirstLeftPrimer,HashMap<Integer,Integer> pairsFirstRightPrimer){
-		int countR = 0;
-		int countL = 0; 
-		for(int n = 0; n<noPartnerRight.size();n++){
-			if(pairsFirstRightPrimer.containsKey(noPartnerRight.get(n))){
-				countR++;
-			}
-		}
-		if(countR==noPartnerRight.size()){
-			noPartnerRight.clear();
-		}
-		for(int n = 0; n<noPartnerLeft.size();n++){	
-			if(pairsFirstLeftPrimer.containsKey(noPartnerLeft.get(n))){
-				countL++;
-			}
-		}
-		if(countL==noPartnerLeft.size()){
-			noPartnerLeft.clear();
-		}
-	}
-}

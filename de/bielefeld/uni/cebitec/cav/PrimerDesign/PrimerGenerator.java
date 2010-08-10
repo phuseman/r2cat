@@ -28,7 +28,7 @@ public class PrimerGenerator {
 	}
 	private String[] markedSeq = null;
 	private PrimerScoringScheme scoring = null;
-	FastaFileReader fastaParser;
+	private FastaFileReader fastaParser;
 	private int realstart = 0;
 	//max length a primer should have
 	private int maxLength = 24;
@@ -44,6 +44,7 @@ public class PrimerGenerator {
 	private Logger logger;
 	private AbstractProgressReporter progress;
 	private File fasta;
+	private char[] alphabetMap= new char[256];
 	
 	/**
 	 * Constructor when only a fasta file is given.
@@ -62,7 +63,6 @@ public class PrimerGenerator {
 	public boolean setParameters(File config) throws Exception{
 		if(config!=null){
 			this.setUpLogFile();
-
 			scoring = new PrimerScoringScheme();
 			FileReader inConfig = new FileReader(config);
 			XMLParser configParser= new XMLParser();
@@ -76,7 +76,7 @@ public class PrimerGenerator {
 	
 	/**
 	 * This methods sets up the logging file.
-	 * 
+	 * ?! am ende noch genutzt ?!
 	 * @throws SecurityException
 	 * @throws IOException
 	 */
@@ -168,6 +168,7 @@ public class PrimerGenerator {
 			} else{
 				throw new NullPointerException("contig id could not be found");
 			}
+		//used if only one contig is marked --> not possible in r2cat context
 			/*} else if(tempPair.length==3){
 				markedSeq = new String[1];
 				markedSeq[0] = tempPair[0];
@@ -279,6 +280,9 @@ public class PrimerGenerator {
 			for(String contigID : markedContig){
 				Integer directionOfPrimer = contigAndDirectionInfo.get(contigID);
 				char[] tempSeqChar = templateSeq.get(contigID);
+				if(directionOfPrimer == -1){
+					tempSeqChar = this.getReverseComplement(tempSeqChar);
+				}
 				int seqLength = tempSeqChar.length;
 				String templateSeqString = new String(tempSeqChar);
 				if(directionOfPrimer == 1){
@@ -325,8 +329,8 @@ public class PrimerGenerator {
 						String candidateReversePrimerMaxLength = templateSeqString.substring(start, end);
 						nextPlus1Base = this.complementBase(templateSeqString.substring(start-1,start));
 						nextPlus2Base = this.complementBase(templateSeqString.substring(start-2,start-1));
-						char[] candidateReversePrimerToArray = candidateReversePrimerMaxLength.toCharArray();
-						char[] candidateReversePrimerSeqReverseComplement = getReverseComplement(candidateReversePrimerToArray);
+						//char[] candidateReversePrimerToArray = candidateReversePrimerMaxLength.toCharArray();
+						char[] candidateReversePrimerSeqReverseComplement = candidateReversePrimerMaxLength.toCharArray();//= getReverseComplement(candidateReversePrimerToArray);
 							if(offset>minBorderOffset&&offset<maxBorderOffset){
 							primerCandidates.add(new Primer(contigID,seqLength,candidateReversePrimerSeqReverseComplement,start,directionOfPrimer,maxLength,nextPlus1Base, nextPlus2Base,offset));
 						for(int length = miniLength; length<candidateReversePrimerMaxLength.length()-1;length++){
@@ -339,8 +343,8 @@ public class PrimerGenerator {
 								nextPlus1BaseForShortPrimers = this.complementBase(candidateReversePrimerMaxLength.substring(candidateReversePrimerMaxLength.length()-length-1,candidateReversePrimerMaxLength.length()-length));
 								nextPlus2BaseForShortPrimers = this.complementBase(candidateReversePrimerMaxLength.substring(candidateReversePrimerMaxLength.length()-length-2,candidateReversePrimerMaxLength.length()-length-1));
 							}
-							char[] candidateReversePrimerArray = candidateReversePrimer.toCharArray();
-							char[] candidateReversePrimerSeq = getReverseComplement(candidateReversePrimerArray);
+							//char[] candidateReversePrimerArray = candidateReversePrimer.toCharArray();
+							char[] candidateReversePrimerSeq = candidateReversePrimer.toCharArray();//= getReverseComplement(candidateReversePrimerArray);
 							primerCandidates.add(new Primer(contigID,seqLength,candidateReversePrimerSeq,start,directionOfPrimer,length,nextPlus1BaseForShortPrimers, nextPlus2BaseForShortPrimers,offset));		
 								}
 							}
@@ -437,7 +441,6 @@ public class PrimerGenerator {
 	 */
 	public PrimerResult getPrimerPairs(Vector<Primer> primerCandidates, PrimerResult primerResult) throws IOException,NullPointerException{
 		PrimerPairs pp = new PrimerPairs();
-		Vector<HashMap<Integer,Integer>> pairsIndexMaps =new Vector<HashMap<Integer, Integer>>();
 			primerCandidates = pp.sortPrimer(primerCandidates);
 			primerResult = pp.pairPrimer(primerCandidates,primerResult, markedSeq);
 			return primerResult;
@@ -469,8 +472,6 @@ public class PrimerGenerator {
 	 * @return
 	 */
 	public char[] getReverseComplement(char[] primerSeq){
-
-		char[] alphabetMap= new char[256];
 		char[] reverseComplement = new char[primerSeq.length];
 		
 		for (int j = 0; j < alphabetMap.length; j++) {

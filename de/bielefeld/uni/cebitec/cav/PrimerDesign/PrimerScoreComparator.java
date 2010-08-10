@@ -15,10 +15,10 @@ public class PrimerScoreComparator implements Comparator<Primer>{
  * scores of each primer object are compared and order by the highest to lowest score
  */
 	@Override
-	public int compare(Primer o1, Primer o2) {
-		if(o1.getPrimerScore()<o2.getPrimerScore()){
+	public int compare(Primer primer1, Primer primer2) {
+		if(primer1.getPrimerScore()<primer2.getPrimerScore()){
 			return 1;
-	} if(o1.getPrimerScore()>o2.getPrimerScore()){
+	} if(primer1.getPrimerScore()>primer2.getPrimerScore()){
 		return -1;
 	}
 	return 0;
