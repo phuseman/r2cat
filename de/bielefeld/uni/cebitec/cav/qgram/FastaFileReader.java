@@ -403,5 +403,64 @@ public class FastaFileReader {
 			this.scanContents(true);
 		}
 	}
+	
+	/**
+	 * Sets all sequences to uppercase letters.
+	 * This can be used as a kind of repeat masking: Uppercase letters indicate nonrepetitive parts.
+	 * In this sense, this function resets the repeatmasking information.
+	 * A functionality of the repeatmasked sequences must be implemented in the classes that want to use it.
+	 * 
+	 * @return returns if this operation was successful. If the internal char array is null, then false is returned. Cal scanContents(true) beforehand.
+	 * 
+	 */
+	public boolean setAllToUppercaseLetters() {
+		if(chararray != null) {
+			for (int i = 0; i < chararray.length; i++) {
+				chararray[i]=Character.toUpperCase(chararray[i]);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Sets the characters in a specified region to lowercase.
+	 * This can be used as a kind of repeat masking: Uppercase letters indicate nonrepetitive parts.
+	 * In this sense, this function sets the given sequences to repetitive.
+	 * A functionality of these repeatmasked sequences must be implemented in the classes that want to use it.
+	 * 
+	 * @param contigId Identifier of the contig where the region should be set to lowercase.
+	 * @param start position of the area to be set
+	 * @param stop position of the area to be set
+	 * @return returns if this operation was successful. If the internal char array is null, then false is returned. Cal scanContents(true) beforehand.
+	 */
+	public boolean setRegionToLowercaseLetters(String contigId, int start, int stop) {
+		//get the offset in the char array
+		Integer offset = offsetsInCharArray.get(contigId);
+		if (chararray != null && offset != null) {
+			int realstart = offset + start;
+			int realstop = offset + stop;
+			
+			//swap positions if startposition is bigger than stop position
+			if (realstart > realstop) {
+				int tmp=realstart;
+				realstart = realstop;
+				realstop = tmp;
+			}
+			
+			try {
+				//set all corresponding letters to lowercase
+				for (int i = realstart; i < realstop; i++) {
+					chararray[i] = Character.toLowerCase(chararray[i]);
+				}
+				//if the index is out of bounds, return false
+			} catch (IndexOutOfBoundsException e) {
+				return false;
+			}
+			return true;
+		}
+
+		return false;
+	}
 
 }
