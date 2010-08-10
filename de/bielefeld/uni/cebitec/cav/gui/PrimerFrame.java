@@ -168,31 +168,21 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				throw new SequenceNotFoundException(
 						"Could not find or read the contigs file", contigs);
 			}
-			PrimerGenerator pg;
 			File fastaFile = contigs.getFile();
 
-			if (configFile != null && configFile.exists()) {
-				pg = new PrimerGenerator(fastaFile, configFile, repeatMaskingCheckBox.getState());
-			} else {
-				pg = new PrimerGenerator(fastaFile, repeatMaskingCheckBox.getState());
-			}
+			PrimerGenerator pg = new PrimerGenerator(fastaFile);
 			pg.registerProgressReporter(this);
 
 			if (repeatMaskingCheckBox.getState()) {
 				PrimerFrame.this.progressBar.setIndeterminate(true);
 				PrimerFrame.this.progressBar
 						.setString("Repeat masking using BLAST");
-			}
-			
-			//TODO this should be separated such that repeat masking and parameter setting are distinct tasks.
-				pg.runRepeatMaskingAndSetParameters();
-
-			if (repeatMaskingCheckBox.getState()) {
+				pg.runRepeatMasking();
 				PrimerFrame.this.progressBar.setString(null);
+				PrimerFrame.this.progressBar.setIndeterminate(false);
 			}
-
-			PrimerFrame.this.progressBar.setIndeterminate(false);
-			
+			pg.setParameters(configFile);
+	
 			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
 			return primerResult;
 

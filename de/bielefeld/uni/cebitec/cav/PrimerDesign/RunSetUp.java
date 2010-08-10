@@ -24,7 +24,7 @@ public class RunSetUp {
 
 		//Creating a new instance of the PrimerGenerator class.
 		PrimerGenerator pg;
-		pg = new PrimerGenerator(fastaFile,configFile,repeatMasking);
+	//	pg = new PrimerGenerator(fastaFile,configFile,repeatMasking);
 	
 		//Creating a new instance of the PrimerGenerator with using a different constructor. In this case default
 		//parameters are used to calculate the primer scores.
@@ -54,8 +54,8 @@ public class RunSetUp {
 		contigPairs.add(pair1);
 		//contigPairs.add(pair2);
 		
-		pg.runRepeatMaskingAndSetParameters();
-		pg.generatePrimers(contigPairs);
+		//pg.runRepeatMaskingAndSetParameters();
+		//pg.generatePrimers(contigPairs);
 	}
 
 }

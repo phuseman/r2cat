@@ -22,8 +22,6 @@ public class PrimerPairs {
 	class Bases{
 		private final static char A ='A',a='a',G ='G',g='g', C='C',c='c',T='T',t='t',N='N', n='n';
 	}
-	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
-	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
 	private ArrayList<Integer> notPairedPrimer = new ArrayList<Integer>();
 	private ArrayList<Integer> noPartnerLeft = new ArrayList<Integer>();
 	private ArrayList<Integer> noPartnerRight = new ArrayList<Integer>();
@@ -187,6 +185,7 @@ public class PrimerPairs {
 		return notComplement;
 	}
 	
+	
 	/**
 	 * This method goes through the given vector of the possible forward and reverse primers in order
 	 * to check if the primers are a fitting pair. (Has to check temperature difference and the property 
@@ -200,7 +199,12 @@ public class PrimerPairs {
 	 * @param reversePrimer
 	 */
 	
-	public void pairPrimer(Vector<Primer> forwardPrimer, Vector<Primer> reversePrimer){
+	public PrimerResult pairPrimer(Vector<Primer> primerCandidates, PrimerResult primerResult, String[] contigIDs){
+		HashMap<Integer,Integer> primerPairIndexLeftPrimerFirst = new HashMap<Integer,Integer>();
+		HashMap<Integer,Integer> primerPairIndexRightPrimerFirst = new HashMap<Integer,Integer>();
+		Vector<HashMap<Integer,Integer>> primerPairIndexMaps = new Vector<HashMap<Integer,Integer>>();
+		Vector<Primer> leftPrimer = new Vector<Primer>();
+		Vector<Primer> rightPrimer = new Vector<Primer>();
 		char[] forwardPrimerSeq;
 		char[] reversePrimerSeq;
 		boolean sequenceCheck = false;
@@ -208,17 +212,25 @@ public class PrimerPairs {
 		double leftPrimerTemperature=0;
 		double rightPrimerTemperature= 0;
 		int j = 0;
-		for(int i = 0; i<forwardPrimer.size();j++,i++){
-			forwardPrimerSeq =  forwardPrimer.elementAt(i).getPrimerSeq();
-			leftPrimerTemperature =  forwardPrimer.elementAt(i).getTemperature();
-			if(j<reversePrimer.size()){
-				reversePrimerSeq = reversePrimer.elementAt(j).getPrimerSeq();
-				rightPrimerTemperature =  reversePrimer.elementAt(j).getTemperature();
+		for(int k = 0; k<primerCandidates.size();k++){
+			if(primerCandidates.elementAt(k).getContigID().equals(contigIDs[0])){
+				leftPrimer.add(primerCandidates.elementAt(k));
+			} else{
+				rightPrimer.add(primerCandidates.elementAt(k));
+			}
+		}
+		for(int i = 0; i<leftPrimer.size();j++,i++){
+			forwardPrimerSeq =  leftPrimer.elementAt(i).getPrimerSeq();
+			leftPrimerTemperature =  leftPrimer.elementAt(i).getTemperature();
+			if(j<rightPrimer.size()){
+				reversePrimerSeq = rightPrimer.elementAt(j).getPrimerSeq();
+				rightPrimerTemperature =  rightPrimer.elementAt(j).getTemperature();
 				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
 					if(temperatureCheck){
 							sequenceCheck = this.seqCheck(forwardPrimerSeq, reversePrimerSeq);
-								if(sequenceCheck&&!pairsFirstLeftPrimer.containsKey(i)){
-											pairsFirstLeftPrimer.put(i, j);
+								if(sequenceCheck&&!primerPairIndexLeftPrimerFirst.containsKey(i)){
+									primerResult.addPair(leftPrimer.elementAt(i), rightPrimer.elementAt(j));
+									primerPairIndexLeftPrimerFirst.put(i, j);
 								} else{
 											notPairedPrimer.add(i);
 									}
@@ -233,24 +245,25 @@ public class PrimerPairs {
 		int countLeft= 0;
 		for(Integer a : notPairedPrimer){
 			countLeft++;
-			if(a<forwardPrimer.size()){
-			forwardPrimerSeq = forwardPrimer.elementAt(a).getPrimerSeq();
-			leftPrimerTemperature =forwardPrimer.elementAt(a).getTemperature();
-			for(int m = 0; m<reversePrimer.size();m++){
-				reversePrimerSeq=reversePrimer.elementAt(m).getPrimerSeq();
-				rightPrimerTemperature=reversePrimer.elementAt(m).getTemperature();
+			if(a<leftPrimer.size()){
+			forwardPrimerSeq = leftPrimer.elementAt(a).getPrimerSeq();
+			leftPrimerTemperature =leftPrimer.elementAt(a).getTemperature();
+			for(int m = 0; m<rightPrimer.size();m++){
+				reversePrimerSeq=rightPrimer.elementAt(m).getPrimerSeq();
+				rightPrimerTemperature=rightPrimer.elementAt(m).getTemperature();
 				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
 				if(temperatureCheck){
 							sequenceCheck = this.seqCheck(forwardPrimerSeq, reversePrimerSeq);
-							if(sequenceCheck&&!pairsFirstLeftPrimer.containsKey(a)){
-								pairsFirstLeftPrimer.put(a, m);
+							if(sequenceCheck&&!primerPairIndexLeftPrimerFirst.containsKey(a)){
+								primerResult.addPair(leftPrimer.elementAt(a), rightPrimer.elementAt(m));
+								primerPairIndexLeftPrimerFirst.put(a, m);
 							} else{
-								if(!noPartnerLeft.contains(a)&&!pairsFirstLeftPrimer.containsKey(a)){
+								if(!noPartnerLeft.contains(a)&&!primerPairIndexLeftPrimerFirst.containsKey(a)){
 									noPartnerLeft.add(a);
 								}
 							}
 				}else{
-					if(!noPartnerLeft.contains(a)&&!pairsFirstLeftPrimer.containsKey(a)){
+					if(!noPartnerLeft.contains(a)&&!primerPairIndexLeftPrimerFirst.containsKey(a)){
 						noPartnerLeft.add(a);
 						}
 				}
@@ -260,26 +273,27 @@ public class PrimerPairs {
 	}
 		int countRight = 0;
 		for(Integer b :notPairedPrimer){
-			if(b<reversePrimer.size()){
+			if(b<rightPrimer.size()){
 				countRight++;
-			reversePrimerSeq=reversePrimer.elementAt(b).getPrimerSeq();
-			rightPrimerTemperature=reversePrimer.elementAt(b).getTemperature();
-			for(int m = 0; m<forwardPrimer.size();m++){
-				forwardPrimerSeq=forwardPrimer.elementAt(m).getPrimerSeq();
-				leftPrimerTemperature=forwardPrimer.elementAt(m).getTemperature();
+			reversePrimerSeq=rightPrimer.elementAt(b).getPrimerSeq();
+			rightPrimerTemperature=rightPrimer.elementAt(b).getTemperature();
+			for(int m = 0; m<leftPrimer.size();m++){
+				forwardPrimerSeq=leftPrimer.elementAt(m).getPrimerSeq();
+				leftPrimerTemperature=leftPrimer.elementAt(m).getTemperature();
 				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
 				if(temperatureCheck){
 					sequenceCheck = this.seqCheck(reversePrimerSeq, forwardPrimerSeq);
 					//b position im Rechten Primer Vektor und m position im linken Primer Vektor
-							if(sequenceCheck&&!pairsFirstRightPrimer.containsKey(b)){
-								pairsFirstRightPrimer.put(b, m);
+							if(sequenceCheck&&!primerPairIndexRightPrimerFirst.containsKey(b)){
+								primerResult.addPair(leftPrimer.elementAt(m), rightPrimer.elementAt(b));
+								primerPairIndexRightPrimerFirst.put(b, m);
 							} else{
-								if(!noPartnerRight.contains(b)&&!pairsFirstRightPrimer.containsKey(b)){
+								if(!noPartnerRight.contains(b)&&!primerPairIndexRightPrimerFirst.containsKey(b)){
 									noPartnerRight.add(b);
 								}
 							}
 				}else{
-				if(!noPartnerRight.contains(b)&&!pairsFirstRightPrimer.containsKey(b)){
+				if(!noPartnerRight.contains(b)&&!primerPairIndexRightPrimerFirst.containsKey(b)){
 					noPartnerRight.add(b);
 				}
 				}
@@ -287,15 +301,16 @@ public class PrimerPairs {
 		}
 		}
 		
-		this.noPartnerCheck();
+		this.noPartnerCheck(primerPairIndexLeftPrimerFirst,primerPairIndexRightPrimerFirst);
 	}
+		return primerResult;
 		
 	}
 	
 	/**
 	 * This method checks if all primer candidates (forward and reverse) got a fitting partner primer. 
 	 */
-	public void noPartnerCheck(){
+	public void noPartnerCheck(HashMap<Integer,Integer> pairsFirstLeftPrimer,HashMap<Integer,Integer> pairsFirstRightPrimer){
 		int countR = 0;
 		int countL = 0; 
 		for(int n = 0; n<noPartnerRight.size();n++){
@@ -314,39 +329,5 @@ public class PrimerPairs {
 		if(countL==noPartnerLeft.size()){
 			noPartnerLeft.clear();
 		}
-	}
-	
-	public HashMap<Integer, Integer> getPairsFirstLeftPrimer() {
-		return pairsFirstLeftPrimer;
-	}
-
-	public void setPairsFirstLeftPrimer(
-			HashMap<Integer, Integer> pairsFirstLeftPrimer) {
-		this.pairsFirstLeftPrimer = pairsFirstLeftPrimer;
-	}
-
-	public HashMap<Integer, Integer> getPairsFirstRightPrimer() {
-		return pairsFirstRightPrimer;
-	}
-
-	public void setPairsFirstRightPrimer(
-			HashMap<Integer, Integer> pairsFirstRightPrimer) {
-		this.pairsFirstRightPrimer = pairsFirstRightPrimer;
-	}
-
-	public ArrayList<Integer> getNoPartnerLeft() {
-		return noPartnerLeft;
-	}
-
-	public void setNoPartnerLeft(ArrayList<Integer> noPartnerLeft) {
-		this.noPartnerLeft = noPartnerLeft;
-	}
-
-	public ArrayList<Integer> getNoPartnerRight() {
-		return noPartnerRight;
-	}
-
-	public void setNoPartnerRight(ArrayList<Integer> noPartnerRight) {
-		this.noPartnerRight = noPartnerRight;
 	}
 }

@@ -10,9 +10,11 @@ public class PrimerResult {
 	private Vector<Primer> forwardPrimer;
 	private Vector<Primer> reversePrimer;
 	
-	public PrimerResult(){
+	public PrimerResult(DNASequence left, DNASequence right){
 		forwardPrimer = new Vector<Primer>();
 		reversePrimer = new Vector<Primer>();
+		contigLeft = left;
+		contigRight = right;
 	}
 	
 	public void addPair(Primer leftPrimer, Primer rightPrimer){
@@ -41,11 +43,13 @@ public class PrimerResult {
 		results.append(infos+" "+contigIDLeft+" and "+contigIDRight+NEW_LINE+NEW_LINE);
 		results.append(infoDes+contigIDLeft+" "+descriptionLeft+NEW_LINE+infoDes+contigIDRight+" "+descriptionRight+NEW_LINE+NEW_LINE);
 		results.append(legend+NEW_LINE+NEW_LINE);
+		if(!forwardPrimer.isEmpty()&&!reversePrimer.isEmpty()&&forwardPrimer.size()==reversePrimer.size()){
 		for(int i = 0;i<this.forwardPrimer.size();i++){
-			//if(i<50){
 			results.append("forward primer: "+TAB+TAB+forwardPrimer.elementAt(i).toString()+NEW_LINE);
 			results.append("reverse primer: "+TAB+TAB+reversePrimer.elementAt(i).toString()+NEW_LINE+NEW_LINE);
-			//	}
+		}
+			}else{
+				results.append("No Primers found");
 			}
 		return results.toString();
 	}

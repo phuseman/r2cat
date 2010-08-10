@@ -1,12 +1,9 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -29,12 +26,9 @@ public class PrimerGenerator {
 	class Bases{
 		private final static char A ='A',a='a',G ='G',g='g', C='C',c='c',T='T',t='t',N='N', n='n';
 	}
-
-	private char[] seq;
-	private Vector<DNASequence> sequences;
 	private String[] markedSeq = null;
 	private RetrieveParametersAndScores scoring = null;
-	FastaFileReader fastaParser = null;
+	FastaFileReader fastaParser;
 	private int realstart = 0;
 	//max length a primer should have
 	private int maxLength = 24;
@@ -48,104 +42,38 @@ public class PrimerGenerator {
 	private int max = maxLength+5;
 	private FileHandler fHandler;
 	private Logger logger;
-	private Vector<String> outputVectorPrimerPair =null;
-	private Vector<String> outputVectorForwardPrimer =null;
-	private Vector<String> outputVectorReversePrimer =null;
-	private boolean repeatMaskingBool = false;
-	private HashMap<Integer,Integer> pairsFirstLeftPrimer = new HashMap<Integer,Integer>();
-	private HashMap<Integer,Integer> pairsFirstRightPrimer = new HashMap<Integer,Integer>();
-	private ArrayList<Integer> noPartnerLeft = new ArrayList<Integer>();
-	private ArrayList<Integer> noPartnerRight = new ArrayList<Integer>();
 	private AbstractProgressReporter progress;
 	private File fasta;
-	private File config;
-	
-	
-	/**
-	 * Constructor of this class if a fasta file and a config file is given.
-	 * 
-	 * @param fastaFile
-	 * @param configFile
-	 * @param repeatMasking
-	 */
-
-	public PrimerGenerator(File fastaFile, File configFile,
-			boolean repeatMasking) {
-		fasta = fastaFile;
-		config = configFile;
-		repeatMaskingBool = repeatMasking;
-	}
 	
 	/**
 	 * Constructor when only a fasta file is given.
 	 * 
 	 * @param fastaFile
-	 * @param repeatMasking
 	 */
-	public PrimerGenerator(File fastaFile, boolean repeatMasking){
-		repeatMaskingBool = repeatMasking;
+	public PrimerGenerator(File fastaFile){
 		fasta = fastaFile;
-		config = null;
+		fastaParser = new FastaFileReader(fastaFile);
 	}
-	
-	public void runRepeatMaskingAndSetParameters() throws Exception{
-
-		if(config==null){
-		try{
+	public boolean runRepeatMasking() throws IOException, InterruptedException{
+		RepeatMasking rm = new RepeatMasking(fasta);
+		rm.runBLAST();
+		temporaryDirectory = rm.getDir();
+		fastaParser = rm.getFfrForpreprocessed();
+		return true;
+	}
+	public boolean setParameters(File config) throws Exception{
+		if(config!=null){
 			this.setUpLogFile();
-		if(repeatMaskingBool){
-			RepeatMasking rm = new RepeatMasking(fasta);
-			rm.runBLAST();
-			temporaryDirectory = rm.getDir();
-			fastaParser = rm.getFfrForpreprocessed();
-			seq = fastaParser.getCharArray();
-			sequences = fastaParser.getSequences();
-		} else{
-			fastaParser = new FastaFileReader(fasta);
-			seq = fastaParser.getCharArray();
-			sequences = fastaParser.getSequences();
-		}
-		scoring = new RetrieveParametersAndScores();
-		}catch(FileNotFoundException e){
-			logger.log(Level.SEVERE, "fasta file could not be found", e);
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "problem occured running BLAST 2.2.23 programms", e);
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "problem occured running BLAST 2.2.23 programms", e);
-		}
-		}else{
-			try{
-				this.setUpLogFile();
-			if(repeatMaskingBool){
-				RepeatMasking rm = new RepeatMasking(fasta);
-				rm.runBLAST();
-				temporaryDirectory = rm.getDir();
-				fastaParser = rm.getFfrForpreprocessed();
-				seq = fastaParser.getCharArray();
-				sequences = fastaParser.getSequences();
-			} else{
-				fastaParser = new FastaFileReader(fasta);
-				seq = fastaParser.getCharArray();
-				sequences = fastaParser.getSequences();
-			}
-			}catch(FileNotFoundException e){
-				logger.log(Level.SEVERE, "fasta file could not be found", e);
-			} catch (IOException e) {
-				logger.log(Level.SEVERE, "problem occured running BLAST 2.2.23 programms", e);
-			} catch (InterruptedException e) {
-				logger.log(Level.SEVERE, "Uncaught exception", e);
-			}
-			try{
 			scoring = new RetrieveParametersAndScores();
 			FileReader inConfig = new FileReader(config);
 			XMLParser configParser= new XMLParser();
 			configParser.parse(scoring, inConfig);
-			}catch(FileNotFoundException e){
-				logger.log(Level.SEVERE, "config file could not be found! The default parameters were used", e);
+			}else{
+				this.setUpLogFile();
+				scoring = new RetrieveParametersAndScores();
 			}
+		return true;
 		}
-	
-	}
 	
 	/**
 	 * This methods sets up the logging file.
@@ -197,11 +125,11 @@ public class PrimerGenerator {
 	 * direction (in form of Integers) of the primer of the selected contig.
 	 * 
 	 * @param contigPair
+	 * @throws IOException 
 	 */
 	
-	public Vector<PrimerResult> generatePrimers(Vector<String[]> contigPair){
+	public Vector<PrimerResult> generatePrimers(Vector<String[]> contigPair) throws IOException{
 		Vector<PrimerResult> prV = new Vector<PrimerResult>();
-		PrimerResult pr = new PrimerResult();
 		int directionContig1 = 0;
 		int directionContig2 = 0;
 		boolean idCheckContig1 =false;
@@ -213,15 +141,10 @@ public class PrimerGenerator {
 		
 		nextchar : for(int i = 0; i<contigPair.size();i++){
 			String[] tempPair = contigPair.elementAt(i);
-			try{
-			//if(tempPair.length==6){
 			markedSeq = new String[2];
 			markedSeq[0] = tempPair[0];
 			markedSeq[1] = tempPair[3];
-			
 			this.reportProgress((double)(i+1)/(contigPair.size()+1), "Generating primers for contig pair "+markedSeq[0] + " and " + markedSeq[1]);
-
-			
 			idCheckContig1 = this.idCheck(markedSeq[0].toString());
 			idCheckContig2 = this.idCheck(markedSeq[1].toString());
 		if(idCheckContig1&&idCheckContig2){
@@ -235,8 +158,8 @@ public class PrimerGenerator {
 			contigAndDirectionInfo.put(markedSeq[1],directionContig2);
 			contigAndisReverseComplementInfo.put(markedSeq[0],isReverseComContig1);
 			contigAndisReverseComplementInfo.put(markedSeq[1],isReverseComContig2);
-			pr = this.generatePrimerFor1ContigPair(markedSeq, contigAndDirectionInfo,contigAndisReverseComplementInfo);
-			prV.add(pr);
+			PrimerResult primerResult = this.generatePrimerFor1ContigPair(markedSeq, contigAndDirectionInfo,contigAndisReverseComplementInfo);
+			prV.add(primerResult);
 			}else{
 				throw new IllegalArgumentException("contigs were marked with the same direction for the primer");
 			}
@@ -260,34 +183,18 @@ public class PrimerGenerator {
 					throw new NullPointerException("contig id could not be found");
 				}
 			}*/
-
-		} catch(FileNotFoundException e){
-			logger.log(Level.SEVERE, e.getMessage(), e);
-		} catch (NullPointerException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
-			continue nextchar;
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
-		} catch(IllegalArgumentException e){
-			logger.log(Level.SEVERE, e.getMessage(), e);
-			continue nextchar;
-		} catch(IllegalStateException e){
-			logger.log(Level.SEVERE, e.getMessage(), e);
-			continue nextchar;
-		}
 		}
 		return prV;
 	}
 	
 	public PrimerResult generatePrimerFor1ContigPair(String[] markedContig,HashMap<String, Integer> contigAndDirectionInfo,HashMap<String, String> contigAndisReverseCompInfo) throws IOException{
 		//all possible primers
+		DNASequence leftContig = this.fastaParser.getSequence(markedSeq[0]);
+		DNASequence rightContig = this.fastaParser.getSequence(markedSeq[1]);
+		PrimerResult pr = new PrimerResult(leftContig,rightContig);
 		Vector<Primer> primerCandidates = this.getPrimerCandidates(markedSeq, contigAndDirectionInfo,contigAndisReverseCompInfo);
-
-		//
-		Vector<Vector> leftRightPrimerScoredCandidates = null;
-		leftRightPrimerScoredCandidates = this.calcScoreEachPrimerCandidate(primerCandidates);
-		pairsFirstLeftPrimer = this.getPrimerPairs(leftRightPrimerScoredCandidates.elementAt(0),leftRightPrimerScoredCandidates.elementAt(1));
-			PrimerResult pr = this.setResult(leftRightPrimerScoredCandidates.elementAt(0), leftRightPrimerScoredCandidates.elementAt(1));
+		primerCandidates = this.calcScoreEachPrimerCandidate(primerCandidates);
+		pr = this.getPrimerPairs(primerCandidates,pr);
 		return pr;	
 	}
 	
@@ -316,12 +223,15 @@ public class PrimerGenerator {
 	 * 
 	 * @param markedContig
 	 * @return templateSeq
+	 * @throws IOException 
 	 */
 	
-		public HashMap<String,char[]> getMarkedSeq(String[] markedContig,HashMap<String, String> contigAndisReverseCompInfo){
+		public HashMap<String,char[]> getMarkedSeq(String[] markedContig,HashMap<String, String> contigAndisReverseCompInfo) throws IOException{
 			HashMap<String, char[]> templateSeq = new HashMap<String,char[]>();
 			boolean isReverseComplemented = false;
 			String isReverseCom = null;
+			char[] seq = fastaParser.getCharArray();
+			Vector<DNASequence> sequences = fastaParser.getSequences();
 			for(String s:markedContig){
 				isReverseCom = contigAndisReverseCompInfo.get(s);
 				isReverseComplemented = this.stringToBoolean(isReverseCom);
@@ -482,80 +392,42 @@ public class PrimerGenerator {
 	 * @throws IOException 
 	 */
 	
-	public Vector<Vector> calcScoreEachPrimerCandidate(Vector<Primer> primerCandidates) throws IOException{
-		Vector<Vector> leftRightPrimerVector =new Vector<Vector>();
-		Vector<Primer> leftPrimer=new Vector<Primer>();
-		Vector<Primer> rightPrimer=new Vector<Primer>();
-		double primerScore = 0;
-		char[] primerSeq = null;
-		Integer direction = 0;
-		int primerLength = 0;
-		int start = 0;
-		int offset = 0;
-		int realstart=0;
-		String contigID = null;
-		String plus1 = null;
-		String plus2 = null;
-		double temperature = 0;
-		
-		double scoreFirstLastBase = 0;
-		double scoreGCTotal = 0;
-		double scoreBackfold = 0;
-		double scoreLength = 0;
-		double scoreLast6 = 0;
-		double scoreGC0207 = 0;
-		double scoreOffset = 0;
-		double scorePlus1Plus2 = 0;
-		double scoreTemp = 0;
-		double scoreNPenalty = 0;
-		double scoreHomopoly = 0;
-		double scoreRepeat = 0;
-	
+	public Vector<Primer> calcScoreEachPrimerCandidate(Vector<Primer> primerCandidates) throws IOException{
+		Vector<Primer> leftRightPrimerVector = new Vector<Primer>();	
 		for(int i = 0; i<primerCandidates.size();i++){
 			
-			contigID = primerCandidates.elementAt(i).getContigID();
-			primerLength = primerCandidates.elementAt(i).getPrimerLength();
-			primerSeq = primerCandidates.elementAt(i).getPrimerSeq();
-			direction = primerCandidates.elementAt(i).getDirection();
-			start = primerCandidates.elementAt(i).getStart();
-			plus1 = primerCandidates.elementAt(i).getLastPlus1();
-			plus2 = primerCandidates.elementAt(i).getLastPlus2();
-			offset = primerCandidates.elementAt(i).getOffset();
+			String contigID = primerCandidates.elementAt(i).getContigID();
+			int primerLength = primerCandidates.elementAt(i).getPrimerLength();
+			char[] primerSeq = primerCandidates.elementAt(i).getPrimerSeq();
+			int direction = primerCandidates.elementAt(i).getDirection();
+			int start = primerCandidates.elementAt(i).getStart();
+			String plus1 = primerCandidates.elementAt(i).getLastPlus1();
+			String plus2 = primerCandidates.elementAt(i).getLastPlus2();
+			int offset = primerCandidates.elementAt(i).getOffset();
 			
-			scoreTemp = this.getTempScore(primerSeq);
+			double scoreTemp = this.getTempScore(primerSeq);
 			if(scoreTemp!=-1){
-			scoreLength = this.getLengthScore(primerLength);
-			scoreGCTotal = this.getGCScore(primerSeq, true,direction);
-			scoreFirstLastBase = this.getFirstAndLastBaseScore(primerSeq, direction);
-			scoreBackfold = this.getBackfoldScore(primerSeq);
-			scoreLast6 = this.getLast6Score(primerSeq,direction);
-			scoreGC0207 = this.getGCScore(primerSeq, false,direction);
-			scorePlus1Plus2 = this.getPlus1Plus2Score(plus1, plus2);
-			scoreOffset = this.getOffsetsScore(offset,primerLength,direction);
-			scoreNPenalty = this.getNPenalty(primerSeq);
-			scoreHomopoly = this.getHomopolyScore(primerSeq);
-			scoreRepeat = this.getRepeatScore(primerSeq);
-			realstart=this.realstart;
-			primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
-			temperature = scoring.getTemperature();
+			double scoreLength = this.getLengthScore(primerLength);
+			double scoreGCTotal = this.getGCScore(primerSeq, true,direction);
+			double scoreFirstLastBase = this.getFirstAndLastBaseScore(primerSeq, direction);
+			double scoreBackfold = this.getBackfoldScore(primerSeq);
+			double scoreLast6 = this.getLast6Score(primerSeq,direction);
+			double scoreGC0207 = this.getGCScore(primerSeq, false,direction);
+			double scorePlus1Plus2 = this.getPlus1Plus2Score(plus1, plus2);
+			double scoreOffset = this.getOffsetsScore(offset,primerLength,direction);
+			double scoreNPenalty = this.getNPenalty(primerSeq);
+			double scoreHomopoly = this.getHomopolyScore(primerSeq);
+			double scoreRepeat = this.getRepeatScore(primerSeq);
+			int realstart=this.realstart;
+			double primerScore = scoreGCTotal+scoreRepeat+scoreFirstLastBase+scoreNPenalty+scoreBackfold+scoreLength+scoreLast6+scoreGC0207+scoreOffset+scorePlus1Plus2+scoreTemp+scoreHomopoly;
+			double temperature = scoring.getTemperature();
 			
 			if(primerScore>-200){
-				if(direction == 1){
-					leftPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature,realstart));
-				} else{
-					realstart=offset-primerLength;
-					rightPrimer.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature,realstart));
-				}
+				leftRightPrimerVector.add(new Primer(contigID,primerSeq,start,direction,primerLength,primerScore,temperature,realstart));
 			}
 		}
-	}
-		leftRightPrimerVector.add(leftPrimer);
-		leftRightPrimerVector.add(rightPrimer);
-		
+		}
 		return leftRightPrimerVector;
-		/*
-		System.out.println("left primer: "+leftPrimer.size());
-		System.out.println("right primer: "+rightPrimer.size());*/
 	}
 	
 	/**
@@ -564,24 +436,12 @@ public class PrimerGenerator {
 	 * 
 	 * @throws IOException 
 	 */
-	
-	public HashMap<Integer,Integer> getPrimerPairs(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer) throws IOException,NullPointerException{
+	public PrimerResult getPrimerPairs(Vector<Primer> primerCandidates, PrimerResult primerResult) throws IOException,NullPointerException{
 		PrimerPairs pp = new PrimerPairs();
-		HashMap<Integer,Integer> pairsFirstLeftPrimer =new HashMap<Integer, Integer>();
-		
-		if(!rightPrimer.isEmpty()&&!leftPrimer.isEmpty()){
-			leftPrimer = pp.sortPrimer(leftPrimer);
-			rightPrimer = pp.sortPrimer(rightPrimer);
-			pp.pairPrimer(leftPrimer, rightPrimer);
-			pairsFirstLeftPrimer=pp.getPairsFirstLeftPrimer();
-			pairsFirstRightPrimer=pp.getPairsFirstRightPrimer();
-			noPartnerLeft=pp.getNoPartnerLeft();
-			noPartnerRight=pp.getNoPartnerRight();
-			return pairsFirstLeftPrimer;
-		} else{
-			pairsFirstLeftPrimer = null;
-			return pairsFirstLeftPrimer;
-		}
+		Vector<HashMap<Integer,Integer>> pairsIndexMaps =new Vector<HashMap<Integer, Integer>>();
+			primerCandidates = pp.sortPrimer(primerCandidates);
+			primerResult = pp.pairPrimer(primerCandidates,primerResult, markedSeq);
+			return primerResult;
 	}
 	
 
@@ -867,57 +727,29 @@ public class PrimerGenerator {
 		return scoreRepeat;
 	}
 
-	public PrimerResult setResult(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer){
+	/*public PrimerResult setResult(Vector<Primer> leftPrimer, Vector<Primer> rightPrimer, Vector<HashMap<Integer,Integer>> primerPairIndexMaps){
 		PrimerResult primerResult = new PrimerResult();
-		DNASequence leftContig = null;
-		DNASequence rightContig = null;
+		HashMap<Integer,Integer> primerPairIndexLeftPrimerFirst = primerPairIndexMaps.elementAt(0);
+		HashMap<Integer,Integer> primerPairIndexRightPrimerFirst = primerPairIndexMaps.elementAt(1);
 		
-		leftContig = this.fastaParser.getSequence(markedSeq[0]);
-		rightContig = this.fastaParser.getSequence(markedSeq[1]);
 		
 		primerResult.addContigs(leftContig, rightContig);
 		
-		for(int i=0;i<pairsFirstLeftPrimer.size();i++){
-			primerResult.addPair(leftPrimer.elementAt(i), rightPrimer.elementAt(pairsFirstLeftPrimer.get(i)));
+		for(int i=0;i<primerPairIndexLeftPrimerFirst.size();i++){
+			primerResult.addPair(leftPrimer.elementAt(i), rightPrimer.elementAt(primerPairIndexLeftPrimerFirst.get(i)));
 		}
-		if(pairsFirstRightPrimer!=null&&pairsFirstRightPrimer.size()>0){
+		if(primerPairIndexRightPrimerFirst!=null&&primerPairIndexRightPrimerFirst.size()>0){
 			
-			Iterator iterator = (pairsFirstRightPrimer.keySet()).iterator();
+			Iterator iterator = (primerPairIndexRightPrimerFirst.keySet()).iterator();
 			while(iterator.hasNext()) {
 			int key = Integer.parseInt(iterator.next().toString());
-			int value = Integer.parseInt(pairsFirstRightPrimer.get(key).toString());
+			int value = Integer.parseInt(primerPairIndexRightPrimerFirst.get(key).toString());
 			primerResult.addPair(leftPrimer.elementAt(value), rightPrimer.elementAt(key));
 			}
 		}
 		return primerResult;
 	}
-	
-	public Vector<String> getOutputVectorPrimerPair() {
-		return outputVectorPrimerPair;
-	}
-
-	public void setOutputVectorPrimerPair(Vector<String> outputVectorPrimerPair) {
-		this.outputVectorPrimerPair = outputVectorPrimerPair;
-	}
-
-	public Vector<String> getOutputVectorForwardPrimer() {
-		return outputVectorForwardPrimer;
-	}
-
-	public void setOutputVectorForwardPrimer(
-			Vector<String> outputVectorForwardPrimer) {
-		this.outputVectorForwardPrimer = outputVectorForwardPrimer;
-	}
-
-	public Vector<String> getOutputVectorReversePrimer() {
-		return outputVectorReversePrimer;
-	}
-
-	public void setOutputVectorReversePrimer(
-			Vector<String> outputVectorReversePrimer) {
-		this.outputVectorReversePrimer = outputVectorReversePrimer;
-	}
-
+*/
 	/**
 	 * Registers a ProgressReporter for this class.
 	 * @param progressReporter
