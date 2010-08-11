@@ -16,14 +16,12 @@ import java.util.Vector;
  *
  */
 public class PrimerPairs {
-
-	private double[][] smithWatermanScoreMatrix = null;
-	private double currentMaxScore = 0;
 	private Bases base;
+	private SimpleSmithWatermanPrimerAligner swa;
 
 	public PrimerPairs() {
-		smithWatermanScoreMatrix  = new double[30][30];
 		base = Bases.getInstance();
+		SimpleSmithWatermanPrimerAligner swa = new SimpleSmithWatermanPrimerAligner();
 	}
 
 
@@ -75,57 +73,25 @@ public class PrimerPairs {
 	 *
 	 * @param firstSeq
 	 * @param secondSeq
-	 * @return notComplement
+	 * @return notComplementary
 	 */
 	
 	public boolean seqCheck(char[] firstSeq,char[] secondSeq){
-		//auf true gesetzt, damit es noch results gibt...
-		boolean notComplement = false;
-		//score considering diagonal cell (H_i-1/j-1)
-		double substiutionScore = 0;
-		//score considering cell to the left (H_i/j-1)
-		double deletionScore = 0;
-		//score considering cell above (H_i-1/j)
-		double insertionScore = 0;
-		//absolut score for current cell
-		double currentCellScore = 0;
-		currentMaxScore = 0;
-		
+		//investigate if both sequences ligate toghether (are partially complementary)
 		secondSeq = base.getReverseComplement(secondSeq);
-
-		//Frage: In den Konstruktor der Klasse?!
-		//first row filled with zeros
-		for(int k = 0; k<smithWatermanScoreMatrix.length;k++){
-				smithWatermanScoreMatrix[0][k] = 0;
+		
+		if(swa.getAlignmentScore(firstSeq, secondSeq,3,3)>=3.) {
+			//if the first three bases match, discard this pair.
+			return false;
 		}
-		//first column filled with zeros
-			for(int m = 0; m<smithWatermanScoreMatrix.length; m++){
-				smithWatermanScoreMatrix[m][0] = 0;
+		double normalizedScore = swa.getAlignmentScore(firstSeq, secondSeq) / Math.min(firstSeq.length,secondSeq.length);
+		
+		//if approximately 8 of 24 bases are matching, then discard this pair
+		if(normalizedScore<0.33) {
+			return true;
+		} else {
+			return false;
 		}
-			//calculation of the scores for the remaining cells in the score matrix
-			for(int i = 1; i<firstSeq.length;i++){
-				for(int j = 1; j<secondSeq.length; j++){
-					substiutionScore = smithWatermanScoreMatrix[i-1][j-1] + checkBases(firstSeq[i-1], secondSeq[j-1]);
-					deletionScore = smithWatermanScoreMatrix[i][j-1]-gapScoring(1);
-					insertionScore = smithWatermanScoreMatrix[i-1][j]-gapScoring(1);
-					
-					//maximum of the above scores is put into the considering cell
-					 currentCellScore = Math.max(Math.max(substiutionScore, insertionScore), Math.max(deletionScore, 0));
-					 smithWatermanScoreMatrix[i][j] = currentCellScore;
-					 
-					 //save highest score
-					 if(currentMaxScore  < currentCellScore){
-						 currentMaxScore  = currentCellScore;
-					 }
-					 //alignment of the first three bases should not get a high score
-					if(i==2 && j ==2 && smithWatermanScoreMatrix[i][j]>=3){
-						notComplement = false;
-						return notComplement;
-					}
-					
-				}
-			}
-			return notComplement;
 	}
 	
 	/**
