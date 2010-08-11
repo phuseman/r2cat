@@ -252,12 +252,11 @@ public class PrimerGenerator {
 		int start = 0;
 		int stop = 0;
 		if (onRightEnd) {
-			int rightEndOffset = contigs.getOffset(contigId)
-					+ (int) contig.getSize();
+			int rightEndOffset = (int) contig.getSize();
 			start = rightEndOffset - maxBorderOffset;
 			stop = rightEndOffset - minBorderOffset;
 		} else {
-			int leftEndOffset = contigs.getOffset(contigId);
+			int leftEndOffset = 0;
 			start = leftEndOffset + minBorderOffset;
 			stop = leftEndOffset + maxBorderOffset;
 

@@ -54,7 +54,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		}
 
 		public double calculatePrimerScore(Primer primer) {
-				char[] primerSeq = primer.getPrimerSeq();
+			char[] primerSeq = primer.getPrimerSeq();
 				
 				double scoreTemp = this.calcScoreMeltingTemperature(primer.getPrimerTemperature());
 				if (scoreTemp != -1) {

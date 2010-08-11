@@ -21,7 +21,7 @@ public class PrimerPairs {
 
 	public PrimerPairs() {
 		base = Bases.getInstance();
-		SimpleSmithWatermanPrimerAligner swa = new SimpleSmithWatermanPrimerAligner();
+		swa = new SimpleSmithWatermanPrimerAligner();
 	}
 
 
@@ -72,19 +72,19 @@ public class PrimerPairs {
 	 * This method aligns the two sequences of the possible primer pair by using the smith-waterman algorithm.
 	 *
 	 * @param firstSeq
-	 * @param secondSeq
+	 * @param secondSeqReversed
 	 * @return notComplementary
 	 */
 	
-	public boolean seqCheck(char[] firstSeq,char[] secondSeq){
+	public boolean seqCheck(char[] firstSeq,char[] secondSeqReversed){
 		//investigate if both sequences ligate toghether (are partially complementary)
-		secondSeq = base.getReverseComplement(secondSeq);
+		secondSeqReversed = base.getReverseComplement(secondSeqReversed);
 		
-		if(swa.getAlignmentScore(firstSeq, secondSeq,3,3)>=3.) {
+		if(swa.getAlignmentScore(firstSeq, secondSeqReversed,3,3)>=3.) {
 			//if the first three bases match, discard this pair.
 			return false;
 		}
-		double normalizedScore = swa.getAlignmentScore(firstSeq, secondSeq) / Math.min(firstSeq.length,secondSeq.length);
+		double normalizedScore = swa.getAlignmentScore(firstSeq, secondSeqReversed) / Math.min(firstSeq.length,secondSeqReversed.length);
 		
 		//if approximately 8 of 24 bases are matching, then discard this pair
 		if(normalizedScore<0.33) {
