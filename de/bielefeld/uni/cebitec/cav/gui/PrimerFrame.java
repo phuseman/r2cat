@@ -192,7 +192,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				PrimerFrame.this.progressBar.setIndeterminate(false);
 			}
 			nextCheck :
-			while(!configFile.canRead()&&!configFile.exists()){
+			while(configFile!=null&&!configFile.canRead()&&!configFile.exists()){
 				Object[] options = { "Yes", "Cancel"};
 				int jOptionPaneAnswer = JOptionPane.showOptionDialog(null,"Could not find or read selected file! \nDo you want to select a new file?", "Config file not found",
 						JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
@@ -213,6 +213,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 					PrimerFrame.this.repaint();
 				}
 			}
+			if(configFile!=null){
 				XMLParser xmlParser = new XMLParser(configFile);
 				boolean isXML = xmlParser.scanXML();
 				if(isXML){
@@ -231,8 +232,10 @@ public class PrimerFrame extends JFrame implements ActionListener,
 						PrimerFrame.this.setConfigButton.setText("Set Config");
 						PrimerFrame.this.setConfigButton.setBackground(null);
 						PrimerFrame.this.repaint();
-
 					}
+					}
+				} else{
+					pg.setParameters(null);
 				}
 			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
 			/*long runningTime = new Date().getTime() - start; 
