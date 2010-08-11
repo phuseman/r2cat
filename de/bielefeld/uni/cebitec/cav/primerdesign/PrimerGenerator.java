@@ -38,8 +38,6 @@ public class PrimerGenerator {
 	private int maxBorderOffset = 400;
 	private File temporaryDirectory = null;
 	private int max = maxLength + 5;
-	private FileHandler fHandler;
-	private Logger logger;
 	private AbstractProgressReporter progress;
 	private File fasta;
 	private Bases base = null;
@@ -60,38 +58,22 @@ public class PrimerGenerator {
 		BLASTRepeatMasker rm = new BLASTRepeatMasker(fastaParser);
 		fastaParser = rm.doRepeatMasking();
 	}
-
+//XML file scannen
+	
 	public boolean setParameters(File config) throws Exception {
 		if (config != null) {
-			this.setUpLogFile();
 			scoring = new PrimerScoringScheme();
-			FileReader inConfig = new FileReader(config);
 			XMLParser configParser = new XMLParser();
-			configParser.parse(scoring, inConfig);
+			if(configParser.scanXML(config)){
+				configParser.parse(scoring, config);
+			}else{
+				System.out.println("ERROR not an xml file");
+			}
+		
 		} else {
-			this.setUpLogFile();
 			scoring = new PrimerScoringScheme();
 		}
 		return true;
-	}
-
-	/**
-	 * This methods sets up the logging file. ?! am ende noch genutzt ?!
-	 * 
-	 * @throws SecurityException
-	 * @throws IOException
-	 */
-	public void setUpLogFile() throws SecurityException, IOException {
-		SimpleFormatter formatterLogFile = new SimpleFormatter();
-		logger = Logger
-				.getLogger("de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator");
-		fHandler = new FileHandler("r2cat_primerDesign_log");
-		logger.setUseParentHandlers(false);
-
-		logger.addHandler(fHandler);
-		fHandler.setFormatter(formatterLogFile);
-
-		logger.setLevel(Level.SEVERE);
 	}
 
 	/**

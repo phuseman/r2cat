@@ -133,11 +133,11 @@ public class Primer {
 	public int getPrimerLength() {
 		return primerLength;
 	}
-
+private MeltingTemperature meltingTemperature = null;
 	public double getPrimerTemperature() {
 		if(primerTemperature == null) {
-			MeltingTemperature melt = new MeltingTemperature();
-			primerTemperature = melt.calculateTemperature(this.getPrimerSeq());
+			meltingTemperature = MeltingTemperature.getInstance();
+			primerTemperature = meltingTemperature.calculateTemperature(this.getPrimerSeq());
 		}
 		
 		return primerTemperature;

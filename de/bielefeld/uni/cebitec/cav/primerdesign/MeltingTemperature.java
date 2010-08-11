@@ -15,18 +15,27 @@ public class MeltingTemperature {
 
 	private double oligoConc = 0;
 	private char base;
-	private HashMap<String,Double> enthalpie=new HashMap<String,Double>();
-	private HashMap<String,Double> entropie=new HashMap<String,Double>();
+	private HashMap<String,Double> enthalpie;
+	private HashMap<String,Double> entropie;
+	private static MeltingTemperature instance = null;
 
 	/**
 	 * In the constructor the oligoConc variable is set and the HashMaps enthalpie and entropie are set up through the method
 	 * fillingEnthalpieAndEntropieParam.
 	 */
-	public MeltingTemperature(){
+	private MeltingTemperature(){
+		enthalpie=new HashMap<String,Double>();
+		entropie=new HashMap<String,Double>();
 	this.fillEnthalpieAndEntropieParam();
 	this.oligoConc = 0.0000025;
 	
 }
+	public static MeltingTemperature getInstance() {
+		if (instance == null) {
+			instance = new MeltingTemperature();
+		}
+		return instance;
+	}
 	
 	/**
 	 *	This method fills HashMaps with the numerical values for a given pair of nucleotides regarding

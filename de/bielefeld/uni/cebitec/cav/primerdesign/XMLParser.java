@@ -1,6 +1,8 @@
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
+import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Stack;
 
@@ -29,11 +31,20 @@ public class XMLParser {
 				DOCTYPE = 14,
 				PRE = 15;
 	}
-	private int countOpening = 0;
-	private int countClosing = 0;
-	
-	public boolean checkXML(){
+	public boolean scanXML(File file) throws IOException{
 		boolean isXML = false;
+		FileReader fileReader = new FileReader(file);
+		 int character = 0;
+		 int countClosing = 0;
+		 int countOpening = 0;
+		while(( character = fileReader.read()) != -1) {
+			 if(character=='<'){
+				 countClosing++;
+			 }
+			 if(character=='>'){
+				 countOpening++;
+			 }
+		 }
 		if(countOpening == countClosing){
 			isXML = true;
 			return isXML;
@@ -65,9 +76,10 @@ public class XMLParser {
 	 * @throws Exception
 	 */
 	
-	  public void parse(DocumentHandler documentHandler,FileReader filereader) throws Exception {
+	  public void parse(DocumentHandler documentHandler,File file) throws Exception {
 		    Stack<Integer> stack = new Stack<Integer>();
 		    StringBuffer stringBuffer = new StringBuffer();
+		    FileReader filereader = new FileReader(file);
 		    int depth = 0;
 		    int mode = TagType.PRE;
 		    int character = 0;
