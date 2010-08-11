@@ -38,7 +38,6 @@ public class PrimerGenerator {
 
 
 	/**
-	 * Constructor when only a fasta file is given.
 	 * 
 	 * @param fastaFile
 	 */
@@ -52,18 +51,11 @@ public class PrimerGenerator {
 		BLASTRepeatMasker rm = new BLASTRepeatMasker(fastaParser);
 		fastaParser = rm.doRepeatMasking();
 	}
-//XML file scannen
 	
-	public boolean setParameters(File config) throws Exception {
-		if (config != null) {
+	public boolean setParameters(XMLParser configParser) throws Exception {
+		if (configParser != null) {
 			scoring = new PrimerScoringScheme();
-			XMLParser configParser = new XMLParser();
-			if(configParser.scanXML(config)){
-				configParser.parse(scoring, config);
-			}else{
-				System.out.println("ERROR not an xml file");
-			}
-		
+			configParser.parse(scoring);
 		} else {
 			scoring = new PrimerScoringScheme();
 		}

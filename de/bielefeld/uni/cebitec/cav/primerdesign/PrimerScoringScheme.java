@@ -21,6 +21,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		private DefaultMutableTreeNode root, currentNode, currentParent;
 		private String currentTag = null;
 		private String value = null;
+		private Stack stack = null;
 		private HashMap<Character, Double> firstBase = new HashMap<Character, Double>();
 		private HashMap<Character, Double> lastBase = new HashMap<Character, Double>();
 		private HashMap<Character, Double>	plus1Base= new HashMap<Character, Double>();
@@ -39,9 +40,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		private Integer[] ATLast6Array;
 		private Integer[] gc0207Array;
 		private Integer[] offsetArray;
-		private Stack stack = null;
 		double temperature = 0;
 		private Bases base;
+		private SimpleSmithWatermanPrimerAligner swa;
 		
 		/**
 		 * Constructor of the class.
@@ -51,6 +52,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		public PrimerScoringScheme(){
 				this.defaultParameters();
 				base = Bases.getInstance();
+				swa = new SimpleSmithWatermanPrimerAligner();
 		}
 
 		public double calculatePrimerScore(Primer primer) {
@@ -59,9 +61,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 				double scoreTemp = this.calcScoreMeltingTemperature(primer.getPrimerTemperature());
 				if (scoreTemp != -1) {
 					double scoreLength = this.getLengthScore(primer.getPrimerLength());
-					double scoreGCTotal = this.getGCScore(primerSeq, true);
-					//merge these
-					double scoreGC0207 = this.getGCScore(primerSeq, false);
+					double scoreGCTotal = this.getGCScore(primerSeq);
 					double scoreFirstLastBase = this.getFirstAndLastBaseScore(primerSeq);
 					double scoreBackfold = this.getBackfoldScore(primerSeq);
 					double scoreLast6 = this.getLast6Score(primerSeq);
@@ -72,7 +72,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 					double scoreRepeat = this.getRepeatScore(primerSeq);
 					double primerScore = scoreGCTotal + scoreRepeat
 							+ scoreFirstLastBase + scoreNPenalty + scoreBackfold
-							+ scoreLength + scoreLast6 + scoreGC0207 + scoreOffset
+							+ scoreLength + scoreLast6 + scoreOffset
 							+ scorePlus1Plus2 + scoreTemp + scoreHomopoly;
 					return primerScore;
 			}
@@ -184,139 +184,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			}
 			return keys;
 		}
-	
-		/**
-		 * This method loads the parameters which are given by a config XML file given by the user.
-		 * 
-		 * @param key
-		 * @param value
-		 */
-		private void loadParameters(String key, String value){
-			
-			ArrayList<Double> gcArrayList = new ArrayList<Double>();
-			ArrayList<Double> annealArrayList = new ArrayList<Double>();
-			ArrayList<Double> atLast6ArrayList = new ArrayList<Double>();
-			ArrayList<Double> gc0207ArrayList = new ArrayList<Double>();
-			ArrayList<Double> offsetArrayList = new ArrayList<Double>();
-			
-			if(currentParent.toString().equals("GC")){
-				gc.put(Double.parseDouble(key), Double.parseDouble(value));
-				gcArrayList.add(Double.parseDouble(key));
-			}if(currentParent.toString().equals("FIRST")){
-				firstBase.put(key.charAt(0), Double.parseDouble(value));
-			}if(currentParent.toString().equals("LAST")){
-				lastBase.put(key.charAt(0), Double.parseDouble(value));
-			}if(currentParent.toString().equals("PLUS_1")){
-				plus1Base.put(key.charAt(0), Double.parseDouble(value));
-			}if(currentParent.toString().equals("PLUS_2")){
-				plus2Base.put(key.charAt(0), Double.parseDouble(value));
-			}if(currentParent.toString().equals("LENGTH")){
-				length.put(currentTag, Double.parseDouble(value));
-			}if(currentParent.toString().equals("HOMOPOLY")){
-				homopoly.put(currentTag, Double.parseDouble(value));
-			}if(currentParent.toString().equals("MAX_OFFSET")){
-				maxOffset.put(currentTag, Double.parseDouble(value));
-			}if(currentParent==currentNode){
-				String cP = currentParent.toString();
-				repeatAndBackfoldAndNPenalty.put(cP, Double.parseDouble(value));		
-			}if(currentParent.toString().equals("OFFSET")){
-				offset.put(Double.parseDouble(key), Double.parseDouble(value));
-				offsetArrayList.add(Double.parseDouble(key));
-			}if(currentParent.toString().equals("GC_0207")){
-				gc0207.put(Double.parseDouble(key), Double.parseDouble(value));
-				gc0207ArrayList.add(Double.parseDouble(key));
-			}if(currentParent.toString().equals("AT_LAST6")){
-				atLast6.put(Double.parseDouble(key), Double.parseDouble(value));
-				atLast6ArrayList.add(Double.parseDouble(key));
-			}if(currentParent.toString().equals("ANNEAL")){
-				anneal.put(Double.parseDouble(key), Double.parseDouble(value));
-				annealArrayList.add(Double.parseDouble(key));
-			}
-			this.gc0207Array =this.makeIntArray((gc0207ArrayList.toArray()));
-			this.ATLast6Array =this.makeIntArray((atLast6ArrayList.toArray()));
-			this.annealArray =this.makeIntArray((annealArrayList.toArray()));
-			this.gcArray =this.makeIntArray((gcArrayList.toArray()));
-			this.offsetArray =this.makeIntArray((offsetArrayList.toArray()));
-		}
 		
-		
-		/**
-		 * @see DocumentHandler
-		 */
-		@Override
-		public void startDocument() throws Exception {
-			stack = new Stack();
-			
-		}
-		
-		/**
-		 * @see DocumentHandler
-		 */
-		@Override
-		public void endDocument() throws Exception {
-			stack = null;
-			
-		}
-		
-		@Override
-		public void startElement(String tag, Hashtable hash) throws Exception {
-			String keyV;
-			DefaultMutableTreeNode newNode= new DefaultMutableTreeNode(tag);
-			if(stack.isEmpty()){
-				stack.push(this);
-			} else{
-				stack.push(this);
-			
-			if(currentNode ==null){
-				root=newNode;
-			} else{
-				currentNode.add(newNode);
-			}
-			currentNode=newNode;
-			if(currentNode.getParent()==null){
-				currentParent =root;
-			} else{
-			currentParent = (DefaultMutableTreeNode) currentNode.getParent();
-			}
-			currentTag = currentNode.toString();
-		
-			}
-			Enumeration e=hash.keys();
-			while(e.hasMoreElements()){
-				keyV = (String)e.nextElement();
-				value = (String)hash.get(keyV);
-			}
-			
-	}
-		
-		/**
-		 * @see DocumentHandler
-		 */
-		@Override
-		public void endElement(String st) throws Exception {
-			if(currentNode==null){	
-			} else{
-			currentNode =(DefaultMutableTreeNode) currentNode.getParent();
-			}
-			stack.pop();
-		}
-
-		/**
-		 * @see DocumentHandler
-		 */
-		@Override
-		public void value(String s) throws Exception {
-			if(!s.isEmpty()&&!s.contains(" ")&&!s.matches("\r\n")){
-				String score = s;
-				String keyValue = value;
-				if(currentNode.getParent()==currentParent&&!value.isEmpty()){
-					loadParameters(keyValue, score);
-				} else{
-					loadParameters(currentTag,score);
-				}
-			}
-		}
-	
 		/**
 		 * This method parses the string objects in the given array
 		 * to integers and returns them in an array.
@@ -330,7 +198,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			String currentObject =	object[i].toString();
 			double doubleTemp = Double.parseDouble(currentObject);
 			int temp = (int) doubleTemp;
-			
 			intArray[i] = temp;
 			
 			}
@@ -516,44 +383,20 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 		public double getBackfoldScore(char[] primerSeq) {
 			double scoreBackfold = 0;
-			
-			for(int i = 0; i<primerSeq.length-8;i++){
-			
+			char[] last4Bases = new char[4];
+			int j = 0;
+			for (int i = 4; i>0; i--,j++){
+				last4Bases[j]= primerSeq[primerSeq.length-i];
 			}
-//			double scoreBackfold = 0;
-//			char[] last4 = new char[4];
-//			char[] last4Bases;
-//			char[] primerSeqMinusEight = new char[primerSeq.length - 8];
-//			System.arraycopy(primerSeq, (primerSeq.length - 4), last4, 0, 4);
-//			System.arraycopy(primerSeq, 0, primerSeqMinusEight, 0,
-//					(primerSeq.length - 8));
-//			last4Bases = base.getReverseComplement(last4);
-//			char[] leftSeq = primerSeqMinusEight;
-//			scoreBackfold = this.calcScoreBackfold(last4Bases, leftSeq);
-			//TODO auch mit smith waterman berechnen
-			return -1000;
-		}
-		
-		/**
-		 * This method tests if the primer sequence can perform a backfold. If that is the case a score
-		 * is set.
-		 * @param last4Base
-		 * @param leftseq
-		 * @return backfold-score
-		 */
-		private double calcScoreBackfold(char[] last4Base,char[] leftseq){
-			double scoreBackfold = 0;
-			String scoreString = null;
-			String last4Bases = new String(last4Base);
-			last4Bases = last4Bases.toUpperCase();
-			String primer = new String(leftseq);
-			primer.toUpperCase();
-			if(primer.contains(last4Bases)){
-				scoreBackfold = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD");
+				base.getReverseComplement(last4Bases);
+			double smwScore = swa.getAlignmentScore(primerSeq, last4Bases);
+			if(smwScore>=8){
+			scoreBackfold = repeatAndBackfoldAndNPenalty.get("BACKFOLD");
 			}
+			System.out.println(scoreBackfold);
 			return scoreBackfold;
 		}
-		
+
 
 		/**
 		 * This method retrieves the first and the last base of a primer sequence
@@ -650,7 +493,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @param direction
 		 * @return allGCScore
 		 */
-		public double getGCScore(char[] primerSeq, boolean totalGC) {
+		public double getGCScore(char[] primerSeq) {
 			double allGCScore = 0;
 			int gcLevel = 0;
 			int gcLevel2A7 = 0;
@@ -729,5 +572,139 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			repeatScore = (repeatFaktor*repeatCount);
 			return repeatScore;
 		}
+		
+
+		/**
+		 * This method loads the parameters which are given by a config XML file given by the user.
+		 * 
+		 * @param key
+		 * @param value
+		 */
+		private void loadParameters(String key, String value){
+			
+			ArrayList<Double> gcArrayList = new ArrayList<Double>();
+			ArrayList<Double> annealArrayList = new ArrayList<Double>();
+			ArrayList<Double> atLast6ArrayList = new ArrayList<Double>();
+			ArrayList<Double> gc0207ArrayList = new ArrayList<Double>();
+			ArrayList<Double> offsetArrayList = new ArrayList<Double>();
+			
+			if(currentParent.toString().equals("GC")){
+				gc.put(Double.parseDouble(key), Double.parseDouble(value));
+				gcArrayList.add(Double.parseDouble(key));
+			}if(currentParent.toString().equals("FIRST")){
+				firstBase.put(key.charAt(0), Double.parseDouble(value));
+			}if(currentParent.toString().equals("LAST")){
+				lastBase.put(key.charAt(0), Double.parseDouble(value));
+			}if(currentParent.toString().equals("PLUS_1")){
+				plus1Base.put(key.charAt(0), Double.parseDouble(value));
+			}if(currentParent.toString().equals("PLUS_2")){
+				plus2Base.put(key.charAt(0), Double.parseDouble(value));
+			}if(currentParent.toString().equals("LENGTH")){
+				length.put(currentTag, Double.parseDouble(value));
+			}if(currentParent.toString().equals("HOMOPOLY")){
+				homopoly.put(currentTag, Double.parseDouble(value));
+			}if(currentParent.toString().equals("MAX_OFFSET")){
+				maxOffset.put(currentTag, Double.parseDouble(value));
+			}if(currentParent==currentNode){
+				String cP = currentParent.toString();
+				repeatAndBackfoldAndNPenalty.put(cP, Double.parseDouble(value));		
+			}if(currentParent.toString().equals("OFFSET")){
+				offset.put(Double.parseDouble(key), Double.parseDouble(value));
+				offsetArrayList.add(Double.parseDouble(key));
+			}if(currentParent.toString().equals("GC_0207")){
+				gc0207.put(Double.parseDouble(key), Double.parseDouble(value));
+				gc0207ArrayList.add(Double.parseDouble(key));
+			}if(currentParent.toString().equals("AT_LAST6")){
+				atLast6.put(Double.parseDouble(key), Double.parseDouble(value));
+				atLast6ArrayList.add(Double.parseDouble(key));
+			}if(currentParent.toString().equals("ANNEAL")){
+				anneal.put(Double.parseDouble(key), Double.parseDouble(value));
+				annealArrayList.add(Double.parseDouble(key));
+			}
+			this.gc0207Array =this.makeIntArray((gc0207ArrayList.toArray()));
+			this.ATLast6Array =this.makeIntArray((atLast6ArrayList.toArray()));
+			this.annealArray =this.makeIntArray((annealArrayList.toArray()));
+			this.gcArray =this.makeIntArray((gcArrayList.toArray()));
+			this.offsetArray =this.makeIntArray((offsetArrayList.toArray()));
+		}
+		
+		
+		/**
+		 * @see DocumentHandler
+		 */
+		@Override
+		public void startDocument() throws Exception {
+			stack = new Stack();
+			
+		}
+		
+		/**
+		 * @see DocumentHandler
+		 */
+		@Override
+		public void endDocument() throws Exception {
+			stack = null;
+			
+		}
+		
+		@Override
+		public void startElement(String tag, Hashtable hash) throws Exception {
+			String keyV;
+			DefaultMutableTreeNode newNode= new DefaultMutableTreeNode(tag);
+			if(stack.isEmpty()){
+				stack.push(this);
+			} else{
+				stack.push(this);
+			
+			if(currentNode ==null){
+				root=newNode;
+			} else{
+				currentNode.add(newNode);
+			}
+			currentNode=newNode;
+			if(currentNode.getParent()==null){
+				currentParent =root;
+			} else{
+			currentParent = (DefaultMutableTreeNode) currentNode.getParent();
+			}
+			currentTag = currentNode.toString();
+		
+			}
+			Enumeration e=hash.keys();
+			while(e.hasMoreElements()){
+				keyV = (String)e.nextElement();
+				value = (String)hash.get(keyV);
+			}
+			
+	}
+		
+		/**
+		 * @see DocumentHandler
+		 */
+		@Override
+		public void endElement(String st) throws Exception {
+			if(currentNode==null){	
+			} else{
+			currentNode =(DefaultMutableTreeNode) currentNode.getParent();
+			}
+			stack.pop();
+		}
+
+		/**
+		 * @see DocumentHandler
+		 */
+		@Override
+		public void value(String s) throws Exception {
+			if(!s.isEmpty()&&!s.contains(" ")&&!s.matches("\r\n")){
+				String score = s;
+				String keyValue = value;
+				if(currentNode.getParent()==currentParent&&!value.isEmpty()){
+					loadParameters(keyValue, score);
+				} else{
+					loadParameters(currentTag,score);
+				}
+			}
+		}
+	
 }
 	

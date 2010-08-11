@@ -30,6 +30,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
 import de.bielefeld.uni.cebitec.cav.primerdesign.ContigPair;
 import de.bielefeld.uni.cebitec.cav.primerdesign.PrimerGenerator;
 import de.bielefeld.uni.cebitec.cav.primerdesign.PrimerResult;
+import de.bielefeld.uni.cebitec.cav.primerdesign.XMLParser;
 import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
@@ -42,6 +43,8 @@ public class PrimerFrame extends JFrame implements ActionListener,
 	private JButton setConfigButton;
 	private JButton run;
 	private File configFile;
+
+
 	private File lastDir;
 	private Vector<ContigPair> contigPairs = null;
 	private Checkbox repeatMaskingCheckBox;
@@ -158,7 +161,13 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		pr.setLocationByPlatform(true);
 		pr.setVisible(true);
 	}
+	public File getConfigFile() {
+		return configFile;
+	}
 
+	public void setConfigFile(File configFile) {
+		this.configFile = configFile;
+	}
 	class PrimerGeneratorTask extends SwingWorker<Vector<PrimerResult>, String>
 			implements AbstractProgressReporter {
 
@@ -182,7 +191,49 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				PrimerFrame.this.progressBar.setString(null);
 				PrimerFrame.this.progressBar.setIndeterminate(false);
 			}
-			pg.setParameters(configFile);
+			nextCheck :
+			while(!configFile.canRead()&&!configFile.exists()){
+				Object[] options = { "Yes", "Cancel"};
+				int jOptionPaneAnswer = JOptionPane.showOptionDialog(null,"Could not find or read selected file! \nDo you want to select a new file?", "Config file not found",
+						JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+						null, options, options[0]);
+
+				if(jOptionPaneAnswer == JOptionPane.YES_OPTION) {PrimerFrame.this.setConfigFile(MiscFileUtils.chooseFile(null,"Choose a new file", null, true,
+									new CustomFileFilter(".xml","XML file")));
+				}
+				
+				if(jOptionPaneAnswer==JOptionPane.YES_OPTION){
+					configFile = PrimerFrame.this.getConfigFile();
+					break nextCheck;
+				}else{
+					this.cancel(true);
+					PrimerFrame.this.configFile = null;
+					PrimerFrame.this.setConfigButton.setText("Set Config");
+					PrimerFrame.this.setConfigButton.setBackground(null);
+					PrimerFrame.this.repaint();
+				}
+			}
+				XMLParser xmlParser = new XMLParser(configFile);
+				boolean isXML = xmlParser.scanXML();
+				if(isXML){
+					pg.setParameters(xmlParser);
+				}else{
+					Object[] options = { "Yes", "Cancel"};
+					int jOptionPaneAnswer = JOptionPane.showOptionDialog(PrimerFrame.this,"The chosen file isn't a xml file. Do you want to generate primers with default parameters?","No XML file",
+							JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+							null, options, options[0]);
+					if(jOptionPaneAnswer == JOptionPane.YES_OPTION) {
+					xmlParser = null;
+					pg.setParameters(xmlParser);
+					}else{
+						this.cancel(true);
+						PrimerFrame.this.configFile = null;
+						PrimerFrame.this.setConfigButton.setText("Set Config");
+						PrimerFrame.this.setConfigButton.setBackground(null);
+						PrimerFrame.this.repaint();
+
+					}
+				}
 			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
 			/*long runningTime = new Date().getTime() - start; 
 			System.out.println(runningTime/1000);*/

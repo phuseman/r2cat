@@ -1,5 +1,6 @@
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.Stack;
  *
  */
 public class XMLParser {
+	private File config = null;
 	class TagType{
 		private static final int
 				TEXT = 1,
@@ -31,19 +33,30 @@ public class XMLParser {
 				DOCTYPE = 14,
 				PRE = 15;
 	}
-	public boolean scanXML(File file) throws IOException{
+	
+	public XMLParser(File configFile){
+		this.config = configFile;
+	}
+	
+	public boolean scanXML() throws IOException{
 		boolean isXML = false;
-		FileReader fileReader = new FileReader(file);
+		BufferedReader in = new BufferedReader(new FileReader(config));
 		 int character = 0;
 		 int countClosing = 0;
 		 int countOpening = 0;
-		while(( character = fileReader.read()) != -1) {
-			 if(character=='<'){
-				 countClosing++;
-			 }
-			 if(character=='>'){
-				 countOpening++;
-			 }
+		 String line;
+		while((line = in.readLine())!= null) {
+			if(!line.contains("##")){
+				char[] currentLine = line.toCharArray();
+				for(int i = 0; i<currentLine.length;i++){
+					if(currentLine[i]=='<'){
+						 countOpening++;
+					}
+					if(currentLine[i]=='>'){
+						countClosing++;
+					}
+				}
+			}
 		 }
 		if(countOpening == countClosing){
 			isXML = true;
@@ -76,10 +89,10 @@ public class XMLParser {
 	 * @throws Exception
 	 */
 	
-	  public void parse(DocumentHandler documentHandler,File file) throws Exception {
+	  public void parse(DocumentHandler documentHandler) throws Exception {
 		    Stack<Integer> stack = new Stack<Integer>();
 		    StringBuffer stringBuffer = new StringBuffer();
-		    FileReader filereader = new FileReader(file);
+		    FileReader filereader = new FileReader(config);
 		    int depth = 0;
 		    int mode = TagType.PRE;
 		    int character = 0;
@@ -249,4 +262,12 @@ public class XMLParser {
 		    if(mode == TagType.DONE)
 		      documentHandler.endDocument();
 		  }
+
+	public File getConfig() {
+		return config;
+	}
+
+	public void setConfig(File config) {
+		this.config = config;
+	}
 }
