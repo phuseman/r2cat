@@ -75,6 +75,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 							+ scoreLength + scoreLast6 + scoreOffset
 							+ scorePlus1Plus2 + scoreTemp + scoreHomopoly;
 					return primerScore;
+					
 			}
 				return -Double.MAX_VALUE;
 		}
@@ -383,7 +384,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 		public double getBackfoldScore(char[] primerSeq) {
 			double scoreBackfold = 0;
-			char[] last4Bases = new char[4];
+	/*		char[] last4Bases = new char[4];
 			int j = 0;
 			for (int i = 4; i>0; i--,j++){
 				last4Bases[j]= primerSeq[primerSeq.length-i];
@@ -392,7 +393,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			double smwScore = swa.getAlignmentScore(primerSeq, last4Bases);
 			if(smwScore>=8){
 			scoreBackfold = repeatAndBackfoldAndNPenalty.get("BACKFOLD");
-			}
+			}*/
 			return scoreBackfold;
 		}
 

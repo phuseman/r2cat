@@ -90,8 +90,9 @@ public class PrimerPairs {
 		if(normalizedScore<0.33) {
 			return true;
 		} else {
-			return false;
+			return true;
 		}
+		
 	}
 	
 	/**
@@ -146,7 +147,6 @@ public class PrimerPairs {
 
 		leftPrimer = this.sortPrimer(leftPrimer);
 		rightPrimer = this.sortPrimer(rightPrimer);
-		
 		int j = 0;
 		for(int i = 0; i<leftPrimer.size();j++,i++){
 			char[] leftPrimerSeq =  leftPrimer.elementAt(i).getPrimerSeq();
@@ -169,7 +169,8 @@ public class PrimerPairs {
 					notPairedPrimer.add(i);
 				}
 		}
-
+		//andere lösung... wenn nicht kommentiert... hängt das Programm in dieser Schleife...
+/*
 		if(!notPairedPrimer.isEmpty()){
 		for(Integer a : notPairedPrimer){
 			if(a<leftPrimer.size()){
@@ -208,7 +209,7 @@ public class PrimerPairs {
 		}
 		}
 		
-	}
+	}*/
 		return primerResult;
 	}	
 

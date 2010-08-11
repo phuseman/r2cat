@@ -205,10 +205,10 @@ public class PrimerGenerator {
 			Primer candidate = primerCandidates.get(i);
 			score = scoring.calculatePrimerScore(candidate);
 			if (score > -200) {
+				candidate.setPrimerScore(score);
 				scoredPrimerCandidates.add(candidate);
 			}
 		}
-		//System.out.println(scoredPrimerCandidates.size());
 		return scoredPrimerCandidates;
 	}
 
