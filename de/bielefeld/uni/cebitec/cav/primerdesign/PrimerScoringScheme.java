@@ -393,7 +393,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			if(smwScore>=8){
 			scoreBackfold = repeatAndBackfoldAndNPenalty.get("BACKFOLD");
 			}
-			System.out.println(scoreBackfold);
 			return scoreBackfold;
 		}
 
