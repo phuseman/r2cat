@@ -61,7 +61,7 @@ import de.bielefeld.uni.cebitec.cav.gui.PrimerFrame;
 import de.bielefeld.uni.cebitec.cav.gui.PrimerResultFrame;
 import de.bielefeld.uni.cebitec.cav.gui.PrimerTable;
 import de.bielefeld.uni.cebitec.cav.gui.SequenceOrderTable;
-import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
+import de.bielefeld.uni.cebitec.cav.primerdesign.PrimerGenerator;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
 public class GuiController {

@@ -1,4 +1,4 @@
-package de.bielefeld.uni.cebitec.cav.PrimerDesign;
+package de.bielefeld.uni.cebitec.cav.primerdesign;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
@@ -21,6 +21,7 @@ public class Primer {
 	private int primerLength = 0;
 	private boolean onRightEnd = false;
 	private int offsetInFastaFile = 0;
+	private char[] primerSequence = null;
 	private double primerScore = 0;
 	private Double primerTemperature = null;
 	
@@ -105,11 +106,19 @@ public class Primer {
 	}
 	
 	public char[] getPrimerSeq() {
-		if(onRightEnd) {
-			return contigSequences.getSubstring(offsetInFastaFile+primerStart, primerLength);
-		} else {
-			return bases.getReverseComplement(contigSequences.getSubstring(offsetInFastaFile+primerStart-primerLength, primerLength));
+		//cache the primer sequences
+		//if primerSequence is null, then it was not acesses before
+		if (primerSequence == null) {
+			if (onRightEnd) {
+				primerSequence = contigSequences.getSubstring(offsetInFastaFile
+						+ primerStart, primerLength);
+			} else {
+				primerSequence = bases.getReverseComplement(contigSequences
+						.getSubstring(offsetInFastaFile + primerStart
+								- primerLength, primerLength));
+			}
 		}
+		return primerSequence;
 	}
 
 

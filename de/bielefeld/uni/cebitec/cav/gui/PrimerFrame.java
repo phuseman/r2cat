@@ -23,13 +23,13 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 
-import de.bielefeld.uni.cebitec.cav.PrimerDesign.ContigPair;
-import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
-import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerResult;
 import de.bielefeld.uni.cebitec.cav.controller.SequenceNotFoundException;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
+import de.bielefeld.uni.cebitec.cav.primerdesign.ContigPair;
+import de.bielefeld.uni.cebitec.cav.primerdesign.PrimerGenerator;
+import de.bielefeld.uni.cebitec.cav.primerdesign.PrimerResult;
 import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 

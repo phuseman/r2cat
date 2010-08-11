@@ -24,8 +24,8 @@ import java.util.Vector;
 
 import javax.swing.table.AbstractTableModel;
 
-import de.bielefeld.uni.cebitec.cav.PrimerDesign.ContigPair;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
+import de.bielefeld.uni.cebitec.cav.primerdesign.ContigPair;
 
 /**
  * This table model provides a wrapper between an alignment positions list and a JTable

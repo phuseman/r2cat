@@ -1,4 +1,4 @@
-package de.bielefeld.uni.cebitec.cav.PrimerDesign;
+package de.bielefeld.uni.cebitec.cav.primerdesign;
 
 import java.util.ArrayList;
 import java.util.Comparator;

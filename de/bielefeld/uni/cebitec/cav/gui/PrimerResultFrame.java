@@ -19,7 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
-import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerResult;
+import de.bielefeld.uni.cebitec.cav.primerdesign.PrimerResult;
 
 public class PrimerResultFrame extends JFrame implements ActionListener {
 

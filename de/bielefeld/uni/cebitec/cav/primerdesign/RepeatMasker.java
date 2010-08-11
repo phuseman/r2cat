@@ -18,29 +18,27 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-package de.bielefeld.uni.cebitec.cav.PrimerDesign;
+package de.bielefeld.uni.cebitec.cav.primerdesign;
+
+import java.io.IOException;
+
+import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 
 /**
- * @author phuseman
+ * Interface for different repeat masking procedures. Each one should accept a FastaFileReader,
+ * set all sequences to capitals and do a repeat masking step where all repetitive sequences are set to lowercase letters.
  * 
+ * @author phuseman
+ *
  */
-public class ContigPair {
-	protected String contig1 = null;
-	protected boolean onRightEnd1 = false;
-	protected String contig2 = null;
-	protected boolean onRightEnd2 = true;
-
-	public ContigPair(String contigId1, String contigId2) {
-		this.contig1 = contigId1;
-		this.contig2 = contigId2;
-	}
-
-	public void setContig1ReverseComplemented(boolean b) {
-		onRightEnd1 = b;
-	}
-
-	public void setContig2ReverseComplemented(boolean b) {
-		onRightEnd2 = !b;
-	}
+public interface RepeatMasker {
+	
+	
+	/**
+	 * Performs the actual repeat masking. After this step, all repetitive regions are set to lowercase letters.
+	 * Nonrepetitive parts are uppercase.
+	 * @return FastaFileReader containing the repeat masked sequences.
+	 */
+	public FastaFileReader doRepeatMasking() throws IOException, InterruptedException;
 
 }

@@ -18,27 +18,47 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-package de.bielefeld.uni.cebitec.cav.PrimerDesign;
-
-import java.io.IOException;
-
-import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
+package de.bielefeld.uni.cebitec.cav.primerdesign;
 
 /**
- * Interface for different repeat masking procedures. Each one should accept a FastaFileReader,
- * set all sequences to capitals and do a repeat masking step where all repetitive sequences are set to lowercase letters.
+ * Convenience class to bundle two contigs for which primer should be generated.
+ * |contig1>*|contig2> 
+ * *:generate primer for this gap
+ * For contig one possible primer will be generated on the right end of the contig in forward direction.
+ * For the second contig the primers will be generated on the left end in backward direction.
  * 
  * @author phuseman
- *
  */
-public interface RepeatMasker {
-	
-	
+public class ContigPair {
+	protected String contig1 = null;
+	protected boolean onRightEnd1 = true;
+	protected String contig2 = null;
+	protected boolean onRightEnd2 = false;
+
 	/**
-	 * Performs the actual repeat masking. After this step, all repetitive regions are set to lowercase letters.
-	 * Nonrepetitive parts are uppercase.
-	 * @return FastaFileReader containing the repeat masked sequences.
+	 * Provide the contig ID's for which the primer shall be generated with a {@link PrimerGenerator}
+	 * @param contigId1 Fasta id of the first contig.
+	 * @param contigId2 Fasta Id of the second contig.
 	 */
-	public FastaFileReader doRepeatMasking() throws IOException, InterruptedException;
+	public ContigPair(String contigId1, String contigId2) {
+		this.contig1 = contigId1;
+		this.contig2 = contigId2;
+	}
+
+	/**
+	 * If the first contig is reverse complemented, then the primer have to be generated for the left end in reverse complement direction.
+	 * @param b contig one is reverse complemented
+	 */
+	public void setContig1ReverseComplemented(boolean b) {
+		onRightEnd1 = !b;
+	}
+
+	/**
+	 * If the second contig is reverse complemented, then the primer have to be generated for the right end in forward direction.
+	 * @param b contig two is reverse complemented
+	 */
+	public void setContig2ReverseComplemented(boolean b) {
+		onRightEnd2 = b;
+	}
 
 }
