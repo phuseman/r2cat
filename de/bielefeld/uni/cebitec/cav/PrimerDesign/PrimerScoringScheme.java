@@ -34,13 +34,14 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		private HashMap<Double, Double> gc0207 = new HashMap<Double, Double>();
 		private HashMap<Double, Double> anneal = new HashMap<Double, Double>	();
 		private HashMap<String, Double> repeatAndBackfoldAndNPenalty= new HashMap<String, Double>();
-		private ArrayList<Double> gcArrayList = new ArrayList<Double>();
-		private ArrayList<Double> annealArrayList = new ArrayList<Double>();
-		private ArrayList<Double> atLast6ArrayList = new ArrayList<Double>();
-		private ArrayList<Double> gc0207ArrayList = new ArrayList<Double>();
-		private ArrayList<Double> offsetArrayList = new ArrayList<Double>();
+		private Integer[] gcArray;
+		private Integer[] annealArray;
+		private Integer[] ATLast6Array;
+		private Integer[] gc0207Array;
+		private Integer[] offsetArray;
 		private Stack stack = null;
 		double temperature = 0;
+		private Bases base;
 		
 		/**
 		 * Constructor of the class.
@@ -49,6 +50,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		
 		public PrimerScoringScheme(){
 				this.defaultParameters();
+				base = Bases.getInstance();
 		}
 
 		public double calculatePrimerScore(Primer primer) {
@@ -82,15 +84,21 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * Parameters are chosen by Jochen Blom and Dr. Christian Rueckert.
 		 */
 		private void defaultParameters(){
+			ArrayList<Double> gcArrayList = new ArrayList<Double>();
+			ArrayList<Double> annealArrayList = new ArrayList<Double>();
+			ArrayList<Double> atLast6ArrayList = new ArrayList<Double>();
+			ArrayList<Double> gc0207ArrayList = new ArrayList<Double>();
+			ArrayList<Double> offsetArrayList = new ArrayList<Double>();
 			
 			gc.put(10.0, 100.0);
 			gc.put(15.0, -100.0);
 			gc.put(20.0, -300.0);
 			gc.put(25.0, -800.0);
 			gc.put(50.0, -1500.0);
-			
-			gcArrayList = this.fillArrayListWithDefaultValues(gc);
-			
+	
+			gcArrayList = fillArrayListWithDefaultValues(gc);
+			this.gcArray =this.makeIntArray((gcArrayList.toArray()));
+		
 			firstBase.put('A', 45.0);
 			firstBase.put('T', 45.0);
 			firstBase.put('C', 0.0);
@@ -122,21 +130,24 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			offset.put(110.0, -50.0);
 			offset.put(150., 250.0);
 			
-			offsetArrayList = this.fillArrayListWithDefaultValues(offset);
+			offsetArrayList = fillArrayListWithDefaultValues(offset);
+			this.offsetArray =this.makeIntArray((offsetArrayList.toArray()));
 			
 			gc0207.put(79.0, 156.0);
 			gc0207.put(60.0, -83.0);
 			gc0207.put(50.0, -320.0);
 			gc0207.put(0.0, -1500.0);
 			
-			gc0207ArrayList = this.fillArrayListWithDefaultValues(gc0207);
+			gc0207ArrayList = fillArrayListWithDefaultValues(gc0207);
+			this.gc0207Array =this.makeIntArray((gc0207ArrayList.toArray()));
 			
 			atLast6.put(79.0, 156.0);
 			atLast6.put(60.0, -83.0);
 			atLast6.put(50.0, -320.0);
 			atLast6.put(0.0, -1500.0);
 			
-			atLast6ArrayList = this.fillArrayListWithDefaultValues(atLast6);
+			atLast6ArrayList = fillArrayListWithDefaultValues(atLast6);
+			this.ATLast6Array =this.makeIntArray((atLast6ArrayList.toArray()));
 			
 			maxOffset.put("DISTANCE", 150.0);
 			maxOffset.put("MULT",-2.0);
@@ -152,7 +163,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			anneal.put(6.0,0.0);
 			anneal.put(100.0, -1500.0);
 			
-			annealArrayList = this.fillArrayListWithDefaultValues(anneal);
+			annealArrayList = fillArrayListWithDefaultValues(anneal);
+			this.annealArray =this.makeIntArray((annealArrayList.toArray()));
 			
 			length.put("IDEAL", 20.5);
 			length.put("SCORE", -2.0);
@@ -180,6 +192,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @param value
 		 */
 		private void loadParameters(String key, String value){
+			
+			ArrayList<Double> gcArrayList = new ArrayList<Double>();
+			ArrayList<Double> annealArrayList = new ArrayList<Double>();
+			ArrayList<Double> atLast6ArrayList = new ArrayList<Double>();
+			ArrayList<Double> gc0207ArrayList = new ArrayList<Double>();
+			ArrayList<Double> offsetArrayList = new ArrayList<Double>();
 			
 			if(currentParent.toString().equals("GC")){
 				gc.put(Double.parseDouble(key), Double.parseDouble(value));
@@ -214,6 +232,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 				anneal.put(Double.parseDouble(key), Double.parseDouble(value));
 				annealArrayList.add(Double.parseDouble(key));
 			}
+			this.gc0207Array =this.makeIntArray((gc0207ArrayList.toArray()));
+			this.ATLast6Array =this.makeIntArray((atLast6ArrayList.toArray()));
+			this.annealArray =this.makeIntArray((annealArrayList.toArray()));
+			this.gcArray =this.makeIntArray((gcArrayList.toArray()));
+			this.offsetArray =this.makeIntArray((offsetArrayList.toArray()));
 		}
 		
 		
@@ -301,31 +324,17 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @param object
 		 * @return array
 		 */
-		public Integer[] makeIntArray(Object[] object){
+		private Integer[] makeIntArray(Object[] object){
 			Integer[] intArray = new Integer[object.length];
 			for(int i = 0; i<object.length;i++){
 			String currentObject =	object[i].toString();
-			int temp = Integer.valueOf(currentObject).intValue();
+			double doubleTemp = Double.parseDouble(currentObject);
+			int temp = (int) doubleTemp;
+			
 			intArray[i] = temp;
 			
 			}
 			return intArray ;
-		}
-		
-		/**
-		 * This method calculates the score for the bases which are in position +1 and +2 after the
-		 * primer sequence ended.
-		 * 
-		 * @param lastPlus1
-		 * @param lastPlus2
-		 * @return scorePlus1Plus2
-		 */
-		public double calcScorePlus1(char lastPlus1, char lastPlus2){
-			double scorePlus1Plus2 = 0;
-			double plus1 = this.plus1Base.get(lastPlus1);
-			double plus2 = this.plus2Base.get(lastPlus2);
-			scorePlus1Plus2 = plus1 + plus2;
-			return scorePlus1Plus2;
 		}
 		
 	
@@ -337,15 +346,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @param gcRatio
 		 * @return GC-Level score
 		 */
-		public double calcScoreTotalGCLevel(double gcRatio){
+		private double calcScoreTotalGCLevel(double gcRatio){
 			double scoreGCTotal = 0;
-			Integer[] gcArray;
-			Object[] tempArray=this.gcArrayList.toArray();
-			gcArray = makeIntArray(tempArray);
 			Arrays.sort(gcArray,Collections.reverseOrder());
 			for (Integer interval : gcArray){
 			if(gcRatio >=(50-interval)&&gcRatio<=(50+interval)){
-						scoreGCTotal =Double.valueOf((gc.get(interval.toString())));
+						scoreGCTotal =gc.get((double)interval);
 				}
 			}
 			return scoreGCTotal;
@@ -358,42 +364,22 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @param primerSeq
 		 * @return melting temperature score
 		 */
-		public double calcScoreMeltingTemperature(double temperature){
+		private double calcScoreMeltingTemperature(double temperature){
 			double scoreTemperature = 0;
 			double minBorder = 0;
 			double maxBorder = 0;
-			Integer[] annealArray;
-			
-			Object[] tempArray = this.annealArrayList.toArray();
-			annealArray = makeIntArray(tempArray);
 			Arrays.sort(annealArray,Collections.reverseOrder());
 			for(Integer interval : annealArray){
 				minBorder = 60-interval;
 				maxBorder = 60+interval;
 			if(temperature>=minBorder&&temperature<=maxBorder){
-				scoreTemperature = Double.valueOf(anneal.get(interval.toString())).doubleValue();
+				scoreTemperature = anneal.get((double)interval);
 				}
 			}
 			return scoreTemperature;
 		}
 		
-  
-
-		
-		/**
-		 * This method gets the number of repeats and calculates a score.
-		 * 
-		 * @param repeatCount
-		 * @return repeat-score
-		 */
-
-		public double calcScoreRepeat(double repeatCount){
-			double score = 0;
-			score = this.repeatAndBackfoldAndNPenalty.get("REPEAT");
-			score = (score*repeatCount);
-			return score;
-		}
-		
+ 
 		/**
 		 * This method gets the number of homopolys in the primer sequence and calculates a 
 		 * score.
@@ -401,7 +387,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @param homopolyCount
 		 * @return homopoly-score
 		 */
-		public double calcScoreHomopoly(int homopolyCount){
+		private double calcScoreHomopoly(int homopolyCount){
 			double scoreHomopoly = 0;
 			double cnt = this.homopoly.get("CNT");
 			double score = this.homopoly.get("SCORE");
@@ -418,15 +404,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @param gcRatio2A7
 		 * @return GC-Level at position 2 and 7 score 
 		 */
-		public double calcScoreGCLevel2A7(double gcRatio2A7){
+		private double calcScoreGCLevel2A7(double gcRatio2A7){
 			double scoreGC2A7 = 0;
-			Integer[] gc0207Array;
-			Object[] tempArray = this.gc0207ArrayList.toArray();
-			gc0207Array = makeIntArray(tempArray);
 			Arrays.sort(gc0207Array);
 			for(Integer border : gc0207Array){
 				if(gcRatio2A7>=border){
-					scoreGC2A7 = Double.valueOf((this.gc0207.get(border.toString())));
+					scoreGC2A7 = this.gc0207.get((double)border);
 				}
 			}
 			return scoreGC2A7;
@@ -441,68 +424,27 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 */
 		public double calcScoreLast6(double ATLast6Ratio){
 			double scoreLast6Bases =0;
-			Integer[] ATLast6Array;
-			Object[] tempArray = this.atLast6ArrayList.toArray();
-			ATLast6Array = makeIntArray(tempArray);
 			Arrays.sort(ATLast6Array);
 			for(Integer border : ATLast6Array){
 				if(ATLast6Ratio>= border){
-					scoreLast6Bases = Double.valueOf((this.atLast6.get(border.toString())));
+					scoreLast6Bases = this.atLast6.get((double)border);
 				}
 			}
 			return scoreLast6Bases;
 		}
 		
-		public double calcScoreOffset(int realstart){
+		private double calcScoreOffset(int realstart){
 			double score =0;
-			Integer[] offsetArray;
-			Object[] tempArray = this.offsetArrayList.toArray();
-			offsetArray = makeIntArray(tempArray);
 			Arrays.sort(offsetArray);
 			for(Integer border : offsetArray){
 				if(realstart>= border){
-					score = Double.valueOf((this.offset.get(border.toString())));
+					score = this.offset.get((double)border);
 				}
 			}
 		
 			return score;
 		}
-		
-		/**
-		 * This method returns the score for the given first base and last base in the primer sequence
-		 * according to the given scoring scheme.
-		 * 
-		 * @param firstBase
-		 * @param lastBase
-		 * @return first and last base score
-		 */
-		public double calcScoreFirstBaseAndLastBase(char firstBase, char lastBase){
-					double scoreFirstLastBase = 0;
-					double firstScore =  this.firstBase.get(firstBase);
-					double lastScore = this.lastBase.get(lastBase);
-					scoreFirstLastBase=firstScore+lastScore;
-					return scoreFirstLastBase;
-		}
-		
-		/**
-		 * This method tests if the primer sequence can perform a backfold. If that is the case a score
-		 * is set.
-		 * @param last4Base
-		 * @param leftseq
-		 * @return backfold-score
-		 */
-		public double calcScoreBackfold(char[] last4Base,char[] leftseq){
-			double scoreBackfold = 0;
-			String scoreString = null;
-			String last4Bases = new String(last4Base);
-			last4Bases = last4Bases.toUpperCase();
-			String primer = new String(leftseq);
-			primer.toUpperCase();
-			if(primer.contains(last4Bases)){
-				scoreBackfold = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD");
-			}
-			return scoreBackfold;
-		}
+	
 		
 		/**
 		 * This method gets the starting position of the primer in the sequence and returns a score 
@@ -511,7 +453,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @param realstart
 		 * @return max-offset score
 		 */
-		public double calcScoreMaxOffset(int realstart){
+		private double calcScoreMaxOffset(int realstart){
 			double scoreMaxOffset = 0;
 			double mult = this.maxOffset.get("MULT");
 			double distance = this.maxOffset.get("DISTANCE");
@@ -522,33 +464,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			return scoreMaxOffset;
 		}
 		
-/**
- * This method gets the number of 'N's occuring in the primer sequence and returns a penalty for each N.
- * @param nCount
- * @return nPenalty
- */
-		public double calcNPenalty(int nCount) {
-			double nPenalty = 0;
-			String penaltyString = this.repeatAndBackfoldAndNPenalty.get("N_PENALTY").toString();
-			nPenalty = (Double.parseDouble(penaltyString))*nCount;
-			return nPenalty;
-		}
 		
-		/**
-		 * This method gets the length of the primer sequence and calculates the length score
-		 * according to the given scoring scheme.
-		 * 
-		 * @param length
-		 * @return length-score
-		 */
-		public double calcLengthScore(int length){
-			double scoreLength = 0;
-			double factor = this.length.get("SCORE");
-			double idealLength = this.length.get("IDEAL");
-			double distance = Math.abs(idealLength - length);
-			scoreLength = (distance*factor);
-			return scoreLength;
-		}
 		public double getTemperature() {
 			return temperature;
 		}
@@ -599,6 +515,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 */
 
 		public double getBackfoldScore(char[] primerSeq) {
+			double scoreBackfold = 0;
+			
+			for(int i = 0; i<primerSeq.length-8;i++){
+			
+			}
 //			double scoreBackfold = 0;
 //			char[] last4 = new char[4];
 //			char[] last4Bases;
@@ -610,8 +531,29 @@ import javax.swing.tree.DefaultMutableTreeNode;
 //			char[] leftSeq = primerSeqMinusEight;
 //			scoreBackfold = this.calcScoreBackfold(last4Bases, leftSeq);
 			//TODO auch mit smith waterman berechnen
-			return -100000;
+			return -1000;
 		}
+		
+		/**
+		 * This method tests if the primer sequence can perform a backfold. If that is the case a score
+		 * is set.
+		 * @param last4Base
+		 * @param leftseq
+		 * @return backfold-score
+		 */
+		private double calcScoreBackfold(char[] last4Base,char[] leftseq){
+			double scoreBackfold = 0;
+			String scoreString = null;
+			String last4Bases = new String(last4Base);
+			last4Bases = last4Bases.toUpperCase();
+			String primer = new String(leftseq);
+			primer.toUpperCase();
+			if(primer.contains(last4Bases)){
+				scoreBackfold = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD");
+			}
+			return scoreBackfold;
+		}
+		
 
 		/**
 		 * This method retrieves the first and the last base of a primer sequence
@@ -629,7 +571,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			char last = primerSeq[primerSeq.length - 1];
 			first = Character.toUpperCase(first);
 			last = Character.toUpperCase(last);
-			scoreFirstLastBase = this.calcScoreFirstBaseAndLastBase(first, last);
+			double firstScore =  this.firstBase.get(first);
+			double lastScore = this.lastBase.get(last);
+			scoreFirstLastBase=firstScore+lastScore;
 			return scoreFirstLastBase;
 		}
 
@@ -642,13 +586,14 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 */
 		public double getNPenalty(char[] PrimerSeq) {
 			double scoreNPenalty = 0;
-			int count = 0;
+			int nCount = 0;
 			for (char i : PrimerSeq) {
 				if (i == 'N' || i == 'n') {
-					count++;
+					nCount++;
 				}
 			}
-			scoreNPenalty = this.calcNPenalty(count);
+			double penalty = this.repeatAndBackfoldAndNPenalty.get("N_PENALTY");
+			scoreNPenalty = penalty*nCount;
 			return scoreNPenalty;
 		}
 
@@ -661,7 +606,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 		public double getLengthScore(int primerLength) {
 			double scoreLength = 0;
-			scoreLength = this.calcLengthScore(primerLength);
+			double factor = this.length.get("SCORE");
+			double idealLength = this.length.get("IDEAL");
+			double distance = Math.abs(idealLength - primerLength);
+			scoreLength = (distance*factor);
 			return scoreLength;
 		}
 
@@ -700,11 +648,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @param primerSeq
 		 * @param totalGC
 		 * @param direction
-		 * @return scoreTotalGC/scoreGC2A7
+		 * @return allGCScore
 		 */
 		public double getGCScore(char[] primerSeq, boolean totalGC) {
-			double scoreTotalGC = 0;
-			double scoreGC2A7 = 0;
+			double allGCScore = 0;
 			int gcLevel = 0;
 			int gcLevel2A7 = 0;
 			double gcRatio = 0;
@@ -718,16 +665,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 					}
 				}
 			}
-
-			if (totalGC) {
 				gcRatio = (float) gcLevel / (float) (primerSeq.length + 1) * 100;
-				scoreTotalGC = this.calcScoreTotalGCLevel(gcRatio);
-				return scoreTotalGC;
-			} else {
+				double scoreTotalGC = this.calcScoreTotalGCLevel(gcRatio);
 				gcRatio2A7 = (float) gcLevel2A7 / 6 * 100;
-				scoreGC2A7 = this.calcScoreGCLevel2A7(gcRatio2A7);
-				return scoreGC2A7;
-			}
+				double scoreGC2A7 = this.calcScoreGCLevel2A7(gcRatio2A7);
+			allGCScore = scoreTotalGC +scoreGC2A7;
+			return allGCScore;
 		}
 
 		/**
@@ -758,7 +701,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			double scorePlus1Plus2 = 0;
 			plus1 = Character.toUpperCase(plus1);
 			plus2 = Character.toUpperCase(plus2);
-			scorePlus1Plus2 = this.calcScorePlus1(plus1, plus2);
+			double plus1Score = this.plus1Base.get(plus1);
+			double plus2Score = this.plus2Base.get(plus2);
+			scorePlus1Plus2 = plus1Score + plus2Score;
 			return scorePlus1Plus2;
 		}
 
@@ -771,16 +716,18 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 */
 
 		public double getRepeatScore(char[] primerSeq) {
-			double scoreRepeat = 0;
 			double repeatCount = 0;
+			double repeatScore = 0;
+			double repeatFaktor = this.repeatAndBackfoldAndNPenalty.get("REPEAT");
 			for (int i = 0; i < primerSeq.length; i++) {
 				if (primerSeq[i] == 'a' || primerSeq[i] == 't'
 						|| primerSeq[i] == 'g' || primerSeq[i] == 'c') {
 					repeatCount++;
 				}
 			}
-			scoreRepeat = this.calcScoreRepeat(repeatCount);
-			return scoreRepeat;
+		
+			repeatScore = (repeatFaktor*repeatCount);
+			return repeatScore;
 		}
 }
 	
