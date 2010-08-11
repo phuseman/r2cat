@@ -183,7 +183,6 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				PrimerFrame.this.progressBar.setIndeterminate(false);
 			}
 			pg.setParameters(configFile);
-	
 			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
 			/*long runningTime = new Date().getTime() - start; 
 			System.out.println(runningTime/1000);*/

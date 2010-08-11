@@ -1,14 +1,8 @@
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Vector;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
@@ -159,77 +153,6 @@ public class PrimerGenerator {
 		return pr;
 	}
 
-	/**
-	 * This methods checks which direction of the primer for the specific contig
-	 * was selected. If the primer is the forward primer a 1 is returned and if
-	 * the primer is on the other contig as the reverse primer the direction is
-	 * -1.
-	 * 
-	 * @param directionInfo
-	 * @return direction
-	 */
-
-	public int setPrimerDirection(String directionInfo) {
-		int direction = 0;
-		if (directionInfo.equals("forward")) {
-			direction = 1;
-		} else {
-			direction = -1;
-		}
-		return direction;
-	}
-
-	/**
-	 * This method goes through the sequence information of the fastaFileReader
-	 * and returns the sequences and the id of the marked contigs in a HashMap.
-	 * It is also checked if the sequences are reverse complemented if so they
-	 * get turned into the previous state.
-	 * 
-	 * @param markedContig
-	 * @return templateSeq
-	 * @throws IOException
-	 */
-
-	public HashMap<String, char[]> getMarkedSeq(String[] markedContig,
-			HashMap<String, String> contigAndisReverseCompInfo)
-			throws IOException {
-		HashMap<String, char[]> templateSeq = new HashMap<String, char[]>();
-		boolean isReverseComplemented = false;
-		String isReverseCom = null;
-		char[] seq = fastaParser.getCharArray();
-		Vector<DNASequence> sequences = fastaParser.getSequences();
-		for (String s : markedContig) {
-			isReverseCom = contigAndisReverseCompInfo.get(s);
-			isReverseComplemented = this.stringToBoolean(isReverseCom);
-			for (int i = 0; i < sequences.size(); i++) {
-				if (sequences.get(i).getId().matches(s)) {
-					int length = (int) sequences.get(i).getSize();
-					int start = (int) sequences.get(i).getOffset();
-					char[] temp = new char[length];
-					System.arraycopy(seq, start, temp, 0, length);
-					if (isReverseComplemented) {
-						base.getReverseComplement(temp);
-						templateSeq.put(s, temp);
-					} else {
-						templateSeq.put(s, temp);
-					}
-				}
-			}
-		}
-		return templateSeq;
-	}
-
-	public boolean stringToBoolean(String s) {
-		boolean bool = false;
-		if (s.equals("true")) {
-			bool = true;
-			return bool;
-		} else {
-			bool = false;
-			return bool;
-		}
-
-	}
 
 	/**
 	 * Generates a set of possible primers for a given contig. The primers
@@ -293,7 +216,7 @@ public class PrimerGenerator {
 				scoredPrimerCandidates.add(candidate);
 			}
 		}
-		System.out.println(scoredPrimerCandidates.size());
+		//System.out.println(scoredPrimerCandidates.size());
 		return scoredPrimerCandidates;
 	}
 
