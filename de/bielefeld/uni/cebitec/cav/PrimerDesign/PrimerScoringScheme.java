@@ -22,24 +22,24 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		private DefaultMutableTreeNode root, currentNode, currentParent;
 		private String currentTag = null;
 		private String value = null;
-		private HashMap<String, String> firstBase = new HashMap<String, String>();
-		private HashMap<String, String> lastBase = new HashMap<String, String>();
-		private HashMap<String, String>	plus1Base= new HashMap<String, String>();
-		private HashMap<String, String>	plus2Base= new HashMap<String, String>();
-		private HashMap<String, String>	length= new HashMap<String, String>();
-		private HashMap<String, String>	homopoly= new HashMap<String, String>();
-		private HashMap<String, String>	maxOffset= new HashMap<String, String>();
-		private HashMap<String, String> gc = new HashMap<String, String>();
-		private HashMap<String, String> offset = new HashMap<String, String>();
-		private HashMap<String, String> atLast6 = new HashMap<String, String>();
-		private HashMap<String, String> gc0207 = new HashMap<String, String>();
-		private HashMap<String, String> anneal = new HashMap<String, String>();
-		private HashMap<String, String> repeatAndBackfoldAndNPenalty= new HashMap<String, String>();
-		private ArrayList<String> gcArrayList = new ArrayList<String>();
-		private ArrayList<String> annealArrayList = new ArrayList<String>();
-		private ArrayList<String> atLast6ArrayList = new ArrayList<String>();
-		private ArrayList<String> gc0207ArrayList = new ArrayList<String>();
-		private ArrayList<String> offsetArrayList = new ArrayList<String>();
+		private HashMap<Character, Double> firstBase = new HashMap<Character, Double>();
+		private HashMap<Character, Double> lastBase = new HashMap<Character, Double>();
+		private HashMap<Character, Double>	plus1Base= new HashMap<Character, Double>();
+		private HashMap<Character, Double>	plus2Base= new HashMap<Character, Double>();
+		private HashMap<String, Double>	length= new HashMap<String, Double>();
+		private HashMap<String, Double>	homopoly= new HashMap<String, Double>();
+		private HashMap<String, Double>	maxOffset= new HashMap<String, Double>();
+		private HashMap<Double, Double> gc = new HashMap<Double, Double>();
+		private HashMap<Double, Double> offset = new HashMap<Double, Double>();
+		private HashMap<Double, Double> atLast6 = new HashMap<Double, Double>();
+		private HashMap<Double, Double> gc0207 = new HashMap<Double, Double>();
+		private HashMap<Double, Double> anneal = new HashMap<Double, Double>	();
+		private HashMap<String, Double> repeatAndBackfoldAndNPenalty= new HashMap<String, Double>();
+		private ArrayList<Double> gcArrayList = new ArrayList<Double>();
+		private ArrayList<Double> annealArrayList = new ArrayList<Double>();
+		private ArrayList<Double> atLast6ArrayList = new ArrayList<Double>();
+		private ArrayList<Double> gc0207ArrayList = new ArrayList<Double>();
+		private ArrayList<Double> offsetArrayList = new ArrayList<Double>();
 		private Stack stack = null;
 		double temperature = 0;
 		
@@ -58,79 +58,79 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 */
 		private void defaultParameters(){
 			
-			gc.put("10", "100");
-			gc.put("15", "-100");
-			gc.put("20", "-300");
-			gc.put("25", "-800");
-			gc.put("50", "-1500");
+			gc.put(10.0, 100.0);
+			gc.put(15.0, -100.0);
+			gc.put(20.0, -300.0);
+			gc.put(25.0, -800.0);
+			gc.put(50.0, -1500.0);
 			
 			gcArrayList = this.fillArrayListWithDefaultValues(gc);
 			
-			firstBase.put("A", "45");
-			firstBase.put("T", "45");
-			firstBase.put("C", "0");
-			firstBase.put("G", "0");
-			firstBase.put("N", "-1500");
+			firstBase.put('A', 45.0);
+			firstBase.put('T', 45.0);
+			firstBase.put('C', 0.0);
+			firstBase.put('G', 0.0);
+			firstBase.put('N', -1500.0);
 			
-			lastBase.put("A", "130");
-			lastBase.put("T", "100");
-			lastBase.put("C", "0");
-			lastBase.put("G", "0");
-			lastBase.put("N", "-1500");
+			lastBase.put('A', 130.0);
+			lastBase.put('T', 100.0);
+			lastBase.put('C', 0.0);
+			lastBase.put('G', 0.0);
+			lastBase.put('N', -1500.0);
 			
-			plus1Base.put("A", "130");
-			plus1Base.put("T", "100");
-			plus1Base.put("C", "0");
-			plus1Base.put("G", "0");
-			plus1Base.put("N", "0");
+			plus1Base.put('A', 130.0);
+			plus1Base.put('T', 100.0);
+			plus1Base.put('C', 0.0);
+			plus1Base.put('G', 0.0);
+			plus1Base.put('N', 0.0);
 			
-			plus2Base.put("A", "80");
-			plus2Base.put("T", "80");
-			plus2Base.put("C", "0");
-			plus2Base.put("G", "0");
-			plus2Base.put("N", "0");
+			plus2Base.put('A', 80.0);
+			plus2Base.put('T', 80.0);
+			plus2Base.put('C', 0.0);
+			plus2Base.put('G', 0.0);
+			plus2Base.put('N', 0.0);
 			
-			offset.put("0", "-1000");
-			offset.put("30", "-600");
-			offset.put("50", "-500");
-			offset.put("80", "-400");
-			offset.put("110", "-50");
-			offset.put("150", "250");
+			offset.put(0.0, -1000.0);
+			offset.put(30.0, -600.0);
+			offset.put(50.0, -500.0);
+			offset.put(80.0, -400.0);
+			offset.put(110.0, -50.0);
+			offset.put(150., 250.0);
 			
 			offsetArrayList = this.fillArrayListWithDefaultValues(offset);
 			
-			gc0207.put("79", "156");
-			gc0207.put("60", "-83");
-			gc0207.put("50", "-320");
-			gc0207.put("0", "-1500");
+			gc0207.put(79.0, 156.0);
+			gc0207.put(60.0, -83.0);
+			gc0207.put(50.0, -320.0);
+			gc0207.put(0.0, -1500.0);
 			
 			gc0207ArrayList = this.fillArrayListWithDefaultValues(gc0207);
 			
-			atLast6.put("79", "156");
-			atLast6.put("60", "-83");
-			atLast6.put("50", "-320");
-			atLast6.put("0", "-1500");
+			atLast6.put(79.0, 156.0);
+			atLast6.put(60.0, -83.0);
+			atLast6.put(50.0, -320.0);
+			atLast6.put(0.0, -1500.0);
 			
 			atLast6ArrayList = this.fillArrayListWithDefaultValues(atLast6);
 			
-			maxOffset.put("DISTANCE", "150");
-			maxOffset.put("MULT","-2");
+			maxOffset.put("DISTANCE", 150.0);
+			maxOffset.put("MULT",-2.0);
 			
-			repeatAndBackfoldAndNPenalty.put("REPEAT", "-78");
-			repeatAndBackfoldAndNPenalty.put("N_PENALTY", "-1500");
-			repeatAndBackfoldAndNPenalty.put("BACKFOLD", "-1500");
+			repeatAndBackfoldAndNPenalty.put("REPEAT", -78.0);
+			repeatAndBackfoldAndNPenalty.put("N_PENALTY", -1500.0);
+			repeatAndBackfoldAndNPenalty.put("BACKFOLD", -1500.0);
 			
-			homopoly.put("CNT", "3");
-			homopoly.put("SCORE", "-200");
+			homopoly.put("CNT", 3.0);
+			homopoly.put("SCORE", -200.0);
 			
-			anneal.put("2", "200");
-			anneal.put("6","0");
-			anneal.put("100", "-1500");
+			anneal.put(2.0, 200.0);
+			anneal.put(6.0,0.0);
+			anneal.put(100.0, -1500.0);
 			
 			annealArrayList = this.fillArrayListWithDefaultValues(anneal);
 			
-			length.put("IDEAL", "20.5");
-			length.put("SCORE", "-2");
+			length.put("IDEAL", 20.5);
+			length.put("SCORE", -2.0);
 		}
 		
 		/**
@@ -139,11 +139,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @param map
 		 * @return keys
 		 */
-		private ArrayList<String> fillArrayListWithDefaultValues(HashMap<String,String> map){
-			ArrayList<String> keys = new ArrayList<String>();
+		private ArrayList<Double> fillArrayListWithDefaultValues(HashMap<Double,Double> map){
+			ArrayList<Double> keys = new ArrayList<Double>();
 			Iterator iterator = (map.keySet()).iterator();
 			while(iterator.hasNext()){
-				keys.add(iterator.next().toString());
+				keys.add((Double) iterator.next());
 			}
 			return keys;
 		}
@@ -157,37 +157,37 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		private void loadParameters(String key, String value){
 			
 			if(currentParent.toString().equals("GC")){
-				gc.put(key, value);
-				gcArrayList.add(key);
+				gc.put(Double.parseDouble(key), Double.parseDouble(value));
+				gcArrayList.add(Double.parseDouble(key));
 			}if(currentParent.toString().equals("FIRST")){
-				firstBase.put(key, value);
+				firstBase.put(key.charAt(0), Double.parseDouble(value));
 			}if(currentParent.toString().equals("LAST")){
-				lastBase.put(key, value);
+				lastBase.put(key.charAt(0), Double.parseDouble(value));
 			}if(currentParent.toString().equals("PLUS_1")){
-				plus1Base.put(key, value);
+				plus1Base.put(key.charAt(0), Double.parseDouble(value));
 			}if(currentParent.toString().equals("PLUS_2")){
-				plus2Base.put(key, value);
+				plus2Base.put(key.charAt(0), Double.parseDouble(value));
 			}if(currentParent.toString().equals("LENGTH")){
-				length.put(currentTag, value);
+				length.put(currentTag, Double.parseDouble(value));
 			}if(currentParent.toString().equals("HOMOPOLY")){
-				homopoly.put(currentTag, value);
+				homopoly.put(currentTag, Double.parseDouble(value));
 			}if(currentParent.toString().equals("MAX_OFFSET")){
-				maxOffset.put(currentTag, value);
+				maxOffset.put(currentTag, Double.parseDouble(value));
 			}if(currentParent==currentNode){
 				String cP = currentParent.toString();
-				repeatAndBackfoldAndNPenalty.put(cP, value);		
+				repeatAndBackfoldAndNPenalty.put(cP, Double.parseDouble(value));		
 			}if(currentParent.toString().equals("OFFSET")){
-				offset.put(key, value);
-				offsetArrayList.add(key);
+				offset.put(Double.parseDouble(key), Double.parseDouble(value));
+				offsetArrayList.add(Double.parseDouble(key));
 			}if(currentParent.toString().equals("GC_0207")){
-				gc0207.put(key, value);
-				gc0207ArrayList.add(key);
+				gc0207.put(Double.parseDouble(key), Double.parseDouble(value));
+				gc0207ArrayList.add(Double.parseDouble(key));
 			}if(currentParent.toString().equals("AT_LAST6")){
-				atLast6.put(key, value);
-				atLast6ArrayList.add(key);
+				atLast6.put(Double.parseDouble(key), Double.parseDouble(value));
+				atLast6ArrayList.add(Double.parseDouble(key));
 			}if(currentParent.toString().equals("ANNEAL")){
-				anneal.put(key, value);
-				annealArrayList.add(key);
+				anneal.put(Double.parseDouble(key), Double.parseDouble(value));
+				annealArrayList.add(Double.parseDouble(key));
 			}
 		}
 		
@@ -295,12 +295,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @param lastPlus2
 		 * @return scorePlus1Plus2
 		 */
-		public double calcScorePlus1(String lastPlus1, String lastPlus2){
+		public double calcScorePlus1(char lastPlus1, char lastPlus2){
 			double scorePlus1Plus2 = 0;
-			String plus1 = this.plus1Base.get(lastPlus1).toString();
-			String plus2 = this.plus2Base.get(lastPlus2).toString();
-			scorePlus1Plus2 = Double.parseDouble(plus1);
-			scorePlus1Plus2 = scorePlus1Plus2 + Double.parseDouble(plus2);
+			double plus1 = this.plus1Base.get(lastPlus1);
+			double plus2 = this.plus2Base.get(lastPlus2);
+			scorePlus1Plus2 = plus1 + plus2;
 			return scorePlus1Plus2;
 		}
 		
@@ -369,9 +368,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 
 		public double calcScoreRepeat(double repeatCount){
 			double score = 0;
-			String tempScore = this.repeatAndBackfoldAndNPenalty.get("REPEAT");
-			double s = Double.parseDouble(tempScore);
-			score = (s*repeatCount);
+			score = this.repeatAndBackfoldAndNPenalty.get("REPEAT");
+			score = (score*repeatCount);
 			return score;
 		}
 		
@@ -384,12 +382,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 */
 		public double calcScoreHomopoly(int homopolyCount){
 			double scoreHomopoly = 0;
-			int cnt = 0;
-			int score = 0;
-			String cntString = this.homopoly.get("CNT");
-			String scoreString = this.homopoly.get("SCORE");
-			cnt = Integer.valueOf(cntString).intValue();
-			score = Integer.valueOf(scoreString).intValue();
+			double cnt = this.homopoly.get("CNT");
+			double score = this.homopoly.get("SCORE");
 			if(homopolyCount >= cnt){
 				scoreHomopoly = score;
 			}
@@ -461,12 +455,10 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @param lastBase
 		 * @return first and last base score
 		 */
-		public double calcScoreFirstBaseAndLastBase(String firstBase, String lastBase){
+		public double calcScoreFirstBaseAndLastBase(char firstBase, char lastBase){
 					double scoreFirstLastBase = 0;
-					String firstString = this.firstBase.get(firstBase);
-					double firstScore = Double.parseDouble(firstString);
-					String lastString = this.lastBase.get(lastBase);
-					double lastScore = Double.parseDouble(lastString);
+					double firstScore =  this.firstBase.get(firstBase);
+					double lastScore = this.lastBase.get(lastBase);
 					scoreFirstLastBase=firstScore+lastScore;
 					return scoreFirstLastBase;
 		}
@@ -486,8 +478,7 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			String primer = new String(leftseq);
 			primer.toUpperCase();
 			if(primer.contains(last4Bases)){
-				scoreString = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD");
-				scoreBackfold = Double.valueOf(scoreString).doubleValue();
+				scoreBackfold = this.repeatAndBackfoldAndNPenalty.get("BACKFOLD");
 			}
 			return scoreBackfold;
 		}
@@ -501,12 +492,8 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 */
 		public double calcScoreMaxOffset(int realstart){
 			double scoreMaxOffset = 0;
-			double mult = 0;
-			double distance = 0;
-			String distanceString = this.maxOffset.get("DISTANCE");
-			String multString = this.maxOffset.get("MULT");
-			mult = Double.parseDouble(multString);
-			distance = Double.parseDouble(distanceString);
+			double mult = this.maxOffset.get("MULT");
+			double distance = this.maxOffset.get("DISTANCE");
 			if(realstart > distance){
 				double maxOffset = realstart - distance;
 				scoreMaxOffset = (maxOffset * mult);
@@ -535,14 +522,9 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 */
 		public double calcLengthScore(int length){
 			double scoreLength = 0;
-			double idealLength = 0;
-			double factor = 0;
-			double distance = 0;
-			String idealString = this.length.get("IDEAL");
-			String factorString = this.length.get("SCORE");
-			factor = Double.parseDouble(factorString);
-			idealLength = Double.parseDouble(idealString);
-			distance = Math.abs(idealLength - length);
+			double factor = this.length.get("SCORE");
+			double idealLength = this.length.get("IDEAL");
+			double distance = Math.abs(idealLength - length);
 			scoreLength = (distance*factor);
 			return scoreLength;
 		}

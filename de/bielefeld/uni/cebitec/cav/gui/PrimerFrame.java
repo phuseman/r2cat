@@ -11,6 +11,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
@@ -169,7 +170,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 						"Could not find or read the contigs file", contigs);
 			}
 			File fastaFile = contigs.getFile();
-
+			//long start = new Date().getTime();
 			PrimerGenerator pg = new PrimerGenerator(fastaFile);
 			pg.registerProgressReporter(this);
 
@@ -184,6 +185,8 @@ public class PrimerFrame extends JFrame implements ActionListener,
 			pg.setParameters(configFile);
 	
 			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
+			/*long runningTime = new Date().getTime() - start; 
+			System.out.println(runningTime/1000);*/
 			return primerResult;
 
 		}

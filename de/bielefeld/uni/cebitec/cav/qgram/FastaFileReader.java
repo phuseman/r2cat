@@ -290,11 +290,11 @@ public class FastaFileReader {
 	 * @return {@link DNASequence} object. if not existant, this method returns null
 	 */
 	public DNASequence getSequence(String id) {
-		
-		for(int i = 0; i<this.sequences.size();i++){
-			if(sequences.elementAt(i).getId().equals(id)){
-				return sequences.elementAt(i);
-			} 
+		for (int i = 0; i < sequences.size(); i++) {
+			if(sequences.get(i).getId().equals(id)) {
+				return sequences.get(i);
+			}
+
 		}
 		return null;
 	}

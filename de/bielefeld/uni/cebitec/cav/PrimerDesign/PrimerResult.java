@@ -42,9 +42,10 @@ public class PrimerResult {
 		String legend = ("primer pair "+TAB+TAB+"start "+TAB+"length "+TAB+"offset "+TAB+"Tm"+TAB+"score"+TAB+"sequence");
 		results.append(infos+" "+contigIDLeft+" and "+contigIDRight+NEW_LINE+NEW_LINE);
 		results.append(infoDes+contigIDLeft+" "+descriptionLeft+NEW_LINE+infoDes+contigIDRight+" "+descriptionRight+NEW_LINE+NEW_LINE);
-		results.append(legend+NEW_LINE+NEW_LINE);
+
 		if(!forwardPrimer.isEmpty()&&!reversePrimer.isEmpty()&&forwardPrimer.size()==reversePrimer.size()){
-		for(int i = 0;i<this.forwardPrimer.size();i++){
+		results.append(legend+NEW_LINE+NEW_LINE);
+			for(int i = 0;i<this.forwardPrimer.size();i++){
 			results.append("forward primer: "+TAB+TAB+forwardPrimer.elementAt(i).toString()+NEW_LINE);
 			results.append("reverse primer: "+TAB+TAB+reversePrimer.elementAt(i).toString()+NEW_LINE+NEW_LINE);
 		}

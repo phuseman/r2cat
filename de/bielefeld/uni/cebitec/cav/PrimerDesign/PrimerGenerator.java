@@ -506,13 +506,11 @@ public class PrimerGenerator {
 	
 	public double getFirstAndLastBaseScore(char[] primerSeq,Integer direction){
 	double scoreFirstLastBase = 0;
-		Object first = primerSeq[0];
-		Object last = primerSeq[primerSeq.length-1];
-		String firstBase = first.toString();
-		String lastBase = last.toString();
-		firstBase = firstBase.toUpperCase();
-		lastBase = lastBase.toUpperCase();
-		scoreFirstLastBase = scoring.calcScoreFirstBaseAndLastBase(firstBase, lastBase);
+		char first = primerSeq[0];
+		char last = primerSeq[primerSeq.length-1];
+		Character.toUpperCase(first);
+		Character.toUpperCase(last);
+		scoreFirstLastBase = scoring.calcScoreFirstBaseAndLastBase(first, last);
 		return scoreFirstLastBase;	
 }	
 	
@@ -636,10 +634,11 @@ public class PrimerGenerator {
  * @param plus2
  * @return scorePlus1Plus2
  */
-	public double getPlus1Plus2Score(String plus1,String plus2){
+	public double getPlus1Plus2Score(char plus1,char plus2){
 		double scorePlus1Plus2 = 0;
-		plus1 = plus1.toUpperCase();
-		plus2 = plus2.toUpperCase();
+		Character.toUpperCase(plus1);
+		Character.toUpperCase(plus2)
+		;
 		scorePlus1Plus2 = scoring.calcScorePlus1(plus1, plus2);
 		return scorePlus1Plus2;
 	}

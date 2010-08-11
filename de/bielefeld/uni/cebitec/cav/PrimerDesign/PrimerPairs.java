@@ -74,7 +74,7 @@ public class PrimerPairs {
 	public boolean seqCheck(char[] firstSeq,char[] secondSeq){
 		Bases base = new Bases();
 		//auf true gesetzt, damit es noch results gibt...
-		boolean notComplement = true;
+		boolean notComplement = false;
 		//score considering diagonal cell (H_i-1/j-1)
 		double substiutionScore = 0;
 		//score considering cell to the left (H_i/j-1)
@@ -119,8 +119,45 @@ public class PrimerPairs {
 					
 				}
 			}
+			
+	/*		String firstSeqLastBases = null;
+			String secondSeqLastBases = null;
+			String firstSeqEightBases = null;
+			String secondSeqAsString  = null;
+			String firstSeqFirstBases =null;
+			String secondSeqFirstBases =null;
+			char[] eightBases = new char[8];
+			char[] leftLastBases = new char[4];
+			char[] rightLastBases = new char[4];
+			char[] leftFirstBases = new char[4];
+			char[] rightFirstBases = new char[4];
+			secondSeq = base.getReverseComplement(secondSeq);
+			for(int k = 0;k<=firstSeq.length-8;k++){
+				System.arraycopy(firstSeq, k, eightBases, 0, 7);
+				//last four bases of the 3'end of the forward primer
+				System.arraycopy(firstSeq, firstSeq.length-4, leftLastBases,0, 3);
+				//first four bases of the 5'end of the forward primer
+				System.arraycopy(firstSeq, 0, leftFirstBases, 0, 3);
+				//last four bases of the 5'end of the reverse primer
+				System.arraycopy(secondSeq, secondSeq.length-4, rightLastBases, 0, 3);
+				//first four bases of the 3'end of the reverse primer
+				System.arraycopy(secondSeq, 0, leftFirstBases, 0, 3);
+				firstSeqLastBases = new String(leftLastBases);
+				secondSeqLastBases = new String(rightLastBases);
+				firstSeqFirstBases=new String(leftFirstBases);
+				secondSeqFirstBases = new String(rightFirstBases);
+				firstSeqEightBases = new String(eightBases);
+				secondSeqAsString = new String(secondSeq);
+				if(secondSeqAsString.contains(firstSeqEightBases)||firstSeqLastBases.equals(secondSeqLastBases)||firstSeqFirstBases.equals(secondSeqFirstBases)){
+					notComplement = false;
+					return notComplement;
+				} else{
+					notComplement = true;
+				}
+			}*/
+			return notComplement;
+			
 			//score übergeben?! <--> verhältnis zur länge berechnen
-		return notComplement;
 	}
 	
 	/**
