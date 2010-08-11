@@ -24,6 +24,7 @@ import java.util.Vector;
 
 import javax.swing.table.AbstractTableModel;
 
+import de.bielefeld.uni.cebitec.cav.PrimerDesign.ContigPair;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList.NotifyEvent;
 
 /**
@@ -187,26 +188,19 @@ public class PrimerTableModel extends AbstractTableModel {
 	 * (The return type string is only an example. Feel free to adopt it as necessary)
 	 * @return
 	 */
-	public Vector<String[]> getSelectedPairs() {
+	public Vector<ContigPair> getSelectedPairs() {
 		int secondIndex ;
-		Vector<String[]> contigPairVector = new Vector<String[]>();
-		int j = 0;
+		Vector<ContigPair> contigPairVector = new Vector<ContigPair>();
 		for (int i = 0; i < createPrimer.length; i++) {
 			String[] contigPair = new String[6];
 			if (createPrimer[i]) {
 				//we look at all adjacent contigs, so the next contig has index+1, except for the last one, here it is the zero index.
 				secondIndex=(i+1)%dnaSequence().size();
 				
-				contigPair[0] = dnaSequence().get(i).getId();
-				contigPair[1] = new Boolean(dnaSequence().get(i).isReverseComplemented()).toString();
-				contigPair[2] = "forward";
-				contigPair[3] = dnaSequence().get(secondIndex).getId();
-				contigPair[4] = new Boolean(dnaSequence().get(secondIndex).isReverseComplemented()).toString();
-				contigPair[5] = "reverse";
-				contigPairVector.add(j, contigPair);
-
-				j++;
-				
+				ContigPair pair = new ContigPair(dnaSequence().get(i).getId(),dnaSequence().get(secondIndex).getId());
+				pair.setContig1ReverseComplemented(dnaSequence().get(i).isReverseComplemented());
+				pair.setContig2ReverseComplemented(dnaSequence().get(secondIndex).isReverseComplemented());
+				contigPairVector.add(pair);
 			}
 		}
 		return contigPairVector;

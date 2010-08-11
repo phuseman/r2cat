@@ -1,9 +1,8 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
 import java.io.FileReader;
+import java.util.Hashtable;
 import java.util.Stack;
-
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 
 /**
  * This class reports what kind of tag was met in the XML-file in order to store the

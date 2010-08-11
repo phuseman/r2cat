@@ -6,13 +6,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Stack;
 
-
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 /**
  * 
  * @author yherrmann
@@ -50,6 +49,32 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		
 		public PrimerScoringScheme(){
 				this.defaultParameters();
+		}
+
+		public double calculatePrimerScore(Primer primer) {
+				char[] primerSeq = primer.getPrimerSeq();
+				
+				double scoreTemp = this.calcScoreMeltingTemperature(primer.getPrimerTemperature());
+				if (scoreTemp != -1) {
+					double scoreLength = this.getLengthScore(primer.getPrimerLength());
+					double scoreGCTotal = this.getGCScore(primerSeq, true);
+					//merge these
+					double scoreGC0207 = this.getGCScore(primerSeq, false);
+					double scoreFirstLastBase = this.getFirstAndLastBaseScore(primerSeq);
+					double scoreBackfold = this.getBackfoldScore(primerSeq);
+					double scoreLast6 = this.getLast6Score(primerSeq);
+					double scorePlus1Plus2 = this.getPlus1Plus2Score(primer.getLastPlus1(), primer.getLastPlus2());
+					double scoreOffset = this.getOffsetsScore(primer.getDistanceFromContigBorder());
+					double scoreNPenalty = this.getNPenalty(primerSeq);
+					double scoreHomopoly = this.getHomopolyScore(primerSeq);
+					double scoreRepeat = this.getRepeatScore(primerSeq);
+					double primerScore = scoreGCTotal + scoreRepeat
+							+ scoreFirstLastBase + scoreNPenalty + scoreBackfold
+							+ scoreLength + scoreLast6 + scoreGC0207 + scoreOffset
+							+ scorePlus1Plus2 + scoreTemp + scoreHomopoly;
+					return primerScore;
+			}
+				return -Double.MAX_VALUE;
 		}
 
 		/**
@@ -333,15 +358,11 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 		 * @param primerSeq
 		 * @return melting temperature score
 		 */
-		public double calcScoreMeltingTemperature(char[] primerSeq){
+		public double calcScoreMeltingTemperature(double temperature){
 			double scoreTemperature = 0;
-			double temperature = 0;
 			double minBorder = 0;
 			double maxBorder = 0;
 			Integer[] annealArray;
-			MeltingTemperature melt = new MeltingTemperature();
-			temperature = melt.calculateTemperature(primerSeq);
-			this.setTemperature(temperature);
 			
 			Object[] tempArray = this.annealArrayList.toArray();
 			annealArray = makeIntArray(tempArray);
@@ -537,5 +558,229 @@ import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 			this.temperature = temperature;
 		}
 		
-	}
+
+
+		/**
+		 * This method checks the following bases in the primer sequences and
+		 * retrieves the score for homopoly.
+		 * 
+		 * @param primerSeq
+		 * @return scoreHomopoly
+		 */
+
+		public double getHomopolyScore(char[] primerSeq) {
+			double scoreHomopoly = 0;
+			double temp = 0;
+			int homCount = 0;
+			char prevBase = 'X';
+			char currentBase;
+			for (int i = 0; i < primerSeq.length; i++) {
+				currentBase = primerSeq[i];
+				if (currentBase == prevBase) {
+					homCount++;
+				} else {
+					homCount = 0;
+				}
+				prevBase = currentBase;
+				temp += this.calcScoreHomopoly(homCount);
+
+			}
+			scoreHomopoly = temp;
+			return scoreHomopoly;
+		}
+
+		/**
+		 * This method retrieves each ends of the primer sequence and turns the last
+		 * four bases into the reverse complement, so the possibilty of a backfold
+		 * within the primer can be scored.
+		 * 
+		 * @param primerSeq
+		 * @return scoreBackfold
+		 */
+
+		public double getBackfoldScore(char[] primerSeq) {
+//			double scoreBackfold = 0;
+//			char[] last4 = new char[4];
+//			char[] last4Bases;
+//			char[] primerSeqMinusEight = new char[primerSeq.length - 8];
+//			System.arraycopy(primerSeq, (primerSeq.length - 4), last4, 0, 4);
+//			System.arraycopy(primerSeq, 0, primerSeqMinusEight, 0,
+//					(primerSeq.length - 8));
+//			last4Bases = base.getReverseComplement(last4);
+//			char[] leftSeq = primerSeqMinusEight;
+//			scoreBackfold = this.calcScoreBackfold(last4Bases, leftSeq);
+			//TODO auch mit smith waterman berechnen
+			return -100000;
+		}
+
+		/**
+		 * This method retrieves the first and the last base of a primer sequence
+		 * according to its direction and then returns the score for the given bases
+		 * at those positions.
+		 * 
+		 * @param primerSeq
+		 * @param direction
+		 * @return scoreFirstLastBase
+		 */
+
+		public double getFirstAndLastBaseScore(char[] primerSeq) {
+			double scoreFirstLastBase = 0;
+			char first = primerSeq[0];
+			char last = primerSeq[primerSeq.length - 1];
+			first = Character.toUpperCase(first);
+			last = Character.toUpperCase(last);
+			scoreFirstLastBase = this.calcScoreFirstBaseAndLastBase(first, last);
+			return scoreFirstLastBase;
+		}
+
+		/**
+		 * This method counts the 'N's in a given primer sequence and returns the
+		 * score for the N-penalty.
+		 * 
+		 * @param PrimerSeq
+		 * @return scoreNPenalty
+		 */
+		public double getNPenalty(char[] PrimerSeq) {
+			double scoreNPenalty = 0;
+			int count = 0;
+			for (char i : PrimerSeq) {
+				if (i == 'N' || i == 'n') {
+					count++;
+				}
+			}
+			scoreNPenalty = this.calcNPenalty(count);
+			return scoreNPenalty;
+		}
+
+		/**
+		 * This method retrieves the score for the given primer length
+		 * 
+		 * @param primerLength
+		 * @return
+		 */
+
+		public double getLengthScore(int primerLength) {
+			double scoreLength = 0;
+			scoreLength = this.calcLengthScore(primerLength);
+			return scoreLength;
+		}
+
+		/**
+		 * This method calculates the ratio of AT at the last six bases and then
+		 * retrieves the score for the ratio of the given primer sequences according
+		 * to its direction.
+		 * 
+		 * @param primerSeq
+		 * @param direction
+		 * @return scoreLast6Bases
+		 */
+
+		public double getLast6Score(char[] primerSeq) {
+			double scoreLast6Bases = 0;
+			double last6Ratio = 0;
+			double ATLevelAtLast6 = 0;
+			for (int i = 1; i <= 6; i++) {
+				if (primerSeq[(primerSeq.length - i)] == 'A'
+						|| primerSeq[(primerSeq.length - i)] == 'a'
+						|| primerSeq[(primerSeq.length - i)] == 'T'
+						|| primerSeq[(primerSeq.length - i)] == 't') {
+					ATLevelAtLast6++;
+				}
+			}
+			last6Ratio = (ATLevelAtLast6 / 6 * 100);
+			scoreLast6Bases = this.calcScoreLast6(last6Ratio);
+			return scoreLast6Bases;
+		}
+
+		/**
+		 * This method calculated the total GC-ratio and the ratio or the ratio for
+		 * GC at positions 2-7 and then retrieves the score for one of those ratios
+		 * of the given sequence depending on the boolean totalGC
+		 * 
+		 * @param primerSeq
+		 * @param totalGC
+		 * @param direction
+		 * @return scoreTotalGC/scoreGC2A7
+		 */
+		public double getGCScore(char[] primerSeq, boolean totalGC) {
+			double scoreTotalGC = 0;
+			double scoreGC2A7 = 0;
+			int gcLevel = 0;
+			int gcLevel2A7 = 0;
+			double gcRatio = 0;
+			double gcRatio2A7 = 0;
+			for (int i = 0; i < primerSeq.length; i++) {
+				if (primerSeq[i] == 'G' || primerSeq[i] == 'g'
+						|| primerSeq[i] == 'C' || primerSeq[i] == 'c') {
+					gcLevel++;
+					if (i > 0 && i < 7) {
+						gcLevel2A7++;
+					}
+				}
+			}
+
+			if (totalGC) {
+				gcRatio = (float) gcLevel / (float) (primerSeq.length + 1) * 100;
+				scoreTotalGC = this.calcScoreTotalGCLevel(gcRatio);
+				return scoreTotalGC;
+			} else {
+				gcRatio2A7 = (float) gcLevel2A7 / 6 * 100;
+				scoreGC2A7 = this.calcScoreGCLevel2A7(gcRatio2A7);
+				return scoreGC2A7;
+			}
+		}
+
+		/**
+		 * This method calculates the realstart position of the primer in the contig
+		 * sequence and retrieves the score for the offset of the given primer.
+		 * 
+		 * @param offset
+		 * @param primerLength
+		 * @param direction
+		 * @return scoreOffset
+		 */
+		public double getOffsetsScore(int distanceToBorder) {
+			double scoreOffset = 0;
+				scoreOffset = this.calcScoreOffset(distanceToBorder)
+						+ this.calcScoreMaxOffset(distanceToBorder);
+				return scoreOffset;
+		}
+
+		/**
+		 * This method retrieves the score for the two bases which follow after the
+		 * primer sequence.
+		 * 
+		 * @param plus1
+		 * @param plus2
+		 * @return scorePlus1Plus2
+		 */
+		public double getPlus1Plus2Score(char plus1, char plus2) {
+			double scorePlus1Plus2 = 0;
+			plus1 = Character.toUpperCase(plus1);
+			plus2 = Character.toUpperCase(plus2);
+			scorePlus1Plus2 = this.calcScorePlus1(plus1, plus2);
+			return scorePlus1Plus2;
+		}
+
+		/**
+		 * This method counts the lowercase letters, which represents the repeats in
+		 * the sequence and retrieves the score for those repeats.
+		 * 
+		 * @param primerSeq
+		 * @return scoreRepeat
+		 */
+
+		public double getRepeatScore(char[] primerSeq) {
+			double scoreRepeat = 0;
+			double repeatCount = 0;
+			for (int i = 0; i < primerSeq.length; i++) {
+				if (primerSeq[i] == 'a' || primerSeq[i] == 't'
+						|| primerSeq[i] == 'g' || primerSeq[i] == 'c') {
+					repeatCount++;
+				}
+			}
+			scoreRepeat = this.calcScoreRepeat(repeatCount);
+			return scoreRepeat;
+		}
+}
 	

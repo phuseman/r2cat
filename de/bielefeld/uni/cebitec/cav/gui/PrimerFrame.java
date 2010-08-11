@@ -11,7 +11,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
@@ -24,12 +23,13 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 
+import de.bielefeld.uni.cebitec.cav.PrimerDesign.ContigPair;
+import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
+import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerResult;
 import de.bielefeld.uni.cebitec.cav.controller.SequenceNotFoundException;
 import de.bielefeld.uni.cebitec.cav.datamodel.AlignmentPositionsList;
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
-import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerGenerator;
-import de.bielefeld.uni.cebitec.cav.PrimerDesign.PrimerResult;
 import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
@@ -43,7 +43,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 	private JButton run;
 	private File configFile;
 	private File lastDir;
-	private Vector<String[]> contigPairs = null;
+	private Vector<ContigPair> contigPairs = null;
 	private Checkbox repeatMaskingCheckBox;
 	private JProgressBar progressBar;
 	private JButton select;
@@ -129,7 +129,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 
 			PrimerGeneratorTask pgT = new PrimerGeneratorTask();
 			pgT.addPropertyChangeListener(this);
-			contigPairs = (Vector<String[]>) ((PrimerTableModel) primer
+			contigPairs = ((PrimerTableModel) primer
 					.getModel()).getSelectedPairs();
 			if(contigPairs.size()>0) {
 				pgT.execute();

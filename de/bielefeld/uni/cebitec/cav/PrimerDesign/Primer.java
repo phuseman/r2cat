@@ -1,198 +1,147 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
-import java.util.Comparator;
+import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
+import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 
 /**
  * This class represents a primer object. This object includes information about
- * the following primer properties:
- * length, startposition,endposition, melting temperature, offset, primer sequence, direction of the primer,
- * score, two bases following the primer in the given sequence and the contig id.
+ * the following primer properties: length, startposition,endposition, melting
+ * temperature, offset, primer sequence, direction of the primer, score, two
+ * bases following the primer in the given sequence and the contig id.
  * 
  * This class includes getter and setter methods for each property.
  * 
  * @author yherrmann
  */
-public class Primer{
-	private double primerScore = 0;
-	private int primerLength = 0;
-	private int contigLength = 0;
-	private double temperature = 0;
-	private Integer direction = 0;
+public class Primer {
 	private String contigID = null;
-	private int start = 0;
-	private int end = 0;
-	private char[] primerSeq = null;
-	private String readDirection = null;
-	private String lastPlus1 = null;
-	private String lastPlus2 = null;
-	private int offset = 0;
-	private int realstart = 0;
+	private DNASequence contig = null;
+	private FastaFileReader contigSequences = null;
+	private int primerStart = 0;
+	private int primerLength = 0;
+	private boolean onRightEnd = false;
+	private int offsetInFastaFile = 0;
+	private double primerScore = 0;
+	private Double primerTemperature = null;
 	
+	private Bases bases;
+
 	/**
-	 * Constructor for the primer candidates with following parameters given.
+	 * Constructor that provides the needed informations.
 	 * 
 	 * @param contigID
-	 * @param seqLength
-	 * @param seq
-	 * @param start
-	 * @param direction
-	 * @param length
-	 * @param lastPlus1
-	 * @param lastPlus2
-	 * @param offset
+	 *            Fasta ID of the contig
+	 * @param contigSequences
+	 *            Fasta File Reader that contains the sequence of the contig
+	 * @param primerStart
+	 *            start position of the 5' end of the primer relative to the
+	 *            contigs sequence
+	 * @param primerLength
+	 *            the length of this primer in the direction given by
+	 *            fromLeftSide
+	 * @param onRightEnd
+	 *            is the primer on the right side of the contig in 5'-3'
+	 *            direction? (otherwise it is the reverse complement on the left
+	 *            side in the other direction)
 	 */
-	
-	public Primer(String contigID,int seqLength,char[] seq, int start, Integer direction, int length, String lastPlus1, String lastPlus2, int offset) {
+	public Primer(String contigID, FastaFileReader contigSequences,
+			int primerStart, int primerLength, boolean onRightEnd) {
+		//                                  |-->| length & onRightEnd = true
+		// -----------------|----------------------|---------------------|
+		//                  ^offset         ^primerStart
+
 		this.contigID = contigID;
-		this.direction = direction;
-		this.primerLength = length;
-		this.primerSeq = seq;
-		this.start = start;
-		this.lastPlus1 =lastPlus1;
-		this.lastPlus2 = lastPlus2;
-		this.offset = offset;
-		this.contigLength = seqLength;
+		this.contigSequences = contigSequences;
+		this.primerStart = primerStart;
+		this.primerLength = primerLength;
+		this.onRightEnd = onRightEnd;
+		this.offsetInFastaFile = this.contigSequences.getOffset(contigID);
+		this.contig = this.contigSequences.getSequence(contigID);
+		bases = Bases.getInstance();
 	}
-	
-/**
- * constructor for the primer candidates with the following parameters given.
- * 
- * @param contigID
- * @param seq
- * @param start
- * @param direction
- * @param length
- * @param score
- * @param meltTemperature
- * @param realstart
- */
-	public Primer(String contigID, char[] seq, int start, Integer direction, int length, double score,double meltTemperature,int realstart){
-		this.contigID = contigID;
-		this.direction = direction;
-		this.primerLength = length;
-		this.primerSeq = seq;
-		this.start = start;
-		this.primerScore = score;
-		this.temperature = meltTemperature;
-		this.realstart = realstart;
-	}
-	
+
 	/**
-	 * Override the toString() method of this object
-	 * Setting up the output of the primer object
+	 * Override the toString() method of this object Setting up the output of
+	 * the primer object
 	 */
-	@Override public String toString(){
+	@Override
+	public String toString() {
 		StringBuilder result = new StringBuilder();
 		String TAB = "\t";
 		String seq = new String(this.getPrimerSeq());
-		double temperature = this.getTemperature();
-		double temp = Math.round(temperature*100.0)/100.0;
-		double scorePrimer=this.getPrimerScore();
-		double score = Math.round(scorePrimer*100.0)/100.0;
-		result.append(this.getStart()+TAB+this.getPrimerLength()+TAB+this.getRealstart()+TAB+temp+TAB+score+TAB+seq);
+		double temperature = this.getPrimerTemperature();
+		double temp = Math.round(temperature * 100.0) / 100.0;
+		double scorePrimer = this.getPrimerScore();
+		double score = Math.round(scorePrimer * 100.0) / 100.0;
+		result.append(this.getStart() + TAB + this.getPrimerLength() + TAB
+				+ this.getDistanceFromContigBorder() + TAB + temp + TAB + score + TAB + seq);
 		return result.toString();
 	}
-	
-	public int getRealstart() {
-		return realstart;
+
+	public char getLastPlus1() {
+		if (onRightEnd) {
+			return contigSequences.charAt(offsetInFastaFile + primerStart + primerLength + 1);
+		} else {
+			return bases.complementBase(contigSequences.charAt(offsetInFastaFile + primerStart - primerLength - 1));
+		}
 	}
 
 
-	public void setRealstart(int realstart) {
-		this.realstart = realstart;
+	public Character getLastPlus2() {
+		if (onRightEnd) {
+			return contigSequences.charAt(offsetInFastaFile + primerStart + primerLength + 2);
+		} else {
+			return bases.complementBase(contigSequences.charAt(offsetInFastaFile + primerStart - primerLength - 2));
+		}
 	}
 
 
-	public int getContigLength() {
-		return contigLength;
-	}
-
-	public void setContigLength(int contigLength) {
-		this.contigLength = contigLength;
-	}
-	public String getReadDirection() {
-		return readDirection;
-	}
-
-	public void setReadDirection(String readDirection) {
-		this.readDirection = readDirection;
-	}
-
-	public String getLastPlus1() {
-		return lastPlus1;
-	}
-
-	public void setLastPlus1(String lastPlus1) {
-		this.lastPlus1 = lastPlus1;
-	}
-
-	public String getLastPlus2() {
-		return lastPlus2;
-	}
-
-	public void setLastPlus2(String lastPlus2) {
-		this.lastPlus2 = lastPlus2;
-	}
-	
-	public Integer getDirection() {
-		return direction;
-	}
-
-
-	public void setDirection(Integer direction) {
-		this.direction = direction;
-	}
-
-	public int getOffset() {
-		return offset;
-	}
-
-	public void setOffset(int offset) {
-		this.offset = offset;
+	public int getDistanceFromContigBorder() {
+		if (onRightEnd) {
+			return (int)contig.getSize() - primerStart;
+		} else {
+			return primerStart;
+		}
 	}
 	
 	public char[] getPrimerSeq() {
-		return primerSeq;
+		if(onRightEnd) {
+			return contigSequences.getSubstring(offsetInFastaFile+primerStart, primerLength);
+		} else {
+			return bases.getReverseComplement(contigSequences.getSubstring(offsetInFastaFile+primerStart-primerLength, primerLength));
+		}
 	}
-	public void setPrimerSeq(char[] primerSeq) {
-		this.primerSeq = primerSeq;
-	}
+
+
 	public double getPrimerScore() {
 		return primerScore;
 	}
+
 	public void setPrimerScore(double primerScore) {
 		this.primerScore = primerScore;
 	}
+
 	public int getPrimerLength() {
 		return primerLength;
 	}
-	public void setPrimerLength(int primerLength) {
-		this.primerLength = primerLength;
+
+	public double getPrimerTemperature() {
+		if(primerTemperature == null) {
+			MeltingTemperature melt = new MeltingTemperature();
+			primerTemperature = melt.calculateTemperature(this.getPrimerSeq());
+		}
+		
+		return primerTemperature;
 	}
-	public double getTemperature() {
-		return temperature;
-	}
-	public void setTemperature(double temperature) {
-		this.temperature = temperature;
-	}
+
 
 	public String getContigID() {
 		return contigID;
 	}
-	public void setContigID(String contigID) {
-		this.contigID = contigID;
-	}
+
 	public int getStart() {
-		return start;
+		return primerStart;
 	}
-	public void setStart(int start) {
-		this.start = start;
-	}
-	public int getEnd() {
-		return end;
-	}
-	public void setEnd(int end) {
-		this.end = end;
-	}
+
 
 }

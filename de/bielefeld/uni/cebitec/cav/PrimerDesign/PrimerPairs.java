@@ -16,8 +16,15 @@ import java.util.Vector;
  *
  */
 public class PrimerPairs {
-	private double[][] smithWatermanScoreMatrix = new double[30][30];
+
+	private double[][] smithWatermanScoreMatrix = null;
 	private double currentMaxScore = 0;
+	private Bases base;
+
+	public PrimerPairs() {
+		smithWatermanScoreMatrix  = new double[30][30];
+		base = Bases.getInstance();
+	}
 
 
 	/**
@@ -72,7 +79,6 @@ public class PrimerPairs {
 	 */
 	
 	public boolean seqCheck(char[] firstSeq,char[] secondSeq){
-		Bases base = new Bases();
 		//auf true gesetzt, damit es noch results gibt...
 		boolean notComplement = false;
 		//score considering diagonal cell (H_i-1/j-1)
@@ -97,8 +103,8 @@ public class PrimerPairs {
 				smithWatermanScoreMatrix[m][0] = 0;
 		}
 			//calculation of the scores for the remaining cells in the score matrix
-			for(int i = 1; i<=firstSeq.length;i++){
-				for(int j = 1; j<=secondSeq.length; j++){
+			for(int i = 1; i<firstSeq.length;i++){
+				for(int j = 1; j<secondSeq.length; j++){
 					substiutionScore = smithWatermanScoreMatrix[i-1][j-1] + checkBases(firstSeq[i-1], secondSeq[j-1]);
 					deletionScore = smithWatermanScoreMatrix[i][j-1]-gapScoring(1);
 					insertionScore = smithWatermanScoreMatrix[i-1][j]-gapScoring(1);
@@ -112,52 +118,14 @@ public class PrimerPairs {
 						 currentMaxScore  = currentCellScore;
 					 }
 					 //alignment of the first three bases should not get a high score
-					if(smithWatermanScoreMatrix[3][3]>=3){
+					if(i==2 && j ==2 && smithWatermanScoreMatrix[i][j]>=3){
 						notComplement = false;
 						return notComplement;
 					}
 					
 				}
 			}
-			
-	/*		String firstSeqLastBases = null;
-			String secondSeqLastBases = null;
-			String firstSeqEightBases = null;
-			String secondSeqAsString  = null;
-			String firstSeqFirstBases =null;
-			String secondSeqFirstBases =null;
-			char[] eightBases = new char[8];
-			char[] leftLastBases = new char[4];
-			char[] rightLastBases = new char[4];
-			char[] leftFirstBases = new char[4];
-			char[] rightFirstBases = new char[4];
-			secondSeq = base.getReverseComplement(secondSeq);
-			for(int k = 0;k<=firstSeq.length-8;k++){
-				System.arraycopy(firstSeq, k, eightBases, 0, 7);
-				//last four bases of the 3'end of the forward primer
-				System.arraycopy(firstSeq, firstSeq.length-4, leftLastBases,0, 3);
-				//first four bases of the 5'end of the forward primer
-				System.arraycopy(firstSeq, 0, leftFirstBases, 0, 3);
-				//last four bases of the 5'end of the reverse primer
-				System.arraycopy(secondSeq, secondSeq.length-4, rightLastBases, 0, 3);
-				//first four bases of the 3'end of the reverse primer
-				System.arraycopy(secondSeq, 0, leftFirstBases, 0, 3);
-				firstSeqLastBases = new String(leftLastBases);
-				secondSeqLastBases = new String(rightLastBases);
-				firstSeqFirstBases=new String(leftFirstBases);
-				secondSeqFirstBases = new String(rightFirstBases);
-				firstSeqEightBases = new String(eightBases);
-				secondSeqAsString = new String(secondSeq);
-				if(secondSeqAsString.contains(firstSeqEightBases)||firstSeqLastBases.equals(secondSeqLastBases)||firstSeqFirstBases.equals(secondSeqFirstBases)){
-					notComplement = false;
-					return notComplement;
-				} else{
-					notComplement = true;
-				}
-			}*/
 			return notComplement;
-			
-			//score übergeben?! <--> verhältnis zur länge berechnen
 	}
 	
 	/**
@@ -201,30 +169,25 @@ public class PrimerPairs {
 	 * @param reversePrimer
 	 */
 	
-	public PrimerResult pairPrimer(Vector<Primer> primerCandidates, PrimerResult primerResult, String[] contigIDs){
+	public PrimerResult pairPrimer(Vector<Primer> leftPrimer,Vector<Primer> rightPrimer, PrimerResult primerResult){
 		
-		//andere Lösung fürs pairing...
+		//andere Loesung fuers pairing...
 		
 		ArrayList<Integer> notPairedPrimer = new ArrayList<Integer>();
-		Vector<Primer> leftPrimer = new Vector<Primer>();
-		Vector<Primer> rightPrimer = new Vector<Primer>();
 		boolean sequenceCheck = false;
 		boolean temperatureCheck =false;
+		
 
-		for(int k = 0; k<primerCandidates.size();k++){
-			if(primerCandidates.elementAt(k).getContigID().equals(contigIDs[0])){
-				leftPrimer.add(primerCandidates.elementAt(k));
-			} else{
-				rightPrimer.add(primerCandidates.elementAt(k));
-			}
-		}
+		leftPrimer = this.sortPrimer(leftPrimer);
+		rightPrimer = this.sortPrimer(rightPrimer);
+		
 		int j = 0;
 		for(int i = 0; i<leftPrimer.size();j++,i++){
 			char[] leftPrimerSeq =  leftPrimer.elementAt(i).getPrimerSeq();
-			double leftPrimerTemperature =  leftPrimer.elementAt(i).getTemperature();
+			double leftPrimerTemperature =  leftPrimer.elementAt(i).getPrimerTemperature();
 			if(j<rightPrimer.size()){
 				char[] rightPrimerSeq = rightPrimer.elementAt(j).getPrimerSeq();
-				double rightPrimerTemperature = rightPrimer.elementAt(j).getTemperature();
+				double rightPrimerTemperature = rightPrimer.elementAt(j).getPrimerTemperature();
 				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
 					if(temperatureCheck){
 							sequenceCheck = this.seqCheck(leftPrimerSeq, rightPrimerSeq);
@@ -245,10 +208,10 @@ public class PrimerPairs {
 		for(Integer a : notPairedPrimer){
 			if(a<leftPrimer.size()){
 			char[] leftPrimerSeq = leftPrimer.elementAt(a).getPrimerSeq();
-			double leftPrimerTemperature =leftPrimer.elementAt(a).getTemperature();
+			double leftPrimerTemperature =leftPrimer.elementAt(a).getPrimerTemperature();
 			for(int m = 0; m<rightPrimer.size();m++){
 				char[] rightPrimerSeq=rightPrimer.elementAt(m).getPrimerSeq();
-				double rightPrimerTemperature=rightPrimer.elementAt(m).getTemperature();
+				double rightPrimerTemperature=rightPrimer.elementAt(m).getPrimerTemperature();
 				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
 				if(temperatureCheck){
 							sequenceCheck = this.seqCheck(leftPrimerSeq, rightPrimerSeq);
@@ -262,10 +225,10 @@ public class PrimerPairs {
 		for(Integer b :notPairedPrimer){
 			if(b<rightPrimer.size()){
 			char[] rightPrimerSeq=rightPrimer.elementAt(b).getPrimerSeq();
-			double rightPrimerTemperature=rightPrimer.elementAt(b).getTemperature();
+			double rightPrimerTemperature=rightPrimer.elementAt(b).getPrimerTemperature();
 			for(int m = 0; m<leftPrimer.size();m++){
 				char[] leftPrimerSeq=leftPrimer.elementAt(m).getPrimerSeq();
-				double leftPrimerTemperature=leftPrimer.elementAt(m).getTemperature();
+				double leftPrimerTemperature=leftPrimer.elementAt(m).getPrimerTemperature();
 				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
 				if(temperatureCheck){
 					sequenceCheck = this.seqCheck(rightPrimerSeq, leftPrimerSeq);

@@ -1,7 +1,6 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
-import java.util.*;
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
+import java.util.Hashtable;
 
 /**
  * Interface to handle the tags while going through a xml-file.

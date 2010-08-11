@@ -1,8 +1,36 @@
 package de.bielefeld.uni.cebitec.cav.PrimerDesign;
 
+
 public class Bases {
+	private static Bases instance = null;
+	
 	private final static char A ='A',a='a',G ='G',g='g', C='C',c='c',T='T',t='t',N='N', n='n';
-	private char[] alphabetMap= new char[256];
+	private char[] complementMap=null; 
+	
+	
+	private Bases() {
+		complementMap=new char[256];
+		for (int j = 0; j < complementMap.length; j++) {
+			complementMap[j]= (char) j;
+		}
+		complementMap[Bases.a]=Bases.t;
+		complementMap[Bases.A]=Bases.T;
+		complementMap[Bases.c]=Bases.g;
+		complementMap[Bases.C]=Bases.G;
+		complementMap[Bases.g]=Bases.c;
+		complementMap[Bases.G]=Bases.C;
+		complementMap[Bases.t]=Bases.a;
+		complementMap[Bases.T]=Bases.A;
+
+	}
+	
+	public static Bases getInstance() {
+		if (instance == null) {
+			instance = new Bases();
+		}
+		return instance;
+	}
+
 	
 	/**
 	 * This method retrieves the reverse complement of a given primer sequence.
@@ -12,20 +40,9 @@ public class Bases {
 	public char[] getReverseComplement(char[] primerSeq){
 		char[] reverseComplement = new char[primerSeq.length];
 		
-		for (int j = 0; j < alphabetMap.length; j++) {
-			alphabetMap[j]= (char) j;
-		}
-		alphabetMap[Bases.a]=Bases.t;
-		alphabetMap[Bases.A]=Bases.T;
-		alphabetMap[Bases.c]=Bases.g;
-		alphabetMap[Bases.C]=Bases.G;
-		alphabetMap[Bases.g]=Bases.c;
-		alphabetMap[Bases.G]=Bases.C;
-		alphabetMap[Bases.t]=Bases.a;
-		alphabetMap[Bases.T]=Bases.A;
 		int m = 0;
 		for (int k = primerSeq.length-1; k>=0; k--,m++) {
-			reverseComplement[m]= alphabetMap[primerSeq[k]];
+			reverseComplement[m]= complementMap[primerSeq[k]];
 		}
 		return reverseComplement;
 	}
@@ -35,30 +52,7 @@ public class Bases {
 	 * @param base
 	 * @return complementBase
 	 */
-	public String complementBase(String base){
-		String complementBase =null;
-	if(base.equals("A")){
-		complementBase="T";
-	} if(base.equals("a")){
-		complementBase="t";
-	}
-	if(base.equals("t")){
-		complementBase="a";
-	}if(base.equals("T")){
-		complementBase="A";
-	}
-	if(base.equals("G")){
-		complementBase="C";
-	}
-	if(base.equals("g")){
-		complementBase="c";
-	}
-	if(base.equals("C")){
-		complementBase="G";
-	}
-	if(base.equals("c")){
-		complementBase="g";
-	}
-		return complementBase;
+	public char complementBase(char base){
+		return complementMap[base];
 	}
 }

@@ -279,6 +279,10 @@ public class FastaFileReader {
 
 		return out;
 	}
+	
+	public int getOffset(String contigId) {
+		return offsetsInCharArray.get(contigId);
+	}
 
 	public DNASequence getSequence(int index) {
 		return sequences.get(index);
@@ -462,5 +466,15 @@ public class FastaFileReader {
 
 		return false;
 	}
-
+	
+	public char charAt(int index) {
+		return chararray[index];
+	}
+	
+	public char[] getSubstring(int offset, int length) {
+		char[] out = new char[length];
+		System.arraycopy(chararray, offset, out, 0, length);
+		return out;
+	}
+	
 }
