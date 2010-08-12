@@ -21,7 +21,6 @@
 
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Vector;
 
@@ -38,6 +37,11 @@ import java.util.Vector;
 public class PrimerPairing {
 	private Bases base;
 	private SimpleSmithWatermanPrimerAligner swa;
+	
+	private final double maxTemperatureDifference = 5.;
+	//value for std of a gaussian courve such that x=8 is quite small and x=0 is y=1.0
+	private final double maxAlignmentScore = 32.;
+	
 
 	public PrimerPairing() {
 		base = Bases.getInstance();
@@ -45,98 +49,80 @@ public class PrimerPairing {
 	}
 
 
-	/**
-	 * This method is used to sort all primer candidates in a vector according to their scores and returns
-	 * a vector of sorted primer objects from highest to lowest.
-	 *  
-	 * @param primer
-	 * @return primer
-	 */
-	
-	public Vector<Primer> sortPrimer(Vector<Primer> primer){
-		Collections.sort(primer);
-		return primer;
-	}
-	
-	/**
+
+    /**
 	 * This method checks if the temperature difference of the forward and reverse primer (possible pair).
+	 * It returns true when the difference between the two temperatures less than 5 degrees.
 	 * 
-	 * It returns true when the difference between the two temperatures is beneath 5 degrees.
-	 * 
-	 * @param firstTemperature
-	 * @param secondTemperature
-	 * @return temperatureCheck
+	 * @param firstTemperature melting temperature of the first primer sequence.
+	 * @param secondTemperature melting temperature of the second primer sequence.
+	 * @return temperatureCheck true if these temperatures indicate that this primer pair can be used together.
 	 */
-	public boolean temperatureCheck(double firstTemperature, double secondTemperature){
-		double temperatureDifference =0;
-		double temperatureDifferenceBorder = 5;
-		boolean temperatureCheck=false;
-		temperatureDifference = Math.abs(firstTemperature-secondTemperature);
-		if(temperatureDifference<temperatureDifferenceBorder){
-			temperatureCheck =true;
+	public boolean temperatureDifferenceQuickCheck(double firstTemperature, double secondTemperature){
+		if(Math.abs(firstTemperature-secondTemperature)<=maxTemperatureDifference){
+			return true;
 		} else{
-			temperatureCheck=false;
+			return false;
 		}
-		return temperatureCheck;
-	}	
+	}
+
+
+
 	/**
-	 * This method aligns the first sequence against the reverse complement to see if the sequences would ligate or not.
-	 * 
-	 *
-	 * @param firstSeq
-	 * @param secondSeq
-	 * @return notComplementary
+     * Score for the melting temperature difference of two primers. 
+     * It is best (returns 1.), if the temperature is the same. If the temperature is more than 5 degree apart,
+     * this is the worst and the method returns zero. (values in between fall exponentially in a gaussian distribution)
+     * @param temp1 temperature of the first primer
+     * @param temp2 temperature of the secont primer
+     * @return value between 1.0 (best) and 0.0 (worst)
+     */
+    public double temperatureDifferenceScore(double temp1, double temp2) {
+    	Double diff = temp1 - temp2;
+    	return Math.exp(-(diff * diff / maxTemperatureDifference));
+    }
+    
+    /**
+	 * (Quick)checks if the first three bases match. If so, these primers are not suited as a pair and false is returned
+	 * @param firstSeq Sequence of the first primer.
+	 * @param secondSeqReversed Please provide the reverse complement sequence of the second primer.
+	 * @return boolean if these sequence are suided as a primer pair or not.
 	 */
 	
-	public boolean seqencesDifferSufficiently(char[] firstSeq,char[] secondSeq){
-		//investigate if both sequences ligate toghether (are partially complementary)
-		char[] secondSeqReversed = base.getReverseComplement(secondSeq);
-		
+	public boolean sequenceSimilarityQuickCheck(char[] firstSeq,char[] secondSeqReversed){
 		if( firstSeq[0] == secondSeqReversed[0] 
 		 && firstSeq[1] == secondSeqReversed[1] 
 		 && firstSeq[2] == secondSeqReversed[2]) {
 			//if the first three bases match, discard this pair.
 			return false;
-		}
-		double normalizedScore = swa.getAlignmentScore(firstSeq, secondSeqReversed) / Math.min(firstSeq.length,secondSeqReversed.length);
-		
-		//if approximately less than 8 of 24 bases are matching this pair differs sufficiently
-		if(normalizedScore<0.33) {
-			return true;
 		} else {
-			return false;
-		}
-		
-	}
-	
-	/**
-	 * Method checks if the bases of the sequences matches if so it returns 1 and if the don't match it returns -1/3.
-	 * 
-	 * @param baseOfFirstSeq
-	 * @param baseOfSecondSeq
-	 * @return score for match or a substitution
-	 */
-	public double checkBases(char baseOfFirstSeq, char baseOfSecondSeq){
-		if(baseOfFirstSeq == baseOfSecondSeq){
-			//for a match
-			return 1;
-		} else{
-			//for a substitution
-			return (-1/3);
+			return true;
 		}
 	}
+
+
+
 	/**
-	 * This method calculates the score considering the gap scoring scheme of the smith-waterman algorithm.
-	 * @param gapLength
-	 * @return gapScore
-	 */
-	public double gapScoring(int gapLength){
-		double gapScore = 0;
-		gapScore = 1+(-1/3)*gapLength;
-		return gapScore;
-	}
-	
-	
+     * How identical are the sequences. Here it is best, if the sequences share no similarity (then here a value close to 1 is returned).
+     * If the sequences are completely identical, then the value 0.0 is returned. 
+     * @param firstSeq sequence of the first primer
+     * @param secondSeq typically the reverse complemented sequence of the second primer, such that the ability to ligate is calculated.
+     * @return a value between 1.0 (best, no sequence similarity) and 0.0 (worst, identical sequences)
+     */
+    public double sequenceSimilarityScore(char[] firstSeq,char[] secondSeq) {
+    	//remove 1 from the score since a one base hit is very likely.
+    	double similarityScore = swa.getAlignmentScore(firstSeq, secondSeq)-1;
+    	
+    	System.out.println(similarityScore);
+    	// if more than 8 bases match, then we cannot use this pair.
+    	if(similarityScore >= 7) {
+    		return 0.0;
+    	} else {
+    		return Math.exp(-(similarityScore * similarityScore / maxAlignmentScore));
+    	}
+    }
+    
+    
+
 	/**
 	 * This method goes through the given vector of the possible forward and reverse primers in order
 	 * to check if the primers are a fitting pair. (Has to check temperature difference and the property 
@@ -151,78 +137,51 @@ public class PrimerPairing {
 	 */
 	
 	public PrimerResult pairPrimer(Vector<Primer> leftPrimer,Vector<Primer> rightPrimer, PrimerResult primerResult){
+		Collections.sort(leftPrimer);
+		Collections.sort(rightPrimer);
 		
-		//andere Loesung fuers pairing...
-		
-		ArrayList<Integer> notPairedPrimer = new ArrayList<Integer>();
-		boolean temperatureCheck =false;
-		
-
-		leftPrimer = this.sortPrimer(leftPrimer);
-		rightPrimer = this.sortPrimer(rightPrimer);
-		int j = 0;
-		for(int i = 0; i<leftPrimer.size();j++,i++){
-			char[] leftPrimerSeq =  leftPrimer.elementAt(i).getPrimerSeq();
-			double leftPrimerTemperature =  leftPrimer.elementAt(i).getPrimerTemperature();
-			if(j<rightPrimer.size()){
-				char[] rightPrimerSeq = rightPrimer.elementAt(j).getPrimerSeq();
-				double rightPrimerTemperature = rightPrimer.elementAt(j).getPrimerTemperature();
-				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
-					if(temperatureCheck){
-							
-								if(seqencesDifferSufficiently(leftPrimerSeq, rightPrimerSeq)){
-									primerResult.addPair(leftPrimer.elementAt(i), rightPrimer.elementAt(j));
-								} else{
-											notPairedPrimer.add(i);
-									}
-					} else{
-							notPairedPrimer.add(i);
-						}
-			}else{
-					notPairedPrimer.add(i);
-				}
+		int topCandidatesToConsider = 10;
+		if(topCandidatesToConsider>rightPrimer.size()) {
+			topCandidatesToConsider=rightPrimer.size();
 		}
-		//andere loesung... wenn nicht kommentiert... haengt das Programm in dieser Schleife...
-/*
-		if(!notPairedPrimer.isEmpty()){
-		for(Integer a : notPairedPrimer){
-			if(a<leftPrimer.size()){
-			char[] leftPrimerSeq = leftPrimer.elementAt(a).getPrimerSeq();
-			double leftPrimerTemperature =leftPrimer.elementAt(a).getPrimerTemperature();
-			for(int m = 0; m<rightPrimer.size();m++){
-				char[] rightPrimerSeq=rightPrimer.elementAt(m).getPrimerSeq();
-				double rightPrimerTemperature=rightPrimer.elementAt(m).getPrimerTemperature();
-				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
-				if(temperatureCheck){
-							sequenceCheck = this.seqCheck(leftPrimerSeq, rightPrimerSeq);
-							if(sequenceCheck){
-								primerResult.addPair(leftPrimer.elementAt(a), rightPrimer.elementAt(m));
-							}
+		if(topCandidatesToConsider>leftPrimer.size()) {
+			topCandidatesToConsider=leftPrimer.size();
+		}
+		
+		Primer left = null;
+		Primer right = null;
+		double temperatureScore = 0;
+		double sequenceSimilarityScore = 0;
+		char[] reverseComplementOfSecondPrimer=null;
+
+		
+		for (int i = 0; i < topCandidatesToConsider; i++) {
+			for (int j = 0; j < topCandidatesToConsider; j++) {
+				temperatureScore = 0;
+				sequenceSimilarityScore = 0;
+				left=leftPrimer.get(i);
+				right = rightPrimer.get(j);
+				if(temperatureDifferenceQuickCheck(right.getPrimerTemperature(), left.getPrimerTemperature())) {
+					temperatureScore = temperatureDifferenceScore(right.getPrimerTemperature(), left.getPrimerTemperature());
+					reverseComplementOfSecondPrimer = base.getReverseComplement(right.getPrimerSeq());
+					if(sequenceSimilarityQuickCheck(left.getPrimerSeq(), reverseComplementOfSecondPrimer)) {
+						sequenceSimilarityScore = sequenceSimilarityScore(left.getPrimerSeq(), reverseComplementOfSecondPrimer);
+						
+//						System.out.println("===========");
+//						System.out.println("Tr:"+ right.getPrimerTemperature()+"\nTl:"+ left.getPrimerTemperature()+"\nTscore="+temperatureScore);
+//						System.out.println("l  : "+new String(left.getPrimerSeq()));
+//						System.out.println("rcr: "+new String(reverseComplementOfSecondPrimer));
+//						System.out.println("similarity score"+sequenceSimilarityScore);
+//						System.out.println("Gesamt: "+ (temperatureScore * sequenceSimilarityScore * (left.getPrimerScore() + right.getPrimerScore())));
+//						System.out.println("===========");
+					}
+				}
+				
+				
 			}
 			
 		}
-	}
-		for(Integer b :notPairedPrimer){
-			if(b<rightPrimer.size()){
-			char[] rightPrimerSeq=rightPrimer.elementAt(b).getPrimerSeq();
-			double rightPrimerTemperature=rightPrimer.elementAt(b).getPrimerTemperature();
-			for(int m = 0; m<leftPrimer.size();m++){
-				char[] leftPrimerSeq=leftPrimer.elementAt(m).getPrimerSeq();
-				double leftPrimerTemperature=leftPrimer.elementAt(m).getPrimerTemperature();
-				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
-				if(temperatureCheck){
-					sequenceCheck = this.seqCheck(rightPrimerSeq, leftPrimerSeq);
-					//b position im Rechten Primer Vektor und m position im linken Primer Vektor
-							if(sequenceCheck){
-								primerResult.addPair(leftPrimer.elementAt(m), rightPrimer.elementAt(b));
-							}
-				}
-				}
-			}
-		}
-		}
 		
-	}*/
 		return primerResult;
 	}	
 

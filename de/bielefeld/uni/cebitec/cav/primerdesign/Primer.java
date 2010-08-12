@@ -234,12 +234,13 @@ public class Primer implements Comparable<Primer> {
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	public int compareTo(Primer other) {
-		if(this.getPrimerScore()<other.getPrimerScore()){
+		if (this.getPrimerScore() < other.getPrimerScore()) {
 			return 1;
-	} if(this.getPrimerScore()>other.getPrimerScore()){
-		return -1;
-	}
-	return 0;
+		}
+		if (this.getPrimerScore() > other.getPrimerScore()) {
+			return -1;
+		}
+		return 0;
 	}
 
 

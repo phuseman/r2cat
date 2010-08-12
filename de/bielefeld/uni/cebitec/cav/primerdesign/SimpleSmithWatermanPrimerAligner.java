@@ -35,9 +35,9 @@ public class SimpleSmithWatermanPrimerAligner {
 	// score considering diagonal cell (i-1/j-1) when characters are the same
 	private double matchScore = 1;
 	// score considering diagonal cell (i-1/j-1) when characters are distinct
-	private double misMatchScore = 0;
+	private double misMatchScore = -1;//0;
 	// score considering cell to the left (i-1/j) or from above (i/j-1)
-	private double indelScore = -0.5;
+	private double indelScore = -2; // -0.5;
 
 	public SimpleSmithWatermanPrimerAligner() {
 		smithWatermanScoreMatrix = new double[maxTableSize][maxTableSize];
@@ -106,6 +106,7 @@ public class SimpleSmithWatermanPrimerAligner {
 
 			}
 		}
+	
 		return maxScore;
 	}
 
