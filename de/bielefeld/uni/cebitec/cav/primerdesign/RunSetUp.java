@@ -9,10 +9,10 @@ public class RunSetUp {
 	public static void main(String args[]) throws Exception{
 		//Path to the config file, which contains the parameters.
 		//File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
-		File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
+		File configFile = new File("C:/Users/Mini-Yvi/Uni/primer_search_default_config.xml");
 		
 		//Path to fasta file containing a list of contigs
-		File fastaFile = new File("C:/Users/Yvisunshine/Uni/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.fas");
+		File fastaFile = new File("C:/Users/Mini-Yvi/Uni/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.fas");
 		long start = new Date().getTime();
 		
 		boolean repeatMasking = false;

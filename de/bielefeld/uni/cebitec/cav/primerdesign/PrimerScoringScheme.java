@@ -33,7 +33,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		private HashMap<Double, Double> offset = new HashMap<Double, Double>();
 		private HashMap<Double, Double> atLast6 = new HashMap<Double, Double>();
 		private HashMap<Double, Double> gc0207 = new HashMap<Double, Double>();
-		private HashMap<Double, Double> anneal = new HashMap<Double, Double>	();
+		private HashMap<Double, Double> anneal = new HashMap<Double, Double>();
 		private HashMap<String, Double> repeatAndBackfoldAndNPenalty= new HashMap<String, Double>();
 		private Integer[] gcArray;
 		private Integer[] annealArray;
@@ -43,6 +43,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		double temperature = 0;
 		private Bases base;
 		private SimpleSmithWatermanPrimerAligner swa;
+		private double homopolyCNT;
+		private double homopolySCORE;
 		
 		/**
 		 * Constructor of the class.
@@ -157,6 +159,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			repeatAndBackfoldAndNPenalty.put("N_PENALTY", -1500.0);
 			repeatAndBackfoldAndNPenalty.put("BACKFOLD", -1500.0);
 			
+			homopolyCNT = 3.0;
+			homopolySCORE = -200.0;
 			homopoly.put("CNT", 3.0);
 			homopoly.put("SCORE", -200.0);
 			
@@ -245,24 +249,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 				}
 			}
 			return scoreTemperature;
-		}
-		
- 
-		/**
-		 * This method gets the number of homopolys in the primer sequence and calculates a 
-		 * score.
-		 * 
-		 * @param homopolyCount
-		 * @return homopoly-score
-		 */
-		private double calcScoreHomopoly(int homopolyCount){
-			double scoreHomopoly = 0;
-			double cnt = this.homopoly.get("CNT");
-			double score = this.homopoly.get("SCORE");
-			if(homopolyCount >= cnt){
-				scoreHomopoly = score;
-			}
-			return scoreHomopoly;
 		}
 		
 		/**
@@ -366,17 +352,17 @@ import javax.swing.tree.DefaultMutableTreeNode;
 					homCount = 0;
 				}
 				prevBase = currentBase;
-				temp += this.calcScoreHomopoly(homCount);
-
+				if(homCount >= homopolyCNT){
+					temp += homopolySCORE;
+				}
 			}
 			scoreHomopoly = temp;
 			return scoreHomopoly;
 		}
 
 		/**
-		 * This method retrieves each ends of the primer sequence and turns the last
-		 * four bases into the reverse complement, so the possibilty of a backfold
-		 * within the primer can be scored.
+		 * This method checks whether the last 4 Bases of the primer can backfold to any part of the
+		 * primer sequence.
 		 * 
 		 * @param primerSeq
 		 * @return scoreBackfold
@@ -384,16 +370,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 		public double getBackfoldScore(char[] primerSeq) {
 			double scoreBackfold = 0;
-	/*		char[] last4Bases = new char[4];
-			int j = 0;
-			for (int i = 4; i>0; i--,j++){
-				last4Bases[j]= primerSeq[primerSeq.length-i];
-			}
-				base.getReverseComplement(last4Bases);
-			double smwScore = swa.getAlignmentScore(primerSeq, last4Bases);
+			char[] reverseCompl = base.getReverseComplement(primerSeq);
+			double smwScore = swa.getAlignmentScore(primerSeq, reverseCompl,4,(primerSeq.length-8));
 			if(smwScore>=8){
 			scoreBackfold = repeatAndBackfoldAndNPenalty.get("BACKFOLD");
-			}*/
+			}
 			return scoreBackfold;
 		}
 
@@ -602,7 +583,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			}if(currentParent.toString().equals("LENGTH")){
 				length.put(currentTag, Double.parseDouble(value));
 			}if(currentParent.toString().equals("HOMOPOLY")){
-				homopoly.put(currentTag, Double.parseDouble(value));
+				if(currentTag =="CNT"){
+					homopolyCNT = Double.parseDouble(value);
+				}
+				if(currentTag =="SCORE"){
+					homopolySCORE = Double.parseDouble(value);
+				}
+				///homopoly.put(currentTag, Double.parseDouble(value));
 			}if(currentParent.toString().equals("MAX_OFFSET")){
 				maxOffset.put(currentTag, Double.parseDouble(value));
 			}if(currentParent==currentNode){
