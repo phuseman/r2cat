@@ -122,7 +122,28 @@ public class PrimerGenerator {
 
 		return checked;
 	}
-
+/**
+ * This method checks the size of the selected contigs.
+ * Contigs need to be at least 100 bp long. In that case the borders of the primer location within a
+ * sequence are set to 0. If the size is bigger than 500 the default paramters for the borders are set.
+ * @param contigID
+ * @return
+ */
+	public boolean contigSizeCheck(String contigID){
+		int contigSize =(int) fastaParser.getSequence(contigID).getSize();
+		if(contigSize>=500){
+			this.minBorderOffset = 80;
+			this.maxBorderOffset = 400;
+			return true;
+		}else if(contigSize>150){
+			this.minBorderOffset = 0;
+			this.maxBorderOffset = 0;
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
 	/**
 	 * This method gets a vector of contigPair, which contains the IDs of the marked contigs.
 	 * For each pair the contig IDs are checked and then the method generatePrimerFor1ContigPair
@@ -144,15 +165,23 @@ public class PrimerGenerator {
 							+ " and " + pair.contig2);
 			//contigID check
 			if (this.idCheck(pair.contig1) && this.idCheck(pair.contig2)) {
+				//in case the contig size is too small to create primers
+				if(this.contigSizeCheck(pair.contig1)&&this.contigSizeCheck(pair.contig2)){
 				if (!(pair.contig1.equals(pair.contig2))) {
 					//generate primers for each contig pair
 					PrimerResult primerResult = this
 							.generatePrimerFor1ContigPair(pair);
 					prV.add(primerResult);
 				}
+				
+				}else{
+					PrimerResult primerResult = new PrimerResult(this.fastaParser.getSequence(pair.contig1),this.fastaParser.getSequence(pair.contig2));
+					prV.add(primerResult);
+				}
 			} else {
 				throw new NullPointerException("contig id could not be found");
 			}
+		
 		}
 		return prV;
 	}
@@ -226,7 +255,7 @@ public class PrimerGenerator {
 			}
 
 		}
-
+	
 		return primerCandidates;
 	}
 
@@ -249,6 +278,7 @@ public class PrimerGenerator {
 				scoredPrimerCandidates.add(candidate);
 			}
 		}
+		System.out.println("size"+scoredPrimerCandidates.size());
 		return scoredPrimerCandidates;
 	}
 
