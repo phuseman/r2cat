@@ -69,28 +69,31 @@ public class PrimerPairs {
 		return temperatureCheck;
 	}	
 	/**
-	 * This method aligns the two sequences of the possible primer pair by using the smith-waterman algorithm.
+	 * This method aligns the first sequence against the reverse complement to see if the sequences would ligate or not.
+	 * 
 	 *
 	 * @param firstSeq
-	 * @param secondSeqReversed
+	 * @param secondSeq
 	 * @return notComplementary
 	 */
 	
-	public boolean seqCheck(char[] firstSeq,char[] secondSeqReversed){
+	public boolean seqencesDifferSufficiently(char[] firstSeq,char[] secondSeq){
 		//investigate if both sequences ligate toghether (are partially complementary)
-		secondSeqReversed = base.getReverseComplement(secondSeqReversed);
+		char[] secondSeqReversed = base.getReverseComplement(secondSeq);
 		
-		if(swa.getAlignmentScore(firstSeq, secondSeqReversed,3,3)>=3.) {
+		if( firstSeq[0] == secondSeqReversed[0] 
+		 && firstSeq[1] == secondSeqReversed[1] 
+		 && firstSeq[2] == secondSeqReversed[2]) {
 			//if the first three bases match, discard this pair.
 			return false;
 		}
 		double normalizedScore = swa.getAlignmentScore(firstSeq, secondSeqReversed) / Math.min(firstSeq.length,secondSeqReversed.length);
 		
-		//if approximately 8 of 24 bases are matching, then discard this pair
+		//if approximately less than 8 of 24 bases are matching this pair differs sufficiently
 		if(normalizedScore<0.33) {
 			return true;
 		} else {
-			return true;
+			return false;
 		}
 		
 	}
@@ -141,7 +144,6 @@ public class PrimerPairs {
 		//andere Loesung fuers pairing...
 		
 		ArrayList<Integer> notPairedPrimer = new ArrayList<Integer>();
-		boolean sequenceCheck = false;
 		boolean temperatureCheck =false;
 		
 
@@ -156,8 +158,8 @@ public class PrimerPairs {
 				double rightPrimerTemperature = rightPrimer.elementAt(j).getPrimerTemperature();
 				temperatureCheck = this.temperatureCheck(leftPrimerTemperature, rightPrimerTemperature);
 					if(temperatureCheck){
-							sequenceCheck = this.seqCheck(leftPrimerSeq, rightPrimerSeq);
-								if(sequenceCheck){
+							
+								if(seqencesDifferSufficiently(leftPrimerSeq, rightPrimerSeq)){
 									primerResult.addPair(leftPrimer.elementAt(i), rightPrimer.elementAt(j));
 								} else{
 											notPairedPrimer.add(i);

@@ -1,6 +1,5 @@
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
-import java.util.HashMap;
 /**
  * This class includes methods to calculate the melting-temperature of a given 
  * nucleotide sequence.
@@ -13,23 +12,77 @@ import java.util.HashMap;
  */
 public class MeltingTemperature {
 
-	private double oligoConc = 0;
-	private char base;
-	private HashMap<String,Double> enthalpie;
-	private HashMap<String,Double> entropie;
+	private final double oligoConc = 0.0000025;
 	private static MeltingTemperature instance = null;
+	private int[] alphabetMap;
+	private double[][] entropyMatrix;
+	private double[][] enthalpyMatrix;
+	
 
 	/**
 	 * In the constructor the oligoConc variable is set and the HashMaps enthalpie and entropie are set up through the method
 	 * fillingEnthalpieAndEntropieParam.
 	 */
 	private MeltingTemperature(){
-		enthalpie=new HashMap<String,Double>();
-		entropie=new HashMap<String,Double>();
-	this.fillEnthalpieAndEntropieParam();
-	this.oligoConc = 0.0000025;
-	
+		init();
 }
+	
+	private void init() {
+	//create alphabet map
+	alphabetMap = new int[256];
+	for (int i = 0; i < alphabetMap.length; i++) {
+		alphabetMap[i]=-1;
+	}
+	//map nucleodide characters to matrix indices
+	alphabetMap['a']=0;
+	alphabetMap['A']=0;
+	alphabetMap['c']=1;
+	alphabetMap['C']=1;
+	alphabetMap['g']=2;
+	alphabetMap['G']=2;
+	alphabetMap['t']=3;
+	alphabetMap['T']=3;
+	
+	
+	//initialize entropy matrix
+	entropyMatrix = new double[4][4];
+	entropyMatrix[alphabetMap['A']][alphabetMap['A']] = -23.6;
+	entropyMatrix[alphabetMap['A']][alphabetMap['T']] = -18.8;
+	entropyMatrix[alphabetMap['A']][alphabetMap['C']] = -23.0;
+	entropyMatrix[alphabetMap['A']][alphabetMap['G']] = -16.1;
+	entropyMatrix[alphabetMap['C']][alphabetMap['A']] = -19.3;
+	entropyMatrix[alphabetMap['C']][alphabetMap['T']] = -16.1;
+	entropyMatrix[alphabetMap['C']][alphabetMap['C']] = -15.6;
+	entropyMatrix[alphabetMap['C']][alphabetMap['G']] = -25.5;
+	entropyMatrix[alphabetMap['G']][alphabetMap['A']] = -20.3;
+	entropyMatrix[alphabetMap['G']][alphabetMap['T']] = -23.0;
+	entropyMatrix[alphabetMap['G']][alphabetMap['C']] = -28.4;
+	entropyMatrix[alphabetMap['G']][alphabetMap['G']] = -15.6;
+	entropyMatrix[alphabetMap['T']][alphabetMap['A']] = -18.5;
+	entropyMatrix[alphabetMap['T']][alphabetMap['T']] = -23.6;
+	entropyMatrix[alphabetMap['T']][alphabetMap['C']] = -20.3;
+	entropyMatrix[alphabetMap['T']][alphabetMap['G']] = -19.3;
+	
+	//initialize enthalpy matrix 
+	enthalpyMatrix = new double[4][4];
+	enthalpyMatrix[alphabetMap['A']][alphabetMap['A']] = -8.4;
+	enthalpyMatrix[alphabetMap['A']][alphabetMap['T']] = -6.5;
+	enthalpyMatrix[alphabetMap['A']][alphabetMap['C']] = -8.6;
+	enthalpyMatrix[alphabetMap['A']][alphabetMap['G']] = -6.1;
+	enthalpyMatrix[alphabetMap['C']][alphabetMap['A']] = -7.4;
+	enthalpyMatrix[alphabetMap['C']][alphabetMap['T']] = -6.1;
+	enthalpyMatrix[alphabetMap['C']][alphabetMap['C']] = -6.7;
+	enthalpyMatrix[alphabetMap['C']][alphabetMap['G']] = -10.1;
+	enthalpyMatrix[alphabetMap['G']][alphabetMap['A']] = -7.7;
+	enthalpyMatrix[alphabetMap['G']][alphabetMap['T']] = -8.6;
+	enthalpyMatrix[alphabetMap['G']][alphabetMap['C']] = -11.1;
+	enthalpyMatrix[alphabetMap['G']][alphabetMap['G']] = -6.7;
+	enthalpyMatrix[alphabetMap['T']][alphabetMap['A']] = -6.3;
+	enthalpyMatrix[alphabetMap['T']][alphabetMap['T']] = -8.4;
+	enthalpyMatrix[alphabetMap['T']][alphabetMap['C']] = -7.7;
+	enthalpyMatrix[alphabetMap['T']][alphabetMap['G']] = -7.4;
+	}
+	
 	public static MeltingTemperature getInstance() {
 		if (instance == null) {
 			instance = new MeltingTemperature();
@@ -43,39 +96,8 @@ public class MeltingTemperature {
 	 */
 	public void fillEnthalpieAndEntropieParam(){
 		
-		enthalpie.put("AA", -8.4);
-		enthalpie.put("AT", -6.5);
-		enthalpie.put("AC", -8.6);
-		enthalpie.put("AG", -6.1);
-		enthalpie.put("CA", -7.4);
-		enthalpie.put("CT", -6.1);
-		enthalpie.put("CC", -6.7);
-		enthalpie.put("CG", -10.1);
-		enthalpie.put("GA", -7.7);
-		enthalpie.put("GT", -8.6);
-		enthalpie.put("GC", -11.1);
-		enthalpie.put("GG", -6.7);
-		enthalpie.put("TA", -6.3);
-		enthalpie.put("TT", -8.4);
-		enthalpie.put("TC", -7.7);
-		enthalpie.put("TG", -7.4);
 		
-		entropie.put("AA", -23.6);
-		entropie.put("AT", -18.8);
-		entropie.put("AC", -23.0);
-		entropie.put("AG", -16.1);
-		entropie.put("CA", -19.3);
-		entropie.put("CT", -16.1);
-		entropie.put("CC", -15.6);
-		entropie.put("CG", -25.5);
-		entropie.put("GA", -20.3);
-		entropie.put("GT", -23.0);
-		entropie.put("GC", -28.4);
-		entropie.put("GG", -15.6);
-		entropie.put("TA", -18.5);
-		entropie.put("TT", -23.6);
-		entropie.put("TC", -20.3);
-		entropie.put("TG", -19.3);
+
 	}
 	
 
@@ -92,40 +114,27 @@ public class MeltingTemperature {
 	 */
 	
 	public double calculateTemperature(char[] seq){
-		base = seq[0];
-		double temparture = 0;
-		double errors = 0;
-		double ent = 0;
-		double enp = 0;
-		String tupel = null;
-		boolean firstBaseSet = false;
+		boolean error = false;
+		double entropy = 0;
+		double enthalpy = 0;
 		
-		for(char b : seq){
-			//needs to be true so the first base is set of the nucleotide tupel
-			if(firstBaseSet){
-				char[] tupelArray = new char[2];
-				tupelArray[0] = base;
-				tupelArray[1] = b;
-				tupel = new String(tupelArray);
-					if(enthalpie.containsKey(tupel)&&entropie.containsKey(tupel)){
-							ent	+= enthalpie.get(tupel);
-							enp += entropie.get(tupel);
-					} else{
-						errors++;
-					}
-					base=b;
-			} else{
-				firstBaseSet=true;
-					}
+		for (int i = 0; i < seq.length-1; i++) {
+			try {
+			entropy += entropyMatrix[alphabetMap[seq[i]]][alphabetMap[seq[i+1]]];
+			enthalpy += enthalpyMatrix[alphabetMap[seq[i]]][alphabetMap[seq[i+1]]];
+			} catch (ArrayIndexOutOfBoundsException e) {
+				error=true;
+			}
+			
 		}
 		
-		if(errors == 0){
+		double temparture = -1;
+		if(!error){
 			//calculation of the melting temperature
-			temparture = (ent*1000/(enp+(1.987*Math.log((oligoConc/4.0))))) - 273.15 - 21.59;
+			//TODO: fixen anteil der berechnung rausnehmen und vorberechnet speichern!
+			temparture = (enthalpy*1000/(entropy+(1.987*Math.log((oligoConc/4.0))))) - 273.15 - 21.59;
 			//temparture = (ent*1000/(enp+(1.987*Math.log((oligoConc/2000000000))))) - 273.15;
-			return temparture;
-		} else {
-			return -1.0;
 		}
+		return temparture;
 	}
 }

@@ -237,6 +237,8 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				} else{
 					pg.setParameters(null);
 				}
+
+			PrimerFrame.this.progressBar.setIndeterminate(false);
 			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
 			/*long runningTime = new Date().getTime() - start; 
 			System.out.println(runningTime/1000);*/
@@ -305,7 +307,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 			// (see SwingWorker.StateValue )
 		} else if (evt.getPropertyName().matches("state")) {
 			if ((SwingWorker.StateValue) evt.getNewValue() == SwingWorker.StateValue.STARTED) {
-				progressBar.setIndeterminate(true);
+//				progressBar.setIndeterminate(true);
 				progressBar.setValue(0);
 				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				this.remove(controlPanel);
