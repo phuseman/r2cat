@@ -34,9 +34,18 @@ import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
  * sequence of primer candidates has to be checked on certain biological
  * properties and are scored based on its properties.
  * 
- * @author yherrmann
- * 
- */
+ * *****************************************************************************************************
+ * 																									   *
+ * The methods to generate primer candidates are based on the perl-script (primer_search_confable.pl)  *
+ * developed and written by Jochen Blom and Dr. Christian Rueckert.									   *
+ * 																									   *
+ * The values for the range, where primers should be localized at an contig-end, are proposition by    *
+ * Dr. Christian Rueckert.																			   *
+ * 																									   *
+ * 																									   *
+ *******************************************************************************************************/
+
+
 public class PrimerGenerator {
 	//instance of the class which contains the parameters and methods to calculate primer scores
 	private PrimerScoringScheme scoring = null;

@@ -36,9 +36,16 @@ import javax.swing.tree.DefaultMutableTreeNode;
  * This class contains the parameters an the methods to calculate the score for each primer candidate.
  * It loads default parameters or retrieves parameters from a given XML file.
  * 
- * @author yherrmann
- *
- */
+ * **************************************************************************************************
+ * 																									*
+ * The parameters are from a config file (primer_search_default_config.xml), which was developed	*
+ * by Jochen Blom and Dr. Christian Rueckert.														*
+ * The methods to calculate the score for a primer are a reproduction of the perl-script 			*
+ * (primer_search_confable.pl) developed and written by Jochen Blom and Dr. Christian Rueckert.		*
+ * 																									*
+ *																									*
+ ****************************************************************************************************/
+
 	final class PrimerScoringScheme implements DocumentHandler {
 		//The following variables are used to parse a xml file by maintaining its structure
 		private DefaultMutableTreeNode root, currentNode, currentParent;
@@ -107,7 +114,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 					double scoreBackfold = this.getBackfoldScore(primerSeq);
 					double scoreLast6 = this.getLast6Score(primerSeq);
 					double scorePlus1Plus2 = this.getPlus1Plus2Score(primer.getLastPlus1(), primer.getLastPlus2());
-					double scoreOffset = this.getOffsetsScore(primer.getDistanceFromContigBorder());
+					double scoreOffset = this.getOffsetsScore(primer.getDistanceFromContigBorder(),primer.getPrimerLength());
 					double scoreNPenalty = this.getNPenalty(primerSeq);
 					double scoreHomopoly = this.getHomopolyScore(primerSeq);
 					double scoreRepeat = this.getRepeatScore(primerSeq);
@@ -170,7 +177,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			offset.put(50.0, -500.0);
 			offset.put(80.0, -400.0);
 			offset.put(110.0, -50.0);
-			offset.put(150., 250.0);
+			offset.put(150.0, 250.0);
 			
 			offsetArrayList = fillArrayListWithDefaultValues(offset);
 			this.offsetArray =this.makeIntArray((offsetArrayList.toArray()));
@@ -521,7 +528,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @param offset
 		 * @return scoreOffset
 		 */
-		public double getOffsetsScore(int distanceToBorder) {
+		public double getOffsetsScore(int distanceToBorder,int primerLength) {
 				double scoreOffset = this.calcScoreOffset(distanceToBorder)
 						+ this.calcScoreMaxOffset(distanceToBorder);
 				return scoreOffset;

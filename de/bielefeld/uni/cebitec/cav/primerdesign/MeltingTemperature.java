@@ -23,13 +23,18 @@ package de.bielefeld.uni.cebitec.cav.primerdesign;
 /**
  * This class includes methods to calculate the melting-temperature of a given 
  * nucleotide sequence.
- * 
- * It is a reproduction of the function (Function.pm) used in a perl-script written by Jochen Blom and Dr. Christian Rueckert.
- * The values of enthalpie and entropie are from the paper Santalucia 1996. !!! 
- * 
- * @author yherrmann
  *
- */
+ ********************************************************************************************************
+ * It is based on the function (Function.pm). It's used in the perl-script (primer_search_confable.pl)	* 
+ * developed and written by Jochen Blom and Dr. Christian Rueckert.										*
+ * 																										*
+ * The values of enthalpie and entropie are extracted from the following paper:							*
+ * 																										*
+ * "Improved Nearest-Neighbor Parameters for Predicting DNA Duplex Stability †", 						*
+ * Santalucia J., Allawi H.T., Seneviratne PA., Biochemistry, Vol. 35, No.11, 1996:3555-3562.	*							*
+ * 																										*
+ *																										*
+ ********************************************************************************************************/
 public class MeltingTemperature {
 
 	private final double oligoConcentration = 0.0000025;
