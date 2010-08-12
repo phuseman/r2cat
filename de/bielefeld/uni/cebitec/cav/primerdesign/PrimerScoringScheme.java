@@ -33,15 +33,19 @@ import java.util.Stack;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
+ * This class contains the parameters an the methods to calculate the score for each primer candidate.
+ * It loads default parameters or retrieves parameters from a given XML file.
  * 
  * @author yherrmann
  *
  */
 	final class PrimerScoringScheme implements DocumentHandler {
+		//The following variables are used to parse a xml file by maintaining its structure
 		private DefaultMutableTreeNode root, currentNode, currentParent;
 		private String currentTag = null;
 		private String value = null;
 		private Stack stack = null;
+		//The following HashMaps and Arrays save the parameters(needed for the score calculation)
 		private HashMap<Character, Double> firstBase = new HashMap<Character, Double>();
 		private HashMap<Character, Double> lastBase = new HashMap<Character, Double>();
 		private HashMap<Character, Double>	plus1Base= new HashMap<Character, Double>();
@@ -59,7 +63,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		private double temperature = 0;
 		private Bases base;
 		private SimpleSmithWatermanPrimerAligner swa;
-		//default parameters
+		//following global variables are intialized with default parameters.
+		// If a XML file is given, these are set to the retrieved parameters.
 		private double homopolyCNT = 3.0;
 		private double homopolySCORE = -200.0;
 		private double lengthIDEAL = 20.5;
@@ -73,7 +78,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		
 		/**
 		 * Constructor of the class.
-		 * Fills the parameter containers with default values.
+		 * Fills the parameter containers with default values and gets instances of the need 'help' classes.
 		 */
 		
 		public PrimerScoringScheme(){
@@ -82,11 +87,20 @@ import javax.swing.tree.DefaultMutableTreeNode;
 				swa = new SimpleSmithWatermanPrimerAligner();
 		}
 
+		/**
+		 * This method calculates scores for each attribute of the primer and returns a
+		 * total score for it.
+		 * 
+		 * @param primer
+		 * @return primer score
+		 */
 		public double calculatePrimerScore(Primer primer) {
 			char[] primerSeq = primer.getPrimerSeq();
 				
-				double scoreTemp = this.calcScoreMeltingTemperature(primer.getPrimerTemperature());
-				if (scoreTemp != -1) {
+				double scoreTemperature = this.calcScoreMeltingTemperature(primer.getPrimerTemperature());
+				//when the temperature scores -1 the sequence contains characters which caused an error in the 
+				//melting temperature calculation. These primers will not be considered in futher calculations
+				if (scoreTemperature != -1) {
 					double scoreLength = this.getLengthScore(primer.getPrimerLength());
 					double scoreGCTotal = this.getGCScore(primerSeq);
 					double scoreFirstLastBase = this.getFirstAndLastBaseScore(primerSeq);
@@ -100,7 +114,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 					double primerScore = scoreGCTotal + scoreRepeat
 							+ scoreFirstLastBase + scoreNPenalty + scoreBackfold
 							+ scoreLength + scoreLast6 + scoreOffset
-							+ scorePlus1Plus2 + scoreTemp + scoreHomopoly;
+							+ scorePlus1Plus2 + scoreTemperature + scoreHomopoly;
 					return primerScore;
 					
 			}
@@ -201,7 +215,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		}
 		
 		/**
-		 * This method parses the string objects in the given array
+		 * This method parses the objects in the given array
 		 * to integers and returns them in an array.
 		 * 
 		 * @param object
@@ -222,8 +236,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 	
 		
 		/**
-		 * This method gets the ratio of G and C in the whole primer sequence and returns a score
-		 * according to the given scoring theme.
+		 * This method gets the ratio of G and C in the whole primer sequence.
+		 * It returns a score for GC-level based on the given parameters.
 		 * 
 		 * @param gcRatio
 		 * @return GC-Level score
@@ -231,6 +245,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		private double calcScoreTotalGCLevel(double gcRatio){
 			double scoreGCTotal = 0;
 			Arrays.sort(gcArray,Collections.reverseOrder());
+			//Paramters are used to form intervals and gives back the score
+			//where the GC-ratio is still in the interval
 			for (Integer interval : gcArray){
 			if(gcRatio >=(50-interval)&&gcRatio<=(50+interval)){
 						scoreGCTotal =gc.get((double)interval);
@@ -240,10 +256,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		}
 
 		/**
-		 * This method gets the primer sequence and retrieves the melting temperature for this sequence.
-		 * According to the given scoring theme a score for the melting temperature is returned.
+		 * This method gets the melting temperature for this primer.
+		 * According to the given parameters the score for the melting temperature is returned.
 		 * 
-		 * @param primerSeq
+		 * @param temperature
 		 * @return melting temperature score
 		 */
 		private double calcScoreMeltingTemperature(double temperature){
@@ -251,6 +267,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			double minBorder = 0;
 			double maxBorder = 0;
 			Arrays.sort(annealArray,Collections.reverseOrder());
+			//Paramters are used to form intervals and gives back the score
+			//where the temperature is still in the interval
 			for(Integer interval : annealArray){
 				minBorder = 60-interval;
 				maxBorder = 60+interval;
@@ -262,8 +280,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		}
 		
 		/**
-		 * This method examines the given ratio of the bases G and C at the position 2 till 7 and returns a score
-		 * according to the given scoring scheme.
+		 * This method examines the given ratio of the bases G and C at the position 2 till 7.
+		 * It returns a score according to the used parameters.
 		 * 
 		 * @param gcRatio2A7
 		 * @return GC-Level at position 2 and 7 score 
@@ -271,6 +289,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		private double calcScoreGCLevel2A7(double gcRatio2A7){
 			double scoreGC2A7 = 0;
 			Arrays.sort(gc0207Array);
+			//Paramters are used to form intervals and gives back the score
+			//where the GC0207-ratio is still in the interval
 			for(Integer border : gc0207Array){
 				if(gcRatio2A7>=border){
 					scoreGC2A7 = this.gc0207.get((double)border);
@@ -289,6 +309,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		public double calcScoreLast6(double ATLast6Ratio){
 			double scoreLast6Bases =0;
 			Arrays.sort(ATLast6Array);
+			//Paramters are used to form intervals and gives back the score
+			//where the AT-ratio in the last 6 bases is still in the interval
 			for(Integer border : ATLast6Array){
 				if(ATLast6Ratio>= border){
 					scoreLast6Bases = this.atLast6.get((double)border);
@@ -297,9 +319,18 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			return scoreLast6Bases;
 		}
 		
+		/**
+		 * This method calculates the score for the offset of a primer to the end
+		 * of the contig.
+		 * 
+		 * @param realstart
+		 * @return offsetScore
+		 */
 		private double calcScoreOffset(int realstart){
-			double score =0;
+			double score = 0;
 			Arrays.sort(offsetArray);
+			//Paramters are used to form intervals and gives back the score
+			//where the start-position of the primer is still in the interval
 			for(Integer border : offsetArray){
 				if(realstart>= border){
 					score = this.offset.get((double)border);
@@ -325,22 +356,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			}
 			return scoreMaxOffset;
 		}
-		
-		
-		public double getTemperature() {
-			return temperature;
-		}
-
-
-		public void setTemperature(double temperature) {
-			this.temperature = temperature;
-		}
-		
-
 
 		/**
-		 * This method checks the following bases in the primer sequences and
-		 * retrieves the score for homopoly.
+		 * This method checks the primer sequences and retrieves the score for homopoly.
 		 * 
 		 * @param primerSeq
 		 * @return scoreHomopoly
@@ -429,10 +447,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		}
 
 		/**
-		 * This method retrieves the score for the given primer length
+		 * This method calculates the score for the given primer length
 		 * 
 		 * @param primerLength
-		 * @return
+		 * @return scoreLength
 		 */
 
 		public double getLengthScore(int primerLength) {
@@ -443,8 +461,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 		/**
 		 * This method calculates the ratio of AT at the last six bases and then
-		 * retrieves the score for the ratio of the given primer sequences according
-		 * to its direction.
+		 * retrieves the score for the ratio of the given primer sequences.
 		 * 
 		 * @param primerSeq
 		 * @param direction
@@ -467,30 +484,31 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		}
 
 		/**
-		 * This method calculated the total GC-ratio and the ratio or the ratio for
-		 * GC at positions 2-7 and then retrieves the score for one of those ratios
-		 * of the given sequence depending on the boolean totalGC
+		 * This method calculated the total GC-ratio and the GC-ratio at positions 2-7.
+		 * It returns the score for both GC-ratios based on the given parameters.
 		 * 
 		 * @param primerSeq
-		 * @param totalGC
-		 * @param direction
 		 * @return allGCScore
 		 */
 		public double getGCScore(char[] primerSeq) {
 			double allGCScore = 0;
 			int gcLevel = 0;
 			int gcLevel2A7 = 0;
+			//going through the primer sequence and count 'G's and 'C's
 			for (int i = 0; i < primerSeq.length; i++) {
 				if (primerSeq[i] == 'G' || primerSeq[i] == 'g'
 						|| primerSeq[i] == 'C' || primerSeq[i] == 'c') {
 					gcLevel++;
+					//only counts 'G's and 'C's when they occure at these positions
 					if (i > 0 && i < 7) {
 						gcLevel2A7++;
 					}
 				}
 			}
+				//gc ratio for the whole sequence
 				double gcRatio = (float) gcLevel / (float) (primerSeq.length + 1) * 100;
 				double scoreTotalGC = this.calcScoreTotalGCLevel(gcRatio);
+				//gc ratio only for the specific positions
 				double gcRatio2A7 = (float) gcLevel2A7 / 6 * 100;
 				double scoreGC2A7 = this.calcScoreGCLevel2A7(gcRatio2A7);
 			allGCScore = scoreTotalGC +scoreGC2A7;
@@ -498,12 +516,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		}
 
 		/**
-		 * This method calculates the realstart position of the primer in the contig
-		 * sequence and retrieves the score for the offset of the given primer.
+		 * This method retrieves the score for the offset of the given primer.
 		 * 
 		 * @param offset
-		 * @param primerLength
-		 * @param direction
 		 * @return scoreOffset
 		 */
 		public double getOffsetsScore(int distanceToBorder) {
@@ -531,7 +546,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 		/**
 		 * This method counts the lowercase letters, which represents the repeats in
-		 * the sequence and retrieves the score for those repeats.
+		 * the sequence and calculates the score for those repeats.
 		 * 
 		 * @param primerSeq
 		 * @return scoreRepeat
@@ -552,7 +567,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		
 
 		/**
-		 * This method loads the parameters which are given by a config XML file given by the user.
+		 * This method loads the parameters which are given by a config XML file 
+		 * given by the user.
 		 * 
 		 * @param key
 		 * @param value
@@ -628,8 +644,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		}
 		
 		
-		/**
-		 * @see DocumentHandler
+		
+		/* (non-Javadoc)
+		 * @see de.bielefeld.uni.cebitec.cav.primerdesign.DocumentHandler#startDocument()
 		 */
 		@Override
 		public void startDocument() throws Exception {
@@ -637,8 +654,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			
 		}
 		
-		/**
-		 * @see DocumentHandler
+		
+		/* (non-Javadoc)
+		 * @see de.bielefeld.uni.cebitec.cav.primerdesign.DocumentHandler#endDocument()
 		 */
 		@Override
 		public void endDocument() throws Exception {
@@ -646,6 +664,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			
 		}
 		
+		/* (non-Javadoc)
+		 * @see de.bielefeld.uni.cebitec.cav.primerdesign.DocumentHandler#startElement(java.lang.String, java.util.Hashtable)
+		 */
 		@Override
 		public void startElement(String tag, Hashtable hash) throws Exception {
 			String keyV;
@@ -677,8 +698,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			
 	}
 		
-		/**
-		 * @see DocumentHandler
+		
+		/* (non-Javadoc)
+		 * @see de.bielefeld.uni.cebitec.cav.primerdesign.DocumentHandler#endElement(java.lang.String)
 		 */
 		@Override
 		public void endElement(String st) throws Exception {
@@ -689,8 +711,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			stack.pop();
 		}
 
-		/**
-		 * @see DocumentHandler
+	
+		/* (non-Javadoc)
+		 * @see de.bielefeld.uni.cebitec.cav.primerdesign.DocumentHandler#value(java.lang.String)
 		 */
 		@Override
 		public void value(String s) throws Exception {
@@ -704,6 +727,5 @@ import javax.swing.tree.DefaultMutableTreeNode;
 				}
 			}
 		}
-	
 }
 	

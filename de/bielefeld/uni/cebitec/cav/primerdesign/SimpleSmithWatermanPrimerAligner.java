@@ -45,6 +45,10 @@ public class SimpleSmithWatermanPrimerAligner {
 
 
 	/**
+	 * This method sets the parameters for the getAlignmentScore-method
+	 * The sequences are set and the length of the sequences are set as the border values
+	 * for the alignment.
+	 * 
 	 * @param firstSeq
 	 * @param secondSeq
 	 * @return
@@ -53,7 +57,17 @@ public class SimpleSmithWatermanPrimerAligner {
 		return getAlignmentScore(firstSeq, secondSeq, firstSeq.length, secondSeq.length);
 	}
 
-	
+	/**
+	 * This method calculates the alignment for two given sequence to the given positions. (maxI and maxJ)
+	 * For the local alignment it uses a simplified version of the smith-waterman algorithm.
+	 * It returns the maximum score of the alignment.
+	 * 
+	 * @param firstSeq
+	 * @param secondSeq
+	 * @param maxI
+	 * @param maxJ
+	 * @return alignemtnScore
+	 */
 	public double getAlignmentScore(char[] firstSeq, char[] secondSeq, int maxI, int maxJ) {
 		if (firstSeq.length > maxTableSize || secondSeq.length > maxTableSize) {
 			throw new IllegalArgumentException("Sequences that schould be aligned are too big.");

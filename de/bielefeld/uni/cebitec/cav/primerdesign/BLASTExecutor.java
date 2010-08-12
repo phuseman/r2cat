@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Yvonne Hermann, Peter Husemann                  *
+ *   Copyright (C) 2010 by Yvonne Herrmann, Peter Husemann                  *
  *   phuseman  a t  cebitec.uni-bielefeld.de                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -26,8 +26,6 @@ import java.io.IOException;
 
 /**
  * This class handels the execution of the external programm BLAST 2.2.23.
- * 
- * @author yherrman
  *
  */
 
@@ -77,8 +75,7 @@ public class BLASTExecutor {
 /**
  * This method executes the programm formatdb and makes a nucleotide database from the given
  * fasta file.
- * TODO: formatdb creates the database files in the directory of the given file. find a way to do this in the temp dir.
- * @throws IOException
+ *  @throws IOException
  * @throws InterruptedException
  */
 	public int makeBlastDB() throws IOException, InterruptedException{
@@ -112,7 +109,7 @@ public class BLASTExecutor {
 
 	/**
 	 * Returns the output file of the blast run.
-	 * Make sure to remove the temporary files with deleteTempDir() after the result was parsed.
+	 * Makes sure to remove the temporary files with deleteTempDir() after the result was parsed.
 	 * If a blast run is not sucessful, then null can be returned.
 	 * 
 	 * @return File blast results in a temporary directory.

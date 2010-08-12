@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Yvonne Hermann, Peter Husemann                  *
+ *   Copyright (C) 2010 by Yvonne Herrmann, Peter Husemann                  *
  *   phuseman  a t  cebitec.uni-bielefeld.de                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -29,24 +29,32 @@ import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 
 /**
  * This class represents a primer object. This object includes information about
- * the following primer properties: length, startposition,endposition, melting
- * temperature, offset, primer sequence, direction of the primer, score, two
- * bases following the primer in the given sequence and the contig id.
+ * the following primer properties: contigId (for which sequence is the primer generated),
+ * length, start-position, melting temperature, primer sequence, distance to the end of the contig,
+ * direction of the primer.
+ * 
+ * It holds methods to retrieve these information of the primer in order to
+ * calculate its score.
  * 
  * The information is sometimes generated and cached on access for performance reasons.
  * 
  * @author yherrmann / phuseman
  */
+
 public class Primer implements Comparable<Primer> {
 	private String contigID = null;
 	private DNASequence contig = null;
 	private FastaFileReader contigSequences = null;
+	//start-position in the contig
 	private int primerStart = 0;
+	//length of the primer sequence
 	private int primerLength = 0;
+	//on which end of the contig should the primer be localized
 	private boolean onRightEnd = false;
 	private int offsetInFastaFile = 0;
 	private char[] primerSequence = null;
 	private double primerScore = 0;
+	//melting temperature of the primer
 	private Double primerTemperature = null;
 	
 	private Bases bases;
@@ -159,10 +167,17 @@ public class Primer implements Comparable<Primer> {
 			return primerStart;
 		}
 	}
-	
+	/**
+	 * This method retrieves the primer sequence from the contig-sequences. 
+	 * That depends on the primer length, start-position and the offset of the sequence in the 
+	 * fasta file.
+	 * It also needs to be checked on which end of the sequence the primer is localized.
+	 * 
+	 * @return primerSequence
+	 */
 	public char[] getPrimerSeq() {
 		//cache the primer sequences
-		//if primerSequence is null, then it was not acesses before
+		//if primerSequence is null, then it was not accesses before
 		if (primerSequence == null) {
 			if (onRightEnd) {
 				primerSequence = contigSequences.getSubstring(offsetInFastaFile
@@ -185,9 +200,18 @@ public class Primer implements Comparable<Primer> {
 		this.primerScore = primerScore;
 	}
 
+
 	public int getPrimerLength() {
 		return primerLength;
 	}
+	/**
+	 * This method returns the melting temperature of the primer. 
+	 * If the temperature is not calculated yet, the method uses an instance of
+	 * MeltingTemperature and retrieves the melting temperature for the given
+	 * primer object.
+	 * 
+	 * @return primerTemperature
+	 */
 	public double getPrimerTemperature() {
 		if(primerTemperature == null) {
 			MeltingTemperature meltingTemperature = MeltingTemperature.getInstance();
@@ -206,6 +230,9 @@ public class Primer implements Comparable<Primer> {
 		return primerStart;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
 	public int compareTo(Primer other) {
 		if(this.getPrimerScore()<other.getPrimerScore()){
 			return 1;

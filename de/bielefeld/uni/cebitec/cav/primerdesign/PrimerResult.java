@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Yvonne Hermann, Peter Husemann                  *
+ *   Copyright (C) 2010 by Yvonne Herrmann, Peter Husemann                  *
  *   phuseman  a t  cebitec.uni-bielefeld.de                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,31 +24,49 @@ package de.bielefeld.uni.cebitec.cav.primerdesign;
 import java.util.Vector;
 
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
-
+/**
+ * This class holds the results of primers for the given contig pair.
+ * 
+ */
 public class PrimerResult {
 	private DNASequence contigLeft;
 	private DNASequence contigRight;
+	//primer at the right end of the first contig
 	private Vector<Primer> forwardPrimer;
+	//primer at the left end of the second contig
 	private Vector<Primer> reversePrimer;
 	
+	/**
+	 * Constructor for this class. 
+	 * Needs to get the object of the each contig of the selected pair and sets up
+	 * vector of primers, which are used to hold the primers in order of their pairing-set up.
+	 * 
+	 * @param left contig
+	 * @param right contig
+	 * 
+	 */
 	public PrimerResult(DNASequence left, DNASequence right){
 		forwardPrimer = new Vector<Primer>();
 		reversePrimer = new Vector<Primer>();
 		contigLeft = left;
 		contigRight = right;
 	}
-	
+	/**
+	 * This method adds a left primer and a right primer in the vectors with maintaining the 
+	 * the same position in each vector. This is how the pairing of primers is saved.
+	 * 
+	 * @param leftPrimer
+	 * @param rightPrimer
+	 */
 	public void addPair(Primer leftPrimer, Primer rightPrimer){
 		forwardPrimer.add(leftPrimer);
 		reversePrimer.add(rightPrimer);
 		
 	}
 	
-	public void addContigs(DNASequence left, DNASequence right){
-		contigLeft = left;
-		contigRight = right;
-	}
-	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override 
 	public String toString(){
 		String NEW_LINE = System.getProperty("line.separator");
@@ -76,6 +94,10 @@ public class PrimerResult {
 		return results.toString();
 	}
 	
+	/**
+	 * This method returns the contig Ids of the current object.
+	 * @return
+	 */
 	public String getContigIDs(){
 		String id1 = contigLeft.getId();
 		String id2 = contigRight.getId();

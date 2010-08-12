@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Yvonne Hermann, Peter Husemann                  *
+ *   Copyright (C) 2010 by Yvonne Herrmann, Peter Husemann                  *
  *   phuseman  a t  cebitec.uni-bielefeld.de                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -41,17 +41,21 @@ public class MeltingTemperature {
 	private double[][] enthalpyMatrix;
         
 	private double entropyAdd;
-        private double temperatureSubstract;
+    private double temperatureSubstract;
 	
-
-	/**
-	 * In the constructor the oligoConc variable is set and the HashMaps enthalpie and entropie are set up through the method
-	 * fillingEnthalpieAndEntropieParam.
-	 */
+/**
+ * Constructor of this class
+ */
 	private MeltingTemperature(){
 		init();
 }
-	
+	/**
+	 * This method sets up the alphabetMap, which sets the bases to a specific number.
+	 * This is used to set up the entropie and enthalpy matrix, which contain values for a given
+	 * base-tupel.
+	 * 
+	 * e.g. 'AA' has an entropy value of -23.6 and an enthalpie value of -8.4
+	 */
 	private void init() {
 	//create alphabet map
 	alphabetMap = new int[256];
@@ -108,14 +112,15 @@ public class MeltingTemperature {
 	enthalpyMatrix[alphabetMap['T']][alphabetMap['G']] = -7.4;
 	
 	
-	//this 
+	//this is summand for the melting temperature formula
 	entropyAdd = (1.987*Math.log((oligoConcentration/4.0)));
+	//this is a term for substraction used in the melting temperature formula
 	temperatureSubstract = 273.15 + 21.59;
 	}
 	
 	/**
 	 * To avoid reoccurring initialisation of these objects, a single instance shall be used.
-	 * @return
+	 * @return instance of this class
 	 */
 	public static MeltingTemperature getInstance() {
 		if (instance == null) {
@@ -127,9 +132,9 @@ public class MeltingTemperature {
 
 	/**
 	 * This method calculates the melting temperature with the base-stacking method.
-	 * A pair of bases of the sequence is compared to the entries of the HashMaps in order to
-	 * get the level of entropie and enthalpie of the whole sequence. These factors are used in 
-	 * the formula of the base-stacking method to calculate the melting temperature.
+	 * Each tupel of bases in the sequence has a level of entropie and enthalpy, which can be
+	 * retrieved from the matrix of entropie and enthalpy. 
+	 * The enthalpie and entropie of the sequence is used in the formula of the base-stacking method to calculate the melting temperature.
 	 * 
 	 * If the sequence contains unknown letters the calculation can not proceed and returns -1.
 	 * 
@@ -141,7 +146,7 @@ public class MeltingTemperature {
 		boolean error = false;
 		double entropy = 0;
 		double enthalpy = 0;
-		
+		//go through the given sequence and calculate the entropie and enthalpy of each pair of bases
 		for (int i = 0; i < seq.length-1; i++) {
 			try {
 			entropy += entropyMatrix[alphabetMap[seq[i]]][alphabetMap[seq[i+1]]];

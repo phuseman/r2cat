@@ -3,7 +3,11 @@ package de.bielefeld.uni.cebitec.cav.primerdesign;
 import java.io.File;
 import java.util.Date;
 import java.util.Vector;
-
+/**
+ * This class is just for testing...
+ * will be deleted
+ *
+ */
 public class RunSetUp {
 	
 	public static void main(String args[]) throws Exception{

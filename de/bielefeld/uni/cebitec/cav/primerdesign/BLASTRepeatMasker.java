@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Yvonne Hermann, Peter Husemann                  *
+ *   Copyright (C) 2010 by Yvonne Herrmann, Peter Husemann                  *
  *   phuseman  a t  cebitec.uni-bielefeld.de                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -52,6 +52,11 @@ public class BLASTRepeatMasker implements RepeatMasker {
 		fastaFile = fasta;
 	}
 
+	
+	
+	/* (non-Javadoc)
+	 * @see de.bielefeld.uni.cebitec.cav.primerdesign.RepeatMasker#doRepeatMasking()
+	 */
 	@Override
 	public FastaFileReader doRepeatMasking() throws IOException,
 			InterruptedException {

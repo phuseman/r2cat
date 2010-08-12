@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Yvonne Hermann, Peter Husemann                  *
+ *   Copyright (C) 2010 by Yvonne Herrmann, Peter Husemann                  *
  *   phuseman  a t  cebitec.uni-bielefeld.de                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -30,19 +30,17 @@ import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 
 /**
- * This class generates the primer candidates given contig-sequences. The
+ * This class generates the primer candidates based on the given sequence. The
  * sequence of primer candidates has to be checked on certain biological
- * properties and are scored according to the scoring-scheme from the
- * "RetrievePArametersAndScores class".
+ * properties and are scored based on its properties.
  * 
  * @author yherrmann
  * 
  */
 public class PrimerGenerator {
-	private String[] markedSeq = null;
+	//instance of the class which contains the parameters and methods to calculate primer scores
 	private PrimerScoringScheme scoring = null;
 	private FastaFileReader fastaParser;
-	private int realstart = 0;
 	// max length a primer should have
 	private int maxLength = 24;
 	// min length a primer should have
@@ -51,14 +49,13 @@ public class PrimerGenerator {
 	private int minBorderOffset = 80;
 	// max of how far away the offset of a primer to the contig end should be
 	private int maxBorderOffset = 400;
-	private File temporaryDirectory = null;
-	private int max = maxLength + 5;
 	private AbstractProgressReporter progress;
 	private File fasta;
 	private Bases base = null;
 
 
 	/**
+	 * Constructor of this class. Needs to get a fastaFile, which contains sorted contigs
 	 * 
 	 * @param fastaFile
 	 */
@@ -68,12 +65,27 @@ public class PrimerGenerator {
 		base = Bases.getInstance();
 	}
 
+	/**
+	 * Method is called when the user wishes to mask repeats in his sequences and returns
+	 * a fastaFileReader object which includes the masked sequences.
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public void runRepeatMasking() throws IOException, InterruptedException {
 		BLASTRepeatMasker rm = new BLASTRepeatMasker(fastaParser);
 		fastaParser = rm.doRepeatMasking();
 	}
 	
-	public boolean setParameters(File config) throws Exception {
+	/**
+	 * This method checks if a config file is given and sets up the PrimerScoringScheme with
+	 * parameters contained in the config file.
+	 * Or it sets up the PrimerScoringScheme with the loaded default parameters.
+	 * 
+	 * @param config
+	 * @throws Exception
+	 */
+	public void setParameters(File config) throws Exception {
 		if (config != null) {
 			XMLParser configParser = new XMLParser(config);
 			scoring = new PrimerScoringScheme();
@@ -81,7 +93,6 @@ public class PrimerGenerator {
 		} else {
 			scoring = new PrimerScoringScheme();
 		}
-		return true;
 	}
 
 	/**
@@ -106,38 +117,30 @@ public class PrimerGenerator {
 	}
 
 	/**
-	 * This method goes through the vector with the selection informations and
-	 * starts to generate primers for each contig pair which was selected. The
-	 * information which contig was selected and which direction the primer has
-	 * on the specific contig end is put in a String Array. The contig IDs of
-	 * the selected contigs are put in the first and third position of the
-	 * array. The direction (forward or reverse" is put in the second position
-	 * for the first selected Contig and in the fourth position for the second
-	 * selected contig. These information are processed and put into a HashMap
-	 * where the key is the contigID and the value is the direction (in form of
-	 * Integers) of the primer of the selected contig.
+	 * This method gets a vector of contigPair, which contains the IDs of the marked contigs.
+	 * For each pair the contig IDs are checked and then the method generatePrimerFor1ContigPair
+	 * is called which makes primers for each contig pair and saves the results in a PrimerResult object in a vector.
 	 * 
 	 * @param contigPair
+	 * @return prV
 	 * @throws IOException
 	 */
-
 	public Vector<PrimerResult> generatePrimers(Vector<ContigPair> contigPair)
 			throws IOException {
 		Vector<PrimerResult> prV = new Vector<PrimerResult>();
-
 		for (int i = 0; i < contigPair.size(); i++) {
 			ContigPair pair = contigPair.elementAt(i);
+			//Progress is reported to the PrimerFrame
 			this.reportProgress((double) (i + 1) / (contigPair.size() + 1),
 					"Generating primers for contig pair " + pair.contig1
 							+ " and " + pair.contig2);
+			//contigID check
 			if (this.idCheck(pair.contig1) && this.idCheck(pair.contig2)) {
 				if (!(pair.contig1.equals(pair.contig2))) {
+					//generate primers for each contig pair
 					PrimerResult primerResult = this
 							.generatePrimerFor1ContigPair(pair);
 					prV.add(primerResult);
-				} else {
-					throw new IllegalStateException(
-							"contig was defined for forward and reverse primer");
 				}
 			} else {
 				throw new NullPointerException("contig id could not be found");
@@ -146,6 +149,15 @@ public class PrimerGenerator {
 		return prV;
 	}
 
+	/**
+	 * This method generates primer candidates for each contig and then calculates the score
+	 * for each primer and put them into a PrimerResult object.
+	 * This object is given to the PrimerPairing class to pair the primers and then is returned.
+	 * 
+	 * @param pair
+	 * @return primerResult
+	 * @throws IOException
+	 */
 	public PrimerResult generatePrimerFor1ContigPair(ContigPair pair)
 			throws IOException {
 		// create all possible primers for both contigs
@@ -162,9 +174,9 @@ public class PrimerGenerator {
 		// pair the primer ant add them to a primer result
 		DNASequence leftContig = this.fastaParser.getSequence(pair.contig1);
 		DNASequence rightContig = this.fastaParser.getSequence(pair.contig2);
-		PrimerResult pr = new PrimerResult(leftContig, rightContig);
-		pr = this.getPrimerPairs(primerCandidates1, primerCandidates2, pr);
-		return pr;
+		PrimerResult primerResult = new PrimerResult(leftContig, rightContig);
+		primerResult = this.getPrimerPairs(primerCandidates1, primerCandidates2, primerResult);
+		return primerResult;
 	}
 
 
@@ -211,10 +223,8 @@ public class PrimerGenerator {
 	}
 
 	/**
-	 * This methods access each scoring method for each primer object and
-	 * retrieves the whole score for each primer candidate. The primer
-	 * candidates with a score higher than -200 are saved up in a vector
-	 * according to the direction of the primer.
+	 * This methods access the scoring method from the PrimerScoringScheme, where the primer
+	 * scores are calculated, and only saves those primers which have higher scores than -200.
 	 * 
 	 * @throws IOException
 	 */

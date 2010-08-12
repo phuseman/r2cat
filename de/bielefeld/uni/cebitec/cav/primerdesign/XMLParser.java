@@ -12,11 +12,12 @@ import java.util.Stack;
  * This class reports what kind of tag was met in the XML-file in order to store the
  * information of the XML-file in the same structure.
  * TODO: add proper reference!!
- * 
+ * REFERENCE!!!
  *
  */
 public class XMLParser {
 	private File config = null;
+	private FileReader fr;
 	class TagType{
 		private static final int
 				TEXT = 1,
@@ -36,12 +37,13 @@ public class XMLParser {
 				PRE = 15;
 	}
 	
-	public XMLParser(File configFile){
+	public XMLParser(File configFile) throws FileNotFoundException{
 		this.config = configFile;
+		this.fr =new FileReader(config);
 	}
 	
 	public boolean scanXML() throws IOException{
-		BufferedReader in = new BufferedReader(new FileReader(config));
+		BufferedReader in = new BufferedReader(fr);
 		 int countClosing = 0;
 		 int countOpening = 0;
 		 String line;
@@ -271,8 +273,8 @@ public class XMLParser {
 		this.config = config;
 	}
 
-	public boolean quickScan() throws IOException {
-		BufferedReader in = new BufferedReader(new FileReader(config));
+	public boolean quickScan() throws IOException  {
+		BufferedReader in = new BufferedReader(fr);
 		 char[] cbuf = new char[1000];  
 		 int opening= 0,closing = 0;
 			 in.read(cbuf, 0, 1000);
