@@ -49,10 +49,10 @@ public class PrimerGenerator {
 	private int minBorderOffset = 80;
 	// max of how far away the offset of a primer to the contig end should be
 	private int maxBorderOffset = 400;
+	
+	
 	private AbstractProgressReporter progress;
-	private File fasta;
-	private Bases base = null;
-
+	private double maxProgress = 0;
 
 	/**
 	 * Constructor of this class. Needs to get a fastaFile, which contains sorted contigs
@@ -60,9 +60,7 @@ public class PrimerGenerator {
 	 * @param fastaFile
 	 */
 	public PrimerGenerator(File fastaFile) {
-		fasta = fastaFile;
 		fastaParser = new FastaFileReader(fastaFile);
-		base = Bases.getInstance();
 	}
 
 	/**
@@ -127,6 +125,7 @@ public class PrimerGenerator {
 	 */
 	public Vector<PrimerResult> generatePrimers(Vector<ContigPair> contigPair)
 			throws IOException {
+		
 		Vector<PrimerResult> prV = new Vector<PrimerResult>();
 		for (int i = 0; i < contigPair.size(); i++) {
 			ContigPair pair = contigPair.elementAt(i);

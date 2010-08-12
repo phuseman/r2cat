@@ -22,6 +22,7 @@
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
 import java.util.Collections;
+import java.util.PriorityQueue;
 import java.util.Vector;
 
 /**
@@ -43,6 +44,29 @@ public class PrimerPairing {
 	private final double maxAlignmentScore = 32.;
 	
 
+	public class PrimerPair implements Comparable<PrimerPair>{
+		Primer left;
+		Primer right;
+		double score;
+		
+		public PrimerPair(Primer left, Primer right, double totalscore) {
+			this.left = left;
+			this.right=right;
+			this.score=totalscore;
+		}
+
+		@Override
+		public int compareTo(PrimerPair o) {
+			if (this.score < o.score) {
+				return 1;
+			}
+			if (this.score > o.score) {
+				return -1;
+			}
+			return 0;
+		}
+	}
+	
 	public PrimerPairing() {
 		base = Bases.getInstance();
 		swa = new SimpleSmithWatermanPrimerAligner();
@@ -112,7 +136,6 @@ public class PrimerPairing {
     	//remove 1 from the score since a one base hit is very likely.
     	double similarityScore = swa.getAlignmentScore(firstSeq, secondSeq)-1;
     	
-    	System.out.println(similarityScore);
     	// if more than 8 bases match, then we cannot use this pair.
     	if(similarityScore >= 7) {
     		return 0.0;
@@ -140,7 +163,11 @@ public class PrimerPairing {
 		Collections.sort(leftPrimer);
 		Collections.sort(rightPrimer);
 		
-		int topCandidatesToConsider = 10;
+		boolean[] leftUsed = new boolean[leftPrimer.size()];
+		boolean[] rightUsed = new boolean[rightPrimer.size()];
+		PriorityQueue<PrimerPair> bestPairs = new PriorityQueue<PrimerPair>();
+		
+		int topCandidatesToConsider = 20;
 		if(topCandidatesToConsider>rightPrimer.size()) {
 			topCandidatesToConsider=rightPrimer.size();
 		}
@@ -152,10 +179,11 @@ public class PrimerPairing {
 		Primer right = null;
 		double temperatureScore = 0;
 		double sequenceSimilarityScore = 0;
+		double totalscore = 0;
 		char[] reverseComplementOfSecondPrimer=null;
 
 		
-		for (int i = 0; i < topCandidatesToConsider; i++) {
+		nextleft : for (int i = 0; i < topCandidatesToConsider; i++) {
 			for (int j = 0; j < topCandidatesToConsider; j++) {
 				temperatureScore = 0;
 				sequenceSimilarityScore = 0;
@@ -167,6 +195,11 @@ public class PrimerPairing {
 					if(sequenceSimilarityQuickCheck(left.getPrimerSeq(), reverseComplementOfSecondPrimer)) {
 						sequenceSimilarityScore = sequenceSimilarityScore(left.getPrimerSeq(), reverseComplementOfSecondPrimer);
 						
+						totalscore = temperatureScore * sequenceSimilarityScore * (left.getPrimerScore() + right.getPrimerScore());
+						bestPairs.add(new PrimerPair(left,right,totalscore));
+						leftUsed[i]=true;
+						rightUsed[j]=true;
+						
 //						System.out.println("===========");
 //						System.out.println("Tr:"+ right.getPrimerTemperature()+"\nTl:"+ left.getPrimerTemperature()+"\nTscore="+temperatureScore);
 //						System.out.println("l  : "+new String(left.getPrimerSeq()));
@@ -174,12 +207,50 @@ public class PrimerPairing {
 //						System.out.println("similarity score"+sequenceSimilarityScore);
 //						System.out.println("Gesamt: "+ (temperatureScore * sequenceSimilarityScore * (left.getPrimerScore() + right.getPrimerScore())));
 //						System.out.println("===========");
+						continue nextleft;
 					}
 				}
-				
-				
 			}
-			
+		}
+
+		
+		
+
+		// the same with the other side
+		
+		nextright : for (int i = 0; i < topCandidatesToConsider; i++) {
+			if(rightUsed[i]) {
+				continue;
+			}
+			for (int j = 0; j < topCandidatesToConsider; j++) {
+				if (leftUsed[j]){
+					continue;
+				}
+				temperatureScore = 0;
+				sequenceSimilarityScore = 0;
+				right = rightPrimer.get(i);
+				left=leftPrimer.get(j);
+				if(temperatureDifferenceQuickCheck(right.getPrimerTemperature(), left.getPrimerTemperature())) {
+					temperatureScore = temperatureDifferenceScore(right.getPrimerTemperature(), left.getPrimerTemperature());
+					reverseComplementOfSecondPrimer = base.getReverseComplement(right.getPrimerSeq());
+					if(sequenceSimilarityQuickCheck(left.getPrimerSeq(), reverseComplementOfSecondPrimer)) {
+						sequenceSimilarityScore = sequenceSimilarityScore(left.getPrimerSeq(), reverseComplementOfSecondPrimer);
+						
+						totalscore = temperatureScore * sequenceSimilarityScore * (left.getPrimerScore() + right.getPrimerScore());
+						bestPairs.add(new PrimerPair(left,right,totalscore));
+						rightUsed[i]=true;
+						leftUsed[j]=true;
+						continue nextright;
+					}
+				}
+			}
+		}
+
+		
+		PrimerPair pair = null;
+		while (!bestPairs.isEmpty()) {
+			pair = bestPairs.poll();
+			primerResult.addPair(pair.left, pair.right);
 		}
 		
 		return primerResult;
