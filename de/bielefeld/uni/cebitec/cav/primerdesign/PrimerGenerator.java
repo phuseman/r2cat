@@ -278,7 +278,7 @@ public class PrimerGenerator {
 				scoredPrimerCandidates.add(candidate);
 			}
 		}
-		System.out.println("size"+scoredPrimerCandidates.size());
+		//System.out.println("size"+scoredPrimerCandidates.size());
 		return scoredPrimerCandidates;
 	}
 
