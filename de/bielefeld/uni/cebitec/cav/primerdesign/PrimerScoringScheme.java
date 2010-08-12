@@ -46,25 +46,30 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		private HashMap<Character, Double> lastBase = new HashMap<Character, Double>();
 		private HashMap<Character, Double>	plus1Base= new HashMap<Character, Double>();
 		private HashMap<Character, Double>	plus2Base= new HashMap<Character, Double>();
-		private HashMap<String, Double>	length= new HashMap<String, Double>();
-		private HashMap<String, Double>	homopoly= new HashMap<String, Double>();
-		private HashMap<String, Double>	maxOffset= new HashMap<String, Double>();
 		private HashMap<Double, Double> gc = new HashMap<Double, Double>();
 		private HashMap<Double, Double> offset = new HashMap<Double, Double>();
 		private HashMap<Double, Double> atLast6 = new HashMap<Double, Double>();
 		private HashMap<Double, Double> gc0207 = new HashMap<Double, Double>();
 		private HashMap<Double, Double> anneal = new HashMap<Double, Double>();
-		private HashMap<String, Double> repeatAndBackfoldAndNPenalty= new HashMap<String, Double>();
 		private Integer[] gcArray;
 		private Integer[] annealArray;
 		private Integer[] ATLast6Array;
 		private Integer[] gc0207Array;
 		private Integer[] offsetArray;
-		double temperature = 0;
+		private double temperature = 0;
 		private Bases base;
 		private SimpleSmithWatermanPrimerAligner swa;
-		private double homopolyCNT;
-		private double homopolySCORE;
+		//default parameters
+		private double homopolyCNT = 3.0;
+		private double homopolySCORE = -200.0;
+		private double lengthIDEAL = 20.5;
+		private double lengthSCORE= -2.0;
+		private double npenalty = -1500.0;
+		private double repeat = -1500.0;
+		private double maxoffsetDISTANCE = 150.0;
+		private double maxoffsetMULT = -2.0;
+		private double backfold = -1500.0;
+		
 		
 		/**
 		 * Constructor of the class.
@@ -172,27 +177,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			atLast6ArrayList = fillArrayListWithDefaultValues(atLast6);
 			this.ATLast6Array =this.makeIntArray((atLast6ArrayList.toArray()));
 			
-			maxOffset.put("DISTANCE", 150.0);
-			maxOffset.put("MULT",-2.0);
-			
-			repeatAndBackfoldAndNPenalty.put("REPEAT", -78.0);
-			repeatAndBackfoldAndNPenalty.put("N_PENALTY", -1500.0);
-			repeatAndBackfoldAndNPenalty.put("BACKFOLD", -1500.0);
-			
-			homopolyCNT = 3.0;
-			homopolySCORE = -200.0;
-			homopoly.put("CNT", 3.0);
-			homopoly.put("SCORE", -200.0);
-			
 			anneal.put(2.0, 200.0);
 			anneal.put(6.0,0.0);
 			anneal.put(100.0, -1500.0);
 			
 			annealArrayList = fillArrayListWithDefaultValues(anneal);
 			this.annealArray =this.makeIntArray((annealArrayList.toArray()));
-			
-			length.put("IDEAL", 20.5);
-			length.put("SCORE", -2.0);
 		}
 		
 		/**
@@ -329,11 +319,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 */
 		private double calcScoreMaxOffset(int realstart){
 			double scoreMaxOffset = 0;
-			double mult = this.maxOffset.get("MULT");
-			double distance = this.maxOffset.get("DISTANCE");
-			if(realstart > distance){
-				double maxOffset = realstart - distance;
-				scoreMaxOffset = (maxOffset * mult);
+			if(realstart > maxoffsetDISTANCE){
+				double maxOffset = realstart - maxoffsetDISTANCE;
+				scoreMaxOffset = (maxOffset * maxoffsetMULT);
 			}
 			return scoreMaxOffset;
 		}
@@ -393,7 +381,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			char[] reverseCompl = base.getReverseComplement(primerSeq);
 			double smwScore = swa.getAlignmentScore(primerSeq, reverseCompl,4,(primerSeq.length-8));
 			if(smwScore>=8){
-			scoreBackfold = repeatAndBackfoldAndNPenalty.get("BACKFOLD");
+			scoreBackfold = backfold;
 			}
 			return scoreBackfold;
 		}
@@ -436,8 +424,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 					nCount++;
 				}
 			}
-			double penalty = this.repeatAndBackfoldAndNPenalty.get("N_PENALTY");
-			scoreNPenalty = penalty*nCount;
+			scoreNPenalty = npenalty*nCount;
 			return scoreNPenalty;
 		}
 
@@ -449,11 +436,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 */
 
 		public double getLengthScore(int primerLength) {
-			double scoreLength = 0;
-			double factor = this.length.get("SCORE");
-			double idealLength = this.length.get("IDEAL");
-			double distance = Math.abs(idealLength - primerLength);
-			scoreLength = (distance*factor);
+			double distance = Math.abs(lengthIDEAL - primerLength);
+			double scoreLength = (distance*lengthSCORE);
 			return scoreLength;
 		}
 
@@ -468,8 +452,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 */
 
 		public double getLast6Score(char[] primerSeq) {
-			double scoreLast6Bases = 0;
-			double last6Ratio = 0;
 			double ATLevelAtLast6 = 0;
 			for (int i = 1; i <= 6; i++) {
 				if (primerSeq[(primerSeq.length - i)] == 'A'
@@ -479,8 +461,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 					ATLevelAtLast6++;
 				}
 			}
-			last6Ratio = (ATLevelAtLast6 / 6 * 100);
-			scoreLast6Bases = this.calcScoreLast6(last6Ratio);
+			double last6Ratio = (ATLevelAtLast6 / 6 * 100);
+			double scoreLast6Bases = this.calcScoreLast6(last6Ratio);
 			return scoreLast6Bases;
 		}
 
@@ -498,8 +480,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			double allGCScore = 0;
 			int gcLevel = 0;
 			int gcLevel2A7 = 0;
-			double gcRatio = 0;
-			double gcRatio2A7 = 0;
 			for (int i = 0; i < primerSeq.length; i++) {
 				if (primerSeq[i] == 'G' || primerSeq[i] == 'g'
 						|| primerSeq[i] == 'C' || primerSeq[i] == 'c') {
@@ -509,9 +489,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 					}
 				}
 			}
-				gcRatio = (float) gcLevel / (float) (primerSeq.length + 1) * 100;
+				double gcRatio = (float) gcLevel / (float) (primerSeq.length + 1) * 100;
 				double scoreTotalGC = this.calcScoreTotalGCLevel(gcRatio);
-				gcRatio2A7 = (float) gcLevel2A7 / 6 * 100;
+				double gcRatio2A7 = (float) gcLevel2A7 / 6 * 100;
 				double scoreGC2A7 = this.calcScoreGCLevel2A7(gcRatio2A7);
 			allGCScore = scoreTotalGC +scoreGC2A7;
 			return allGCScore;
@@ -527,8 +507,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @return scoreOffset
 		 */
 		public double getOffsetsScore(int distanceToBorder) {
-			double scoreOffset = 0;
-				scoreOffset = this.calcScoreOffset(distanceToBorder)
+				double scoreOffset = this.calcScoreOffset(distanceToBorder)
 						+ this.calcScoreMaxOffset(distanceToBorder);
 				return scoreOffset;
 		}
@@ -542,12 +521,11 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @return scorePlus1Plus2
 		 */
 		public double getPlus1Plus2Score(char plus1, char plus2) {
-			double scorePlus1Plus2 = 0;
 			plus1 = Character.toUpperCase(plus1);
 			plus2 = Character.toUpperCase(plus2);
 			double plus1Score = this.plus1Base.get(plus1);
 			double plus2Score = this.plus2Base.get(plus2);
-			scorePlus1Plus2 = plus1Score + plus2Score;
+			double scorePlus1Plus2 = plus1Score + plus2Score;
 			return scorePlus1Plus2;
 		}
 
@@ -561,8 +539,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 		public double getRepeatScore(char[] primerSeq) {
 			double repeatCount = 0;
-			double repeatScore = 0;
-			double repeatFaktor = this.repeatAndBackfoldAndNPenalty.get("REPEAT");
 			for (int i = 0; i < primerSeq.length; i++) {
 				if (primerSeq[i] == 'a' || primerSeq[i] == 't'
 						|| primerSeq[i] == 'g' || primerSeq[i] == 'c') {
@@ -570,7 +546,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 				}
 			}
 		
-			repeatScore = (repeatFaktor*repeatCount);
+			double repeatScore = (repeat*repeatCount);
 			return repeatScore;
 		}
 		
@@ -601,20 +577,36 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			}if(currentParent.toString().equals("PLUS_2")){
 				plus2Base.put(key.charAt(0), Double.parseDouble(value));
 			}if(currentParent.toString().equals("LENGTH")){
-				length.put(currentTag, Double.parseDouble(value));
+				if(currentTag.toString().equals("IDEAL")){
+					lengthIDEAL = Double.parseDouble(value);
+				}
+				if(currentTag.toString().equals("SCORE")){
+					lengthSCORE = Double.parseDouble(value);
+				}
 			}if(currentParent.toString().equals("HOMOPOLY")){
-				if(currentTag =="CNT"){
+				if(currentTag.toString().equals("CNT")){
 					homopolyCNT = Double.parseDouble(value);
 				}
-				if(currentTag =="SCORE"){
+				if(currentTag.toString().equals("SCORE")){
 					homopolySCORE = Double.parseDouble(value);
 				}
-				///homopoly.put(currentTag, Double.parseDouble(value));
 			}if(currentParent.toString().equals("MAX_OFFSET")){
-				maxOffset.put(currentTag, Double.parseDouble(value));
+				if(currentTag.toString().equals("DISTANCE")){
+					maxoffsetDISTANCE = Double.parseDouble(value);
+				}
+				if(currentTag.toString().equals("MULT")){
+					maxoffsetMULT = Double.parseDouble(value);
+				}
 			}if(currentParent==currentNode){
-				String cP = currentParent.toString();
-				repeatAndBackfoldAndNPenalty.put(cP, Double.parseDouble(value));		
+				if(currentParent.toString().equals("N_PENALTY")){
+					npenalty = Double.parseDouble(value);
+				}
+				if(currentParent.toString().equals("BACKFOLD")){
+					backfold = Double.parseDouble(value);
+				}
+				if(currentParent.toString().equals("REPEAT")){
+					repeat = Double.parseDouble(value);
+				}
 			}if(currentParent.toString().equals("OFFSET")){
 				offset.put(Double.parseDouble(key), Double.parseDouble(value));
 				offsetArrayList.add(Double.parseDouble(key));

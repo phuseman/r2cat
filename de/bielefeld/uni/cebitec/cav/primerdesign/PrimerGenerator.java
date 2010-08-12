@@ -73,8 +73,9 @@ public class PrimerGenerator {
 		fastaParser = rm.doRepeatMasking();
 	}
 	
-	public boolean setParameters(XMLParser configParser) throws Exception {
-		if (configParser != null) {
+	public boolean setParameters(File config) throws Exception {
+		if (config != null) {
+			XMLParser configParser = new XMLParser(config);
 			scoring = new PrimerScoringScheme();
 			configParser.parse(scoring);
 		} else {

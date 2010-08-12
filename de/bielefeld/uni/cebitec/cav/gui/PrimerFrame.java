@@ -5,6 +5,7 @@ import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -122,37 +123,107 @@ public class PrimerFrame extends JFrame implements ActionListener,
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("generate_primer")) {
-
-			if (alignmentPositionsList.getQueries() != null
-					&& !alignmentPositionsList.getQueries().isEmpty()) {
-				contigs = alignmentPositionsList.getQueries().get(0);
-			} else {
-				contigs = new DNASequence("dummy");
-			}
-
-			PrimerGeneratorTask pgT = new PrimerGeneratorTask();
-			pgT.addPropertyChangeListener(this);
-			contigPairs = ((PrimerTableModel) primer
-					.getModel()).getSelectedPairs();
-			if(contigPairs.size()>0) {
-				pgT.execute();
+			try {
+				runAlgorithm();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 
 		} else if (e.getActionCommand().matches("setConfig")) {
-			File config = this.chooseFile(configFile,
-					"Select config (xml format)");
-			this.setConfig(config, false);
-			if (config != null) {
-				this.setConfigButton.setText(configFile.getName());
-				this.setConfigButton.setBackground(Color.decode("#90EE90"));
-			} else {
-				this.setConfigButton.setText("Set Config");
-				this.setConfigButton.setBackground(null);
-				configFile = null;
+			try {
+				setConfig();
+			} catch (NumberFormatException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (HeadlessException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		}
 		this.invalidate();
 		this.repaint();
+	}
+
+	private void setConfig() throws NumberFormatException, HeadlessException, IOException {
+		File config = this.chooseFile(configFile,
+				"Select config (xml format)");
+		this.setConfig(config, false);
+		if (configFile != null) {
+			if(!configFile.canRead()&&!configFile.exists()){
+				Object[] options = {"Yes", "Cancel"};
+				int jOptionPaneAnswer = JOptionPane.showOptionDialog(null,"Could not find or read selected file! \nDo you want to select a new file?", "Config file not found",
+						JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+						null, options, options[0]);
+
+				if(jOptionPaneAnswer == JOptionPane.YES_OPTION) {this.setConfig(MiscFileUtils.chooseFile(null,"Choose a new file", null, true,
+									new CustomFileFilter(".xml","XML file")),false);
+				}
+				
+				if(jOptionPaneAnswer==JOptionPane.YES_OPTION){
+					this.setConfigButton.setText(configFile.getName());
+					this.setConfigButton.setBackground(Color.decode("#90EE90"));
+				} 
+			}else{
+				XMLParser xmlParser = new XMLParser(configFile);
+				if(xmlParser.quickScan()){
+					this.setConfigButton.setText(configFile.getName());
+					this.setConfigButton.setBackground(Color.decode("#90EE90"));
+				} else{
+					Object[] options = { "Yes", "Cancel"};
+					int jOptionPaneAnswer = JOptionPane.showOptionDialog(null,"Sorry! This is not an xml file. \nDo you want to select a new file?", "This is not an xml file!",
+							JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+							null, options, options[0]);
+
+					if(jOptionPaneAnswer == JOptionPane.YES_OPTION) {this.setConfig(MiscFileUtils.chooseFile(null,"Choose a new file", null, true,
+										new CustomFileFilter(".xml","XML file")),false);
+					}
+					if(jOptionPaneAnswer==JOptionPane.YES_OPTION){
+						this.setConfigButton.setText(configFile.getName());
+						this.setConfigButton.setBackground(Color.decode("#90EE90"));
+					} 
+				}
+			}
+			} else {
+			this.setConfigButton.setText("Set Config");
+			this.setConfigButton.setBackground(null);
+			configFile = null;
+		}
+	}
+	
+	private void runAlgorithm() throws IOException {
+		if (alignmentPositionsList.getQueries() != null
+				&& !alignmentPositionsList.getQueries().isEmpty()) {
+			contigs = alignmentPositionsList.getQueries().get(0);
+		} else {
+			contigs = new DNASequence("dummy");
+		}
+		
+		PrimerGeneratorTask pgT = new PrimerGeneratorTask();
+		pgT.addPropertyChangeListener(this);
+		contigPairs = ((PrimerTableModel) primer
+				.getModel()).getSelectedPairs();
+		if(contigPairs.size()>0) {
+			if(configFile!= null){
+				XMLParser xmlParser = new XMLParser(configFile);
+				boolean isXML = xmlParser.scanXML();
+			if(!isXML){
+			JOptionPane.showMessageDialog(this,"Error! This is not a xml file!");
+					this.configFile = null;
+					this.setConfigButton.setText("Set Config");
+					this.setConfigButton.setBackground(null);
+					this.repaint();
+				}else{
+					pgT.execute();
+				}
+			}else{
+				pgT.execute();	
+			}
+		
+		}
 	}
 
 	public void showResults(Vector<PrimerResult> pResult) {
@@ -160,13 +231,6 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		pr.pack();
 		pr.setLocationByPlatform(true);
 		pr.setVisible(true);
-	}
-	public File getConfigFile() {
-		return configFile;
-	}
-
-	public void setConfigFile(File configFile) {
-		this.configFile = configFile;
 	}
 	class PrimerGeneratorTask extends SwingWorker<Vector<PrimerResult>, String>
 			implements AbstractProgressReporter {
@@ -191,52 +255,12 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				PrimerFrame.this.progressBar.setString(null);
 				PrimerFrame.this.progressBar.setIndeterminate(false);
 			}
-			nextCheck :
-			while(configFile!=null&&!configFile.canRead()&&!configFile.exists()){
-				Object[] options = { "Yes", "Cancel"};
-				int jOptionPaneAnswer = JOptionPane.showOptionDialog(null,"Could not find or read selected file! \nDo you want to select a new file?", "Config file not found",
-						JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
-						null, options, options[0]);
-
-				if(jOptionPaneAnswer == JOptionPane.YES_OPTION) {PrimerFrame.this.setConfigFile(MiscFileUtils.chooseFile(null,"Choose a new file", null, true,
-									new CustomFileFilter(".xml","XML file")));
-				}
-				
-				if(jOptionPaneAnswer==JOptionPane.YES_OPTION){
-					configFile = PrimerFrame.this.getConfigFile();
-					break nextCheck;
-				}else{
-					this.cancel(true);
-					PrimerFrame.this.configFile = null;
-					PrimerFrame.this.setConfigButton.setText("Set Config");
-					PrimerFrame.this.setConfigButton.setBackground(null);
-					PrimerFrame.this.repaint();
-				}
+			
+			if(configFile != null){
+				pg.setParameters(configFile);
+			}else{
+				pg.setParameters(null);
 			}
-			if(configFile!=null){
-				XMLParser xmlParser = new XMLParser(configFile);
-				boolean isXML = xmlParser.scanXML();
-				if(isXML){
-					pg.setParameters(xmlParser);
-				}else{
-					Object[] options = { "Yes", "Cancel"};
-					int jOptionPaneAnswer = JOptionPane.showOptionDialog(PrimerFrame.this,"The chosen file isn't a xml file. Do you want to generate primers with default parameters?","No XML file",
-							JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
-							null, options, options[0]);
-					if(jOptionPaneAnswer == JOptionPane.YES_OPTION) {
-					xmlParser = null;
-					pg.setParameters(xmlParser);
-					}else{
-						this.cancel(true);
-						PrimerFrame.this.configFile = null;
-						PrimerFrame.this.setConfigButton.setText("Set Config");
-						PrimerFrame.this.setConfigButton.setBackground(null);
-						PrimerFrame.this.repaint();
-					}
-					}
-				} else{
-					pg.setParameters(null);
-				}
 
 			PrimerFrame.this.progressBar.setIndeterminate(false);
 			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);

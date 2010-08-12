@@ -2,6 +2,7 @@ package de.bielefeld.uni.cebitec.cav.primerdesign;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -40,9 +41,7 @@ public class XMLParser {
 	}
 	
 	public boolean scanXML() throws IOException{
-		boolean isXML = false;
 		BufferedReader in = new BufferedReader(new FileReader(config));
-		 int character = 0;
 		 int countClosing = 0;
 		 int countOpening = 0;
 		 String line;
@@ -60,11 +59,11 @@ public class XMLParser {
 			}
 		 }
 		if(countOpening == countClosing){
-			isXML = true;
-			return isXML;
+			return true;
 		}else{
-			return isXML;
+			return false;
 		}
+		
 	}
 	
 /**
@@ -270,5 +269,25 @@ public class XMLParser {
 
 	public void setConfig(File config) {
 		this.config = config;
+	}
+
+	public boolean quickScan() throws IOException {
+		BufferedReader in = new BufferedReader(new FileReader(config));
+		 char[] cbuf = new char[1000];  
+		 int opening= 0,closing = 0;
+			 in.read(cbuf, 0, 1000);
+			 for (int i = 0; i < cbuf.length; i++) {
+				if(cbuf[i]=='<'){
+					opening++;
+				}
+				if(cbuf[i]=='>'){
+					closing++;
+				}
+			}
+			 if(opening!=0&&opening>=closing&&closing!=0){
+				 return true;
+			 }else{
+				 return false;
+			 }
 	}
 }
