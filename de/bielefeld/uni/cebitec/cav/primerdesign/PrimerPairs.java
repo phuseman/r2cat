@@ -171,7 +171,7 @@ public class PrimerPairs {
 					notPairedPrimer.add(i);
 				}
 		}
-		//andere lösung... wenn nicht kommentiert... hängt das Programm in dieser Schleife...
+		//andere loesung... wenn nicht kommentiert... haengt das Programm in dieser Schleife...
 /*
 		if(!notPairedPrimer.isEmpty()){
 		for(Integer a : notPairedPrimer){

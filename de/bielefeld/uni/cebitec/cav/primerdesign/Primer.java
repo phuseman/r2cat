@@ -1,5 +1,7 @@
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
+import java.util.Locale;
+
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 
@@ -9,9 +11,9 @@ import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
  * temperature, offset, primer sequence, direction of the primer, score, two
  * bases following the primer in the given sequence and the contig id.
  * 
- * This class includes getter and setter methods for each property.
+ * The information is sometimes generated and cached on access for performance reasons.
  * 
- * @author yherrmann
+ * @author yherrmann / phuseman
  */
 public class Primer {
 	private String contigID = null;
@@ -47,9 +49,13 @@ public class Primer {
 	 */
 	public Primer(String contigID, FastaFileReader contigSequences,
 			int primerStart, int primerLength, boolean onRightEnd) {
-		//                                  |-->| length & onRightEnd = true
+		//  onRightEnd = true               |-->
 		// -----------------|----------------------|---------------------|
 		//                  ^offset         ^primerStart
+
+		//  onRightEnd = false                        <--| (reverse complement)
+		// -----------------|----------------------|---------------------|
+		//                                   offset^     ^primerStart
 
 		this.contigID = contigID;
 		this.contigSequences = contigSequences;
@@ -67,19 +73,39 @@ public class Primer {
 	 */
 	@Override
 	public String toString() {
-		StringBuilder result = new StringBuilder();
-		String TAB = "\t";
-		String seq = new String(this.getPrimerSeq());
-		double temperature = this.getPrimerTemperature();
-		double temp = Math.round(temperature * 100.0) / 100.0;
-		double scorePrimer = this.getPrimerScore();
-		double score = Math.round(scorePrimer * 100.0) / 100.0;
-		result.append(this.getStart() + TAB + this.getPrimerLength() + TAB
-				+ this.getDistanceFromContigBorder() + TAB + temp + TAB + score + TAB + seq);
-		return result.toString();
+		return toStringWithSeperatorChar('\t');
+	}
+	
+	/**
+	 * This method allows to show the primer information with an arbitrary seperating character.
+	 * Common choisces are a tab \t oder a colon ,
+	 * @param sep
+	 * @return
+	 */
+	private String toStringWithSeperatorChar(char sep) {
+		return String.format((Locale) null, "%d%c%c%c%d%c%d%c%.2f%c%.2f%c%s",
+				getStart(),
+				sep,
+				onRightEnd?'>':'<',
+				sep,
+				getPrimerLength(),
+				sep,
+				getDistanceFromContigBorder(),
+				sep,
+				getPrimerTemperature(),
+				sep,
+				getPrimerScore(),
+				sep,
+				new String(getPrimerSeq())
+				);
 	}
 
-	public char getLastPlus1() {
+	
+	
+	/**
+	 * @return Gets one base behind the primer. This is necessary for the score calculation.
+	 */
+	protected char getLastPlus1() {
 		if (onRightEnd) {
 			return contigSequences.charAt(offsetInFastaFile + primerStart + primerLength + 1);
 		} else {
@@ -88,7 +114,10 @@ public class Primer {
 	}
 
 
-	public Character getLastPlus2() {
+	/**
+	 * @return Gets the second base after the primer. This is necessary for the score calculation.
+	 */
+	protected Character getLastPlus2() {
 		if (onRightEnd) {
 			return contigSequences.charAt(offsetInFastaFile + primerStart + primerLength + 2);
 		} else {
@@ -97,6 +126,10 @@ public class Primer {
 	}
 
 
+	/**
+	 * @return Gives the distance from the end of the contig. (Distance to the last base of the contig, if in forward direction;
+	 * distance to the first base if reverse complemented)
+	 */
 	public int getDistanceFromContigBorder() {
 		if (onRightEnd) {
 			return (int)contig.getSize() - primerStart;
