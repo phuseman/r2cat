@@ -21,6 +21,11 @@
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
 /**
+ * This class can be used to apply the smith waterman algorithm to two char arrays.
+ * It is designed to align only small primer sequences which are not longer than 30 characters!
+ * 
+ * The default score settings (match=1,mismatch=0,indel=-0.5) are equvalent to the unit cost edit distance (0 for match, 1 for mismatch, 1 for indel). 
+ * 
  * @author phuseman
  * 
  */
@@ -30,15 +35,20 @@ public class SimpleSmithWatermanPrimerAligner {
 	// score considering diagonal cell (i-1/j-1) when characters are the same
 	private double matchScore = 1;
 	// score considering diagonal cell (i-1/j-1) when characters are distinct
-	private double misMatchScore = -1;
+	private double misMatchScore = 0;
 	// score considering cell to the left (i-1/j) or from above (i/j-1)
-	private double indelScore = -1;
+	private double indelScore = -0.5;
 
 	public SimpleSmithWatermanPrimerAligner() {
 		smithWatermanScoreMatrix = new double[maxTableSize][maxTableSize];
 	}
 
 
+	/**
+	 * @param firstSeq
+	 * @param secondSeq
+	 * @return
+	 */
 	public double getAlignmentScore(char[] firstSeq, char[] secondSeq) {
 		return getAlignmentScore(firstSeq, secondSeq, firstSeq.length, secondSeq.length);
 	}
@@ -46,7 +56,7 @@ public class SimpleSmithWatermanPrimerAligner {
 	
 	public double getAlignmentScore(char[] firstSeq, char[] secondSeq, int maxI, int maxJ) {
 		if (firstSeq.length > maxTableSize || secondSeq.length > maxTableSize) {
-			throw new IllegalArgumentException("Sequences too big");
+			throw new IllegalArgumentException("Sequences that schould be aligned are too big.");
 		}
 
 		double maxScore = 0;

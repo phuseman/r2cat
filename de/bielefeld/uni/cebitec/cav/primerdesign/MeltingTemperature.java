@@ -1,3 +1,23 @@
+/***************************************************************************
+ *   Copyright (C) 2010 by Yvonne Hermann, Peter Husemann                  *
+ *   phuseman  a t  cebitec.uni-bielefeld.de                               *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
 /**
@@ -12,11 +32,16 @@ package de.bielefeld.uni.cebitec.cav.primerdesign;
  */
 public class MeltingTemperature {
 
-	private final double oligoConc = 0.0000025;
+	private final double oligoConcentration = 0.0000025;
 	private static MeltingTemperature instance = null;
+	
+	//to map chars onto matrix indices
 	private int[] alphabetMap;
 	private double[][] entropyMatrix;
 	private double[][] enthalpyMatrix;
+        
+	private double entropyAdd;
+        private double temperatureSubstract;
 	
 
 	/**
@@ -81,23 +106,22 @@ public class MeltingTemperature {
 	enthalpyMatrix[alphabetMap['T']][alphabetMap['T']] = -8.4;
 	enthalpyMatrix[alphabetMap['T']][alphabetMap['C']] = -7.7;
 	enthalpyMatrix[alphabetMap['T']][alphabetMap['G']] = -7.4;
+	
+	
+	//this 
+	entropyAdd = (1.987*Math.log((oligoConcentration/4.0)));
+	temperatureSubstract = 273.15 + 21.59;
 	}
 	
+	/**
+	 * To avoid reoccurring initialisation of these objects, a single instance shall be used.
+	 * @return
+	 */
 	public static MeltingTemperature getInstance() {
 		if (instance == null) {
 			instance = new MeltingTemperature();
 		}
 		return instance;
-	}
-	
-	/**
-	 *	This method fills HashMaps with the numerical values for a given pair of nucleotides regarding
-	 *	the enthalpie and the entropie. 
-	 */
-	public void fillEnthalpieAndEntropieParam(){
-		
-		
-
 	}
 	
 
@@ -131,9 +155,7 @@ public class MeltingTemperature {
 		double temparture = -1;
 		if(!error){
 			//calculation of the melting temperature
-			//TODO: fixen anteil der berechnung rausnehmen und vorberechnet speichern!
-			temparture = (enthalpy*1000/(entropy+(1.987*Math.log((oligoConc/4.0))))) - 273.15 - 21.59;
-			//temparture = (ent*1000/(enp+(1.987*Math.log((oligoConc/2000000000))))) - 273.15;
+			temparture = (enthalpy*1000/(entropy+entropyAdd)) - temperatureSubstract ;
 		}
 		return temparture;
 	}

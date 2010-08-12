@@ -1,8 +1,28 @@
+/***************************************************************************
+ *   Copyright (C) 2010 by Yvonne Hermann, Peter Husemann                  *
+ *   phuseman  a t  cebitec.uni-bielefeld.de                               *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.Collections;
 import java.util.Vector;
 
 /**
@@ -15,11 +35,11 @@ import java.util.Vector;
  * @author yherrman
  *
  */
-public class PrimerPairs {
+public class PrimerPairing {
 	private Bases base;
 	private SimpleSmithWatermanPrimerAligner swa;
 
-	public PrimerPairs() {
+	public PrimerPairing() {
 		base = Bases.getInstance();
 		swa = new SimpleSmithWatermanPrimerAligner();
 	}
@@ -34,17 +54,8 @@ public class PrimerPairs {
 	 */
 	
 	public Vector<Primer> sortPrimer(Vector<Primer> primer){
-		Comparator<Primer> comparator = new PrimerScoreComparator();
-		PriorityQueue<Primer> queue = new PriorityQueue<Primer>(100,comparator);
-		for(int j = 0;j<primer.size();j++){
-			queue.add(primer.elementAt(j));
-		}
-		primer.clear();
-		while(queue.size()!=0){
-			primer.add(queue.remove());
-		
-		}
-			return primer;
+		Collections.sort(primer);
+		return primer;
 	}
 	
 	/**

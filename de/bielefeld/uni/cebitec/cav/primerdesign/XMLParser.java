@@ -10,6 +10,7 @@ import java.util.Stack;
 /**
  * This class reports what kind of tag was met in the XML-file in order to store the
  * information of the XML-file in the same structure.
+ * TODO: add proper reference!!
  * 
  *
  */

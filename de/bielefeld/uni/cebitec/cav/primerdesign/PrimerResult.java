@@ -1,3 +1,24 @@
+/***************************************************************************
+ *   Copyright (C) 2010 by Yvonne Hermann, Peter Husemann                  *
+ *   phuseman  a t  cebitec.uni-bielefeld.de                               *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
 import java.util.Vector;
@@ -46,8 +67,8 @@ public class PrimerResult {
 		if(!forwardPrimer.isEmpty()&&!reversePrimer.isEmpty()&&forwardPrimer.size()==reversePrimer.size()){
 		results.append(legend+NEW_LINE+NEW_LINE);
 			for(int i = 0;i<this.forwardPrimer.size();i++){
-			results.append("forward primer:"+TAB+TAB+forwardPrimer.elementAt(i).toString()+NEW_LINE);
-			results.append("reverse primer:"+TAB+TAB+reversePrimer.elementAt(i).toString()+NEW_LINE+NEW_LINE);
+			results.append("forward primer:"+TAB+forwardPrimer.elementAt(i).toString()+NEW_LINE);
+			results.append("reverse primer:"+TAB+reversePrimer.elementAt(i).toString()+NEW_LINE+NEW_LINE);
 		}
 			}else{
 				results.append("No Primers found");
