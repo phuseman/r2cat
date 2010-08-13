@@ -102,27 +102,7 @@ public class PrimerGenerator {
 		}
 	}
 
-	/**
-	 * This method checks if the id of the selected contig is in the fasta file
-	 * with the sequences of the contigs. Returns true if the contig ID is in
-	 * the fasta file.
-	 * 
-	 * @param contigID
-	 * @return checked
-	 * @throws IOException
-	 */
 
-	public boolean idCheck(String contigID) throws IOException {
-		boolean checked = false;
-		if (fastaParser.containsId(contigID)) {
-			checked = true;
-		} else {
-			checked = false;
-		}
-
-		return checked;
-	}
-	
 	/**
 	 * This method gets a vector of contigPair, which contains the IDs of the marked contigs.
 	 * For each pair the contig IDs are checked and then the method generatePrimerFor1ContigPair
@@ -143,7 +123,7 @@ public class PrimerGenerator {
 					"Generating primers for contig pair " + pair.contig1
 							+ " and " + pair.contig2);
 			//contigID check
-			if (this.idCheck(pair.contig1) && this.idCheck(pair.contig2)) {
+			if (fastaParser.containsId(pair.contig1) && fastaParser.containsId(pair.contig2)) {
 				if (!(pair.contig1.equals(pair.contig2))) {
 					//generate primers for each contig pair
 					PrimerResult primerResult = this

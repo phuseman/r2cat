@@ -513,10 +513,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 				}
 			}
 				//gc ratio for the whole sequence
-				double gcRatio = (float) gcLevel / (float) (primerSeq.length + 1) * 100;
+				double gcRatio = (float) gcLevel / (float) (primerSeq.length + 1) * 100.;
 				double scoreTotalGC = this.calcScoreTotalGCLevel(gcRatio);
 				//gc ratio only for the specific positions
-				double gcRatio2A7 = (float) gcLevel2A7 / 6 * 100;
+				double gcRatio2A7 = (float) gcLevel2A7 / 6. * 100.;
 				double scoreGC2A7 = this.calcScoreGCLevel2A7(gcRatio2A7);
 			allGCScore = scoreTotalGC +scoreGC2A7;
 			return allGCScore;
