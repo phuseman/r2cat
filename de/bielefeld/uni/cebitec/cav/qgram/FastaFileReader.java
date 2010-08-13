@@ -39,13 +39,15 @@ public class FastaFileReader {
 
 	private File source = null;
 	private Vector<DNASequence> sequences;
+	private HashMap<String, Integer> sequencesMap;
 
-	private char[] chararray;
-	private HashMap<String, Integer> offsetsInCharArray;
+	private char[] chararray = null;
+	private int[] offsets = null;
 
 	public FastaFileReader(File input) {
 		this.source = input;
 		sequences = new Vector<DNASequence>();
+		sequencesMap = new HashMap<String, Integer>();
 	}
 
 	
@@ -82,13 +84,15 @@ public class FastaFileReader {
 	}
 	
 	/**
-	 * Scans the contents of the file. Returns if a line ">id" was present
+	 * Scans the contents of the file. Returns if at least one line with ">id" was present
 	 * @param createCharArray
 	 * @return boolean Id's were found
 	 * @throws IOException
 	 * @throws NoFastaFileException 
 	 */
 	public boolean scanContents(boolean createCharArray) throws IOException {
+		HashMap<String, Integer> offsetsInCharArray;
+
 		if (!isFastaQuickCheck()) {
 			throw new IOException("File seems to be not a fasta file");
 		}
@@ -214,15 +218,25 @@ public class FastaFileReader {
 			sequences.add(new DNASequence(source, lastSequenceId,
 					lastSequenceDescription, lastSequenceLength));
 
-			// set the offset of each sequence object
-			for (DNASequence seq : sequences) {
-				// key is id, value is offset in a contiguous sequence
-				long offset = offsetsInCharArray.get(seq.getId());
-				seq.setOffset(offset);
+			if(createCharArray) {
+				offsets = new int[offsetsInCharArray.size() + 1];
+				int offset=0;
+				for (int i = 0; i < sequences.size(); i++) {
+					// set the offset of each sequence object...
+					offset = offsetsInCharArray.get(sequences.get(i).getId());
+					// as well as in the offsets array...
+					offsets[i] = offset;
+					// and remember the index of each sequence
+					if(!sequencesMap.containsKey(sequences.get(i).getId())){
+						sequencesMap.put(sequences.get(i).getId(), i);
+					}
+				}
+				//store in the last field the total size. this eases to go through the sequences.
+				offsets[sequences.size()] = chararray.length;
 			}
 
 			initialized = true;
-			}
+			} //if ids were found
 			
 			
 			
@@ -233,6 +247,8 @@ public class FastaFileReader {
 			}
 //		}
 		
+			
+			
 		return idsFound;
 	}
 
@@ -268,20 +284,11 @@ public class FastaFileReader {
 	 */
 	public int[] getOffsetsArray() throws IOException  {
 		checkInitialisation();
-
-		int[] out = new int[offsetsInCharArray.size() + 1];
-
-		for (int i = 0; i < sequences.size(); i++) {
-			out[i] = (int) sequences.get(i).getOffset();
-		}
-
-		out[sequences.size()] = chararray.length;
-
-		return out;
+		return offsets;
 	}
 	
 	public int getOffset(String contigId) {
-		return offsetsInCharArray.get(contigId);
+		return offsets[sequencesMap.get(contigId)];
 	}
 
 	public DNASequence getSequence(int index) {
@@ -294,13 +301,12 @@ public class FastaFileReader {
 	 * @return {@link DNASequence} object. if not existant, this method returns null
 	 */
 	public DNASequence getSequence(String id) {
-		for (int i = 0; i < sequences.size(); i++) {
-			if(sequences.get(i).getId().equals(id)) {
-				return sequences.get(i);
-			}
-
+		Integer index = sequencesMap.get(id);
+		if (index != null) {
+			return sequences.get(sequencesMap.get(id));
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	
@@ -395,7 +401,7 @@ public class FastaFileReader {
 	 */
 	public boolean containsId(String id) throws IOException  {
 		checkInitialisation();
-		return offsetsInCharArray.containsKey(id);
+		return sequencesMap.containsKey(id);
 	}
 
 	/**
@@ -440,7 +446,7 @@ public class FastaFileReader {
 	 */
 	public boolean setRegionToLowercaseLetters(String contigId, int start, int stop) {
 		//get the offset in the char array
-		Integer offset = offsetsInCharArray.get(contigId);
+		Integer offset = this.getOffset(contigId);
 		if (chararray != null && offset != null) {
 			int realstart = offset + start;
 			int realstop = offset + stop;
