@@ -36,6 +36,8 @@ public class PrimerResult {
 	//primer at the left end of the second contig
 	private Vector<Primer> reversePrimer;
 	
+	private Vector<String> comments;
+	
 	/**
 	 * Constructor for this class. 
 	 * Needs to get the object of the each contig of the selected pair and sets up
@@ -48,6 +50,7 @@ public class PrimerResult {
 	public PrimerResult(DNASequence left, DNASequence right){
 		forwardPrimer = new Vector<Primer>();
 		reversePrimer = new Vector<Primer>();
+		comments = new Vector<String>();
 		contigLeft = left;
 		contigRight = right;
 	}
@@ -90,8 +93,11 @@ public class PrimerResult {
 			results.append("right:"+TAB+reversePrimer.elementAt(i).toString()+NEW_LINE+NEW_LINE);
 		}
 			}else{
-				results.append("No Primers found");
+				results.append("Sorry, no Primers were found"+NEW_LINE);
 			}
+		for (String comment : comments) {
+			results.append(NEW_LINE+comment);
+		}
 		return results.toString();
 	}
 	
@@ -106,6 +112,10 @@ public class PrimerResult {
 		String ids = id1+"-"+id2;
 		
 		return ids;
+	}
+	
+	public void addAdditionalComment(String comment) {
+		comments.add(comment);
 	}
 
 }

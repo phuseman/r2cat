@@ -30,8 +30,8 @@ package de.bielefeld.uni.cebitec.cav.primerdesign;
  * 																										*
  * The values of enthalpie and entropie are extracted from the following paper:							*
  * 																										*
- * "Improved Nearest-Neighbor Parameters for Predicting DNA Duplex Stability †", 						*
- * Santalucia J., Allawi H.T., Seneviratne PA., Biochemistry, Vol. 35, No.11, 1996:3555-3562.	*							*
+ * "Improved Nearest-Neighbor Parameters for Predicting DNA Duplex Stability", 				    		*
+ * Santalucia J., Allawi H.T., Seneviratne PA., Biochemistry, Vol. 35, No.11, 1996:3555-3562.	        *							*
  * 																										*
  *																										*
  ********************************************************************************************************/

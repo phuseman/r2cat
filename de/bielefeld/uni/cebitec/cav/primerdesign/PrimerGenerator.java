@@ -51,13 +51,13 @@ public class PrimerGenerator {
 	private PrimerScoringScheme scoring = null;
 	private FastaFileReader fastaParser;
 	// max length a primer should have
-	private int maxLength = 24;
+	private final int maxLength = 24;
 	// min length a primer should have
-	private int miniLength = 19;
+	private final int miniLength = 19;
 	// min of how close the offset of a primer to the contig end should be
-	private int minBorderOffset = 80;
+	private final int minBorderOffset = 80;
 	// max of how far away the offset of a primer to the contig end should be
-	private int maxBorderOffset = 400;
+	private final int maxBorderOffset = 400;
 	
 	
 	private AbstractProgressReporter progress;
@@ -122,27 +122,6 @@ public class PrimerGenerator {
 
 		return checked;
 	}
-/**
- * This method checks the size of the selected contigs.
- * Contigs need to be at least 100 bp long. In that case the borders of the primer location within a
- * sequence are set to 0. If the size is bigger than 500 the default paramters for the borders are set.
- * @param contigID
- * @return
- */
-	public boolean contigSizeCheck(String contigID){
-		int contigSize =(int) fastaParser.getSequence(contigID).getSize();
-		if(contigSize>=500){
-			this.minBorderOffset = 80;
-			this.maxBorderOffset = 400;
-			return true;
-		}else if(contigSize>150){
-			this.minBorderOffset = 0;
-			this.maxBorderOffset = 0;
-			return true;
-		}else{
-			return false;
-		}
-	}
 	
 	/**
 	 * This method gets a vector of contigPair, which contains the IDs of the marked contigs.
@@ -165,8 +144,6 @@ public class PrimerGenerator {
 							+ " and " + pair.contig2);
 			//contigID check
 			if (this.idCheck(pair.contig1) && this.idCheck(pair.contig2)) {
-				//in case the contig size is too small to create primers
-				if(this.contigSizeCheck(pair.contig1)&&this.contigSizeCheck(pair.contig2)){
 				if (!(pair.contig1.equals(pair.contig2))) {
 					//generate primers for each contig pair
 					PrimerResult primerResult = this
@@ -174,10 +151,6 @@ public class PrimerGenerator {
 					prV.add(primerResult);
 				}
 				
-				}else{
-					PrimerResult primerResult = new PrimerResult(this.fastaParser.getSequence(pair.contig1),this.fastaParser.getSequence(pair.contig2));
-					prV.add(primerResult);
-				}
 			} else {
 				throw new NullPointerException("contig id could not be found");
 			}
@@ -213,6 +186,12 @@ public class PrimerGenerator {
 		DNASequence rightContig = this.fastaParser.getSequence(pair.contig2);
 		PrimerResult primerResult = new PrimerResult(leftContig, rightContig);
 		primerResult = this.getPrimerPairs(primerCandidates1, primerCandidates2, primerResult);
+		if(primerCandidates1.isEmpty()) {
+			primerResult.addAdditionalComment("No primer could be generated for the first contig. Maybe it is to small.");
+		}
+		if(primerCandidates2.isEmpty()) {
+			primerResult.addAdditionalComment("No primer could be generated for the first contig. Maybe it is to small.");
+		}
 		return primerResult;
 	}
 
@@ -235,10 +214,11 @@ public class PrimerGenerator {
 			String contigId, boolean onRightEnd) {
 		Vector<Primer> primerCandidates = new Vector<Primer>();
 		DNASequence contig = contigs.getSequence(contigId);
+		int contigSize = (int) contig.getSize();
 		int start = 0;
 		int stop = 0;
 		if (onRightEnd) {
-			int rightEndOffset = (int) contig.getSize();
+			int rightEndOffset = contigSize;
 			start = rightEndOffset - maxBorderOffset;
 			stop = rightEndOffset - minBorderOffset;
 		} else {
@@ -247,6 +227,21 @@ public class PrimerGenerator {
 			stop = leftEndOffset + maxBorderOffset;
 
 		}
+		
+		//if the contig is smaller than the expected bounds, correct the bounds
+		if (start<0 || start>contigSize) {
+			start=0;
+		}
+		//leave space for the two bases after the primer that are needed for score computation.
+		if (stop >= (contigSize-2) || stop <= 2) {
+			stop = contigSize-2;
+		}
+		
+		//if the sequence is to small, return empty primer vector
+		if(Math.abs(start-stop)<400) {
+			return primerCandidates;
+		}
+		
 
 		for (int i = start; i < stop; i++) {
 			for (int j = miniLength; j <= maxLength; j++) {
