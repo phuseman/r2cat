@@ -117,11 +117,9 @@ public class QGramCoder {
 			if (currentQLength < q) {
 				currentQLength++;
 			} else {
-				if((currentEncoding>=0) && (currentEncoding < maxEncoding)) {
+                            assert(currentEncoding>=0);
+                            assert(currentEncoding < maxEncoding);
 				valid = true;
-				} else {
-					System.err.println("Coder: Code too small/big: " + currentEncoding);
-				}
 			}
 
 		} else {//... else invalidate code

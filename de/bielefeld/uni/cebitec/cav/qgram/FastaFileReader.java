@@ -43,6 +43,7 @@ public class FastaFileReader {
 
 	private char[] chararray = null;
 	private int[] offsets = null;
+	private int[] sizes = null;
 
 	public FastaFileReader(File input) {
 		this.source = input;
@@ -219,7 +220,8 @@ public class FastaFileReader {
 					lastSequenceDescription, lastSequenceLength));
 
 			if(createCharArray) {
-				offsets = new int[offsetsInCharArray.size() + 1];
+				offsets = new int[sequences.size() + 1];
+				sizes = new int[sequences.size()];
 				int offset=0;
 				for (int i = 0; i < sequences.size(); i++) {
 					// set the offset of each sequence object...
@@ -230,6 +232,8 @@ public class FastaFileReader {
 					if(!sequencesMap.containsKey(sequences.get(i).getId())){
 						sequencesMap.put(sequences.get(i).getId(), i);
 					}
+					//remember the size of each fasta sequence to speed up the updateBin in the matcher.
+					sizes[i]=(int)sequences.get(i).getSize();
 				}
 				//store in the last field the total size. this eases to go through the sequences.
 				offsets[sequences.size()] = chararray.length;
@@ -293,6 +297,10 @@ public class FastaFileReader {
 
 	public DNASequence getSequence(int index) {
 		return sequences.get(index);
+	}
+	
+	public int getSizeOfSequence(int i) {
+		return sizes[i];
 	}
 
 	/**
