@@ -49,10 +49,10 @@ public class PrimerPairing {
 		Primer right;
 		double score;
 		
-		public PrimerPair(Primer left, Primer right, double totalscore) {
+		public PrimerPair(Primer left, Primer right, double pairScore) {
 			this.left = left;
 			this.right=right;
-			this.score=totalscore;
+			this.score=pairScore;
 		}
 
 		@Override
@@ -75,6 +75,120 @@ public class PrimerPairing {
 
 
     /**
+	 * This method tries to find suitable pairs of primers.
+	 * If primers are generated for two contigs, then the best scoring primers for each contig do not necessarily fit together.
+	 * If the sequences are reverse complementary, the primer pair could bind together. Another issue is the temperature of the
+	 * given candidates. This method compares temperature and sequence and the previously calculated score for the individual primers and
+	 * generates a list of those which are best scoring and fit together by means of temperature and sequence (dis)similarity.
+	 * 
+	 * @param leftPrimer
+	 * @param rightPrimer
+	 */
+	
+	public PrimerResult pairPrimer(Vector<Primer> leftPrimer,
+			Vector<Primer> rightPrimer, PrimerResult primerResult) {
+		Collections.sort(leftPrimer);
+		Collections.sort(rightPrimer);
+	
+		PriorityQueue<PrimerPair> bestPairs = new PriorityQueue<PrimerPair>();
+	
+		int maxCandidatesToConsider = 20;
+		int maxRight = rightPrimer.size();
+		int maxLeft = leftPrimer.size();
+	
+		double totalscore = 0;
+	
+		for (int i = 0; i <= maxCandidatesToConsider; i++) {
+			for (int j = i; j >= 0; j--) {
+				//for all right primers with j<=i calculate score and add them to the pairs list
+				if (i < maxLeft && j < maxRight) {
+					totalscore = scorePrimerPair(leftPrimer.get(i), rightPrimer
+							.get(j));
+					//add pair only if none of the quickchecks have failed (score==0.)
+					if (totalscore > 0.) {
+						bestPairs.add(new PrimerPair(leftPrimer.get(i),
+								rightPrimer.get(j), totalscore));
+					}
+				}
+				//for all left primers with j<i calculate score and add them to the pairs list
+				if (i != j && j < maxLeft && i < maxRight) {
+					totalscore = scorePrimerPair(leftPrimer.get(j), rightPrimer
+							.get(i));
+					//add pair only if none of the quickchecks have failed (score==0.)
+					if (totalscore > 0.) {
+						bestPairs.add(new PrimerPair(leftPrimer.get(j),
+								rightPrimer.get(i), totalscore));
+					}
+				}
+			}
+		}
+	
+		
+		//select the top 20 scores from all compared primers
+		PrimerPair pair = null;
+		int numberOfResults = 1;
+		while (!bestPairs.isEmpty() && numberOfResults <= 20) {
+			pair = bestPairs.poll();
+			primerResult.addPair(pair.left, pair.right);
+			numberOfResults++;
+		}
+	
+		return primerResult;
+	}
+
+
+
+	/**
+	 * Checks the melting temperature difference and the sequence
+	 * (dis)similarity to the reverse complement of the second sequence and
+	 * combines this with the scores of the primers to a pair score.
+	 * 
+	 * @param left
+	 *            primer sequence
+	 * @param right
+	 *            right
+	 * @return pair fitting score
+	 */
+	private double scorePrimerPair(Primer left, Primer right) {
+		double temperatureScore;
+		double sequenceSimilarityScore;
+		char[] reverseComplementOfSecondPrimer;
+		if (temperatureDifferenceQuickCheck(right.getPrimerTemperature(), left
+				.getPrimerTemperature())) {
+			temperatureScore = temperatureDifferenceScore(right
+					.getPrimerTemperature(), left.getPrimerTemperature());
+			reverseComplementOfSecondPrimer = base.getReverseComplement(right
+					.getPrimerSeq());
+			if (sequenceSimilarityQuickCheck(left.getPrimerSeq(),
+					reverseComplementOfSecondPrimer)) {
+				sequenceSimilarityScore = sequenceSimilarityScore(left
+						.getPrimerSeq(), reverseComplementOfSecondPrimer);
+
+				return temperatureScore * sequenceSimilarityScore
+						* (left.getPrimerScore() + right.getPrimerScore());
+
+				//debugging:
+				// System.out.println("===========");
+				// System.out.println("Tr:"+
+				// right.getPrimerTemperature()+"\nTl:"+
+				// left.getPrimerTemperature()+"\nTscore="+temperatureScore);
+				// System.out.println("l  : "+new String(left.getPrimerSeq()));
+				// System.out.println("rcr: "+new
+				// String(reverseComplementOfSecondPrimer));
+				// System.out.println("similarity score"+sequenceSimilarityScore);
+				// System.out.println("Gesamt: "+ (temperatureScore *
+				// sequenceSimilarityScore * (left.getPrimerScore() +
+				// right.getPrimerScore())));
+				// System.out.println("===========");
+
+			}
+		}
+		return 0;
+	}
+
+
+
+	/**
 	 * This method checks if the temperature difference of the forward and reverse primer (possible pair).
 	 * It returns true when the difference between the two temperatures less than 5 degrees.
 	 * 
@@ -97,7 +211,7 @@ public class PrimerPairing {
      * It is best (returns 1.), if the temperature is the same. If the temperature is more than 5 degree apart,
      * this is the worst and the method returns zero. (values in between fall exponentially in a gaussian distribution)
      * @param temp1 temperature of the first primer
-     * @param temp2 temperature of the secont primer
+     * @param temp2 temperature of the second primer
      * @return value between 1.0 (best) and 0.0 (worst)
      */
     public double temperatureDifferenceScore(double temp1, double temp2) {
@@ -109,7 +223,7 @@ public class PrimerPairing {
 	 * (Quick)checks if the first three bases match. If so, these primers are not suited as a pair and false is returned
 	 * @param firstSeq Sequence of the first primer.
 	 * @param secondSeqReversed Please provide the reverse complement sequence of the second primer.
-	 * @return boolean if these sequence are suided as a primer pair or not.
+	 * @return boolean if these sequence are suited as a primer pair or not.
 	 */
 	
 	public boolean sequenceSimilarityQuickCheck(char[] firstSeq,char[] secondSeqReversed){
@@ -142,119 +256,7 @@ public class PrimerPairing {
     	} else {
     		return Math.exp(-(similarityScore * similarityScore / maxAlignmentScore));
     	}
-    }
-    
-    
-
-	/**
-	 * This method goes through the given vector of the possible forward and reverse primers in order
-	 * to check if the primers are a fitting pair. (Has to check temperature difference and the property 
-	 * of complementary.
-	 * If one of the properties is violated those primers are saved (notPairedPrimer)
-	 * and then paired up with a fitting primer-candidate.
-	 * The pair information is saved in HashMaps with position in the forward primer vector as the key and
-	 * the position in the reverse primer vector as the value.
-	 * 
-	 * @param forwardPrimer
-	 * @param reversePrimer
-	 */
-	
-	public PrimerResult pairPrimer(Vector<Primer> leftPrimer,Vector<Primer> rightPrimer, PrimerResult primerResult){
-		Collections.sort(leftPrimer);
-		Collections.sort(rightPrimer);
-		
-		boolean[] leftUsed = new boolean[leftPrimer.size()];
-		boolean[] rightUsed = new boolean[rightPrimer.size()];
-		PriorityQueue<PrimerPair> bestPairs = new PriorityQueue<PrimerPair>();
-		
-		int topCandidatesToConsider = 20;
-		if(topCandidatesToConsider>rightPrimer.size()) {
-			topCandidatesToConsider=rightPrimer.size();
-		}
-		if(topCandidatesToConsider>leftPrimer.size()) {
-			topCandidatesToConsider=leftPrimer.size();
-		}
-		
-		Primer left = null;
-		Primer right = null;
-		double temperatureScore = 0;
-		double sequenceSimilarityScore = 0;
-		double totalscore = 0;
-		char[] reverseComplementOfSecondPrimer=null;
-
-		
-		nextleft : for (int i = 0; i < topCandidatesToConsider; i++) {
-			for (int j = 0; j < topCandidatesToConsider; j++) {
-				temperatureScore = 0;
-				sequenceSimilarityScore = 0;
-				left=leftPrimer.get(i);
-				right = rightPrimer.get(j);
-				if(temperatureDifferenceQuickCheck(right.getPrimerTemperature(), left.getPrimerTemperature())) {
-					temperatureScore = temperatureDifferenceScore(right.getPrimerTemperature(), left.getPrimerTemperature());
-					reverseComplementOfSecondPrimer = base.getReverseComplement(right.getPrimerSeq());
-					if(sequenceSimilarityQuickCheck(left.getPrimerSeq(), reverseComplementOfSecondPrimer)) {
-						sequenceSimilarityScore = sequenceSimilarityScore(left.getPrimerSeq(), reverseComplementOfSecondPrimer);
-						
-						totalscore = temperatureScore * sequenceSimilarityScore * (left.getPrimerScore() + right.getPrimerScore());
-						bestPairs.add(new PrimerPair(left,right,totalscore));
-						leftUsed[i]=true;
-						rightUsed[j]=true;
-						
-//						System.out.println("===========");
-//						System.out.println("Tr:"+ right.getPrimerTemperature()+"\nTl:"+ left.getPrimerTemperature()+"\nTscore="+temperatureScore);
-//						System.out.println("l  : "+new String(left.getPrimerSeq()));
-//						System.out.println("rcr: "+new String(reverseComplementOfSecondPrimer));
-//						System.out.println("similarity score"+sequenceSimilarityScore);
-//						System.out.println("Gesamt: "+ (temperatureScore * sequenceSimilarityScore * (left.getPrimerScore() + right.getPrimerScore())));
-//						System.out.println("===========");
-						continue nextleft;
-					}
-				}
-			}
-		}
-
-		
-		
-
-		// the same with the other side
-		
-		nextright : for (int i = 0; i < topCandidatesToConsider; i++) {
-			if(rightUsed[i]) {
-				continue;
-			}
-			for (int j = 0; j < topCandidatesToConsider; j++) {
-				if (leftUsed[j]){
-					continue;
-				}
-				temperatureScore = 0;
-				sequenceSimilarityScore = 0;
-				right = rightPrimer.get(i);
-				left=leftPrimer.get(j);
-				if(temperatureDifferenceQuickCheck(right.getPrimerTemperature(), left.getPrimerTemperature())) {
-					temperatureScore = temperatureDifferenceScore(right.getPrimerTemperature(), left.getPrimerTemperature());
-					reverseComplementOfSecondPrimer = base.getReverseComplement(right.getPrimerSeq());
-					if(sequenceSimilarityQuickCheck(left.getPrimerSeq(), reverseComplementOfSecondPrimer)) {
-						sequenceSimilarityScore = sequenceSimilarityScore(left.getPrimerSeq(), reverseComplementOfSecondPrimer);
-						
-						totalscore = temperatureScore * sequenceSimilarityScore * (left.getPrimerScore() + right.getPrimerScore());
-						bestPairs.add(new PrimerPair(left,right,totalscore));
-						rightUsed[i]=true;
-						leftUsed[j]=true;
-						continue nextright;
-					}
-				}
-			}
-		}
-
-		
-		PrimerPair pair = null;
-		while (!bestPairs.isEmpty()) {
-			pair = bestPairs.poll();
-			primerResult.addPair(pair.left, pair.right);
-		}
-		
-		return primerResult;
-	}	
+    }	
 
 	}
 	
