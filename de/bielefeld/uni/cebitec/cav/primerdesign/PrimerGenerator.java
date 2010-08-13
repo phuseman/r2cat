@@ -190,7 +190,7 @@ public class PrimerGenerator {
 			primerResult.addAdditionalComment("No primer could be generated for the first contig. Maybe it is to small.");
 		}
 		if(primerCandidates2.isEmpty()) {
-			primerResult.addAdditionalComment("No primer could be generated for the first contig. Maybe it is to small.");
+			primerResult.addAdditionalComment("No primer could be generated for the second contig. Maybe it is to small.");
 		}
 		return primerResult;
 	}
@@ -237,7 +237,7 @@ public class PrimerGenerator {
 			stop = contigSize-2;
 		}
 		
-		//if the sequence is to small, return empty primer vector
+		//if the sequence is to small, return empty primer vector.
 		if(Math.abs(start-stop)>400) {
 			return primerCandidates;
 		}
