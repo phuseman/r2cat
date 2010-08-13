@@ -238,7 +238,7 @@ public class PrimerGenerator {
 		}
 		
 		//if the sequence is to small, return empty primer vector
-		if(Math.abs(start-stop)<400) {
+		if(Math.abs(start-stop)>400) {
 			return primerCandidates;
 		}
 		
