@@ -682,7 +682,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 				stack.push(this);
 			} else{
 				stack.push(this);
-			
 			if(currentNode ==null){
 				root=newNode;
 			} else{

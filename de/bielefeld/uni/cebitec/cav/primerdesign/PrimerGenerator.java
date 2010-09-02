@@ -102,7 +102,6 @@ public class PrimerGenerator {
 		}
 	}
 
-
 	/**
 	 * This method gets a vector of contigPair, which contains the IDs of the marked contigs.
 	 * For each pair the contig IDs are checked and then the method generatePrimerFor1ContigPair
@@ -197,15 +196,30 @@ public class PrimerGenerator {
 		int contigSize = (int) contig.getSize();
 		int start = 0;
 		int stop = 0;
+		//System.out.println("\n");
 		if (onRightEnd) {
 			int rightEndOffset = contigSize;
 			start = rightEndOffset - maxBorderOffset;
 			stop = rightEndOffset - minBorderOffset;
+			
+		/*	//EVALUIERUNG
+			 char[] temp = fastaParser.getSubstring(fastaParser.getOffset(contigId)+start, 320);
+			 for(int j = 0; j<temp.length;j++){
+				 System.out.print(temp[j]);
+			 }
+			 System.out.print("[nnnn]");*/
+			
 		} else {
 			int leftEndOffset = 0;
 			start = leftEndOffset + minBorderOffset;
 			stop = leftEndOffset + maxBorderOffset;
-
+			
+/*			//EVALUIERUNG
+			 char[] temp = fastaParser.getSubstring(fastaParser.getOffset(contigId)+start, 320);
+					 for(int j = 0; j<temp.length;j++){
+			 System.out.print(temp[j]);
+		 }
+					 System.out.println("\n");*/
 		}
 		
 		//if the contig is smaller than the expected bounds, correct the bounds
@@ -230,7 +244,6 @@ public class PrimerGenerator {
 			}
 
 		}
-	
 		return primerCandidates;
 	}
 
@@ -253,7 +266,6 @@ public class PrimerGenerator {
 				scoredPrimerCandidates.add(candidate);
 			}
 		}
-		//System.out.println("size"+scoredPrimerCandidates.size());
 		return scoredPrimerCandidates;
 	}
 

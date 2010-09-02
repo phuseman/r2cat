@@ -24,10 +24,24 @@ import java.util.Hashtable;
 
 /**
  * Interface to handle the tags while going through a xml-file.
+ * It is based on the DocumentHandler from SAX (Simple API for XML).
  * 
- * @author yherrman
- *
- */
+ * 
+ ****************************************************************************
+ * SAX 1.0																	*
+ * Version 1.0 of the Simple API for XML (SAX), created collectively 		*
+ * by the membership of the XML-DEV mailing list, is hereby released into 	*
+ * the public domain.														*
+ * 																			*
+ * No one owns SAX: you may use it freely in both commercial and 			*
+ * non-commercial applications, bundle it with your software distribution, 	*
+ * include it on a CD-ROM, list the source code in a book, mirror the 		*
+ * documentation at your own web site, or use it in any 					*
+ * other way you see fit.													*
+ * 																		   	*
+ * David Megginson, Megginson Technologies Ltd. 1998-05-11                 	*
+ *                                                                         	*
+ ***************************************************************************/
 
 public interface DocumentHandler {
 	
@@ -40,7 +54,7 @@ public interface DocumentHandler {
 	 * @throws Exception
 	 */
 	
-  public void startElement(String tag,Hashtable attrs) throws Exception;
+  public void startElement(String tag,Hashtable attributes) throws Exception;
   
   /**
    * Method is called when a element of XML ends

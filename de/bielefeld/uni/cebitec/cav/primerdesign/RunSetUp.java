@@ -13,10 +13,11 @@ public class RunSetUp {
 	public static void main(String args[]) throws Exception{
 		//Path to the config file, which contains the parameters.
 		//File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config_original.xml");
-		File configFile = new File("C:/Users/Mini-Yvi/Uni/primer_search_default_config.xml");
+		File configFile = new File("C:/Users/Yvisunshine/Uni/primer_search_default_config.xml");
 		
 		//Path to fasta file containing a list of contigs
-		File fastaFile = new File("C:/Users/Mini-Yvi/Uni/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.fas");
+		//File fastaFile = new File("C:/Users/Yvisunshine/testing.fas");
+		File fastaFile = new File("C:/Users/Yvisunshine/Uni/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.fas");
 		long start = new Date().getTime();
 		
 		boolean repeatMasking = false;
@@ -30,10 +31,10 @@ public class RunSetUp {
 		Vector<ContigPair> pairVe = new Vector<ContigPair>();
 		pairVe.add(pair);
 		//pairVe.add(pair2);
-		pg.setParameters(null);
+		pg.setParameters(configFile);
 		pg.generatePrimers(pairVe);
 		long runningTime = new Date().getTime() - start; 
-		System.out.println(runningTime);
+		//System.out.println(runningTime);
 	}
 
 }

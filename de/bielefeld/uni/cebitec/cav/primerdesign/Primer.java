@@ -162,9 +162,9 @@ public class Primer implements Comparable<Primer> {
 	 */
 	public int getDistanceFromContigBorder() {
 		if (onRightEnd) {
-			return (int)contig.getSize() - primerStart;
+			return (int)contig.getSize() - primerStart - this.primerLength;
 		} else {
-			return primerStart;
+			return primerStart-primerLength;
 		}
 	}
 	/**
@@ -227,7 +227,12 @@ public class Primer implements Comparable<Primer> {
 	}
 
 	public int getStart() {
-		return primerStart;
+		if (onRightEnd) {
+			return primerStart;
+		}else{
+			return primerStart;
+		}
+		
 	}
 
 	/* (non-Javadoc)
