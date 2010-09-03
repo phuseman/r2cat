@@ -150,12 +150,12 @@ public class PrimerPairing {
 	 * @return pair fitting score
 	 */
 	private double scorePrimerPair(Primer left, Primer right) {
-		double temperatureScore;
+		double temperatureDifferenceScore;
 		double sequenceSimilarityScore;
 		char[] reverseComplementOfSecondPrimer;
 		if (temperatureDifferenceQuickCheck(right.getPrimerTemperature(), left
 				.getPrimerTemperature())) {
-			temperatureScore = temperatureDifferenceScore(right
+			temperatureDifferenceScore = temperatureDifferenceScore(right
 					.getPrimerTemperature(), left.getPrimerTemperature());
 			reverseComplementOfSecondPrimer = base.getReverseComplement(right
 					.getPrimerSeq());
@@ -164,7 +164,7 @@ public class PrimerPairing {
 				sequenceSimilarityScore = sequenceSimilarityScore(left
 						.getPrimerSeq(), reverseComplementOfSecondPrimer);
 
-				return temperatureScore * sequenceSimilarityScore
+				return temperatureDifferenceScore * sequenceSimilarityScore
 						* (left.getPrimerScore() + right.getPrimerScore());
 
 				//debugging:
@@ -227,10 +227,11 @@ public class PrimerPairing {
 	 */
 	
 	public boolean sequenceSimilarityQuickCheck(char[] firstSeq,char[] secondSeqReversed){
-		if( firstSeq[0] == secondSeqReversed[0] 
-		 && firstSeq[1] == secondSeqReversed[1] 
-		 && firstSeq[2] == secondSeqReversed[2]) {
-			//if the first three bases match, discard this pair.
+		if( firstSeq[0] == secondSeqReversed[secondSeqReversed.length-1] 
+		 && firstSeq[1] == secondSeqReversed[secondSeqReversed.length-2] 
+		 && firstSeq[2] == secondSeqReversed[secondSeqReversed.length-3]) {
+			//if the first three bases of the first sequence match with the three bases at the 3'-End of the second sequence, 
+			//discard this pair.
 			return false;
 		} else {
 			return true;
