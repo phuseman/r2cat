@@ -227,11 +227,10 @@ public class PrimerPairing {
 	 */
 	
 	public boolean sequenceSimilarityQuickCheck(char[] firstSeq,char[] secondSeqReversed){
-		if( firstSeq[0] == secondSeqReversed[secondSeqReversed.length-1] 
-		 && firstSeq[1] == secondSeqReversed[secondSeqReversed.length-2] 
-		 && firstSeq[2] == secondSeqReversed[secondSeqReversed.length-3]) {
-			//if the first three bases of the first sequence match with the three bases at the 3'-End of the second sequence, 
-			//discard this pair.
+		if( firstSeq[0] == secondSeqReversed[0] 
+		 && firstSeq[1] == secondSeqReversed[1] 
+		 && firstSeq[2] == secondSeqReversed[2]) {
+			//if the first three bases match, discard this pair.
 			return false;
 		} else {
 			return true;
