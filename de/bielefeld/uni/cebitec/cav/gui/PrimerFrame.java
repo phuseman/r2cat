@@ -17,6 +17,7 @@ import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -52,6 +53,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 	private JButton remove;
 	private PrimerTableModel model;
 	private JPanel controlPanel;
+	private JComboBox repeatMaskingComboBox;
 
 	public PrimerFrame(AlignmentPositionsList alignmentPositionsList) {
 		this.alignmentPositionsList = alignmentPositionsList;
@@ -91,9 +93,14 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		controlPanel.add(setConfigButton);
 		setConfigButton.addActionListener(this);
 
-		repeatMaskingCheckBox = new Checkbox("Repeat Masking");
-		controlPanel.add(repeatMaskingCheckBox);
-
+		//repeatMaskingCheckBox = new Checkbox("Repeat Masking");
+		//controlPanel.add(repeatMaskingCheckBox);
+		String[] repeatString = { "Repeat Masking with BLAST", "Sequences are already masked", "No Repeat Masking is necessary" };
+		repeatMaskingComboBox = new JComboBox(repeatString);
+		repeatMaskingComboBox.setSelectedIndex(2);
+		controlPanel.add(repeatMaskingComboBox);
+		repeatMaskingComboBox.addActionListener(this);
+		
 		progressBar = new JProgressBar();
 		progressBar.setToolTipText("Generating possible primer pairs for the contigs");
 		progressBar.setStringPainted(true);
@@ -278,13 +285,18 @@ public class PrimerFrame extends JFrame implements ActionListener,
 			PrimerGenerator pg = new PrimerGenerator(fastaFile);
 			pg.registerProgressReporter(this);
 
-			if (repeatMaskingCheckBox.getState()) {
+			//if (repeatMaskingCheckBox.getState()) {
+			if(PrimerFrame.this.repeatMaskingComboBox.getSelectedIndex()==0){
 				PrimerFrame.this.progressBar.setIndeterminate(true);
 				PrimerFrame.this.progressBar
 						.setString("Repeat masking using BLAST");
 				pg.runRepeatMasking();
 				PrimerFrame.this.progressBar.setString(null);
 				PrimerFrame.this.progressBar.setIndeterminate(false);
+			}else if(PrimerFrame.this.repeatMaskingComboBox.getSelectedIndex()==2){
+				pg.setSequenceToUpperCases();
+			}else if(PrimerFrame.this.repeatMaskingComboBox.getSelectedIndex()==1){
+				//sequences are already masked so nothing will be done with the sequences
 			}
 			//checks if a configFile is set and gives it to the primerGenerator class
 			if(configFile != null){
