@@ -85,6 +85,13 @@ public class PrimerGenerator {
 	}
 	
 	/**
+	 * Methods sets sequences to upperCases. In case the user enters sequences just in lower cases.
+	 */
+	public void setSequenceToUpperCases(){
+		fastaParser.setAllToUppercaseLetters();
+	}
+	
+	/**
 	 * This method checks if a config file is given and sets up the PrimerScoringScheme with
 	 * parameters contained in the config file.
 	 * Or it sets up the PrimerScoringScheme with the loaded default parameters.
