@@ -134,14 +134,15 @@ public class DotPlotVisualisation extends DataViewPlugin {
 		   
 		   
 		   
-		   //add a textfield for the contigs name and the reference sequence name
 		   SpringLayout layout = new SpringLayout();
 
+		   //add a textfield for the contigs name and the reference sequence name
 		   referenceLabel = new JTextField("Reference");
 		   referenceLabel.setEditable(true); //can be changes
 		   referenceLabel.setHorizontalAlignment(JTextField.RIGHT);
 		   referenceLabel.setOpaque(false);//sets the background transparent. otherwise some parts of the visualisation would be covered.
 		   referenceLabel.setBorder(null); // no boder; integrates better in the dotplot.
+		   //
 		   //put the reference label bottom right.
 		   layout.putConstraint(SpringLayout.WEST, referenceLabel,border,SpringLayout.WEST, this);
 		   layout.putConstraint(SpringLayout.EAST, referenceLabel,-border,SpringLayout.EAST, this);
@@ -341,7 +342,7 @@ public class DotPlotVisualisation extends DataViewPlugin {
 	 */
 	private void drawCoordinateSystem(Graphics2D g2d) {
 
-		// TODO extend this, so it draws axis labels
+		// TODO extend this, so it draws axis labels 
 
 		Color last = g2d.getColor();
 		g2d.setColor(Color.BLACK);
@@ -350,23 +351,6 @@ public class DotPlotVisualisation extends DataViewPlugin {
 		g2d.drawLine(0, 0, 0, -this.getHeight() + 2 * border);
 		// xaxis
 		g2d.drawLine(0, 0, drawingWidth, 0);
-
-//		g2d
-//				.drawString("Contigs", -(border / 2), -this.getHeight() + 2
-//						* border);
-//		
-//		String xLabel="";
-//		if(R2cat.dataModelController.getAlignmentPositionsStatistics().getNumberOfTargets()>=2) {
-//			xLabel = "Reference Sequences";
-//		} else {
-//			xLabel = "Reference Genome";
-//		}
-//		
-//		int xLabelSize = SwingUtilities.computeStringWidth(this
-//				.getFontMetrics(this.getFont()), xLabel);
-//
-//		g2d.drawString(xLabel, drawingWidth - xLabelSize, border / 2 + 5);
-
 		g2d.setColor(last);
 	}
 

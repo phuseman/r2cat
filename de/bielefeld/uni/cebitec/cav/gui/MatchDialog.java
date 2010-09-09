@@ -61,6 +61,7 @@ import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 import de.bielefeld.uni.cebitec.cav.utils.Timer;
 
 /**
+ * This is a dialog to select two fasta files in order to match them.
  * @author phuseman
  * 
  */
@@ -270,7 +271,9 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 				result = this.get();
 				if (result!=null) {
 					if (result.size()==0) {
-						errorAlert("Sorry, no matches were found. Change the files and try again");
+						errorAlert("Sorry, no matches were found.\n" +
+								"One reason could be that the sequences are too small\n" +
+								"or maybe they are not similar enough.");
 						progressBar.setValue(0);
 					}
 					startButton.setText("Continue");

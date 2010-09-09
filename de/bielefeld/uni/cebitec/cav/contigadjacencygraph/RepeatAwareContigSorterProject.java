@@ -115,8 +115,7 @@ public class RepeatAwareContigSorterProject {
 
 				boolean projectParsed = project
 						.readProject(new File(
-								"/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7109/self/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"
-						// "/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7109/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"
+								"/homes/phuseman/compassemb/testdaten/repcat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"
 						));
 				if (!projectParsed) {
 					System.err
@@ -652,7 +651,7 @@ reference="genomes/Corynebacterium_urealyticum_DSM_7109.fna"
 
 		boolean success = true;
 
-		// don't know if this works, should set the workind directory to the
+		// don't know if this works, should set the working directory to the
 		// project dir.
 		System.setProperty("user.dir", projectDir.getAbsolutePath());
 

@@ -93,16 +93,7 @@ public class TreebasedContigSorterProject {
 		try {
 			
 			boolean projectParsed=project.readProject(new File(
-					"/homes/phuseman/tmp/trecat_test/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"
-//					"/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7109/self/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_inOrder.tcp"
-//					 "/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7111/Corynebacterium_urealyticum_DSM_7111_454AllContigs.tcp"
-//					 "/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7111/Corynebacterium_urealyticum_DSM_7111_454LargeContigs_renumbered.tcp"
-//					 "/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7111/Corynebacterium_urealyticum_DSM_7111_454LargeContigs.tcp"
-//			 "/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7109/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_inOrder.tcp"
-//					"/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7109/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_inOrder.tcp"
-					//"/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Curealyticum7109/self/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"
-//			 "/homes/phuseman/compassemb/20090323_treecat/evaluation_treecat/Corynebacterium_urealyticum_DSM_7109_454AllContigs.tcp"
-//			 "/homes/phuseman/compassemb/20100302_repeat_rearrangement_aware/Agrobacterium_sp_H13-3/Agrobacterium_sp_H13-3_454AllContigs.tcp"
+					"/homes/phuseman/compassemb/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"
 			));
 			if(!projectParsed) {
 				System.err.println("The given project file was not sucessfully parsed");
