@@ -37,7 +37,7 @@ public class QGramCoder {
 
 	private long maxEncoding = 0;
 
-	private long currentQLength = 0;
+	private long currentQLength = 1;
 
 	private int divisor = 0;
 
@@ -107,7 +107,7 @@ public class QGramCoder {
 	 */
 	public int updateEncoding(char c) {
 
-		//if character is A,T,C,G (upper or lowercase) calculate code...
+		// if character is A,T,C,G (upper or lowercase) calculate code...
 		if (alphabet[c] != -1) {
 
 			currentEncoding %= divisor;
@@ -117,19 +117,15 @@ public class QGramCoder {
 			if (currentQLength < q) {
 				currentQLength++;
 			} else {
-				if((currentEncoding>=0) && (currentEncoding < maxEncoding)) {
+				assert(currentEncoding >= 0);
+				assert(currentEncoding < maxEncoding);
 				valid = true;
-				} else {
-					System.err.println("Coder: Code too small/big: " + currentEncoding);
-				}
 			}
-
-		} else {//... else invalidate code
+		} else {// ... else invalidate code
 			currentEncoding = 0;
-			currentQLength = 0;
+			currentQLength = 1;
 			valid = false;
 			numberOfInvalid++;
-//			 System.out.println(c);
 		}
 
 		if (valid) {
@@ -248,7 +244,7 @@ public class QGramCoder {
 	 */
 	public void reset() {
 		currentEncoding = 0;
-		currentQLength = 0;
+		currentQLength = 1;
 		numberOfInvalid = 0;
 		valid=false;
 	}
