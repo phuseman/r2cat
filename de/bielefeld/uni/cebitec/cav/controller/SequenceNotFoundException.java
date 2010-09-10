@@ -22,35 +22,42 @@ package de.bielefeld.uni.cebitec.cav.controller;
 
 import java.io.IOException;
 
+import javax.swing.JOptionPane;
+
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
+import de.bielefeld.uni.cebitec.cav.gui.CustomFileFilter;
+import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
 /**
  * This exception is used if a fasta file should be written but the source file
- * for a DNASequence object is not known or does not contain the sequence with the given ID
+ * for a DNASequence object is not known or does not contain the sequence with
+ * the given ID
  * 
  * @author phuseman
- *
+ * 
  */
 public class SequenceNotFoundException extends IOException {
-	private DNASequence sequence=null;
+	private DNASequence sequence = null;
+
 	public SequenceNotFoundException(DNASequence s) {
 		super();
-		sequence=s;
+		sequence = s;
 	}
 
-	public SequenceNotFoundException(String message, Throwable cause, DNASequence s) {
+	public SequenceNotFoundException(String message, Throwable cause,
+			DNASequence s) {
 		super(message, cause);
-		sequence=s;
+		sequence = s;
 	}
 
 	public SequenceNotFoundException(String message, DNASequence s) {
 		super(message);
-		sequence=s;
+		sequence = s;
 	}
 
 	public SequenceNotFoundException(Throwable cause, DNASequence s) {
 		super(cause);
-		sequence=s;
+		sequence = s;
 	}
 
 	public DNASequence getDNASequence() {
@@ -61,4 +68,29 @@ public class SequenceNotFoundException extends IOException {
 		this.sequence = sequence;
 	}
 
+	/**
+	 * This method handles the case, when the file for a dna sequence is not given, or not readable.
+	 * The user is asked, if the missing file should be selected. If so a dialoge is popped up to select a file.
+	 * 
+	 * @param SequenceNotFoundException contains the {@link DNASequence} object for that the file is missing.
+	 * @return Integer either JOptionPane.YES_OPTION, JOptionPane.NO_OPTION, or JOptionPane.CANCEL_OPTION
+	 */
+	public static int handleSequenceNotFoundException(
+			SequenceNotFoundException e) {
+		Object[] options = { "Yes", "No, leave out missing sequences", "Abort" };
+		int jOptionPaneAnswer = JOptionPane.showOptionDialog(null, e
+				.getMessage()
+				+ "\nDo you want to select a file?", "Sequence not found",
+				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+				null, options, options[0]);
+
+		if(jOptionPaneAnswer == JOptionPane.YES_OPTION) {
+			e.getDNASequence().setFile(
+					MiscFileUtils.chooseFile(null,"Choose a new file", null, true,
+							new CustomFileFilter(".fas,.fna,.fasta",
+									"Fasta file")));
+		}
+
+		return jOptionPaneAnswer;
+	}
 }

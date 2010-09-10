@@ -281,8 +281,6 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 
 					R2cat.dataModelController.setAlignmentsPositonsList(result);
 					R2cat.guiController.setVisualisationNeedsUpdate();
-
-
 					
 					MatchDialog.this.validate();
 				} else {

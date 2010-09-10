@@ -39,13 +39,16 @@ public class FastaFileReader {
 
 	private File source = null;
 	private Vector<DNASequence> sequences;
+	private HashMap<String, Integer> sequencesMap;
 
-	private char[] chararray;
-	private HashMap<String, Integer> offsetsInCharArray;
+	private char[] chararray = null;
+	private int[] offsets = null;
+	private int[] sizes = null;
 
 	public FastaFileReader(File input) {
 		this.source = input;
 		sequences = new Vector<DNASequence>();
+		sequencesMap = new HashMap<String, Integer>();
 	}
 
 	
@@ -82,13 +85,15 @@ public class FastaFileReader {
 	}
 	
 	/**
-	 * Scans the contents of the file. Returns if a line ">id" was present
+	 * Scans the contents of the file. Returns if at least one line with ">id" was present
 	 * @param createCharArray
 	 * @return boolean Id's were found
 	 * @throws IOException
 	 * @throws NoFastaFileException 
 	 */
 	public boolean scanContents(boolean createCharArray) throws IOException {
+		HashMap<String, Integer> offsetsInCharArray;
+
 		if (!isFastaQuickCheck()) {
 			throw new IOException("File seems to be not a fasta file");
 		}
@@ -214,15 +219,28 @@ public class FastaFileReader {
 			sequences.add(new DNASequence(source, lastSequenceId,
 					lastSequenceDescription, lastSequenceLength));
 
-			// set the offset of each sequence object
-			for (DNASequence seq : sequences) {
-				// key is id, value is offset in a contiguous sequence
-				long offset = offsetsInCharArray.get(seq.getId());
-				seq.setOffset(offset);
+			if(createCharArray) {
+				offsets = new int[sequences.size() + 1];
+				sizes = new int[sequences.size()];
+				int offset=0;
+				for (int i = 0; i < sequences.size(); i++) {
+					// set the offset of each sequence object...
+					offset = offsetsInCharArray.get(sequences.get(i).getId());
+					// as well as in the offsets array...
+					offsets[i] = offset;
+					// and remember the index of each sequence
+					if(!sequencesMap.containsKey(sequences.get(i).getId())){
+						sequencesMap.put(sequences.get(i).getId(), i);
+					}
+					//remember the size of each fasta sequence to speed up the updateBin in the matcher.
+					sizes[i]=(int)sequences.get(i).getSize();
+				}
+				//store in the last field the total size. this eases to go through the sequences.
+				offsets[sequences.size()] = chararray.length;
 			}
 
 			initialized = true;
-			}
+			} //if ids were found
 			
 			
 			
@@ -233,6 +251,8 @@ public class FastaFileReader {
 			}
 //		}
 		
+			
+			
 		return idsFound;
 	}
 
@@ -268,22 +288,36 @@ public class FastaFileReader {
 	 */
 	public int[] getOffsetsArray() throws IOException  {
 		checkInitialisation();
-
-		int[] out = new int[offsetsInCharArray.size() + 1];
-
-		for (int i = 0; i < sequences.size(); i++) {
-			out[i] = (int) sequences.get(i).getOffset();
-		}
-
-		out[sequences.size()] = chararray.length;
-
-		return out;
+		return offsets;
+	}
+	
+	public int getOffset(String contigId) {
+		return offsets[sequencesMap.get(contigId)];
 	}
 
 	public DNASequence getSequence(int index) {
 		return sequences.get(index);
 	}
+	
+	public int getSizeOfSequence(int i) {
+		return sizes[i];
+	}
 
+	/**
+	 * Gives the DNASequence Object, if this id exists.
+	 * @param id to be found
+	 * @return {@link DNASequence} object. if not existent, this method returns null
+	 */
+	public DNASequence getSequence(String id) {
+		Integer index = sequencesMap.get(id);
+		if (index != null) {
+			return sequences.get(sequencesMap.get(id));
+		} else {
+			return null;
+		}
+	}
+
+	
 	public File getSource() {
 		return source;
 	}
@@ -375,17 +409,86 @@ public class FastaFileReader {
 	 */
 	public boolean containsId(String id) throws IOException  {
 		checkInitialisation();
-		return offsetsInCharArray.containsKey(id);
+		return sequencesMap.containsKey(id);
 	}
 
 	/**
 	 * If the contents of the file were not read in, resume this.
 	 * @throws IOException
 	 */
-	private void checkInitialisation() throws IOException {
+	public void checkInitialisation() throws IOException {
 		if (!initialized || chararray == null) {
 			this.scanContents(true);
 		}
 	}
+	
+	/**
+	 * Sets all sequences to uppercase letters.
+	 * This can be used as a kind of repeat masking: Uppercase letters indicate nonrepetitive parts.
+	 * In this sense, this function resets the repeatmasking information.
+	 * A functionality of the repeatmasked sequences must be implemented in the classes that want to use it.
+	 * 
+	 * @return returns if this operation was successful. If the internal char array is null, then false is returned. Cal scanContents(true) beforehand.
+	 * 
+	 */
+	public boolean setAllToUppercaseLetters() {
+		if(chararray != null) {
+			for (int i = 0; i < chararray.length; i++) {
+				chararray[i]=Character.toUpperCase(chararray[i]);
+			}
+			return true;
+		}
+		return false;
+	}
 
+	/**
+	 * Sets the characters in a specified region to lowercase.
+	 * This can be used as a kind of repeat masking: Lowercase sequences indicate repetitive parts.
+	 * In this sense, this function sets the given sequences to repetitive.
+	 * A functionality of these repeatmasked sequences must be implemented in the classes that want to use it.
+	 * 
+	 * @param contigId Identifier of the contig where the region should be set to lowercase.
+	 * @param start position of the area to be set
+	 * @param stop position of the area to be set
+	 * @return returns if this operation was successful. If the internal char array is null, then false is returned. Cal scanContents(true) beforehand.
+	 */
+	public boolean setRegionToLowercaseLetters(String contigId, int start, int stop) {
+		//get the offset in the char array
+		Integer offset = this.getOffset(contigId);
+		if (chararray != null && offset != null) {
+			int realstart = offset + start;
+			int realstop = offset + stop;
+			
+			//swap positions if startposition is bigger than stop position
+			if (realstart > realstop) {
+				int tmp=realstart;
+				realstart = realstop;
+				realstop = tmp;
+			}
+			
+			try {
+				//set all corresponding letters to lowercase
+				for (int i = realstart; i < realstop; i++) {
+					chararray[i] = Character.toLowerCase(chararray[i]);
+				}
+				//if the index is out of bounds, return false
+			} catch (IndexOutOfBoundsException e) {
+				return false;
+			}
+			return true;
+		}
+
+		return false;
+	}
+	
+	public char charAt(int index) {
+		return chararray[index];
+	}
+	
+	public char[] getSubstring(int offset, int length) {
+		char[] out = new char[length];
+		System.arraycopy(chararray, offset, out, 0, length);
+		return out;
+	}
+	
 }

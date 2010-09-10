@@ -144,11 +144,11 @@ public class ContigSorter implements Runnable {
 	 * Sets the histogram to zero.
 	 */
 	private void resetHistogram() {
-		if (histogram != null) {
+		//if (histogram != null) {
 			for (int i = 0; i < histogram.length; i++) {
 				histogram[i] = 0;
 			}
-		}
+		//}
 	}
 
 	/**
@@ -175,7 +175,7 @@ public class ContigSorter implements Runnable {
 		
 		//TODO: It would be great if this would work circular. but this had then to be for each target sequence.
 		
-		if (histogram != null) {
+		//if (histogram != null) {
 
 			for (int i = 0; i < windowSize; i++) {
 				actualValue += histogram[i];
@@ -201,7 +201,7 @@ public class ContigSorter implements Runnable {
 //				// 
 				
 			}
-		}
+		//}
 
 //		 log.close();
 //		 } catch (IOException e) {

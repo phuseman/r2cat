@@ -127,6 +127,7 @@ public class QGramFilter {
 	// it is faster without and the values are not really reliable to 
 	//serve as a measure of identity
 	private static final boolean computeMean=false;
+	private int querySize;
 	
 
 	//debug
@@ -676,8 +677,7 @@ public class QGramFilter {
 		 * d = (|Target| + position_in_query - position_in_target)/|Bins|
 		 */
 		private void updateBin(int b, int hitPositionTarget, int hitPositionQuery, int offsetDiagonal) {
-			// the size of the query is needed for the reverse complement
-			int querySize = (int)query.getSequence(queryNumber).getSize();
+			querySize = query.getSizeOfSequence(queryNumber);
 			
 			// TODO check correctness with unit test
 			// if the last hit was more than w+q away: report and/or start new parallelogram

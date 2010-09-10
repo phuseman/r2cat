@@ -55,6 +55,7 @@ import de.bielefeld.uni.cebitec.cav.gui.HelpFrame;
 import de.bielefeld.uni.cebitec.cav.gui.MainMenu;
 import de.bielefeld.uni.cebitec.cav.gui.MainWindow;
 import de.bielefeld.uni.cebitec.cav.gui.MatchDialog;
+import de.bielefeld.uni.cebitec.cav.gui.PrimerFrame;
 import de.bielefeld.uni.cebitec.cav.gui.SequenceOrderTable;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
@@ -418,11 +419,7 @@ public class GuiController {
 
 	private void exportAsFastaFile(File f, boolean ignoreMissingFiles) {
 		try {
-			if (!f.getName().endsWith(".fas")||!f.getName().endsWith(".fasta")||!f.getName().endsWith(".fna")) {
-				f = new File(f.getAbsolutePath() + ".fas");
-			}
-
-			// TODO check if all files are existent
+			MiscFileUtils.enforceExtension(f, ".fas");
 
 			// mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			int contigsWritten = R2cat.dataModelController
@@ -437,20 +434,10 @@ public class GuiController {
 
 		} catch (IOException e) {
 			if (e.getClass() == SequenceNotFoundException.class) {
+				int answer = SequenceNotFoundException.handleSequenceNotFoundException((SequenceNotFoundException)e);
 				
-				SequenceNotFoundException seqNotFoundException = (SequenceNotFoundException)e;
-
-				Object[] options = { "Yes", "No, leave out missing sequences", "Abort" };
-				int n = JOptionPane.showOptionDialog(this.getMainWindow(),
-						e.getMessage()+"\nDo you want to select a file?",
-						"Sequence not found", JOptionPane.YES_NO_CANCEL_OPTION,
-						JOptionPane.WARNING_MESSAGE, null,
-						options,
-						options[0]);
-				
-				switch (n) {
+				switch (answer) {
 				case JOptionPane.YES_OPTION:
-				seqNotFoundException.getDNASequence().setFile(this.chooseFile("Choose a new file",true, new CustomFileFilter(".fas,.fna,.fasta", "Fasta file")));
 					this.exportAsFastaFile(f, ignoreMissingFiles);
 					break;
 				case JOptionPane.NO_OPTION:
@@ -544,5 +531,20 @@ public class GuiController {
 		export.showExportDialog(mainWindow, "Export view to file", dotPlotVisualisation, "r2catExport"+dateFormat.format(date));
 	}
 	
-
+	public void showGeneratePrimerFrame(AlignmentPositionsList alignmentPositionsList) {
+		if (alignmentPositionsList != null) {	
+			PrimerFrame primer = new PrimerFrame(alignmentPositionsList);
+			primer.setIconImage(mainWindow.getIconImage());
+			primer.pack();
+			primer.setLocationByPlatform(true);
+			primer.setVisible(true);
+		}	
+	}
+/*	public void showPrimerResults(PrimerGenerator pg, Vector<String> output){
+		PrimerResults pr = new PrimerResults(pg, output);
+		pr.setIconImage(mainWindow.getIconImage());
+		pr.pack();
+		pr.setLocationByPlatform(true);
+		pr.setVisible(true);
+	}*/
 }
