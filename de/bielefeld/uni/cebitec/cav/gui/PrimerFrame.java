@@ -1,7 +1,6 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -47,18 +46,15 @@ public class PrimerFrame extends JFrame implements ActionListener,
 	private File configFile;
 	private File lastDir;
 	private Vector<ContigPair> contigPairs = null;
-	private Checkbox repeatMaskingCheckBox;
 	private JProgressBar progressBar;
 	private JButton select;
 	private JButton remove;
-	private PrimerTableModel model;
 	private JPanel controlPanel;
 	private JComboBox repeatMaskingComboBox;
 
 	public PrimerFrame(AlignmentPositionsList alignmentPositionsList) {
 		this.alignmentPositionsList = alignmentPositionsList;
 		primer = new PrimerTable(alignmentPositionsList);
-		model = (PrimerTableModel) primer.getModel();
 		// uebpruefen ob leer... dann FILE
 		Vector<DNASequence> seq = alignmentPositionsList.getQueries();
 		init();
@@ -93,11 +89,17 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		controlPanel.add(setConfigButton);
 		setConfigButton.addActionListener(this);
 
-		//repeatMaskingCheckBox = new Checkbox("Repeat Masking");
-		//controlPanel.add(repeatMaskingCheckBox);
-		String[] repeatString = { "Repeat Masking with BLAST", "Sequences are already masked", "No Repeat Masking is necessary" };
+		String[] repeatString = { "Repeat Masking with BLAST", "Sequences are already masked", "No Repeat Masking" };
 		repeatMaskingComboBox = new JComboBox(repeatString);
 		repeatMaskingComboBox.setSelectedIndex(2);
+		repeatMaskingComboBox.setToolTipText("<html>Determines whether a repeat masking step should be performed.<br>" +
+				"There are three possibilities:"+
+				"<ul>" +
+				"<li>Either BLAST can be used to mask repetitive regions</li>" +
+				"<li>The FASTA file is already masked: small letters indicate repetitive regions,<br>" +
+				"capital letters mean normal</li>" +
+				"<li>No repeat masking should be used</li>" +
+				"</ul></html>");
 		controlPanel.add(repeatMaskingComboBox);
 		repeatMaskingComboBox.addActionListener(this);
 		
