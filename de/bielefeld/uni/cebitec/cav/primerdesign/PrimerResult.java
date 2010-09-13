@@ -72,6 +72,26 @@ public class PrimerResult {
 	 */
 	@Override 
 	public String toString(){
+		//EVALUIEREN
+/*		String NEW_LINE = System.getProperty("line.separator");
+		String TAB = "\t";
+		String contigIDLeft = contigLeft.getId();
+		String contigIDRight =contigRight.getId();
+		StringBuilder results = new StringBuilder();
+	
+		if(!forwardPrimer.isEmpty()&&!reversePrimer.isEmpty()&&forwardPrimer.size()==reversePrimer.size()){
+			for(int i = 0;i<this.forwardPrimer.size();i++){
+				//results.append(">"+contigIDLeft+i+"left"+NEW_LINE);
+				results.append(forwardPrimer.elementAt(i).toString()+NEW_LINE);
+				results.append(reversePrimer.elementAt(i).toString()+NEW_LINE);
+			}
+			for(int j= 0; j<this.forwardPrimer.size();j++){
+				//results.append(">"+contigIDRight+j+"Right"+NEW_LINE);
+				//results.append(reversePrimer.elementAt(j).toString()+NEW_LINE);
+			}
+		}
+		return results.toString();*/
+		
 		String NEW_LINE = System.getProperty("line.separator");
 		String TAB = "\t";
 		String infos ="Primer picking results for contigs";
@@ -92,6 +112,7 @@ public class PrimerResult {
 			results.append("left:"+TAB+forwardPrimer.elementAt(i).toString()+NEW_LINE);
 			results.append("right:"+TAB+reversePrimer.elementAt(i).toString()+NEW_LINE+NEW_LINE);
 		}
+			//results.append(NEW_LINE);
 			}else{
 				results.append("Sorry, no Primers were found"+NEW_LINE);
 			}

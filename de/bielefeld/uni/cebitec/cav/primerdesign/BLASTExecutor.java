@@ -80,7 +80,7 @@ public class BLASTExecutor {
  */
 	public int makeBlastDB() throws IOException, InterruptedException{
 		if (temporaryDirectoryForBLAST == null) {
-			//failsafe: creat temp dir, if this has hot happened yet
+			//failsafe: create temp dir, if this has hot happened yet
 			this.createTempDir();
 		}
 		String command = new String("formatdb -i "+targetFastaFile.getAbsolutePath()+" -p F -n blastdb");
@@ -110,14 +110,14 @@ public class BLASTExecutor {
 	/**
 	 * Returns the output file of the blast run.
 	 * Makes sure to remove the temporary files with deleteTempDir() after the result was parsed.
-	 * If a blast run is not sucessful, then null can be returned.
+	 * If a blast run is not successful, then null can be returned.
 	 * 
 	 * @return File blast results in a temporary directory.
 	 * 
 	 */
 	public File getBlastOutput() throws IOException, InterruptedException{
 		if(blastOutput == null) {
-			//failsafe: run blast, if ther is no result file
+			//failsafe: run blast, if there is no result file
 			this.runBlastCommand();
 		}
 			return blastOutput;
@@ -133,7 +133,6 @@ public class BLASTExecutor {
 			File[] files = temporaryDirectoryForBLAST.listFiles();
 			if (files != null) {
 				for (int i = 0; i < files.length; i++) {
-//					System.out.println("removing "+files[i].getName());
 					files[i].delete();
 				}
 			}

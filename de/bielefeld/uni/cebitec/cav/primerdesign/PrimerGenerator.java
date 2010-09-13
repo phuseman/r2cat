@@ -101,9 +101,8 @@ public class PrimerGenerator {
 	 */
 	public void setParameters(File config) throws Exception {
 		if (config != null) {
-			XMLParser configParser = new XMLParser(config);
-			scoring = new PrimerScoringScheme();
-			configParser.parse(scoring);
+			scoring = new PrimerScoringScheme(config);
+			scoring.setUpParser();
 		} else {
 			scoring = new PrimerScoringScheme();
 		}
