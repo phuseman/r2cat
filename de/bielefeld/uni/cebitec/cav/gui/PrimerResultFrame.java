@@ -43,10 +43,14 @@ public class PrimerResultFrame extends JFrame implements ActionListener {
 		String tabName;
 		for (int j = 0; j < primerResults.size(); j++) {
 			JTextArea primerResultText = new JTextArea(primerResults.elementAt(
-					j).toString());
+					j).toString(),50,80);
 			tabName = primerResults.elementAt(j).getContigIDs();
 			primerResultText.setEditable(false);
+
 			JScrollPane scrollPane = new JScrollPane(primerResultText);
+			   scrollPane.setAutoscrolls(true);
+			 int max = scrollPane.getVerticalScrollBar().getMaximum();
+		      scrollPane.getVerticalScrollBar().setValue( max );
 			tabbedPane.addTab(tabName, scrollPane);
 		}
 
