@@ -1,7 +1,6 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -116,7 +115,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		run.addActionListener(this);
 
 		this.add(controlPanel, BorderLayout.SOUTH);
-
+		
 		this.pack();
 
 		int width = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
@@ -162,6 +161,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 					e1.printStackTrace();
 				}
 		}
+		this.pack();
 		this.invalidate();
 		this.repaint();
 	}
@@ -176,6 +176,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 	 * @throws IOException
 	 */
 	private void setConfig() throws NumberFormatException, HeadlessException, IOException {
+		int previouseSize = (int) this.setConfigButton.getSize().getWidth();
 		File config = this.chooseFile(configFile,
 				"Select config (xml format)");
 		this.setConfig(config, false);
@@ -194,14 +195,14 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				if(jOptionPaneAnswer==JOptionPane.YES_OPTION){
 					this.setConfigButton.setText(configFile.getName());
 					this.setConfigButton.setBackground(Color.decode("#90EE90"));
-				} 
+			} 
 			}else{
 				//quickScan through the selected file
 				XMLCheck xmlParser = new XMLCheck(configFile);
 				if(xmlParser.quickScan()){
 					this.setConfigButton.setText(configFile.getName());
 					this.setConfigButton.setBackground(Color.decode("#90EE90"));
-				} else{
+					} else{
 					Object[] options = { "Yes", "Cancel"};
 					int jOptionPaneAnswer = JOptionPane.showOptionDialog(null,"Sorry! This is not an xml file. \nDo you want to select a new file?", "This is not an xml file!",
 							JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
