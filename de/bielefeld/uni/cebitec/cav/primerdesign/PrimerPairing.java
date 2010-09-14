@@ -166,21 +166,6 @@ public class PrimerPairing {
 
 				return temperatureDifferenceScore * sequenceSimilarityScore
 						* (left.getPrimerScore() + right.getPrimerScore());
-
-				//debugging:
-				// System.out.println("===========");
-				// System.out.println("Tr:"+
-				// right.getPrimerTemperature()+"\nTl:"+
-				// left.getPrimerTemperature()+"\nTscore="+temperatureScore);
-				// System.out.println("l  : "+new String(left.getPrimerSeq()));
-				// System.out.println("rcr: "+new
-				// String(reverseComplementOfSecondPrimer));
-				// System.out.println("similarity score"+sequenceSimilarityScore);
-				// System.out.println("Gesamt: "+ (temperatureScore *
-				// sequenceSimilarityScore * (left.getPrimerScore() +
-				// right.getPrimerScore())));
-				// System.out.println("===========");
-
 			}
 		}
 		return 0;

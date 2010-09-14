@@ -24,18 +24,18 @@ jar:$(R2CAT_JARFILE)
 $(R2CAT_JARFILE):all
 	jar cvfm $(R2CAT_JARFILE) Manifest_r2cat.txt `find . -iname '*.class'` images/*.png extra/* \
 META-INF/services/org.freehep.util.export.ExportFileType 
-	jarsigner -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(R2CAT_JARFILE) cgcat
+	jarsigner -tsa https://timestamp.geotrust.com/tsa -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(R2CAT_JARFILE) cgcat
 
 $(TREE_JARFILE):all
 	jar cvfm $(TREE_JARFILE) Manifest_treecat.txt `find . -iname '*.class'` images/*.png extra/* \
 META-INF/services/org.freehep.util.export.ExportFileType 
-	jarsigner -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(TREE_JARFILE) cgcat
+	jarsigner -tsa https://timestamp.geotrust.com/tsa -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(TREE_JARFILE) cgcat
 
 $(CGCAT_JARFILE):all
 	-rm -vf extra/*~
 	jar cvf $(CGCAT_JARFILE) `find . -iname '*.class'` images/*.png extra/* \
 META-INF/services/org.freehep.util.export.ExportFileType 
-	jarsigner -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(CGCAT_JARFILE) cgcat
+	jarsigner -tsa https://timestamp.geotrust.com/tsa -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(CGCAT_JARFILE) cgcat
 
 zipsources:
 	zip -9 sources.zip Manifest_*.txt `find . -iname '*.java'` images/*.png extra/* \

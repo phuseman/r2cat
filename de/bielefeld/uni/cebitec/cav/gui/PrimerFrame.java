@@ -1,6 +1,7 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -31,7 +32,7 @@ import de.bielefeld.uni.cebitec.cav.datamodel.PrimerTableModel;
 import de.bielefeld.uni.cebitec.cav.primerdesign.ContigPair;
 import de.bielefeld.uni.cebitec.cav.primerdesign.PrimerGenerator;
 import de.bielefeld.uni.cebitec.cav.primerdesign.PrimerResult;
-import de.bielefeld.uni.cebitec.cav.primerdesign.XMLParser;
+import de.bielefeld.uni.cebitec.cav.primerdesign.XMLCheck;
 import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
 import de.bielefeld.uni.cebitec.cav.utils.MiscFileUtils;
 
@@ -89,7 +90,9 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		controlPanel.add(setConfigButton);
 		setConfigButton.addActionListener(this);
 
-		String[] repeatString = { "Repeat Masking with BLAST", "Sequences are already masked", "No Repeat Masking" };
+		//repeatMaskingCheckBox = new Checkbox("Repeat Masking");
+		//controlPanel.add(repeatMaskingCheckBox);
+		String[] repeatString = { "Repeat Masking with BLAST", "Repeats are already masked", "No Repeat Masking is necessary" };
 		repeatMaskingComboBox = new JComboBox(repeatString);
 		repeatMaskingComboBox.setSelectedIndex(2);
 		repeatMaskingComboBox.setToolTipText("<html>Determines whether a repeat masking step should be performed.<br>" +
@@ -194,7 +197,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				} 
 			}else{
 				//quickScan through the selected file
-				XMLParser xmlParser = new XMLParser(configFile);
+				XMLCheck xmlParser = new XMLCheck(configFile);
 				if(xmlParser.quickScan()){
 					this.setConfigButton.setText(configFile.getName());
 					this.setConfigButton.setBackground(Color.decode("#90EE90"));
@@ -236,7 +239,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		//if pairs are selected then check the xml file of right structure
 		if(contigPairs.size()>0) {
 			if(configFile!= null){
-				XMLParser xmlParser = new XMLParser(configFile);
+				XMLCheck xmlParser = new XMLCheck(configFile);
 				boolean isXML = xmlParser.scanXML();
 			if(!isXML){
 				//config file doesn't have xml structure! Error message for user

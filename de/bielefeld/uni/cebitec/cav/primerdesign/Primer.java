@@ -113,7 +113,14 @@ public class Primer implements Comparable<Primer> {
 	 * @return
 	 */
 	private String toStringWithSeperatorChar(char sep) {
-		return String.format((Locale) null, "%d%c%c%c%d%c%d%c%.2f%c%.2f%c%s",
+		//EVALUERIEN
+/*		double temp = getPrimerTemperature();
+		Math.round(temp * 100 / 100.);
+		String test = String.valueOf(temp);
+		return String.format((Locale) null, "%.2f",
+				getPrimerTemperature());*/
+		
+			return String.format((Locale) null, "%d%c%c%c%d%c%d%c%.2f%c%.2f%c%s",
 				getStart(),
 				sep,
 				onRightEnd?'>':'<',

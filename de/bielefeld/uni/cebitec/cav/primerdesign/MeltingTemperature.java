@@ -56,10 +56,10 @@ public class MeltingTemperature {
 }
 	/**
 	 * This method sets up the alphabetMap, which sets the bases to a specific number.
-	 * This is used to set up the entropie and enthalpy matrix, which contain values for a given
+	 * This is used to set up the entropy and enthalpy matrix, which contain values for a given
 	 * base-tupel.
 	 * 
-	 * e.g. 'AA' has an entropy value of -23.6 and an enthalpie value of -8.4
+	 * e.g. 'AA' has an entropy value of -23.6 and an enthalpy value of -8.4
 	 */
 	private void init() {
 	//create alphabet map
@@ -151,7 +151,7 @@ public class MeltingTemperature {
 		boolean error = false;
 		double entropy = 0;
 		double enthalpy = 0;
-		//go through the given sequence and calculate the entropie and enthalpy of each pair of bases
+		//go through the given sequence and calculate the entropy and enthalpy of each pair of bases
 		for (int i = 0; i < seq.length-1; i++) {
 			try {
 			entropy += entropyMatrix[alphabetMap[seq[i]]][alphabetMap[seq[i+1]]];

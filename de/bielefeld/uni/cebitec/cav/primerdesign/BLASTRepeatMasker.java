@@ -40,13 +40,11 @@ public class BLASTRepeatMasker implements RepeatMasker {
 
 	/**
 	 * Constructor to set up the working directory and the fasta file. It also
-	 * starts the RunBlast class in order to run the BLAST programms and parses
+	 * starts the RunBlast class in order to run the BLAST programs and parses
 	 * the BLAST output in order to mask the bases of the repeats to lower
 	 * cases.
 	 * 
 	 * @param fasta
-	 * @throws IOException
-	 * @throws InterruptedException
 	 */
 	public BLASTRepeatMasker(FastaFileReader fasta) {
 		fastaFile = fasta;
@@ -74,7 +72,7 @@ public class BLASTRepeatMasker implements RepeatMasker {
 	}
 
 	/**
-	 * This method parses the output of the blastall programm in order to mask
+	 * This method parses the output of the blastall program in order to mask
 	 * the repeats to lower cases.
 	 * 
 	 * @throws IOException

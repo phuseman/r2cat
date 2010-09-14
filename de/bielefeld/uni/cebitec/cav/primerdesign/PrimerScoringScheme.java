@@ -21,20 +21,26 @@
 package de.bielefeld.uni.cebitec.cav.primerdesign;
 
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Stack;
-
 import javax.swing.tree.DefaultMutableTreeNode;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * This class contains the parameters an the methods to calculate the score for each primer candidate.
- * It loads default parameters or retrieves parameters from a given XML file.
+ * It loads default parameters or retrieves parameters from a given XML file with the SAXParser.
  * 
  * **************************************************************************************************
  * 																									*
@@ -46,7 +52,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  *																									*
  ****************************************************************************************************/
 
-	final class PrimerScoringScheme implements DocumentHandler {
+	final class PrimerScoringScheme extends DefaultHandler{
 		//The following variables are used to parse a xml file by maintaining its structure
 		private DefaultMutableTreeNode root, currentNode, currentParent;
 		private String currentTag = null;
@@ -79,9 +85,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		private double npenalty = -1500.0;
 		private double repeat = -1500.0;
 		private double maxoffsetDISTANCE = 150.0;
-		private double maxoffsetMULT = -2.0;
+		private double maxoffsetMULT= -2.0;
 		private double backfold = -1500.0;
-		
+		//globale variables are needed to parse XML-File
+		private File configFile = null;
+		private String elementName = null;
+		private String parentElementName = null;
+		private String key = null;
 		
 		/**
 		 * Constructor of the class.
@@ -92,6 +102,16 @@ import javax.swing.tree.DefaultMutableTreeNode;
 				this.defaultParameters();
 				base = Bases.getInstance();
 				swa = new SimpleSmithWatermanPrimerAligner();
+		}
+		/**
+		 * Constructor of the class.
+		 * When a config-file is given the parsing of XML file is set up and puts the retrieved parameters in the
+		 * parameter containers.
+		 */
+		public PrimerScoringScheme(File config){
+			configFile = config;
+			base = Bases.getInstance();
+			swa = new SimpleSmithWatermanPrimerAligner();
 		}
 
 		/**
@@ -581,65 +601,50 @@ import javax.swing.tree.DefaultMutableTreeNode;
 		 * @param value
 		 */
 		private void loadParameters(String key, String value){
-			
 			ArrayList<Double> gcArrayList = new ArrayList<Double>();
 			ArrayList<Double> annealArrayList = new ArrayList<Double>();
 			ArrayList<Double> atLast6ArrayList = new ArrayList<Double>();
 			ArrayList<Double> gc0207ArrayList = new ArrayList<Double>();
 			ArrayList<Double> offsetArrayList = new ArrayList<Double>();
-			
-			if(currentParent.toString().equals("GC")){
+			if(parentElementName.equals("GC")){
 				gc.put(Double.parseDouble(key), Double.parseDouble(value));
 				gcArrayList.add(Double.parseDouble(key));
-			}if(currentParent.toString().equals("FIRST")){
+			}if(parentElementName.equals("FIRST")){
 				firstBase.put(key.charAt(0), Double.parseDouble(value));
-			}if(currentParent.toString().equals("LAST")){
+			}if(parentElementName.equals("LAST")){
 				lastBase.put(key.charAt(0), Double.parseDouble(value));
-			}if(currentParent.toString().equals("PLUS_1")){
+			}if(parentElementName.equals("PLUS_1")){
 				plus1Base.put(key.charAt(0), Double.parseDouble(value));
-			}if(currentParent.toString().equals("PLUS_2")){
+			}if(parentElementName.equals("PLUS_2")){
 				plus2Base.put(key.charAt(0), Double.parseDouble(value));
-			}if(currentParent.toString().equals("LENGTH")){
-				if(currentTag.toString().equals("IDEAL")){
+			}if(elementName.equals("IDEAL")){
 					lengthIDEAL = Double.parseDouble(value);
-				}
-				if(currentTag.toString().equals("SCORE")){
+			}if(elementName.equals("SCORE")&&parentElementName.equals("LENGTH")){
 					lengthSCORE = Double.parseDouble(value);
-				}
-			}if(currentParent.toString().equals("HOMOPOLY")){
-				if(currentTag.toString().equals("CNT")){
+			}if(elementName.equals("CNT")){
 					homopolyCNT = Double.parseDouble(value);
-				}
-				if(currentTag.toString().equals("SCORE")){
+			}if(elementName.equals("SCORE")&&parentElementName.equals("HOMOPOLY")){
 					homopolySCORE = Double.parseDouble(value);
-				}
-			}if(currentParent.toString().equals("MAX_OFFSET")){
-				if(currentTag.toString().equals("DISTANCE")){
+			}if(elementName.equals("DISTANCE")){
 					maxoffsetDISTANCE = Double.parseDouble(value);
-				}
-				if(currentTag.toString().equals("MULT")){
+			}if(elementName.equals("MULT")){
 					maxoffsetMULT = Double.parseDouble(value);
-				}
-			}if(currentParent==currentNode){
-				if(currentParent.toString().equals("N_PENALTY")){
+			}if(parentElementName.equals("N_PENALTY")){
 					npenalty = Double.parseDouble(value);
-				}
-				if(currentParent.toString().equals("BACKFOLD")){
+			}if(parentElementName.equals("BACKFOLD")){
 					backfold = Double.parseDouble(value);
-				}
-				if(currentParent.toString().equals("REPEAT")){
+			}if(parentElementName.equals("REPEAT")){
 					repeat = Double.parseDouble(value);
-				}
-			}if(currentParent.toString().equals("OFFSET")){
+			}if(parentElementName.equals("OFFSET")){
 				offset.put(Double.parseDouble(key), Double.parseDouble(value));
 				offsetArrayList.add(Double.parseDouble(key));
-			}if(currentParent.toString().equals("GC_0207")){
+			}if(parentElementName.equals("GC_0207")){
 				gc0207.put(Double.parseDouble(key), Double.parseDouble(value));
 				gc0207ArrayList.add(Double.parseDouble(key));
-			}if(currentParent.toString().equals("AT_LAST6")){
+			}if(parentElementName.equals("AT_LAST6")){
 				atLast6.put(Double.parseDouble(key), Double.parseDouble(value));
 				atLast6ArrayList.add(Double.parseDouble(key));
-			}if(currentParent.toString().equals("ANNEAL")){
+			}if(parentElementName.equals("ANNEAL")){
 				anneal.put(Double.parseDouble(key), Double.parseDouble(value));
 				annealArrayList.add(Double.parseDouble(key));
 			}
@@ -650,88 +655,58 @@ import javax.swing.tree.DefaultMutableTreeNode;
 			this.offsetArray =this.makeIntArray((offsetArrayList.toArray()));
 		}
 		
-		
-		
-		/* (non-Javadoc)
-		 * @see de.bielefeld.uni.cebitec.cav.primerdesign.DocumentHandler#startDocument()
+		/**
+		 * This methods sets up the needed SAXParser components and parses the given file.
+		 * 
+		 * @throws SAXException
+		 * @throws IOException
 		 */
-		@Override
-		public void startDocument() throws Exception {
-			stack = new Stack();
-			
-		}
-		
-		
-		/* (non-Javadoc)
-		 * @see de.bielefeld.uni.cebitec.cav.primerdesign.DocumentHandler#endDocument()
-		 */
-		@Override
-		public void endDocument() throws Exception {
-			stack = null;
-			
-		}
-		
-		/* (non-Javadoc)
-		 * @see de.bielefeld.uni.cebitec.cav.primerdesign.DocumentHandler#startElement(java.lang.String, java.util.Hashtable)
-		 */
-		@Override
-		public void startElement(String tag, Hashtable hash) throws Exception {
-			String keyV;
-			DefaultMutableTreeNode newNode= new DefaultMutableTreeNode(tag);
-			if(stack.isEmpty()){
-				stack.push(this);
-			} else{
-				stack.push(this);
-			if(currentNode ==null){
-				root=newNode;
-			} else{
-				currentNode.add(newNode);
-			}
-			currentNode=newNode;
-			if(currentNode.getParent()==null){
-				currentParent =root;
-			} else{
-			currentParent = (DefaultMutableTreeNode) currentNode.getParent();
-			}
-			currentTag = currentNode.toString();
-		
-			}
-			Enumeration e=hash.keys();
-			while(e.hasMoreElements()){
-				keyV = (String)e.nextElement();
-				value = (String)hash.get(keyV);
-			}
-			
-	}
-		
-		
-		/* (non-Javadoc)
-		 * @see de.bielefeld.uni.cebitec.cav.primerdesign.DocumentHandler#endElement(java.lang.String)
-		 */
-		@Override
-		public void endElement(String st) throws Exception {
-			if(currentNode==null){	
-			} else{
-			currentNode =(DefaultMutableTreeNode) currentNode.getParent();
-			}
-			stack.pop();
-		}
+		public void setUpParser() throws SAXException, IOException{
+			XMLReader xr = XMLReaderFactory.createXMLReader();
+			xr.setContentHandler(this);
+			xr.setErrorHandler(this);
+			FileReader file = new FileReader(configFile);
+			xr.parse(new InputSource(file));
 
-	
-		/* (non-Javadoc)
-		 * @see de.bielefeld.uni.cebitec.cav.primerdesign.DocumentHandler#value(java.lang.String)
-		 */
-		@Override
-		public void value(String s) throws Exception {
-			if(!s.isEmpty()&&!s.contains(" ")&&!s.matches("\r\n")){
-				String score = s;
-				String keyValue = value;
-				if(currentNode.getParent()==currentParent&&!value.isEmpty()){
-					loadParameters(keyValue, score);
-				} else{
-					loadParameters(currentTag,score);
-				}
-			}
 		}
+		
+		/**
+		 * This method is called when a new XML-Element starts. 
+		 */
+		public void startElement (String uri, String name,String qName, Attributes atts){
+			if(!name.equals("CONFIG")){
+				//needs to be saved since the other element names occure more than once in the config-file
+			if(parentElementName==null){
+			parentElementName= name;
+			}
+			 elementName = name;
+			 for( int i = 0; i < atts.getLength(); i++ ){
+			 key = atts.getValue(i);
+			 }
+			}
+   }
+
+		/**
+		 * This method is called when a XML-Element end-tag is found.
+		 */
+   public void endElement (String uri, String name, String qName){
+	   if(parentElementName==name){
+		   parentElementName = null; 
+	   }
+   }
+/**
+ * This method is called to retrieve the parameters from the XML-Element and calls the method to load
+ * the parameters into the needed containers.
+ */
+   public void characters (char ch[], int start, int length){
+	   value = new String(ch,start,length).trim();
+	   if(value.length()>0){
+		   if(key!=null){
+			   this.loadParameters(key, value);
+		   }else{
+			   this.loadParameters(elementName, value);
+		   }
+	   }
+   }
 }
 	
