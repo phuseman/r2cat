@@ -161,7 +161,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 					e1.printStackTrace();
 				}
 		}
-		this.pack();
+
 		this.invalidate();
 		this.repaint();
 	}
@@ -195,6 +195,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				if(jOptionPaneAnswer==JOptionPane.YES_OPTION){
 					this.setConfigButton.setText(configFile.getName());
 					this.setConfigButton.setBackground(Color.decode("#90EE90"));
+					this.pack();
 			} 
 			}else{
 				//quickScan through the selected file
@@ -202,6 +203,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				if(xmlParser.quickScan()){
 					this.setConfigButton.setText(configFile.getName());
 					this.setConfigButton.setBackground(Color.decode("#90EE90"));
+					this.pack();
 					} else{
 					Object[] options = { "Yes", "Cancel"};
 					int jOptionPaneAnswer = JOptionPane.showOptionDialog(null,"Sorry! This is not an xml file. \nDo you want to select a new file?", "This is not an xml file!",
