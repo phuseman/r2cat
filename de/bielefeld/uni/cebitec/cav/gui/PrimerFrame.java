@@ -2,11 +2,14 @@ package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -51,6 +54,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 	private JButton remove;
 	private JPanel controlPanel;
 	private JComboBox repeatMaskingComboBox;
+	private double currentWidth;
 
 	public PrimerFrame(AlignmentPositionsList alignmentPositionsList) {
 		this.alignmentPositionsList = alignmentPositionsList;
@@ -71,7 +75,6 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		this.setLayout(new BorderLayout());
 		JScrollPane tp = new JScrollPane(primer);
 		this.add(tp, BorderLayout.CENTER);
-
 		controlPanel = new JPanel();
 		select = new JButton("Select all");
 		select.setActionCommand("select_all");
@@ -86,11 +89,10 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		setConfigButton.setActionCommand("setConfig");
 		setConfigButton
 				.setToolTipText("Choose a XML file of primer design parameters");
+		currentWidth = this.getSize().getWidth();
 		controlPanel.add(setConfigButton);
 		setConfigButton.addActionListener(this);
 
-		//repeatMaskingCheckBox = new Checkbox("Repeat Masking");
-		//controlPanel.add(repeatMaskingCheckBox);
 		String[] repeatString = { "Repeat Masking with BLAST", "Repeats are already masked", "No Repeat Masking is necessary" };
 		repeatMaskingComboBox = new JComboBox(repeatString);
 		repeatMaskingComboBox.setSelectedIndex(2);
@@ -112,8 +114,8 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		run = new JButton("Generate Primers");
 		run.setActionCommand("generate_primer");
 		controlPanel.add(run);
-		run.addActionListener(this);
 
+		run.addActionListener(this);
 		this.add(controlPanel, BorderLayout.SOUTH);
 		
 		this.pack();
@@ -176,7 +178,6 @@ public class PrimerFrame extends JFrame implements ActionListener,
 	 * @throws IOException
 	 */
 	private void setConfig() throws NumberFormatException, HeadlessException, IOException {
-		int previouseSize = (int) this.setConfigButton.getSize().getWidth();
 		File config = this.chooseFile(configFile,
 				"Select config (xml format)");
 		this.setConfig(config, false);
@@ -193,17 +194,30 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				}
 				
 				if(jOptionPaneAnswer==JOptionPane.YES_OPTION){
+					if(this.setConfigButton.getText().length()<configFile.getName().length()&&this.getExtendedState()!=6){
 					this.setConfigButton.setText(configFile.getName());
 					this.setConfigButton.setBackground(Color.decode("#90EE90"));
 					this.pack();
+					}else{
+						this.setConfigButton.setText(configFile.getName());
+						this.setConfigButton.setBackground(Color.decode("#90EE90"));
+					}
+				
+	
 			} 
 			}else{
 				//quickScan through the selected file
 				XMLCheck xmlParser = new XMLCheck(configFile);
 				if(xmlParser.quickScan()){
-					this.setConfigButton.setText(configFile.getName());
-					this.setConfigButton.setBackground(Color.decode("#90EE90"));
-					this.pack();
+					if(this.setConfigButton.getText().length()<configFile.getName().length()&&this.getExtendedState()!=6){
+						this.setConfigButton.setText(configFile.getName());
+						this.setConfigButton.setBackground(Color.decode("#90EE90"));
+						this.pack();
+						}else{
+							this.setConfigButton.setText(configFile.getName());
+							this.setConfigButton.setBackground(Color.decode("#90EE90"));
+						}
+
 					} else{
 					Object[] options = { "Yes", "Cancel"};
 					int jOptionPaneAnswer = JOptionPane.showOptionDialog(null,"Sorry! This is not an xml file. \nDo you want to select a new file?", "This is not an xml file!",
@@ -214,8 +228,14 @@ public class PrimerFrame extends JFrame implements ActionListener,
 										new CustomFileFilter(".xml","XML file")),false);
 					}
 					if(jOptionPaneAnswer==JOptionPane.YES_OPTION){
-						this.setConfigButton.setText(configFile.getName());
-						this.setConfigButton.setBackground(Color.decode("#90EE90"));
+						if(this.setConfigButton.getText().length()<configFile.getName().length()&&this.getExtendedState()!=6){
+							this.setConfigButton.setText(configFile.getName());
+							this.setConfigButton.setBackground(Color.decode("#90EE90"));
+							this.pack();
+							}else{
+								this.setConfigButton.setText(configFile.getName());
+								this.setConfigButton.setBackground(Color.decode("#90EE90"));
+							}
 					} 
 				}
 			}
