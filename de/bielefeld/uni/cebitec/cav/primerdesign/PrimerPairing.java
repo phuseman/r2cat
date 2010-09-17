@@ -153,14 +153,17 @@ public class PrimerPairing {
 		double temperatureDifferenceScore;
 		double sequenceSimilarityScore;
 		char[] reverseComplementOfSecondPrimer;
+		char[] reverseComplementOfFirstPrimer;
 		if (temperatureDifferenceQuickCheck(right.getPrimerTemperature(), left
 				.getPrimerTemperature())) {
 			temperatureDifferenceScore = temperatureDifferenceScore(right
 					.getPrimerTemperature(), left.getPrimerTemperature());
 			reverseComplementOfSecondPrimer = base.getReverseComplement(right
 					.getPrimerSeq());
+			reverseComplementOfFirstPrimer = base.getReverseComplement(left.getPrimerSeq());
 			if (sequenceSimilarityQuickCheck(left.getPrimerSeq(),
-					reverseComplementOfSecondPrimer)) {
+					reverseComplementOfSecondPrimer)&&sequenceSimilarityQuickCheck(reverseComplementOfFirstPrimer,
+							right.getPrimerSeq())) {
 				sequenceSimilarityScore = sequenceSimilarityScore(left
 						.getPrimerSeq(), reverseComplementOfSecondPrimer);
 
