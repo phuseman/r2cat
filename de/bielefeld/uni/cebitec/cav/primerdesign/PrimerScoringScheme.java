@@ -29,8 +29,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Stack;
-import javax.swing.tree.DefaultMutableTreeNode;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -53,11 +51,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
  ****************************************************************************************************/
 
 	final class PrimerScoringScheme extends DefaultHandler{
-		//The following variables are used to parse a xml file by maintaining its structure
-		private DefaultMutableTreeNode root, currentNode, currentParent;
-		private String currentTag = null;
-		private String value = null;
-		private Stack stack = null;
 		//The following HashMaps and Arrays save the parameters(needed for the score calculation)
 		private HashMap<Character, Double> firstBase = new HashMap<Character, Double>();
 		private HashMap<Character, Double> lastBase = new HashMap<Character, Double>();
@@ -73,7 +66,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
 		private Integer[] ATLast6Array;
 		private Integer[] gc0207Array;
 		private Integer[] offsetArray;
-		private double temperature = 0;
 		private Bases base;
 		private SimpleSmithWatermanPrimerAligner swa;
 		//following global variables are intialized with default parameters.
@@ -92,6 +84,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 		private String elementName = null;
 		private String parentElementName = null;
 		private String key = null;
+		private String value = null;
 		
 		/**
 		 * Constructor of the class.
@@ -669,7 +662,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
 			xr.parse(new InputSource(file));
 
 		}
-		
 		/**
 		 * This method is called when a new XML-Element starts. 
 		 */

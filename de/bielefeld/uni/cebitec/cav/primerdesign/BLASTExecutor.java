@@ -84,6 +84,7 @@ public class BLASTExecutor {
 			this.createTempDir();
 		}
 		String command = new String("formatdb -i "+targetFastaFile.getAbsolutePath()+" -p F -n blastdb");
+		//command BLAST 2.2.24
 		//String command = new String("makeblastdb -in "+targetFastaFile.getAbsolutePath()+" -dbtype nucl -parse_seqids -out blastdb");
 		Process p = Runtime.getRuntime().exec(command,null,temporaryDirectoryForBLAST);
 		return p.waitFor();
@@ -104,6 +105,7 @@ public class BLASTExecutor {
 		}
 		blastOutput = new File(temporaryDirectoryForBLAST,"blastout.txt");
 		String command = new String("blastall -p blastn -i "+queryFastaFile.getAbsolutePath()+" -d blastdb -F F -m 8 -e 1e-04 -o " +blastOutput.getAbsolutePath());
+		//command for BLAST 2.2.24
 		//String command = new String("blastn -query "+queryFastaFile.getAbsolutePath()+" -db blastdb  -dust no -outfmt 6 -evalue 1e-04 -out "+blastOutput.getAbsolutePath());
 		Process p = Runtime.getRuntime().exec(command,null,temporaryDirectoryForBLAST);
 		return p.waitFor();
