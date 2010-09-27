@@ -138,11 +138,18 @@ public class PrimerFrame extends JFrame implements ActionListener,
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("generate_primer")) {
-			try {
-				runAlgorithm();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			if(!((PrimerTableModel) primer
+					.getModel()).getSelectedPairs().isEmpty()){
+				try {
+					runAlgorithm();
+				} catch (IOException e1) {
+					if(e1.getMessage().equals("Error! Can not generate primers for this selection!")){
+						JOptionPane.showMessageDialog(this,"Error! Can not generate primers for this selection!");
+					}
+					e1.printStackTrace();
+				}
+			}else{
+				JOptionPane.showMessageDialog(this,"Error! No contig-pair selected!");
 			}
 
 		} else if (e.getActionCommand().matches("setConfig")) {
