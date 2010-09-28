@@ -228,6 +228,8 @@ public class FastaFileReader {
 					offset = offsetsInCharArray.get(sequences.get(i).getId());
 					// as well as in the offsets array...
 					offsets[i] = offset;
+					// as well as in the sequence object
+					sequences.get(i).setOffset(offset);
 					// and remember the index of each sequence
 					if(!sequencesMap.containsKey(sequences.get(i).getId())){
 						sequencesMap.put(sequences.get(i).getId(), i);
