@@ -1,7 +1,6 @@
 package de.bielefeld.uni.cebitec.cav.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -16,6 +15,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -72,8 +72,11 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		this.setLayout(new BorderLayout());
 		JScrollPane tp = new JScrollPane(primer);
 		this.add(tp, BorderLayout.CENTER);
+		this.setMinimumSize(new Dimension(640,480));
 
 		controlPanel = new JPanel();
+		controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.LINE_AXIS));
+
 		select = new JButton("Select all");
 		select.setActionCommand("select_all");
 		controlPanel.add(select);
@@ -87,11 +90,10 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		setConfigButton.setActionCommand("setConfig");
 		setConfigButton
 				.setToolTipText("Choose a XML file of primer design parameters");
+		setConfigButton.setMinimumSize(new Dimension(20,20));
 		controlPanel.add(setConfigButton);
 		setConfigButton.addActionListener(this);
 
-		//repeatMaskingCheckBox = new Checkbox("Repeat Masking");
-		//controlPanel.add(repeatMaskingCheckBox);
 		String[] repeatString = { "Repeat Masking with BLAST", "Repeats are already masked", "No Repeat Masking is necessary" };
 		repeatMaskingComboBox = new JComboBox(repeatString);
 		repeatMaskingComboBox.setSelectedIndex(2);
