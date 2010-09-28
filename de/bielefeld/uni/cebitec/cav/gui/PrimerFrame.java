@@ -143,6 +143,7 @@ public class PrimerFrame extends JFrame implements ActionListener,
 				try {
 					runAlgorithm();
 				} catch (IOException e1) {
+					System.out.println("test"+e1);
 					if(e1.getMessage().equals("Error! Can not generate primers for this selection!")){
 						JOptionPane.showMessageDialog(this,"Error! Can not generate primers for this selection!");
 					}
@@ -317,7 +318,6 @@ public class PrimerFrame extends JFrame implements ActionListener,
 			PrimerGenerator pg = new PrimerGenerator(fastaFile);
 			pg.registerProgressReporter(this);
 
-			//if (repeatMaskingCheckBox.getState()) {
 			if(PrimerFrame.this.repeatMaskingComboBox.getSelectedIndex()==0){
 				PrimerFrame.this.progressBar.setIndeterminate(true);
 				PrimerFrame.this.progressBar
@@ -339,7 +339,20 @@ public class PrimerFrame extends JFrame implements ActionListener,
 
 			PrimerFrame.this.progressBar.setIndeterminate(false);
 			//Generating primers starts
-			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
+			Vector<PrimerResult> primerResult = null;
+			try{
+				primerResult = pg.generatePrimers(contigPairs);
+	
+			}catch (IOException e1) {
+				if(e1.getMessage().equals("Error! Can not generate primers for this selection!")){
+					JOptionPane.showMessageDialog(PrimerFrame.this,"Error! Can not generate primers for this selection!");
+					PrimerFrame.this.progressBar.setIndeterminate(false);
+					PrimerFrame.this.progressBar.setString(null);
+					PrimerFrame.this.progressBar.setVisible(false);
+					PrimerFrame.this.repaint();
+				}
+				e1.printStackTrace();
+			}
 			return primerResult;
 		}
 

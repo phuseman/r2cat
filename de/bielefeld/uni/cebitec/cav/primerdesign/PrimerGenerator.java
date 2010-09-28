@@ -25,8 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
 
-import javax.swing.JOptionPane;
-
 import de.bielefeld.uni.cebitec.cav.datamodel.DNASequence;
 import de.bielefeld.uni.cebitec.cav.qgram.FastaFileReader;
 import de.bielefeld.uni.cebitec.cav.utils.AbstractProgressReporter;
@@ -137,8 +135,7 @@ public class PrimerGenerator {
 							.generatePrimerFor1ContigPair(pair);
 					prV.add(primerResult);
 				}else{
-					//needs to be tested
-					//throw new IOException("Error! Can not generate primers for this selection!");
+					throw new IOException("Error! Can not generate primers for this selection!");
 				}
 				
 			} else {
