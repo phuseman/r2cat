@@ -292,6 +292,8 @@ public class QGramFilter {
 		
 ////		// go through all queries
 		for (queryNumber = 0; queryNumber < queriesOffsets.length - 1; queryNumber++) {
+			querySize = query.getSizeOfSequence(queryNumber);
+
 			progress=(2.*queriesOffsets[queryNumber])/total;
 			//match one query in forward direction
 			matchQuery(queriesOffsets[queryNumber],queriesOffsets[queryNumber+1]);
@@ -355,6 +357,7 @@ public class QGramFilter {
 		long queryStart = 0;
 		long queryEnd = 0;
 
+		long totalMatchSize = 0;
 		int qhits = 0;
 		float variance = 0;
 
@@ -370,6 +373,8 @@ public class QGramFilter {
 				targetEnd = ap.getTargetEnd();
 				queryStart = ap.getQueryStart();
 				queryEnd = ap.getQueryEnd();
+				
+				totalMatchSize = ap.size();
 
 				qhits = ap.getNumberOfQHits();
 				variance = ap.getVariance();
@@ -451,9 +456,11 @@ public class QGramFilter {
 							if (computeMean) {
 								ap.setVariance(variance);
 							}
-							// FIXME: set the number of qhits to the appropriate
+							// set the number of qhits to the appropriate
 							// fraction of that part
-							ap.setNumberOfQHits(qhits);
+							int qhitFraction = (int) ((double)sliceLength/totalMatchSize * qhits);
+							
+							ap.setNumberOfQHits(qhitFraction);
 							result.addAlignmentPosition(ap);
 							newMatches++;
 
@@ -677,8 +684,6 @@ public class QGramFilter {
 		 * d = (|Target| + position_in_query - position_in_target)/|Bins|
 		 */
 		private void updateBin(int b, int hitPositionTarget, int hitPositionQuery, int offsetDiagonal) {
-			querySize = query.getSizeOfSequence(queryNumber);
-			
 			// TODO check correctness with unit test
 			// if the last hit was more than w+q away: report and/or start new parallelogram
 			if (hitPositionQuery - eZone.getHeight() + eZone.getQGramSize() > binMax[b]) {
@@ -948,9 +953,9 @@ public class QGramFilter {
 //				+ " bottom:" + bottom 
 //				+ " (" + (top-bottom)+")"
 //				+ " hits:" + binCounts[bucketindex]
-//				+ " Mean:" + binMean[bucketindex]
-//				+ " (" + (left-binMean[bucketindex])+ ") "
-//				+" Variance:"+binVariance[bucketindex]
+////				+ " Mean:" + binMean[bucketindex]
+////				+ " (" + (left-binMean[bucketindex])+ ") "
+////				+" Variance:"+binVariance[bucketindex]
 //				                          );
 				
 		AlignmentPosition ap;
