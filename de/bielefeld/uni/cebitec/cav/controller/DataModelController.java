@@ -76,7 +76,7 @@ public class DataModelController {
 		alignmentPositionsList.setInitialQueryOrientation();
 
 		//recalculate the offsets
-		alignmentPositionsList.setQueryOffsets();
+		alignmentPositionsList.sortTargetsByPreviousOffset();
 
 		
 		// add offsets for the targets.

@@ -272,7 +272,7 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 				if (result!=null) {
 					if (result.size()==0) {
 						errorAlert("Sorry, no matches were found.\n" +
-								"One reason could be that the sequences are too small\n" +
+								"One reason could be that the sequences are too small (<500 bases)\n" +
 								"or maybe they are not similar enough.");
 						progressBar.setValue(0);
 					}

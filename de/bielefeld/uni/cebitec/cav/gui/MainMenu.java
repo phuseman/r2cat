@@ -183,7 +183,15 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		optionsMenu.add(grid);
 		
 		optionsMenu.addSeparator();
-		
+
+		JMenuItem sortTargets = new JMenuItem("Sort targets by size");
+		sortTargets.setMnemonic(KeyEvent.VK_T);
+		sortTargets.getAccessibleContext().setAccessibleDescription(
+				"Sort the targets by their size");
+		sortTargets.setActionCommand("sort_targets");
+		sortTargets.addActionListener(this);
+		optionsMenu.add(sortTargets);
+
 		JMenuItem sortQueriesAuto = new JMenuItem("Sort queries");
 		sortQueriesAuto.setMnemonic(KeyEvent.VK_Q);
 		sortQueriesAuto.getAccessibleContext().setAccessibleDescription(
@@ -279,6 +287,8 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			R2cat.guiController.showQuerySortTable(R2cat.dataModelController.getAlignmentPositionsList());
 	} else if (e.getActionCommand().matches("sort_queries")) {
 		R2cat.guiController.sortContigs();
+	}else if (e.getActionCommand().matches("sort_targets")) {
+		R2cat.guiController.sortTargetsBySize();
 	} else if (e.getActionCommand().matches("show_help")) {
 			R2cat.guiController.showHelpFrame();
 		} else if (e.getActionCommand().matches("show_about")) {

@@ -165,19 +165,45 @@ public class AlignmentPositionsList extends Observable implements
 		}
 	}
 
-	public void setTargetOffsets() {
-		long offset = 0;
-		
+	/**
+	 * If wanted, the order of the targets can be changed such that they are ordered by size.
+	 */
+	public void sortTargetsBySize() {
 		Collections.sort(targetOrder, new Comparator<DNASequence>() {
 			public int compare(DNASequence a, DNASequence b) {
 				if (a.getSize()==b.getSize()) {
 					return 0;
 				} else {
-					return a.getSortKey()<b.getSize() ? -1 : 1 ;
+					return a.getSize()>b.getSize() ? -1 : 1 ;
 				}
 			}
 		});
-
+		setTargetOffsets();
+	}
+	
+	/**
+	 * This can be used if all sequences already have an offset, but maybe some of the sequences are missing.
+	 */
+	public void sortTargetsByPreviousOffset() {
+		Collections.sort(targetOrder, new Comparator<DNASequence>() {
+			public int compare(DNASequence a, DNASequence b) {
+				if (a.getOffset()==b.getOffset()) {
+					return 0;
+				} else {
+					return a.getOffset()<b.getOffset() ? -1 : 1 ;
+				}
+			}
+		});
+		setTargetOffsets();
+	}
+	
+	
+	
+	/**
+	 * Use the existing target order to put the appropriate offsets to the target {@link DNASequence}s.
+	 */
+	public void setTargetOffsets() {
+		long offset = 0;
 		
 		for (DNASequence target : targetOrder) {
 			target.setOffset(offset);

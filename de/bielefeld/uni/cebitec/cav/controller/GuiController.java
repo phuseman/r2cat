@@ -520,6 +520,17 @@ public class GuiController {
 		dotPlotVisualisation.repaint();
 
 	}
+	
+	/**
+	 * Sort the targets by their size. Biggest first.
+	 */
+	public void sortTargetsBySize() {
+		R2cat.dataModelController.getAlignmentPositionsList().sortTargetsBySize();
+		R2cat.dataModelController.getAlignmentPositionsList().notifyObservers(AlignmentPositionsList.NotifyEvent.ORDER_CHANGED_OR_CONTIG_REVERSED);
+		this.setVisualisationNeedsUpdate();
+		dotPlotVisualisation.repaint();
+
+	}
 
 	public void exportAlignmentPositionsListAsImage() {
 		ExportDialog export=new ExportDialog("r2cat",true);
