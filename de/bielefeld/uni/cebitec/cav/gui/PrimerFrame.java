@@ -73,7 +73,6 @@ public class PrimerFrame extends JFrame implements ActionListener,
 		JScrollPane tp = new JScrollPane(primer);
 		this.add(tp, BorderLayout.CENTER);
 		this.setMinimumSize(new Dimension(640,480));
-
 		controlPanel = new JPanel();
 		controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.LINE_AXIS));
 
@@ -142,11 +141,18 @@ public class PrimerFrame extends JFrame implements ActionListener,
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("generate_primer")) {
-			try {
-				runAlgorithm();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			if(!((PrimerTableModel) primer
+					.getModel()).getSelectedPairs().isEmpty()){
+				try {
+					runAlgorithm();
+				} catch (IOException e1) {
+					if(e1.getMessage().equals("Error! Can not generate primers for this selection!")){
+						JOptionPane.showMessageDialog(this,"Error! Can not generate primers for this selection!");
+					}
+					e1.printStackTrace();
+				}
+			}else{
+				JOptionPane.showMessageDialog(this,"Error! No contig-pair selected!");
 			}
 
 		} else if (e.getActionCommand().matches("setConfig")) {
@@ -292,7 +298,6 @@ public class PrimerFrame extends JFrame implements ActionListener,
 			PrimerGenerator pg = new PrimerGenerator(fastaFile);
 			pg.registerProgressReporter(this);
 
-			//if (repeatMaskingCheckBox.getState()) {
 			if(PrimerFrame.this.repeatMaskingComboBox.getSelectedIndex()==0){
 				PrimerFrame.this.progressBar.setIndeterminate(true);
 				PrimerFrame.this.progressBar
@@ -314,7 +319,20 @@ public class PrimerFrame extends JFrame implements ActionListener,
 
 			PrimerFrame.this.progressBar.setIndeterminate(false);
 			//Generating primers starts
-			Vector<PrimerResult> primerResult = pg.generatePrimers(contigPairs);
+			Vector<PrimerResult> primerResult = null;
+			try{
+				primerResult = pg.generatePrimers(contigPairs);
+	
+			}catch (IOException e1) {
+				if(e1.getMessage().equals("Error! Can not generate primers for this selection!")){
+					JOptionPane.showMessageDialog(PrimerFrame.this,"Error! Can not generate primers for this selection!");
+					PrimerFrame.this.progressBar.setIndeterminate(false);
+					PrimerFrame.this.progressBar.setString(null);
+					PrimerFrame.this.progressBar.setVisible(false);
+					PrimerFrame.this.repaint();
+				}
+				e1.printStackTrace();
+			}
 			return primerResult;
 		}
 

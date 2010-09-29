@@ -134,6 +134,8 @@ public class PrimerGenerator {
 					PrimerResult primerResult = this
 							.generatePrimerFor1ContigPair(pair);
 					prV.add(primerResult);
+				}else{
+					throw new IOException("Error! Can not generate primers for this selection!");
 				}
 				
 			} else {
@@ -202,30 +204,16 @@ public class PrimerGenerator {
 		int contigSize = (int) contig.getSize();
 		int start = 0;
 		int stop = 0;
-		//System.out.println("\n");
+
 		if (onRightEnd) {
 			int rightEndOffset = contigSize;
 			start = rightEndOffset - maxBorderOffset;
 			stop = rightEndOffset - minBorderOffset;
 			
-		/*	//EVALUIERUNG
-			 char[] temp = fastaParser.getSubstring(fastaParser.getOffset(contigId)+start, 320);
-			 for(int j = 0; j<temp.length;j++){
-				 System.out.print(temp[j]);
-			 }
-			 System.out.print("[nnnn]");*/
-			
 		} else {
 			int leftEndOffset = 0;
 			start = leftEndOffset + minBorderOffset;
 			stop = leftEndOffset + maxBorderOffset;
-			
-/*			//EVALUIERUNG
-			 char[] temp = fastaParser.getSubstring(fastaParser.getOffset(contigId)+start, 320);
-					 for(int j = 0; j<temp.length;j++){
-			 System.out.print(temp[j]);
-		 }
-					 System.out.println("\n");*/
 		}
 		
 		//if the contig is smaller than the expected bounds, correct the bounds

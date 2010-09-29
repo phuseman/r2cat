@@ -214,8 +214,12 @@ public class PrimerPairing {
 	public boolean sequenceSimilarityQuickCheck(char[] firstSeq,char[] secondSeqReversed){
 		if( firstSeq[0] == secondSeqReversed[0] 
 		 && firstSeq[1] == secondSeqReversed[1] 
-		 && firstSeq[2] == secondSeqReversed[2]) {
-			//if the first three bases match, discard this pair.
+		 && firstSeq[2] == secondSeqReversed[2]
+		 ||firstSeq[firstSeq.length-1]==secondSeqReversed[secondSeqReversed.length-1]
+		 &&firstSeq[firstSeq.length-2]==secondSeqReversed[secondSeqReversed.length-2]
+		 &&firstSeq[firstSeq.length-3]==secondSeqReversed[secondSeqReversed.length-3]) {
+			//if the first three bases match or the last three bases, discard this pair.
+			//needs to be checked so the first three bases of the 3'-end won't interact with the three bases at the 5'end
 			return false;
 		} else {
 			return true;
