@@ -951,7 +951,7 @@ public class PSGraphics2D extends AbstractVectorGraphicsIO implements
         // are ignored and font transformation should be used after the
         // general one.
         AffineTransform at = new AffineTransform(1, 0, 0, 1, x, y);
-        // matchesly font transformation, e.g. vertical offset and scaling
+        // apply font transformation, e.g. vertical offset and scaling
         // for TextAttribut.SUPERSUBSCRIPT
         at.concatenate(getFont().getTransform());
         // flip vertically
