@@ -160,7 +160,7 @@ public abstract class FontTable {
         // result.append(attributes.get(TextAttribute.STRIKETHROUGH));
         // result.append("]");
 
-        // SUPERSCRIPT is apllied by font.getTransformation()
+        // SUPERSCRIPT is applied by font.getTransformation()
         // leave this as a reminder!
         // result.append("[");
         // result.append(attributes.get(TextAttribute.SUPERSCRIPT));

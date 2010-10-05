@@ -56,7 +56,7 @@ public class GenericTagHandler extends TagHandler {
     private Stack/*<String>*/ fontFamilyStack;
 
     /**
-     * if we aplly TextAttribute.SUPERSCRIPT with correction of
+     * if we apply TextAttribute.SUPERSCRIPT with correction of
      * transformation the text is to high / to low by some points
      */
     private double superscriptCorrection;
@@ -103,7 +103,7 @@ public class GenericTagHandler extends TagHandler {
             clearedText.toString(),
             FontUtilities.getAttributes(graphics.getFont()));
 
-        // aplly attributes
+        // apply attributes
         for (int i = 0; i < attributes.size(); i++) {
             ((AttributeEntry)attributes.elementAt(i)).apply(attributedString);
         }
@@ -139,7 +139,7 @@ public class GenericTagHandler extends TagHandler {
             clearedText.toString(),
             FontUtilities.getAttributes(graphics.getFont()));
 
-        // aplly attributes
+        // apply attributes
         for (int i = 0; i < attributes.size(); i++) {
             ((AttributeEntry)attributes.elementAt(i)).apply(attributedString);
         }
@@ -295,7 +295,7 @@ public class GenericTagHandler extends TagHandler {
     /**
      * Helper to store an TextAttribute, its value and the range
      * it should cover in <code>text</code>. Entries are created
-     * by {@link GenericTagHandler#closeTag(String)} and apllied
+     * by {@link GenericTagHandler#closeTag(String)} and applied
      * in {@link GenericTagHandler#print(TagString, double, double, double)}
      */
     private class AttributeEntry {

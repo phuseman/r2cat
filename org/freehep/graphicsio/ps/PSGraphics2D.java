@@ -337,8 +337,7 @@ public class PSGraphics2D extends AbstractVectorGraphicsIO implements
 
         BufferedReader br = null;
         try {
-        	URL prolog = getClass().getResource("/extra/PSProlog.txt");
-//        	URL prolog = Thread.currentThread().getContextClassLoader().getResource("PSProlog.txt");
+        	URL prolog = getClass().getResource("PSProlog.txt");
         	
         	br = new BufferedReader(new InputStreamReader(prolog.openStream()));
             String s;
@@ -952,7 +951,7 @@ public class PSGraphics2D extends AbstractVectorGraphicsIO implements
         // are ignored and font transformation should be used after the
         // general one.
         AffineTransform at = new AffineTransform(1, 0, 0, 1, x, y);
-        // aplly font transformation, e.g. vertical offset and scaling
+        // apply font transformation, e.g. vertical offset and scaling
         // for TextAttribut.SUPERSUBSCRIPT
         at.concatenate(getFont().getTransform());
         // flip vertically

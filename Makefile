@@ -1,7 +1,14 @@
 OBJECTS := $(patsubst %.java,%.class,$(shell find . -iname '*.java'))
 
+COMMON := `find de/bielefeld/uni/cebitec/common/ -iname '*.class'`
+CONTIGADJACENCYGRAPH := `find de/bielefeld/uni/cebitec/contigadjacencygraph/ -iname '*.class'`
+PRIMERDESIGN := `find de/bielefeld/uni/cebitec/primerdesign/ -iname '*.class'`
+QGRAM := `find de/bielefeld/uni/cebitec/qgram/ -iname '*.class'`
+R2CAT := `find de/bielefeld/uni/cebitec/r2cat/ -iname '*.class' -o -iname '*.png' -o -iname '*.html'`
+TREECAT := `find de/bielefeld/uni/cebitec/treecat/ -iname '*.class'`
+FREEHEP := `find org/freehep/ -iname '*.class'` META-INF/services/org.freehep.util.export.ExportFileType org/freehep/graphicsio/ps/PSProlog.txt
 
-JAVA := javac 
+JAVAC := javac 
 
 R2CAT_JARFILE := r2cat.jar
 CGCAT_JARFILE := cg-cat.jar
@@ -15,27 +22,26 @@ INSTALLPATHBIBISERV := /vol/bibidev/cg-cat/data/cg-cat/
 
 .SUFFIXES: .java .class
 %.class:%.java
-	$(JAVA) $<
+	$(JAVAC) $<
 
 all:$(OBJECTS)
 
 jar:$(R2CAT_JARFILE)
 
 $(R2CAT_JARFILE):all
-	jar cvfm $(R2CAT_JARFILE) Manifest_r2cat.txt `find . -iname '*.class'` images/*.png extra/* \
-META-INF/services/org.freehep.util.export.ExportFileType 
-	jarsigner -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(R2CAT_JARFILE) cgcat
+	jar cvfm $(R2CAT_JARFILE) Manifest_r2cat.txt $(R2CAT) $(COMMON) $(QGRAM) $(PRIMERDESIGN) $(FREEHEP)
+# 	jarsigner -tsa https://timestamp.geotrust.com/tsa -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(R2CAT_JARFILE) cgcat
+# I changed the storepass after migrating to sourceforge :)
 
 $(TREE_JARFILE):all
-	jar cvfm $(TREE_JARFILE) Manifest_treecat.txt `find . -iname '*.class'` images/*.png extra/* \
-META-INF/services/org.freehep.util.export.ExportFileType 
-	jarsigner -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(TREE_JARFILE) cgcat
+	jar cvfm $(TREE_JARFILE) Manifest_treecat.txt $(TREECAT) $(COMMON) $(QGRAM) $(CONTIGADJACENCYGRAPH)
+# 	jarsigner -tsa https://timestamp.geotrust.com/tsa -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(TREE_JARFILE) cgcat
+# I changed the storepass after migrating to sourceforge :)
 
 $(CGCAT_JARFILE):all
-	-rm -vf extra/*~
-	jar cvf $(CGCAT_JARFILE) `find . -iname '*.class'` images/*.png extra/* \
-META-INF/services/org.freehep.util.export.ExportFileType 
-	jarsigner -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(CGCAT_JARFILE) cgcat
+	jar cvf $(CGCAT_JARFILE) $(COMMON) $(CONTIGADJACENCYGRAPH) $(PRIMERDESIGN) $(QGRAM) $(R2CAT) $(TREECAT) $(FREEHEP)
+# 	jarsigner -tsa https://timestamp.geotrust.com/tsa -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(CGCAT_JARFILE) cgcat
+# I changed the storepass after migrating to sourceforge :)
 
 zipsources:
 	zip -9 sources.zip Manifest_*.txt `find . -iname '*.java'` images/*.png extra/* \
