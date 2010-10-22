@@ -661,5 +661,12 @@ public class ContigAdjacencyGraph {
 			}
 			return existingContigs.size();
 		}
+		public void makeSymmetrical(){
+			for (int i = 0; i < adjacencyWeightMatrix.length; i++) { // column
+				for (int j = i + 1; j < adjacencyWeightMatrix[i].length; j++) { // row
+					adjacencyWeightMatrix[j][i] = adjacencyWeightMatrix[i][j];
+				}
+			}
+		}
 		
 }

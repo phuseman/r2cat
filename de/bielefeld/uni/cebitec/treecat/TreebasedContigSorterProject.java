@@ -879,4 +879,7 @@ public class LeafCollector<T> implements NodeVisitor<Node<T>> {
 public String suggestOutputFile() {
 	return projectDir + File.separator	+ MiscFileUtils.getFileNameWithoutExtension(contigs)+ "_LayoutGraph.neato";
 }
+public ContigAdjacencyGraph getContigAdjacencyGraph() {
+	return cag;
+}
 }
