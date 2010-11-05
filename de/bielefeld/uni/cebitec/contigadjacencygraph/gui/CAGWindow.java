@@ -11,6 +11,7 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -33,27 +34,12 @@ public class CAGWindow extends JFrame implements ActionListener, ListSelectionLi
 	private JMenu menu;
 	private JMenuItem menuItem;
 	private ChooseContigPanel chooseContigPanel;
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		
-		java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    UIManager.setLookAndFeel(
-                                  "javax.swing.plaf.metal.MetalLookAndFeel");
-                                //  "com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-                                //UIManager.getCrossPlatformLookAndFeelClassName());
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                new CAGWindow();
-            }
-        });
-	}
+	private JPanel genomePanel;
+	private String[] listData;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
 	
-	public CAGWindow(){
+	public CAGWindow(String[] contigNameList){
+
 		setTitle("View of contig adjacency graph");
 		
 		/*
@@ -97,7 +83,14 @@ public class CAGWindow extends JFrame implements ActionListener, ListSelectionLi
 		 * JList nimmt einen beleibigen Objekttyp entgegen; werden aber in der Liste als strings repraesentiert
 		 * Mittels einer 
 		 */
-		String[] listData = { "Contig 1", "Contig 2", "Contig 3","Contig 1", "Contig 2", "Contig 3","Contig 1", "Contig 2", "Contig 3","Contig 1", "Contig 2", "Contig 3","Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" ,"Contig 1", "Contig 2", "Contig 3" };
+		/*
+		 * Liste mit den Namen der Contigs 
+		 */
+		listData = new String[contigNameList.length];
+		for (int i = 0; i < contigNameList.length ; i++){
+			String contigname = contigNameList[i];
+			listData[i] = "Contig "+contigname;
+		}
 		
 		list = new JList(listData);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -112,6 +105,11 @@ public class CAGWindow extends JFrame implements ActionListener, ListSelectionLi
         listContainer.setBorder(BorderFactory.createTitledBorder("Contig List"));
         listContainer.add(listScroller);
 		add(listContainer, BorderLayout.EAST);
+		
+		// Hier sollen spaeter die ausgewaehlten Contigs angezeigt werden
+		genomePanel = new JPanel();
+		genomePanel.setBackground(Color.WHITE);
+		add(genomePanel, BorderLayout.SOUTH);
 		
 		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
