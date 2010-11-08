@@ -661,12 +661,47 @@ public class ContigAdjacencyGraph {
 			}
 			return existingContigs.size();
 		}
+		
+		
+		/**
+		 * Makes the matrix symmetrical. Is not used at the moment..
+		 */
 		public void makeSymmetrical(){
 			for (int i = 0; i < adjacencyWeightMatrix.length; i++) { // column
 				for (int j = i + 1; j < adjacencyWeightMatrix[i].length; j++) { // row
 					adjacencyWeightMatrix[j][i] = adjacencyWeightMatrix[i][j];
 				}
 			}
+		}
+
+
+
+
+
+		/**
+		 * Gets the complete graph as layoutGraph. (Excludes all entries with a weight of zero)
+		 * @return layout graph
+		 */
+		public LayoutGraph getCompleteGraph() {
+			LayoutGraph layoutGraph = new LayoutGraph(contigs);
+			
+			double[] leftTotalSupport = new double[numberOfContigs];
+			double[] rightTotalSupport = new double[numberOfContigs];
+			
+			System.arraycopy(totalSupport, 0, rightTotalSupport, 0, numberOfContigs);
+			System.arraycopy(totalSupport, numberOfContigs, leftTotalSupport, 0, numberOfContigs);
+			
+			layoutGraph.setTotalSupportLeftConnectors(leftTotalSupport);
+			layoutGraph.setTotalSupportRightConnectors(rightTotalSupport);
+
+			for (int i = 0; i < adjacencyWeightMatrix.length; i++) { // column
+				for (int j = i + 1; j < adjacencyWeightMatrix[i].length; j++) { // row
+					if(adjacencyWeightMatrix[i][j]>0) {
+						layoutGraph.addEdge(getAdjacencyEdgeFromMatrixEntries(layoutGraph, i, j));
+					}
+				}
+			}
+			return layoutGraph;
 		}
 		
 }
