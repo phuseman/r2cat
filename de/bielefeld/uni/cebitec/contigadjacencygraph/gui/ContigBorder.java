@@ -78,18 +78,18 @@ public class ContigBorder extends AbstractBorder{
 		p.lineTo(x + width -15, y + height  -1); // 3
 		p.lineTo(x, y + height -1); // 4
 		p.closePath();
-		p.moveTo(x +2, y+5);
-		p.lineTo(x+3, y+3);
-		p.lineTo(x+width-15, y+3);
+		p.moveTo(x, y+5);
+		p.lineTo(x+2, y+3);
+		p.lineTo(x+width-14, y+3);
 		p.lineTo(x+width-3, y+height/2 );
-		p.lineTo(x+width-12, y+height-2);
-		p.lineTo(x+width-13, y+height-2);
-		p.moveTo(x + 3, y+3);
+		p.lineTo(x+width-13, y+height-1);
+		p.lineTo(x+width-13, y+height-1);
+		p.moveTo(x + 2, y+3);
 		p.lineTo(x +4, y+1);
-		p.lineTo(x+width-15, y+1);
-		p.lineTo(x+width, y+height/2 );
-		p.lineTo(x+width-9, y+height-4);
-		p.lineTo(x+width-12, y+height-4);
+		p.lineTo(x+width-13, y+1);
+		p.lineTo(x+width-1, y+height/2 );
+		p.lineTo(x+width-11, y+height-1);
+		p.lineTo(x+width-11, y+height-1);
 		return p;
 	}
 	private GeneralPath makeReverseRepeatContig(int x, int y, int width, int height) {
@@ -102,16 +102,16 @@ public class ContigBorder extends AbstractBorder{
 		p.lineTo(x + width -1, y + 4);
 		p.lineTo(x + width-1, y+height-1);
 		p.closePath();
-		p.moveTo(x+15, y+height-2);
-		p.lineTo(x+13, y+height-2);
+		p.moveTo(x+15, y+height-1);
+		p.lineTo(x+13, y+height-1);
 		p.lineTo(x+2, y+height/2);
-		p.lineTo(x+15, y+2);
+		p.lineTo(x+14, y+2);
 		p.lineTo(x+width-4, y+2);
 		p.lineTo(x+width-1, y+4);
-		p.moveTo(x+13, y+height-4);
-		p.lineTo(x+11, y+height-4);
+		p.moveTo(x+13, y+height-1);
+		p.lineTo(x+11, y+height-1);
 		p.lineTo(x, y+height/2);
-		p.lineTo(x+15, y);
+		p.lineTo(x+13, y);
 		p.lineTo(x+width-6, y);
 		p.lineTo(x+width-4, y-2);
 		
