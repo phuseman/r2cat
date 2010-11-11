@@ -2,6 +2,7 @@ package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -17,14 +18,70 @@ import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
 
-public class CagCreator {
+import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CagEventListener;
 
-	private static Vector<DNASequence> contigs;
-	private static String[] listData;
+/*
+ * ist mein model 
+ * hier werden die Daten- Zustands- und Anwendungslogik implementiert
+ */
+public class CagCreator {
+	
+	private static LayoutGraph layoutGraph;
+	private static ContigAdjacencyGraph cag;
+	private static LayoutGraph completeGraph;
+
+	private Vector<DNASequence> contigs;
+	private String[] listData;
+	private ArrayList <CagEventListener> listeners;
+	private HashMap<Integer, Vector<AdjacencyEdge>> leftNeighbours;
+	private HashMap<Integer, Vector<AdjacencyEdge>> rightNeighbours;
+	private String currentContig;
 
 	// private CAGWindow window;
+	public CagCreator(){
+		listeners = new ArrayList <CagEventListener>();
+		calculateNeighbours();
+		createContigList();
+	}
+	
+	public void sendCurrentContig(){
+		System.out.println("Sende event choosed contig");
+		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,getCurrentContig());
+		fireEvent(event);
+		
+	}
+	
+
+	/*
+	 * TODO 
+	 * Wenn das aktuelle Contig gewechselt hat,
+	 * sollte nun dadurch das sich der Zustand vom Model geändert hat
+	 * auf der Gui in der Mitte dieses spezifische Contig erscheinen.
+	 * Sprich es sollte als Reverse, Normal oder Repetetiv erscheinen
+	 * mit dem richtigen Namen drauf.
+	 * 
+	 * TODO
+	 * Des weiteren sollten die besten 5 Nachbarn ermittelt werden
+	 * erstelle Methode findTheBest5Neightbours
+	 * 
+	 * TODO
+	 * Wenn schon einer dieser Nachbarn ausgewählt wurde sollte dieser Nachbar 
+	 * eine andere Erscheinung haben als alle anderen Nachbarn.
+	 */
+	public void setCurrentContig(String currentContig) {
+		this.currentContig = currentContig;
+		System.out.println("Changed contig. Current Contig is: "+currentContig);
+	}
+
+	public String getCurrentContig() {
+		return currentContig;
+	}
+
+
 
 	public static void main(String[] args) {
+		
+		
 		TreebasedContigSorterProject project = new TreebasedContigSorterProject();
 
 		project.register(new SimpleProgressReporter());
@@ -55,94 +112,121 @@ public class CagCreator {
 
 			t.restartTimer("matches");
 
-			LayoutGraph layoutGraph = project.sortContigs();
-
-			ContigAdjacencyGraph cag = project.getContigAdjacencyGraph();
-			LayoutGraph completeGraph = cag.getCompleteGraph();
+			layoutGraph = project.sortContigs();// noch ungenutzt
 			
-			/*
-			 * erstellen einer Namensliste aller Contigs
-			 */
-			contigs = completeGraph.getNodes();
-			listData = new String[contigs.size()];
+			cag = project.getContigAdjacencyGraph();
+			completeGraph = cag.getCompleteGraph();
 			
-			for (int i = 0 ; i < contigs.size(); i ++){
-				 DNASequence contig = contigs.get(i);
-				 listData[i]= contig.getId();
-			}
+			CagCreator model = new CagCreator(); 
+			Controller controller = new Controller(model);
 			
-			//System.out.println(completeGraph.csvOutput());
-
-			/*
-			 * Diese Hashmaps speichern die linken und rechten Nachbarn aller Contigs
-			 */
-			HashMap<Integer, Vector<AdjacencyEdge>> left = new HashMap<Integer, Vector<AdjacencyEdge>>();
-			HashMap<Integer, Vector<AdjacencyEdge>> right = new HashMap<Integer, Vector<AdjacencyEdge>>();
-			
-			for (AdjacencyEdge e : completeGraph.getEdges()) {
-				//System.out.println("(" + e.geti() + ", " + e.getj() + ")= "+ e.getSupport());
-
-				int i = e.geti();
-				int j = e.getj();
-
-				if (e.isLeftConnectori()) {
-					if (!left.containsKey(i)) {
-						left.put(i, new Vector<AdjacencyEdge>()); 
-					}
-					left.get(i).add(e);
-				} else {
-					if (!right.containsKey(i)) {
-						right.put(i, new Vector<AdjacencyEdge>()); 
-					}
-					right.get(i).add(e);
-				}
-
-				if (e.isLeftConnectorj()) {
-					if (!left.containsKey(j)) {
-						left.put(j, new Vector<AdjacencyEdge>()); 
-					}
-					left.get(j).add(e);
-				} else {
-					if (!right.containsKey(j)) {
-						right.put(j, new Vector<AdjacencyEdge>()); 
-					}
-					right.get(j).add(e);
-				}
-
-			}
-
-		/*	System.out.println(left.size());
-			System.out.println("hashmap linke seite");
-			System.out.println(left);
-			System.out.println("hashmap rechte seite");
-			System.out.println(right);*/
-			// System.out.println(layoutGraph);
-			// layoutGraph.writeLayoutAsNeato(new
-			// File(project.suggestOutputFile()),
-			// LayoutGraph.NeatoOutputType.ONENODE);
-			// / System.out.println("wrote "+project.suggestOutputFile());
-
 			t.stopTimer("sorting");
 
 			t.stopTimer("Total time");
 		} catch (CannotProceedException e) {
 			System.err.println("Programm failed:\n" + e.getMessage());
 		}
+		
+	}
+	
+	
+	/*
+	 * Diese Hashmaps speichern die linken und rechten Nachbarn aller Contigs
+	 * TODO muss noch aufgerufen werden
+	 */
+	private void calculateNeighbours(){
+		leftNeighbours = new HashMap<Integer, Vector<AdjacencyEdge>>();
+		rightNeighbours = new HashMap<Integer, Vector<AdjacencyEdge>>();
+		
+		for (AdjacencyEdge e : completeGraph.getEdges()) {
 
-		// Starten des Fensters
-		java.awt.EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					UIManager
-							.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-					// "com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-					// UIManager.getCrossPlatformLookAndFeelClassName());
-				} catch (Exception ex) {
-					ex.printStackTrace();
+			int i = e.geti();
+			int j = e.getj();
+
+			if (e.isLeftConnectori()) {
+				if (!leftNeighbours.containsKey(i)) {
+					leftNeighbours.put(i, new Vector<AdjacencyEdge>()); 
 				}
-				new CAGWindow(listData);
+				leftNeighbours.get(i).add(e);
+			} else {
+				if (!rightNeighbours.containsKey(i)) {
+					rightNeighbours.put(i, new Vector<AdjacencyEdge>()); 
+				}
+				rightNeighbours.get(i).add(e);
 			}
-		});
+
+			if (e.isLeftConnectorj()) {
+				if (!leftNeighbours.containsKey(j)) {
+					leftNeighbours.put(j, new Vector<AdjacencyEdge>()); 
+				}
+				leftNeighbours.get(j).add(e);
+			} else {
+				if (!rightNeighbours.containsKey(j)) {
+					rightNeighbours.put(j, new Vector<AdjacencyEdge>()); 
+				}
+				rightNeighbours.get(j).add(e);
+			}
+
+		}
+		//System.out.println(rightNeighbours.get(1));
+		
+	}
+	/*
+	 * erstellen einer Namensliste aller Contigs
+	 */
+	private String[] createContigList(){
+		
+		contigs = completeGraph.getNodes();
+		listData = new String[contigs.size()];
+		
+		for (int i = 0 ; i < contigs.size(); i ++){
+			DNASequence contig = contigs.get(i);
+			listData[i]= contig.getId();
+		}
+		return listData;
+	}
+	
+	
+	public HashMap<Integer, Vector<AdjacencyEdge>> getLeftNeighbours() {
+		return leftNeighbours;
+	}
+
+	public HashMap<Integer, Vector<AdjacencyEdge>> getRightNeighbours() {
+		return rightNeighbours;
+	}
+	
+	public String[] getListData() {
+		this.createContigList();
+		return listData;
+	}
+	/**
+	 * Hier werden alle Klassen die sich registrien in der
+	 * ArrayList gespeichert.
+	 */
+	public void addEventListener (CagEventListener listener) {
+		listeners.add(listener);
+	}
+	
+	/**
+	 * Hier werden alle Klasse die sich registriet haben aus 
+	 * der ArrayList gelöscht.
+	 */
+	public void removeEventListener(CagEventListener listener) {
+		listeners.remove(listener);
+	}
+	
+	/**
+	 * "Feuert" die Briefe(Events) an alle Listener.
+	 * @param event (Das Event, das gefeuert wird muss angegben werden.)
+	 */
+	private void fireEvent(CagEvent event) {
+		
+		ArrayList <CagEventListener> copyList = 
+			new ArrayList <CagEventListener>(listeners);
+		for (CagEventListener listener : copyList) {
+			listener.event_fired(event);
+			
+		}
 	}
 
 }

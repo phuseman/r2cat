@@ -6,10 +6,14 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.EventListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.GroupLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -24,22 +28,52 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.event.*;
 
-
-public class CAGWindow extends JFrame implements ActionListener, ListSelectionListener{
-
+/*
+ * Ist das Abbild vom Model
+ */
+public class CAGWindow extends JFrame implements CagEventListener{//  ActionListener{  CagEventListener{
+	
+	private CAGWindow window;
 	private JScrollPane listScroller;
 	private JList list;
 	private JPanel listContainer;
 	private JMenuBar menuBar;
 	private JMenu menu;
 	private JMenuItem menuItem;
-	private ChooseContigPanel chooseContigPanel;
+//	private ChooseContigPanel chooseContigPanel;
+	private JPanel chooseContigPanel;
 	private JPanel genomePanel;
 	private String[] listData;
+	private CagCreator model;
+	private Controller control;
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+	private ContigBorder border;
+	private ContigBorder reverseBorder;
+	private ContigBorder repeatBorder;
+	private ContigBorder reverseRepeatBorder;
 	
-	public CAGWindow(String[] contigNameList){
+	private JButton leftContig1;
+	private JButton leftContig2 ;
+	private JButton leftContig3 ;
+	private JButton leftContig4 ;
+	private JButton leftContig5 ;
 
+	private JButton centralContig;
+
+	private JButton rightContig1 ;
+	private JButton rightContig2 ;
+	private JButton rightContig3 ;
+	private JButton rightContig4 ;
+	private JButton rightContig5 ;
+
+	
+	
+	public CAGWindow(CagCreator myModel, Controller controller){
+		window = this;
+		this.model = myModel;
+		listData = model.getListData();
+		myModel.addEventListener(this);
+		this.control = controller;
 		setTitle("View of contig adjacency graph");
 		
 		/*
@@ -49,6 +83,7 @@ public class CAGWindow extends JFrame implements ActionListener, ListSelectionLi
 		menuBar = new JMenuBar();		
 		menu = new JMenu("Menu");	
 		menuItem = new JMenuItem("Exit");
+		menuItem.addActionListener(new ExitItemListener());
 		//mnemonic: der erste Buchstabe wird unterstrichen; kann mit einer tastenkombi aktiviert werden
 		// accelerator: eine Tastenkobi wird angezeigt und der Menupunkt kann auch mit dieser
 		// 						kombi aktiviert werden
@@ -68,7 +103,111 @@ public class CAGWindow extends JFrame implements ActionListener, ListSelectionLi
 		/*
 		 * Dieses Panel enhaelt das Contig das Ausgewaehlt wurde und deren moegliche Nachbarn
 		 */
-		chooseContigPanel = new ChooseContigPanel();
+//		chooseContigPanel = new ChooseContigPanel();
+		chooseContigPanel = new JPanel();
+			
+			GroupLayout layout = new GroupLayout(chooseContigPanel);
+			
+			chooseContigPanel.setLayout(layout);
+			
+			border = new ContigBorder(false , false);
+			reverseBorder = new ContigBorder(false, true);
+			repeatBorder = new ContigBorder(true, false);
+			reverseRepeatBorder = new ContigBorder(true, true);
+			
+
+
+			leftContig1 = new JButton();
+			leftContig2 = new JButton();
+			leftContig3 = new JButton();
+			leftContig4 = new JButton();
+			leftContig5 = new JButton();
+
+			centralContig = new JButton();
+
+			rightContig1 = new JButton();
+			rightContig2 = new JButton();
+			rightContig3 = new JButton();
+			rightContig4 = new JButton();
+			rightContig5 = new JButton();
+			
+			leftContig1.setText("Contig 1");
+			leftContig1.setContentAreaFilled(false);
+			leftContig1.setBorder(border);
+			leftContig2.setText("Contig 2");
+			leftContig2.setContentAreaFilled(false);
+			leftContig2.setBorder(repeatBorder);
+			leftContig3.setText("Contig 3");
+			leftContig3.setBorder(border);
+			leftContig3.setContentAreaFilled(false);
+			leftContig4.setText("Contig 4");
+			leftContig4.setBorder(border);
+			leftContig4.setContentAreaFilled(false);
+			leftContig5.setText("Contig 5");
+			leftContig5.setBorder(reverseBorder);
+			leftContig5.setContentAreaFilled(false);
+			
+			//centralContig.setText("aktuelles Contig");
+			centralContig.setBorder(reverseRepeatBorder);
+			centralContig.setContentAreaFilled(false);
+			
+			rightContig1.setText("Contig 1");
+			rightContig1.setContentAreaFilled(false);
+			rightContig1.setBorder(reverseBorder);
+			rightContig2.setText("Contig 2");
+			rightContig2.setContentAreaFilled(false);
+			rightContig2.setBorder(border);
+			rightContig3.setText("Contig 3");
+			rightContig3.setContentAreaFilled(false);
+			rightContig3.setBorder(border);
+			rightContig4.setText("Contig 4");
+			rightContig4.setContentAreaFilled(false);
+			rightContig4.setBorder(repeatBorder);
+			rightContig5.setText("Contig 5");
+			rightContig5.setContentAreaFilled(false);
+			rightContig5.setBorder(border);
+			/*
+			 * automatic gaps that correspond to preferred distances between
+			 * neighboring components (or between a component and container border)
+			 */
+			layout.setAutoCreateGaps(true);
+			layout.setAutoCreateContainerGaps(true);
+
+			layout.setHorizontalGroup(layout.createSequentialGroup()
+					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+							.addComponent(leftContig1).addComponent(leftContig2)
+							.addComponent(leftContig3).addComponent(leftContig4)
+							.addComponent(leftContig5))
+					.addComponent(centralContig)
+					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+							.addComponent(rightContig1).addComponent(	rightContig2)
+							.addComponent(rightContig3).addComponent(rightContig4)
+							.addComponent(rightContig5))
+					);
+
+			layout.setVerticalGroup(layout.createSequentialGroup()
+					.addGroup(
+							layout.createParallelGroup(
+									GroupLayout.Alignment.BASELINE).addComponent(leftContig1)
+									.addComponent(rightContig1))
+					.addGroup(
+							layout.createParallelGroup(
+									GroupLayout.Alignment.BASELINE).addComponent(
+									leftContig2).addComponent(rightContig2))
+					.addGroup(
+							layout.createParallelGroup(
+									GroupLayout.Alignment.BASELINE).addComponent(
+									leftContig3).addComponent(centralContig)
+									.addComponent(rightContig3))
+					.addGroup(
+							layout.createParallelGroup(
+									GroupLayout.Alignment.BASELINE).addComponent(
+									leftContig4).addComponent(rightContig4))
+					.addGroup(
+							layout.createParallelGroup(
+									GroupLayout.Alignment.BASELINE).addComponent(
+									leftContig5).addComponent(rightContig5)));
+		
 		chooseContigPanel.setBackground(Color.WHITE);
 		add(chooseContigPanel , BorderLayout.CENTER);
 		/*
@@ -86,16 +225,16 @@ public class CAGWindow extends JFrame implements ActionListener, ListSelectionLi
 		/*
 		 * Liste mit den Namen der Contigs 
 		 */
-		listData = new String[contigNameList.length];
-		for (int i = 0; i < contigNameList.length ; i++){
-			String contigname = contigNameList[i];
+
+		for (int i = 0; i < listData.length ; i++){
+			String contigname = listData[i];
 			listData[i] = "Contig "+contigname;
 		}
 		
 		list = new JList(listData);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setVisibleRowCount(10);
-		list.addListSelectionListener(this);
+		list.addListSelectionListener(new ContigChangedListener());
 
 		listScroller = new JScrollPane(list);
 		listScroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -113,24 +252,47 @@ public class CAGWindow extends JFrame implements ActionListener, ListSelectionLi
 		
 		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		//setSize(Toolkit.getDefaultToolkit().getScreenSize());
+		//setSize(Toolkit.getDefaultToolkit().getScreenSize()); // hier wird das Fenster auf die Größe des Bildschirmes angepasst.
 		setSize(600, 600);
 		setVisible(true);
 		
 		pack();
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+//	@Override
+//	public void actionPerformed(ActionEvent e) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+	public class ContigChangedListener implements ListSelectionListener{
+
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			if (e.getValueIsAdjusting() == false) {
+				String selection = (String) list.getSelectedValue();
+				control.selectContig(selection);
+				System.out.print(selection+"\n");
+				
+			}
+			
+		}
+	}
+	
+	public class ExitItemListener implements ActionListener {
+		
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			window.dispose();
+		}
 		
 	}
-	public void valueChanged(ListSelectionEvent e) {
-	    if (e.getValueIsAdjusting() == false) {
-	    		String selection = (String) list.getSelectedValue();
-	    		System.out.print(selection);
-	    		
-	    }
+	@Override
+	public void event_fired(CagEvent event) {
+		if(event.getEvent_type().equals(EventType.EVENT_CHOOSED_CONTIG)){
+			String contigName = event.getString();
+			centralContig.setText(contigName);
+		}
+		
 	}
 
 

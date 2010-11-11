@@ -119,4 +119,5 @@ public class ChooseContigPanel extends JPanel {
 								GroupLayout.Alignment.BASELINE).addComponent(
 								leftContig5).addComponent(rightContig5)));
 	}
+	
 }
