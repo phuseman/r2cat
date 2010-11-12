@@ -11,13 +11,14 @@ public class CagEvent {
 
 	public CagEvent(EventType event, String data) {
 		this.event_type = event;
+		this.data = data;
 	}
 
 	public EventType getEvent_type() {
 		return event_type;
 	}
 	
-	public String getString(){
+	public String getData(){
 		return data;
 	}
 

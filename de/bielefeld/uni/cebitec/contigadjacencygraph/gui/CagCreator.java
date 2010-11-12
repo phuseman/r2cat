@@ -36,6 +36,7 @@ public class CagCreator {
 	private HashMap<Integer, Vector<AdjacencyEdge>> leftNeighbours;
 	private HashMap<Integer, Vector<AdjacencyEdge>> rightNeighbours;
 	private String currentContig;
+	private HashMap contigInfo;
 
 	// private CAGWindow window;
 	public CagCreator(){
@@ -43,40 +44,6 @@ public class CagCreator {
 		calculateNeighbours();
 		createContigList();
 	}
-	
-	public void sendCurrentContig(){
-		System.out.println("Sende event choosed contig");
-		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,getCurrentContig());
-		fireEvent(event);
-		
-	}
-	
-
-	/*
-	 * TODO 
-	 * Wenn das aktuelle Contig gewechselt hat,
-	 * sollte nun dadurch das sich der Zustand vom Model geändert hat
-	 * auf der Gui in der Mitte dieses spezifische Contig erscheinen.
-	 * Sprich es sollte als Reverse, Normal oder Repetetiv erscheinen
-	 * mit dem richtigen Namen drauf.
-	 * 
-	 * TODO
-	 * Des weiteren sollten die besten 5 Nachbarn ermittelt werden
-	 * erstelle Methode findTheBest5Neightbours
-	 * 
-	 * TODO
-	 * Wenn schon einer dieser Nachbarn ausgewählt wurde sollte dieser Nachbar 
-	 * eine andere Erscheinung haben als alle anderen Nachbarn.
-	 */
-	public void setCurrentContig(String currentContig) {
-		this.currentContig = currentContig;
-		System.out.println("Changed contig. Current Contig is: "+currentContig);
-	}
-
-	public String getCurrentContig() {
-		return currentContig;
-	}
-
 
 
 	public static void main(String[] args) {
@@ -168,7 +135,6 @@ public class CagCreator {
 			}
 
 		}
-		//System.out.println(rightNeighbours.get(1));
 		
 	}
 	/*
@@ -177,6 +143,9 @@ public class CagCreator {
 	private String[] createContigList(){
 		
 		contigs = completeGraph.getNodes();
+		System.out.println(contigs);
+		System.out.println(contigs.get(1));
+		
 		listData = new String[contigs.size()];
 		
 		for (int i = 0 ; i < contigs.size(); i ++){
@@ -195,12 +164,68 @@ public class CagCreator {
 		return rightNeighbours;
 	}
 	
+	private void informationOfCurrentContig(String name){
+		contigInfo = new HashMap<String, String>();
+		
+		int contigId =new Integer(currentContig.replace ("Contig ", "")).intValue();
+		DNASequence contig = contigs.get(contigId);
+
+		long size = contig.getSize();
+		boolean isRepetitiv =contig.isRepetitive();
+		
+		contigInfo.put("Name", name);
+		contigInfo.put("Size", Long.toString(size));
+		contigInfo.put("isRepetitiv", Boolean.toString(isRepetitiv));
+
+	}
+
+	/*
+	 * TODO 
+	 * Wenn das aktuelle Contig gewechselt hat,
+	 * sollte nun dadurch das sich der Zustand vom Model geändert hat
+	 * auf der Gui in der Mitte dieses spezifische Contig erscheinen.
+	 * Sprich es sollte als Reverse, Normal oder Repetetiv erscheinen
+	 * mit dem richtigen Namen drauf.
+	 * 
+	 * TODO
+	 * Des weiteren sollten die besten 5 Nachbarn ermittelt werden
+	 * erstelle Methode findTheBest5Neightbours
+	 * 
+	 * TODO
+	 * Wenn schon einer dieser Nachbarn ausgewählt wurde sollte dieser Nachbar 
+	 * eine andere Erscheinung haben als alle anderen Nachbarn.
+	 */
+	public void setCurrentContig(String currentContig) {
+		this.currentContig = currentContig;
+		System.out.println("Changed contig. Current Contig is: "+currentContig);
+	}
+
+	public String getCurrentContig() {
+		return currentContig;
+	}
+	
+	/*
+	 * This list has all contignames, which will be display in the scrollbar / window
+	 * the user is able to select a contig, such that this contig will be display 
+	 * at the central contig  
+	 */
 	public String[] getListData() {
 		this.createContigList();
 		return listData;
 	}
+	/*
+	 * Send an event, if the user selected an contig
+	 * TODO Im moment sende ich nur den Namen des contigs
+	 * Besser: name und info ob repetetiv oder nicht, damit es im fenster richtig
+	 * dargestellt werden kann 
+	 */
+	public void sendCurrentContig(){
+		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG, getCurrentContig());
+		informationOfCurrentContig(currentContig);
+		fireEvent(event);
+	}
 	/**
-	 * Hier werden alle Klassen die sich registrien in der
+	 * Hier werden alle Klassen die sich registrieren in der
 	 * ArrayList gespeichert.
 	 */
 	public void addEventListener (CagEventListener listener) {
@@ -208,7 +233,7 @@ public class CagCreator {
 	}
 	
 	/**
-	 * Hier werden alle Klasse die sich registriet haben aus 
+	 * Hier werden alle Klasse die sich registriert haben aus 
 	 * der ArrayList gelöscht.
 	 */
 	public void removeEventListener(CagEventListener listener) {
@@ -221,8 +246,7 @@ public class CagCreator {
 	 */
 	private void fireEvent(CagEvent event) {
 		
-		ArrayList <CagEventListener> copyList = 
-			new ArrayList <CagEventListener>(listeners);
+		ArrayList <CagEventListener> copyList = 	new ArrayList <CagEventListener>(listeners);
 		for (CagEventListener listener : copyList) {
 			listener.event_fired(event);
 			

@@ -42,6 +42,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 	private JMenuItem menuItem;
 //	private ChooseContigPanel chooseContigPanel;
 	private JPanel chooseContigPanel;
+	private GroupLayout layout;
 	private JPanel genomePanel;
 	private String[] listData;
 	private CagCreator model;
@@ -84,13 +85,6 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		menu = new JMenu("Menu");	
 		menuItem = new JMenuItem("Exit");
 		menuItem.addActionListener(new ExitItemListener());
-		//mnemonic: der erste Buchstabe wird unterstrichen; kann mit einer tastenkombi aktiviert werden
-		// accelerator: eine Tastenkobi wird angezeigt und der Menupunkt kann auch mit dieser
-		// 						kombi aktiviert werden
-		//menu.setMnemonic(KeyEvent.VK_A);
-		//menu.getAccessibleContext().setAccessibleDescription( "The only menu in this program that has menu items");
-		//menuItem.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_1, ActionEvent.ALT_MASK));
-		//menuItem.getAccessibleContext().setAccessibleDescription("Exit");
 		
 		/*a group of JMenuItems
 		 * Hier werden die Menupunkte hinzugefuegt
@@ -106,7 +100,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 //		chooseContigPanel = new ChooseContigPanel();
 		chooseContigPanel = new JPanel();
 			
-			GroupLayout layout = new GroupLayout(chooseContigPanel);
+			layout = new GroupLayout(chooseContigPanel);
 			
 			chooseContigPanel.setLayout(layout);
 			
@@ -253,7 +247,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		//setSize(Toolkit.getDefaultToolkit().getScreenSize()); // hier wird das Fenster auf die Größe des Bildschirmes angepasst.
-		setSize(600, 600);
+		setSize(900, 900);
 		setVisible(true);
 		
 		pack();
@@ -269,10 +263,9 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
 			if (e.getValueIsAdjusting() == false) {
+				System.out.println("Selected value is: "+list.getSelectedValue());
 				String selection = (String) list.getSelectedValue();
-				control.selectContig(selection);
-				System.out.print(selection+"\n");
-				
+				control.selectContig(selection);				
 			}
 			
 		}
@@ -288,8 +281,9 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 	}
 	@Override
 	public void event_fired(CagEvent event) {
+		
 		if(event.getEvent_type().equals(EventType.EVENT_CHOOSED_CONTIG)){
-			String contigName = event.getString();
+			String contigName = event.getData();			
 			centralContig.setText(contigName);
 		}
 		
