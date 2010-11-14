@@ -142,7 +142,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			leftContig5.setContentAreaFilled(false);
 			
 			//centralContig.setText("aktuelles Contig");
-			centralContig.setBorder(reverseRepeatBorder);
+			//centralContig.setBorder(reverseRepeatBorder);
 			centralContig.setContentAreaFilled(false);
 			
 			rightContig1.setText("Contig 1");
@@ -283,8 +283,15 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 	public void event_fired(CagEvent event) {
 		
 		if(event.getEvent_type().equals(EventType.EVENT_CHOOSED_CONTIG)){
-			String contigName = event.getData();			
-			centralContig.setText(contigName);
+			String contigName = event.getData();
+			long size = event.getSize();
+			boolean isRepeat = event.isRepetitiv();
+			centralContig.setText(contigName+" \n"+"Länge: "+size+" bp");
+			if (isRepeat == true){				
+				centralContig.setBorder(new ContigBorder(true, false));
+			}else{
+				centralContig.setBorder(new ContigBorder(false, false));
+			}
 		}
 		
 	}
