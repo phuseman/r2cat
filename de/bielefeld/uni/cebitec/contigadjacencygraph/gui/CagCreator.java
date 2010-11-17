@@ -4,12 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import javax.naming.CannotProceedException;
-import javax.swing.UIManager;
 
-import de.bielefeld.uni.cebitec.common.MiscFileUtils;
 import de.bielefeld.uni.cebitec.common.SimpleProgressReporter;
 import de.bielefeld.uni.cebitec.common.Timer;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.ContigAdjacencyGraph;
@@ -17,8 +16,6 @@ import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
-
-import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CagEventListener;
 
 /*
  * ist mein model 
@@ -36,7 +33,6 @@ public class CagCreator {
 	private HashMap<Integer, Vector<AdjacencyEdge>> leftNeighbours;
 	private HashMap<Integer, Vector<AdjacencyEdge>> rightNeighbours;
 	private String currentContig;
-	private HashMap contigInfo;
 	private DNASequence contig;
 	private long contigSize = 0;
 	private boolean contigIsRepetitiv = false;
@@ -44,7 +40,7 @@ public class CagCreator {
 	// private CAGWindow window;
 	public CagCreator() {
 		listeners = new ArrayList<CagEventListener>();
-		calculateNeighbourList();
+		leftAndRightNeighbour();
 		createContigList();
 	}
 
@@ -99,11 +95,12 @@ public class CagCreator {
 
 	/*
 	 * Diese Hashmaps speichern die linken und rechten Nachbarn aller Contigs
-	 * TODO muss noch aufgerufen werden
+	 * TODO Zur zeit ist es moeglich, dass die Kante sowohl rechter als auch linker 
+	 * Konnektor sein kann. soll das so bleiben??
 	 */
-	private void calculateNeighbourList() {
-		leftNeighbours = new HashMap<Integer, Vector<AdjacencyEdge>>();
-		rightNeighbours = new HashMap<Integer, Vector<AdjacencyEdge>>();
+	private void leftAndRightNeighbour() {
+		leftNeighbours = new LinkedHashMap<Integer, Vector<AdjacencyEdge>>();
+		rightNeighbours = new LinkedHashMap<Integer, Vector<AdjacencyEdge>>();
 
 		for (AdjacencyEdge e : completeGraph.getEdges()) {
 
@@ -133,9 +130,68 @@ public class CagCreator {
 				}
 				rightNeighbours.get(j).add(e);
 			}
-
+			
 		}
-		System.out.println(rightNeighbours);
+		for (Integer id : rightNeighbours.keySet()) {
+			System.out.println("Right neighbours for id : "+id);
+			for(AdjacencyEdge edge : rightNeighbours.get(id)) {
+				System.out.println(edge);
+			}
+		}
+//		System.out.println(rightNeighbours);
+		
+	}
+	/*
+	 * TODO ist es notwendig, dass ich double erhalte?
+	 */
+	private double[] fiveMostLikelyRightNeighbours(){
+		double[] sortierArray = new double[rightNeighbours.size()];
+		for (AdjacencyEdge edge : rightNeighbours.get(currentContig)){
+				
+		}
+		return sortierArray;
+	
+	}
+	
+	// sortiert ein Zahlen-Array mit CountingSort
+	// erwartet als Parameter ein int-Array und gibt dieses sortiert wieder zurück
+	private  double[] countingSort(double[] numbers) {
+		// Maximum der Zahlen berechnen
+		double max = numbers[0];
+		for (int i = 1; i < numbers.length; i++) {
+			// wenn es größeres als das aktuelle gibt, ist das nun das neue größte
+			if (numbers[i] > max)
+				max = numbers[i];
+		}
+	 
+		// temporäres Array erzeugen mit: Länge = Maximum des Zahlenarrays + die "0"
+		double[] sortedNumbers = new double[(int)max+1];
+	 
+		// Indizes des Zahlen-Arrays durchgehen
+		for (int i = 0; i < numbers.length; i++) {
+			// wir zählen, wie oft jede Zahl aus numbers vorkommt und
+			// speichern diese Anzahl in sortedNumbers[] bei Index number[i]
+			sortedNumbers[(int)numbers[i]]++;
+		}
+	 
+		// insertPosition steht für die Schreib-Position im Ausgabe-Array
+		int insertPosition = 0;
+	 
+		// Indizes von sortedNumbers[] durchgehen, um zu sehen, wie oft jede Zahl vorkommt
+		for (int i = 0; i <= max; i++) {
+			// Anzahl von i durchgehen, um gleiche Zahlen hintereinander einzutragen
+			for (int j = 0; j < sortedNumbers[i]; j++) {
+				// das Zahlen-Array wird jetzt sortiert neu geschrieben für jedes
+				// Auftreten von i
+				numbers[insertPosition] = i;
+				insertPosition++;
+			}
+		}
+		return numbers;
+	}
+
+	private void fiveMostLikelyLeftNeighbours(){
+		
 	}
 
 	/*
@@ -155,7 +211,7 @@ public class CagCreator {
 
 
 	private void informationOfCurrentContig(String name) {
-		contigInfo = new HashMap<String, String>();
+
 		if (currentContig.contains("Contig r")) {
 			int contigId = new Integer(currentContig.replace("Contig r", ""))
 					.intValue();

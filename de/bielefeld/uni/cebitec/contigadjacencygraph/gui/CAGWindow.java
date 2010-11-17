@@ -1,32 +1,31 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.EventListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.DefaultListSelectionModel;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.UIManager;
-import javax.swing.event.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /*
  * Ist das Abbild vom Model
@@ -53,7 +52,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 	private ContigBorder repeatBorder;
 	private ContigBorder reverseRepeatBorder;
 	
-	private JButton leftContig1;
+	private JPanel leftContig1;
 	private JButton leftContig2 ;
 	private JButton leftContig3 ;
 	private JButton leftContig4 ;
@@ -111,7 +110,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			
 
 
-			leftContig1 = new JButton();
+			leftContig1 = new JPanel();
 			leftContig2 = new JButton();
 			leftContig3 = new JButton();
 			leftContig4 = new JButton();
@@ -125,9 +124,39 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			rightContig4 = new JButton();
 			rightContig5 = new JButton();
 			
-			leftContig1.setText("Contig 1");
-			leftContig1.setContentAreaFilled(false);
+			JLabel contigLabel = new JLabel("Contig 1");
+			contigLabel.setName("contigLabel");
+			leftContig1.add(contigLabel);
+			//GroupLayout lableLayout = new GroupLayout(leftContig1);
+			leftContig1.addMouseListener(new MouseAdapter() {
+				
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					
+					JPanel jp = (JPanel)e.getSource();
+					int subcomponents = jp.getComponentCount();
+					JLabel child = null;
+					for(int i = 0;i<subcomponents;i++) {
+						Component c = jp.getComponent(i);
+						if(c.getName().equals("contigLabel")) {
+							System.out.println("Found contig label!");
+							child = (JLabel)c;
+						}
+					}
+					if(child!=null) {
+						JOptionPane.showMessageDialog(jp.getTopLevelAncestor(), "Click auf "+child.getClass().getCanonicalName()+": "+child.getText());
+					}
+				}
+			});
+			//leftContig1.setText("Contig 1");
+			//leftContig1.setContentAreaFilled(false);
+			setGroupLayoutForContigPanel(leftContig1,contigLabel);
 			leftContig1.setBorder(border);
+			leftContig1.setOpaque(false);
+			leftContig1.setPreferredSize(new Dimension(100,50));
+			leftContig1.setMaximumSize(new Dimension(100,50));
+			leftContig1.setMinimumSize(new Dimension(100,50));
+			
 			leftContig2.setText("Contig 2");
 			leftContig2.setContentAreaFilled(false);
 			leftContig2.setBorder(repeatBorder);
@@ -253,6 +282,24 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		pack();
 	}
 
+	private void setGroupLayoutForContigPanel(JPanel contigPanel, JLabel contigLabel) {
+		GroupLayout layout = new GroupLayout(contigPanel);
+		contigPanel.setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(contigLabel))
+				);
+
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addGroup(
+						layout.createParallelGroup(
+								GroupLayout.Alignment.LEADING).addComponent(contigLabel)
+								));
+	}
+	
 //	@Override
 //	public void actionPerformed(ActionEvent e) {
 //		// TODO Auto-generated method stub
@@ -286,7 +333,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			String contigName = event.getData();
 			long size = event.getSize();
 			boolean isRepeat = event.isRepetitiv();
-			centralContig.setText(contigName+" \n"+"Länge: "+size+" bp");
+			centralContig.setText(contigName+" \n\r"+"Laenge: "+size+" bp");
 			if (isRepeat == true){				
 				centralContig.setBorder(new ContigBorder(true, false));
 			}else{

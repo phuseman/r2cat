@@ -60,7 +60,7 @@ public class ContigBorder extends AbstractBorder{
 
 		p.moveTo(x, y); // Startpunkt
 		p.lineTo(x + width - 10, y); // 1
-		p.lineTo(x + width, y + height / 2); // 2
+		p.lineTo(x + width -1, y + height / 2); // 2
 		p.lineTo(x + width -10, y + height -1); // 3
 		p.lineTo(x, y + height -1); // 4
 		p.closePath();
