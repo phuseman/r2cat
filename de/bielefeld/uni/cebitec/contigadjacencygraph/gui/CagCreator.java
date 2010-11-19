@@ -34,6 +34,7 @@ public class CagCreator {
 	private HashMap<Integer, Vector<AdjacencyEdge>> rightNeighbours;
 	private String currentContig;
 	private DNASequence contig;
+	private int contigId;
 	private long contigSize = 0;
 	private boolean contigIsRepetitiv = false;
 
@@ -95,23 +96,28 @@ public class CagCreator {
 
 	/*
 	 * Diese Hashmaps speichern die linken und rechten Nachbarn aller Contigs
-	 * TODO Zur zeit ist es moeglich, dass die Kante sowohl rechter als auch linker 
-	 * Konnektor sein kann. soll das so bleiben??
+	 * TODO Zur Zeit kann eine Kante sowohl Rechter als auch linker Konnektor 
+	 * sein soll das so bleiben?
 	 */
 	private void leftAndRightNeighbour() {
 		leftNeighbours = new LinkedHashMap<Integer, Vector<AdjacencyEdge>>();
 		rightNeighbours = new LinkedHashMap<Integer, Vector<AdjacencyEdge>>();
 
+		//fuer alle Kanten im layout Graphen
 		for (AdjacencyEdge e : completeGraph.getEdges()) {
 
+			// hole fuer die aktuelle  Kante den Knoten i und j
 			int i = e.geti();
 			int j = e.getj();
 
+			//wenn diese Kante der linke konnektor von i ist
 			if (e.isLeftConnectori()) {
 				if (!leftNeighbours.containsKey(i)) {
 					leftNeighbours.put(i, new Vector<AdjacencyEdge>());
 				}
+				// dann ist sie die verbindung zum linken Knoten von i 
 				leftNeighbours.get(i).add(e);
+				// wenn nicht dann ist sie die verbindung zum rechten Knoten i
 			} else {
 				if (!rightNeighbours.containsKey(i)) {
 					rightNeighbours.put(i, new Vector<AdjacencyEdge>());
@@ -119,6 +125,7 @@ public class CagCreator {
 				rightNeighbours.get(i).add(e);
 			}
 
+			//wenn diese Kante der linke konnektor von j ist
 			if (e.isLeftConnectorj()) {
 				if (!leftNeighbours.containsKey(j)) {
 					leftNeighbours.put(j, new Vector<AdjacencyEdge>());
@@ -133,12 +140,13 @@ public class CagCreator {
 			
 		}
 		for (Integer id : rightNeighbours.keySet()) {
-			System.out.println("Right neighbours for id : "+id);
+			//System.out.println("Right neighbours for id : "+id);
 			for(AdjacencyEdge edge : rightNeighbours.get(id)) {
-				System.out.println(edge);
+				//System.out.println(edge);
+				//System.out.println(edge.getRelativeSupporti());
+				//System.out.println(edge.getRelativeSupportj());
 			}
 		}
-//		System.out.println(rightNeighbours);
 		
 	}
 	/*
@@ -146,8 +154,15 @@ public class CagCreator {
 	 */
 	private double[] fiveMostLikelyRightNeighbours(){
 		double[] sortierArray = new double[rightNeighbours.size()];
-		for (AdjacencyEdge edge : rightNeighbours.get(currentContig)){
+		for (AdjacencyEdge edge : rightNeighbours.get(contigId)){//ist current contig jetzt i oder j?
+			//System.out.println("rN "+rightNeighbours.get(contigId));
+				//edge.getRelativeSupporti();
+				System.out.println(edge+ " l support "+edge.getRelativeSupporti());
 				
+		}
+		for (AdjacencyEdge edge : leftNeighbours.get(contigId)){//ist current contig jetzt i oder j?
+			System.out.println(edge+ " r support "+edge.getRelativeSupportj());
+			
 		}
 		return sortierArray;
 	
@@ -211,6 +226,7 @@ public class CagCreator {
 
 
 	private void informationOfCurrentContig(String name) {
+		fiveMostLikelyRightNeighbours();
 
 		if (currentContig.contains("Contig r")) {
 			int contigId = new Integer(currentContig.replace("Contig r", ""))
@@ -225,6 +241,7 @@ public class CagCreator {
 		}
 			contigSize = contig.getSize();
 			contigIsRepetitiv = contig.isRepetitive();
+			System.out.println("contig"+contig.getId());
 			System.out.println(contigSize);
 			System.out.println(contigIsRepetitiv);
 
@@ -234,6 +251,7 @@ public class CagCreator {
 	 * Send an event, if the user selected an contig TODO noch senden ob revers oder nicht
 	 */
 	public void sendCurrentContig() {
+		
 		informationOfCurrentContig(currentContig);
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
 				currentContig,contigSize,contigIsRepetitiv );

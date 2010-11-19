@@ -53,6 +53,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 	private ContigBorder reverseRepeatBorder;
 	
 	private JPanel leftContig1;
+	private JLabel contigLabel;
 	private JButton leftContig2 ;
 	private JButton leftContig3 ;
 	private JButton leftContig4 ;
@@ -124,8 +125,9 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			rightContig4 = new JButton();
 			rightContig5 = new JButton();
 			
-			JLabel contigLabel = new JLabel("Contig 1");
+			contigLabel = new JLabel();
 			contigLabel.setName("contigLabel");
+			//leftContig1.setLayout(new BorderLayout().NORTH);
 			leftContig1.add(contigLabel);
 			//GroupLayout lableLayout = new GroupLayout(leftContig1);
 			leftContig1.addMouseListener(new MouseAdapter() {
@@ -150,7 +152,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			});
 			//leftContig1.setText("Contig 1");
 			//leftContig1.setContentAreaFilled(false);
-			setGroupLayoutForContigPanel(leftContig1,contigLabel);
+			//setGroupLayoutForContigPanel(leftContig1,contigLabel);
 			leftContig1.setBorder(border);
 			leftContig1.setOpaque(false);
 			leftContig1.setPreferredSize(new Dimension(100,50));
@@ -332,13 +334,14 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		if(event.getEvent_type().equals(EventType.EVENT_CHOOSED_CONTIG)){
 			String contigName = event.getData();
 			long size = event.getSize();
-			boolean isRepeat = event.isRepetitiv();
-			centralContig.setText(contigName+" \n\r"+"Laenge: "+size+" bp");
-			if (isRepeat == true){				
+			boolean u = event.isRepetitiv();
+		//	centralContig.setText(contigName+" \n\r"+"Laenge: "+size+" bp");
+			contigLabel.setText("<html><font size = -2><u>"+contigName+"</u><br>length: "+size+" bp </html>");
+			/*if (isRepeat == true){				
 				centralContig.setBorder(new ContigBorder(true, false));
 			}else{
 				centralContig.setBorder(new ContigBorder(false, false));
-			}
+			}*/
 		}
 		
 	}
