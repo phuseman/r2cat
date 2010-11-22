@@ -110,7 +110,9 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			reverseRepeatBorder = new ContigBorder(true, true);
 			
 
-
+			/*
+			 * TODO alle JButton in Panel!
+			 */
 			leftContig1 = new JPanel();
 			leftContig2 = new JButton();
 			leftContig3 = new JButton();
@@ -153,8 +155,8 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			//leftContig1.setText("Contig 1");
 			//leftContig1.setContentAreaFilled(false);
 			//setGroupLayoutForContigPanel(leftContig1,contigLabel);
-			leftContig1.setBorder(border);
-			leftContig1.setOpaque(false);
+//			leftContig1.setBorder(border);
+			leftContig1.setBackground(Color.WHITE);
 			leftContig1.setPreferredSize(new Dimension(100,50));
 			leftContig1.setMaximumSize(new Dimension(100,50));
 			leftContig1.setMinimumSize(new Dimension(100,50));
@@ -248,9 +250,10 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		 * Mittels einer 
 		 */
 		/*
-		 * Liste mit den Namen der Contigs 
+		 * Liste mit den Namen der Contigs
+		 * TODO am Ende sollte diese for schleife verschwinden, da "Contig" schon im Namen sein sollte
+		 * nur bei diesen Testdaten ist das anders, weil die Contigs umbenannt wurden. 
 		 */
-
 		for (int i = 0; i < listData.length ; i++){
 			String contigname = listData[i];
 			listData[i] = "Contig "+contigname;
@@ -328,20 +331,27 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		}
 		
 	}
+	/*
+	 * TODO fange weitere Events hab
+	 */
 	@Override
 	public void event_fired(CagEvent event) {
 		
 		if(event.getEvent_type().equals(EventType.EVENT_CHOOSED_CONTIG)){
 			String contigName = event.getData();
 			long size = event.getSize();
-			boolean u = event.isRepetitiv();
-		//	centralContig.setText(contigName+" \n\r"+"Laenge: "+size+" bp");
+			boolean isRepeat = event.isRepetitiv();
+			centralContig.setText(contigName+" \n\r"+"Laenge: "+size+" bp");
 			contigLabel.setText("<html><font size = -2><u>"+contigName+"</u><br>length: "+size+" bp </html>");
-			/*if (isRepeat == true){				
+			if (isRepeat == true){				
 				centralContig.setBorder(new ContigBorder(true, false));
+				leftContig1.setBorder(new ContigBorder(true,false));
+				leftContig1.setOpaque(false);
 			}else{
 				centralContig.setBorder(new ContigBorder(false, false));
-			}*/
+				leftContig1.setBorder(new ContigBorder(false,false));
+				leftContig1.setOpaque(false);
+			}
 		}
 		
 	}

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.naming.CannotProceedException;
@@ -20,6 +21,10 @@ import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
 /*
  * ist mein model 
  * hier werden die Daten- Zustands- und Anwendungslogik implementiert
+ * 
+ * TODO heute 5 Warscheinlichsten Nachbarn links und rechts in Variablen verpacken
+ * und an gui senden!
+ * Button in label √§ndern!
  */
 public class CagCreator {
 
@@ -32,6 +37,8 @@ public class CagCreator {
 	private ArrayList<CagEventListener> listeners;
 	private HashMap<Integer, Vector<AdjacencyEdge>> leftNeighbours;
 	private HashMap<Integer, Vector<AdjacencyEdge>> rightNeighbours;
+	private TreeMap<Double, AdjacencyEdge> supportOfLeftNeighbours;
+	private TreeMap<Double, AdjacencyEdge> supportOfRightNeighbours;
 	private String currentContig;
 	private DNASequence contig;
 	private int contigId;
@@ -45,6 +52,9 @@ public class CagCreator {
 		createContigList();
 	}
 
+	/*
+	 * Diese Main methode verschwindet zum Schluss!
+	 */
 	public static void main(String[] args) {
 
 		TreebasedContigSorterProject project = new TreebasedContigSorterProject();
@@ -77,7 +87,7 @@ public class CagCreator {
 
 			t.restartTimer("matches");
 
-			layoutGraph = project.sortContigs();// noch ungenutzt
+			layoutGraph = project.sortContigs();
 
 			cag = project.getContigAdjacencyGraph();
 			completeGraph = cag.getCompleteGraph();
@@ -96,26 +106,26 @@ public class CagCreator {
 
 	/*
 	 * Diese Hashmaps speichern die linken und rechten Nachbarn aller Contigs
-	 * TODO Zur Zeit kann eine Kante sowohl Rechter als auch linker Konnektor 
+	 * TODO Zur Zeit kann eine Kante sowohl Rechter als auch linker Konnektor
 	 * sein soll das so bleiben?
 	 */
 	private void leftAndRightNeighbour() {
 		leftNeighbours = new LinkedHashMap<Integer, Vector<AdjacencyEdge>>();
 		rightNeighbours = new LinkedHashMap<Integer, Vector<AdjacencyEdge>>();
 
-		//fuer alle Kanten im layout Graphen
+		// fuer alle Kanten im layout Graphen
 		for (AdjacencyEdge e : completeGraph.getEdges()) {
 
-			// hole fuer die aktuelle  Kante den Knoten i und j
+			// hole fuer die aktuelle Kante den Knoten i und j
 			int i = e.geti();
 			int j = e.getj();
 
-			//wenn diese Kante der linke konnektor von i ist
+			// wenn diese Kante der linke konnektor von i ist
 			if (e.isLeftConnectori()) {
 				if (!leftNeighbours.containsKey(i)) {
 					leftNeighbours.put(i, new Vector<AdjacencyEdge>());
 				}
-				// dann ist sie die verbindung zum linken Knoten von i 
+				// dann ist sie die verbindung zum linken Knoten von i
 				leftNeighbours.get(i).add(e);
 				// wenn nicht dann ist sie die verbindung zum rechten Knoten i
 			} else {
@@ -125,7 +135,7 @@ public class CagCreator {
 				rightNeighbours.get(i).add(e);
 			}
 
-			//wenn diese Kante der linke konnektor von j ist
+			// wenn diese Kante der linke konnektor von j ist
 			if (e.isLeftConnectorj()) {
 				if (!leftNeighbours.containsKey(j)) {
 					leftNeighbours.put(j, new Vector<AdjacencyEdge>());
@@ -137,80 +147,77 @@ public class CagCreator {
 				}
 				rightNeighbours.get(j).add(e);
 			}
-			
+
 		}
 		for (Integer id : rightNeighbours.keySet()) {
-			//System.out.println("Right neighbours for id : "+id);
-			for(AdjacencyEdge edge : rightNeighbours.get(id)) {
-				//System.out.println(edge);
-				//System.out.println(edge.getRelativeSupporti());
-				//System.out.println(edge.getRelativeSupportj());
+			// System.out.println("Right neighbours for id : "+id);
+			for (AdjacencyEdge edge : rightNeighbours.get(id)) {
+				// System.out.println(edge);
+				// System.out.println(edge.getRelativeSupporti());
+				// System.out.println(edge.getRelativeSupportj());
 			}
 		}
-		
+
 	}
+
 	/*
-	 * TODO ist es notwendig, dass ich double erhalte?
+	 * TODO Aus der HashMap rightNeighbours sollen alle rechten nachbarn
+	 * ausgelesen werden.
+	 * 
+	 * Jede Kante wird durch zwei Knoten definiert (i,j) in right/leftNeigbours
+	 * ist in der Hashmap ist der Knoten i/j mit einem Vektor von Kanten
+	 * gespeichert. In dem Vektor sind Knoten (Vektoreintr√§ge) mit den
+	 * entsprechenden Nachbarkanten gespeichert 
+	 * 0 (0,1) (0,13)(1,0)(11,0)
+	 * 1 (1,3)(1,7)(9,1) usw. 
+	 * der entsprechende Knoten kann auf beiden Seiten sein
+	 * beide varianten sind gleichwertig (i,j)=(j,i) durch islefti/j kann die
+	 * Orientierung des Contigs ermittelt werden.
 	 */
-	private double[] fiveMostLikelyRightNeighbours(){
-		double[] sortierArray = new double[rightNeighbours.size()];
-		for (AdjacencyEdge edge : rightNeighbours.get(contigId)){//ist current contig jetzt i oder j?
-			//System.out.println("rN "+rightNeighbours.get(contigId));
-				//edge.getRelativeSupporti();
-				System.out.println(edge+ " l support "+edge.getRelativeSupporti());
-				
-		}
-		for (AdjacencyEdge edge : leftNeighbours.get(contigId)){//ist current contig jetzt i oder j?
-			System.out.println(edge+ " r support "+edge.getRelativeSupportj());
-			
-		}
-		return sortierArray;
-	
-	}
-	
-	// sortiert ein Zahlen-Array mit CountingSort
-	// erwartet als Parameter ein int-Array und gibt dieses sortiert wieder zur¸ck
-	private  double[] countingSort(double[] numbers) {
-		// Maximum der Zahlen berechnen
-		double max = numbers[0];
-		for (int i = 1; i < numbers.length; i++) {
-			// wenn es grˆﬂeres als das aktuelle gibt, ist das nun das neue grˆﬂte
-			if (numbers[i] > max)
-				max = numbers[i];
-		}
-	 
-		// tempor‰res Array erzeugen mit: L‰nge = Maximum des Zahlenarrays + die "0"
-		double[] sortedNumbers = new double[(int)max+1];
-	 
-		// Indizes des Zahlen-Arrays durchgehen
-		for (int i = 0; i < numbers.length; i++) {
-			// wir z‰hlen, wie oft jede Zahl aus numbers vorkommt und
-			// speichern diese Anzahl in sortedNumbers[] bei Index number[i]
-			sortedNumbers[(int)numbers[i]]++;
-		}
-	 
-		// insertPosition steht f¸r die Schreib-Position im Ausgabe-Array
-		int insertPosition = 0;
-	 
-		// Indizes von sortedNumbers[] durchgehen, um zu sehen, wie oft jede Zahl vorkommt
-		for (int i = 0; i <= max; i++) {
-			// Anzahl von i durchgehen, um gleiche Zahlen hintereinander einzutragen
-			for (int j = 0; j < sortedNumbers[i]; j++) {
-				// das Zahlen-Array wird jetzt sortiert neu geschrieben f¸r jedes
-				// Auftreten von i
-				numbers[insertPosition] = i;
-				insertPosition++;
+	/* 
+	 * Get the support of all right neighbours from the current contig
+	 * Save them in a tree map, which automaticly sort the nodes by their support.
+	 * Attention! The most likely neightbours are at the end!
+	 */
+	private TreeMap<Double, AdjacencyEdge> mostLikelyRightNeighbours() {
+
+		supportOfRightNeighbours = new TreeMap<Double, AdjacencyEdge>();
+
+		for (AdjacencyEdge edge : rightNeighbours.get(1)) {
+			if (edge.isRightConnectori()) {
+				supportOfRightNeighbours.put(edge.getRelativeSupporti(), edge);
+			} else {
+				supportOfRightNeighbours.put(edge.getRelativeSupportj(), edge);
 			}
 		}
-		return numbers;
+
+		return supportOfRightNeighbours;
+		// ! Achtung kl element ist das erste h√∂chste das letzte
 	}
 
-	private void fiveMostLikelyLeftNeighbours(){
-		
+	/* 
+	 * Get the support of all left neighbours from the current contig
+	 * Save them in a tree map, which automaticly sort the nodes by their support.
+	 * Attention! The most likely neightbours are at the end!
+	 */
+	private TreeMap<Double, AdjacencyEdge> mostLikelyLeftNeighbours() {
+
+		supportOfLeftNeighbours = new TreeMap<Double, AdjacencyEdge>();
+
+		for (AdjacencyEdge edge : leftNeighbours.get(9)) {
+			if (edge.isRightConnectori()) {
+				supportOfLeftNeighbours.put(edge.getRelativeSupporti(), edge);
+			} else {
+				supportOfLeftNeighbours.put(edge.getRelativeSupportj(), edge);
+			}
+		}
+		return supportOfLeftNeighbours;
+		// ! Achtung kl element ist das erste h√∂chste das letzte
+
 	}
 
 	/*
-	 * erstellen einer Namensliste aller Contigs
+	 * Create a List of all Contigs
 	 */
 	private String[] createContigList() {
 
@@ -224,37 +231,42 @@ public class CagCreator {
 		return listData;
 	}
 
-
+	/*
+	 * Method to select some informations for the current contig.
+	 * They will be displayed in the view of the contig
+	 */
 	private void informationOfCurrentContig(String name) {
-		fiveMostLikelyRightNeighbours();
 
 		if (currentContig.contains("Contig r")) {
 			int contigId = new Integer(currentContig.replace("Contig r", ""))
 					.intValue();
-			//TODO abfrage von r!000 nur wie? habe string + int
-			//contig = contigs.get(Integer.parseInt("r")+contigId);
+			// TODO abfrage von r!000 nur wie? habe string + int
+			// contig = contigs.get(Integer.parseInt("r")+contigId);
 		} else {
 			int contigId = new Integer(currentContig.replace("Contig ", ""))
 					.intValue();
 			contig = contigs.get(contigId);
 
 		}
-			contigSize = contig.getSize();
-			contigIsRepetitiv = contig.isRepetitive();
-			System.out.println("contig"+contig.getId());
-			System.out.println(contigSize);
-			System.out.println(contigIsRepetitiv);
+		//TODO Noch abfragen ob reverse oder nicht; default sollte nicht reverse sein.
+		// das erste Contig, welches ausgew√§hlt wird sollte in normal |> also in 5'-3'? angezeigt werden.
+		contigSize = contig.getSize();
+		contigIsRepetitiv = contig.isRepetitive();
+		// System.out.println("contig"+contig.getId());
+		// System.out.println(contigSize);
+		// System.out.println(contigIsRepetitiv);
 
 	}
 
 	/*
-	 * Send an event, if the user selected an contig TODO noch senden ob revers oder nicht
+	 * Send an event, if the user selected an contig TODO noch senden ob revers
+	 * oder nicht
 	 */
 	public void sendCurrentContig() {
-		
+
 		informationOfCurrentContig(currentContig);
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
-				currentContig,contigSize,contigIsRepetitiv );
+				currentContig, contigSize, contigIsRepetitiv);
 		fireEvent(event);
 	}
 
@@ -293,13 +305,13 @@ public class CagCreator {
 	public HashMap<Integer, Vector<AdjacencyEdge>> getLeftNeighbours() {
 		return leftNeighbours;
 	}
-	
+
 	public HashMap<Integer, Vector<AdjacencyEdge>> getRightNeighbours() {
 		return rightNeighbours;
 	}
 
 	/*
-	 * This list has all contignames, which will be display in the scrollbar /
+	 * This list has all names of contigs, which will be display in the scrollbar /
 	 * window the user is able to select a contig, such that this contig will be
 	 * display at the central contig
 	 */
@@ -308,24 +320,28 @@ public class CagCreator {
 		return listData;
 	}
 
+	/*
+	 * Return the current Contig Id/Name
+	 */
 	public String getCurrentContig() {
 		return currentContig;
 	}
+
 	/*
-	 * TODO Wenn das aktuelle Contig gewechselt hat, sollte nun dadurch das sich
-	 * der Zustand vom Model ge√§ndert hat auf der Gui in der Mitte dieses
+	 * TODO Wenn das aktuelle Contig gewechselt hat, sollte nun dadurch
+	 * der Zustand vom Model √§ndern; und dadurch auf der Gui in der Mitte dieses
 	 * spezifische Contig erscheinen. Sprich es sollte als Reverse, Normal oder
 	 * Repetetiv erscheinen mit dem richtigen Namen drauf.
-	 * 
-	 * TODO Des weiteren sollten die besten 5 Nachbarn ermittelt werden erstelle
-	 * Methode findTheBest5Neightbours
 	 * 
 	 * TODO Wenn schon einer dieser Nachbarn ausgew√§hlt wurde sollte dieser
 	 * Nachbar eine andere Erscheinung haben als alle anderen Nachbarn.
 	 */
-	public void setCurrentContig(String currentContig) {
+	public void changeContigs(String currentContig) {
 		this.currentContig = currentContig;
+		mostLikelyLeftNeighbours();
+		mostLikelyRightNeighbours();
 		System.out.println("Changed contig. Current Contig is: "
 				+ currentContig);
+		sendCurrentContig();
 	}
 }

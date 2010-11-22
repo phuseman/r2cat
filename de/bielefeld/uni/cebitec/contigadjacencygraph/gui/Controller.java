@@ -42,8 +42,8 @@ public class Controller {
 	 * TODO
 	 */
 	public void selectContig(String contigName){
-		model.setCurrentContig(contigName);
-		model.sendCurrentContig();
+		model.changeContigs(contigName);
+		//model.sendCurrentContig();
 	}
 	
 //	/**
