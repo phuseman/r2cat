@@ -45,7 +45,9 @@ public class LayoutGraph {
 	private double[] totalSupportLeftConnectors = null;
 	private double[] totalSupportRightConnectors = null;
 
-	private boolean[] nodesUsed = null;
+	//contains a boolean if a node (contig) is used in this layout
+	private boolean[] nodeUsed = null;
+	//states how many times this node is used in this layout (in the case of repetitive contigs)
 	private int[] nodeCopyNumber = null;
 
 	/**
@@ -402,12 +404,12 @@ public class LayoutGraph {
 	public LayoutGraph(Vector<DNASequence> nodes) {
 		edges = new Vector<AdjacencyEdge>();
 		this.nodes = nodes;
-		nodesUsed = new boolean[nodes.size()];
+		nodeUsed = new boolean[nodes.size()];
 		nodeCopyNumber = new int[nodes.size()];
 	}
 
 	/**
-	 * @return A vetor containing all nodes (contigs).
+	 * @return A vector containing all nodes (contigs).
 	 */
 	public Vector<DNASequence> getNodes() {
 		return nodes;
@@ -437,14 +439,23 @@ public class LayoutGraph {
 		if (edge.i > nodes.size() || edge.j > nodes.size()) {
 			throw new IllegalArgumentException("Error: Tried to add an edge with an index that was bigger than the number of nodes.");
 		}
-		nodesUsed[edge.i] = true;
-		if (nodeCopyNumber[edge.i] < edge.getRepeatCounti()) {
-			nodeCopyNumber[edge.i] = edge.getRepeatCounti();
+		
+		if(nodeUsed[edge.i] == false) {
+			nodeUsed[edge.i] = true;
+			nodeCopyNumber[edge.i]=1;
+		} else {
+			if (nodeCopyNumber[edge.i] < edge.getRepeatCounti()) {
+				nodeCopyNumber[edge.i] = edge.getRepeatCounti();
+			}
 		}
 
-		nodesUsed[edge.j] = true;
-		if (nodeCopyNumber[edge.j] < edge.getRepeatCountj()) {
-			nodeCopyNumber[edge.j] = edge.getRepeatCountj();
+		if (nodeUsed[edge.j] == false) {
+		nodeUsed[edge.j] = true;
+		nodeCopyNumber[edge.j]=1;
+		} else {
+			if (nodeCopyNumber[edge.j] < edge.getRepeatCountj()) {
+				nodeCopyNumber[edge.j] = edge.getRepeatCountj();
+			}
 		}
 		this.edges.add(edge);
 	}
@@ -508,7 +519,7 @@ public class LayoutGraph {
 			neatoHeader
 					.append("{ node [label=\"\", shape=circle,height=0.12,width=0.12,fontsize=1]\n");
 			for (int i = 0; i < nodes.size(); i++) {
-				if (nodesUsed[i] && nodeCopyNumber[i] == 0) {
+				if (nodeUsed[i] && nodeCopyNumber[i] == 1) {
 					neatoHeader.append(" l" + i + " r" + i);
 				}
 			}
@@ -518,7 +529,7 @@ public class LayoutGraph {
 			neatoHeader
 					.append("{ node [label=\"\", shape=circle,height=0.12,width=0.12,fontsize=1,shape=box]\n");
 			for (int i = 0; i < nodes.size(); i++) {
-				if (nodesUsed[i] && nodeCopyNumber[i] > 0) {
+				if (nodeUsed[i] && nodeCopyNumber[i] > 1) {
 					for (int r = 1; r <= nodeCopyNumber[i]; r++) {
 						neatoHeader.append(" l" + i + String.format("%04d", r)
 								+ " r" + i + String.format("%04d", r));
@@ -530,7 +541,7 @@ public class LayoutGraph {
 
 		// write a node definition for each node.
 		for (int i = 0; i < nodes.size(); i++) {
-			if (nodesUsed[i]) {
+			if (nodeUsed[i]) {
 				String id = "";
 				String label = "";
 				String length = String.format((Locale) null, "%.1f", nodes.get(
@@ -549,7 +560,7 @@ public class LayoutGraph {
 					parameters += "];\n";
 				}
 
-				if (nodeCopyNumber[i] == 0) { // copy number zero: contig is not
+				if (nodeCopyNumber[i] == 1) { // copy number one: contig is not
 												// repetitive / occures once
 					if (type == NeatoOutputType.TWONODES) {
 						id = " l" + i + " -- r" + i + " ";
