@@ -53,19 +53,29 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 	private ContigBorder reverseRepeatBorder;
 	
 	private JPanel leftContig1;
-	private JLabel contigLabel;
-	private JButton leftContig2 ;
-	private JButton leftContig3 ;
-	private JButton leftContig4 ;
-	private JButton leftContig5 ;
+	private JLabel contigLabel1;
+	private JPanel leftContig2 ;
+	private JLabel contigLabel2;
+	private JPanel leftContig3;
+	private JLabel contigLabel3;
+	private JPanel leftContig4 ;
+	private JLabel contigLabel4;
+	private JPanel leftContig5 ;
+	private JLabel contigLabel5;
 
-	private JButton centralContig;
+	private JPanel centralContig;
+	private JLabel centralContigLabel;
 
-	private JButton rightContig1 ;
-	private JButton rightContig2 ;
-	private JButton rightContig3 ;
-	private JButton rightContig4 ;
-	private JButton rightContig5 ;
+	private JPanel rightContig1 ;
+	private JLabel rightcontigLabel1;
+	private JPanel rightContig2 ;
+	private JLabel rightcontigLabel2;
+	private JPanel rightContig3 ;
+	private JLabel rightcontigLabel3;
+	private JPanel rightContig4 ;
+	private JLabel rightcontigLabel4;
+	private JPanel rightContig5 ;
+	private JLabel rightcontigLabel5;
 
 	
 	
@@ -97,7 +107,6 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		/*
 		 * Dieses Panel enhaelt das Contig das Ausgewaehlt wurde und deren moegliche Nachbarn
 		 */
-//		chooseContigPanel = new ChooseContigPanel();
 		chooseContigPanel = new JPanel();
 			
 			layout = new GroupLayout(chooseContigPanel);
@@ -111,88 +120,136 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			
 
 			/*
-			 * TODO alle JButton in Panel!
+			 * TODO
+			 * diese Panels und Label in einer Methode generieren lassen!
 			 */
 			leftContig1 = new JPanel();
-			leftContig2 = new JButton();
-			leftContig3 = new JButton();
-			leftContig4 = new JButton();
-			leftContig5 = new JButton();
+			leftContig2 = new JPanel();
+			leftContig3 = new JPanel();
+			leftContig4 = new JPanel();
+			leftContig5 = new JPanel();
 
-			centralContig = new JButton();
+			centralContig = new JPanel();
 
-			rightContig1 = new JButton();
-			rightContig2 = new JButton();
-			rightContig3 = new JButton();
-			rightContig4 = new JButton();
-			rightContig5 = new JButton();
+			rightContig1 = new JPanel();
+			rightContig2 = new JPanel();
+			rightContig3 = new JPanel();
+			rightContig4 = new JPanel();
+			rightContig5 = new JPanel();
 			
-			contigLabel = new JLabel();
-			contigLabel.setName("contigLabel");
 			//leftContig1.setLayout(new BorderLayout().NORTH);
-			leftContig1.add(contigLabel);
 			//GroupLayout lableLayout = new GroupLayout(leftContig1);
-			leftContig1.addMouseListener(new MouseAdapter() {
-				
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					
-					JPanel jp = (JPanel)e.getSource();
-					int subcomponents = jp.getComponentCount();
-					JLabel child = null;
-					for(int i = 0;i<subcomponents;i++) {
-						Component c = jp.getComponent(i);
-						if(c.getName().equals("contigLabel")) {
-							System.out.println("Found contig label!");
-							child = (JLabel)c;
-						}
-					}
-					if(child!=null) {
-						JOptionPane.showMessageDialog(jp.getTopLevelAncestor(), "Click auf "+child.getClass().getCanonicalName()+": "+child.getText());
-					}
-				}
-			});
-			//leftContig1.setText("Contig 1");
-			//leftContig1.setContentAreaFilled(false);
-			//setGroupLayoutForContigPanel(leftContig1,contigLabel);
-//			leftContig1.setBorder(border);
+			contigLabel1 = new JLabel();
+			contigLabel1.setName("contigLabel");
+			leftContig1.add(contigLabel1);
+			leftContig1.addMouseListener(new ContigMouseListener());
+			
+			contigLabel2 = new JLabel();
+			contigLabel2.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
+			leftContig2.add(contigLabel2);
+			leftContig2.addMouseListener(new ContigMouseListener());
+
+			contigLabel3 = new JLabel();
+			contigLabel3.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
+			leftContig3.add(contigLabel3);
+			leftContig3.addMouseListener(new ContigMouseListener());
+
+			contigLabel4 = new JLabel();
+			contigLabel4.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
+			leftContig4.add(contigLabel4);
+			leftContig4.addMouseListener(new ContigMouseListener());
+
+			contigLabel5 = new JLabel();
+			contigLabel5.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
+			leftContig5.add(contigLabel5);
+			leftContig5.addMouseListener(new ContigMouseListener());
+
+			centralContigLabel = new JLabel();
+			centralContigLabel.setName("contigLabel");
+			centralContig.add(centralContigLabel);
+			centralContig.addMouseListener(new ContigMouseListener());
+			
+			rightcontigLabel1 = new JLabel();
+			rightcontigLabel1.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
+			rightContig1.add(rightcontigLabel1);
+			rightContig1.addMouseListener(new ContigMouseListener());
+			
+			rightcontigLabel2 = new JLabel();
+			rightcontigLabel2.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
+			rightContig2.add(rightcontigLabel2);
+			rightContig2.addMouseListener(new ContigMouseListener());
+			
+			rightcontigLabel3 = new JLabel();
+			rightcontigLabel3.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
+			rightContig3.add(rightcontigLabel3);
+			rightContig3.addMouseListener(new ContigMouseListener());
+			
+			rightcontigLabel4 = new JLabel();
+			rightcontigLabel4.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
+			rightContig4.add(rightcontigLabel4);
+			rightContig4.addMouseListener(new ContigMouseListener());
+			
+			rightcontigLabel5 = new JLabel();
+			rightcontigLabel5.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
+			rightContig5.add(rightcontigLabel5);
+			rightContig5.addMouseListener(new ContigMouseListener());
+
 			leftContig1.setBackground(Color.WHITE);
 			leftContig1.setPreferredSize(new Dimension(100,50));
 			leftContig1.setMaximumSize(new Dimension(100,50));
 			leftContig1.setMinimumSize(new Dimension(100,50));
 			
-			leftContig2.setText("Contig 2");
-			leftContig2.setContentAreaFilled(false);
-			leftContig2.setBorder(repeatBorder);
-			leftContig3.setText("Contig 3");
-			leftContig3.setBorder(border);
-			leftContig3.setContentAreaFilled(false);
-			leftContig4.setText("Contig 4");
-			leftContig4.setBorder(border);
-			leftContig4.setContentAreaFilled(false);
-			leftContig5.setText("Contig 5");
-			leftContig5.setBorder(reverseBorder);
-			leftContig5.setContentAreaFilled(false);
+			leftContig2.setBackground(Color.WHITE);
+			leftContig2.setPreferredSize(new Dimension(100,50));
+			leftContig2.setMaximumSize(new Dimension(100,50));
+			leftContig2.setMinimumSize(new Dimension(100,50));
+
+			leftContig3.setBackground(Color.WHITE);
+			leftContig3.setPreferredSize(new Dimension(100,50));
+			leftContig3.setMaximumSize(new Dimension(100,50));
+			leftContig3.setMinimumSize(new Dimension(100,50));
+
+			leftContig4.setBackground(Color.WHITE);
+			leftContig4.setPreferredSize(new Dimension(100,50));
+			leftContig4.setMaximumSize(new Dimension(100,50));
+			leftContig4.setMinimumSize(new Dimension(100,50));
+
+			leftContig5.setBackground(Color.WHITE);
+			leftContig5.setPreferredSize(new Dimension(100,50));
+			leftContig5.setMaximumSize(new Dimension(100,50));
+			leftContig5.setMinimumSize(new Dimension(100,50));
+
+			centralContig.setBackground(Color.WHITE);
+			centralContig.setPreferredSize(new Dimension(100,50));
+			centralContig.setMaximumSize(new Dimension(100,50));
+			centralContig.setMinimumSize(new Dimension(100,50));
 			
-			//centralContig.setText("aktuelles Contig");
-			//centralContig.setBorder(reverseRepeatBorder);
-			centralContig.setContentAreaFilled(false);
+			rightContig1.setBackground(Color.WHITE);
+			rightContig1.setPreferredSize(new Dimension(100,50));
+			rightContig1.setMaximumSize(new Dimension(100,50));
+			rightContig1.setMinimumSize(new Dimension(100,50));
+
+			rightContig2.setBackground(Color.WHITE);
+			rightContig2.setPreferredSize(new Dimension(100,50));
+			rightContig2.setMaximumSize(new Dimension(100,50));
+			rightContig2.setMinimumSize(new Dimension(100,50));
+
+			rightContig3.setBackground(Color.WHITE);
+			rightContig3.setPreferredSize(new Dimension(100,50));
+			rightContig3.setMaximumSize(new Dimension(100,50));
+			rightContig3.setMinimumSize(new Dimension(100,50));
 			
-			rightContig1.setText("Contig 1");
-			rightContig1.setContentAreaFilled(false);
-			rightContig1.setBorder(reverseBorder);
-			rightContig2.setText("Contig 2");
-			rightContig2.setContentAreaFilled(false);
-			rightContig2.setBorder(border);
-			rightContig3.setText("Contig 3");
-			rightContig3.setContentAreaFilled(false);
-			rightContig3.setBorder(border);
-			rightContig4.setText("Contig 4");
-			rightContig4.setContentAreaFilled(false);
-			rightContig4.setBorder(repeatBorder);
-			rightContig5.setText("Contig 5");
-			rightContig5.setContentAreaFilled(false);
-			rightContig5.setBorder(border);
+			rightContig4.setBackground(Color.WHITE);
+			rightContig4.setPreferredSize(new Dimension(100,50));
+			rightContig4.setMaximumSize(new Dimension(100,50));
+			rightContig4.setMinimumSize(new Dimension(100,50));
+			
+			rightContig5.setBackground(Color.WHITE);
+			rightContig5.setPreferredSize(new Dimension(100,50));
+			rightContig5.setMaximumSize(new Dimension(100,50));
+			rightContig5.setMinimumSize(new Dimension(100,50));
+			
+
 			/*
 			 * automatic gaps that correspond to preferred distances between
 			 * neighboring components (or between a component and container border)
@@ -207,7 +264,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 							.addComponent(leftContig5))
 					.addComponent(centralContig)
 					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-							.addComponent(rightContig1).addComponent(	rightContig2)
+							.addComponent(rightContig1).addComponent(rightContig2)
 							.addComponent(rightContig3).addComponent(rightContig4)
 							.addComponent(rightContig5))
 					);
@@ -239,8 +296,6 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		add(chooseContigPanel , BorderLayout.CENTER);
 		/*
 		 * Dieses Panel enthaelt alle Contigs dieses Genoms als Liste
-		 * Spaeter sollte eine Eintrag waehlbar sein.
-		 * TODO Dieses Contig sollte dann in der Mitte des oberen Panels auftauchen 
 		 */
 		listContainer = new JPanel();//new GridLayout(1,1)
 		
@@ -287,6 +342,13 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		pack();
 	}
 
+	/*
+	 * Dieses Layout für die Panel ist im Moment überflüssig;
+	 * den umgebrochenen Text die die contigs tragen wird durch
+	 * "<html><font size = -2><u>"+contigName+"</u><br>length: "+size+" bp </html>"
+	 * erzeugt.
+	 * TODO sollte ich diese Methode behalten?
+	 */
 	private void setGroupLayoutForContigPanel(JPanel contigPanel, JLabel contigLabel) {
 		GroupLayout layout = new GroupLayout(contigPanel);
 		contigPanel.setLayout(layout);
@@ -323,6 +385,53 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		}
 	}
 	
+	public class ContigMouseListener implements MouseListener{
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			
+			JPanel jp = (JPanel)e.getSource();
+			int subcomponents = jp.getComponentCount();
+			JLabel child = null;
+			for(int i = 0;i<subcomponents;i++) {
+				Component c = jp.getComponent(i);
+				if(c.getName().equals("contigLabel")) {
+					System.out.println("Found contig label!");
+					child = (JLabel)c;
+				}
+			}
+			if(child!=null) {
+				JOptionPane.showMessageDialog(jp.getTopLevelAncestor(), "Click auf "+child.getClass().getCanonicalName()+": "+child.getText());
+			}
+		}
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		
+		
+	}
+	
 	public class ExitItemListener implements ActionListener {
 		
 		@Override
@@ -341,17 +450,49 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			String contigName = event.getData();
 			long size = event.getSize();
 			boolean isRepeat = event.isRepetitiv();
-			centralContig.setText(contigName+" \n\r"+"Laenge: "+size+" bp");
-			contigLabel.setText("<html><font size = -2><u>"+contigName+"</u><br>length: "+size+" bp </html>");
+			centralContigLabel.setText("<html><font size = -2><u>"+contigName+"</u><br>length: "+size+" bp </html>");
+			contigLabel1.setText("<html><font size = -2><u>"+contigName+"</u><br>length: "+size+" bp </html>");
+			/*
+			 * Hier for schleife
+			 * und für jedes Objekt das ich aus dem Array bekomme sollten diese Abfragen gemacht werden
+			 * damit jedes Contig selbst richtig dargestellt werden kann.
+			 */
 			if (isRepeat == true){				
 				centralContig.setBorder(new ContigBorder(true, false));
+				centralContig.setOpaque(false);
 				leftContig1.setBorder(new ContigBorder(true,false));
 				leftContig1.setOpaque(false);
+				leftContig2.setBorder(new ContigBorder(true,false));
+				leftContig2.setOpaque(false);
+				leftContig3.setBorder(new ContigBorder(true,false));
+				leftContig3.setOpaque(false);
+				leftContig4.setBorder(new ContigBorder(true,false));
+				leftContig4.setOpaque(false);
+				leftContig5.setBorder(new ContigBorder(true,false));
+				leftContig5.setOpaque(false);
 			}else{
 				centralContig.setBorder(new ContigBorder(false, false));
+				centralContig.setOpaque(false);
 				leftContig1.setBorder(new ContigBorder(false,false));
 				leftContig1.setOpaque(false);
+				leftContig2.setBorder(new ContigBorder(false,false));
+				leftContig2.setOpaque(false);
+				leftContig3.setBorder(new ContigBorder(false,false));
+				leftContig3.setOpaque(false);
+				leftContig4.setBorder(new ContigBorder(false,false));
+				leftContig4.setOpaque(false);
+				leftContig5.setBorder(new ContigBorder(false,false));
+				leftContig5.setOpaque(false);
 			}
+		}
+		if(event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBORS)){
+			/*
+			 * hier aus der Treemap die 5 wahrscheinlichsten contig namen sammeln
+			 * und die contigs entsprechend anzeigen.
+			 */
+		}
+		if(event.getEvent_type().equals(EventType.EVENT_SEND_RIGHT_NEIGHBORS)){
+			
 		}
 		
 	}
