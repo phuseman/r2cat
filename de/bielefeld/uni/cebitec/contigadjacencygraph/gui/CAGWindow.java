@@ -140,57 +140,46 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			//leftContig1.setLayout(new BorderLayout().NORTH);
 			//GroupLayout lableLayout = new GroupLayout(leftContig1);
 			contigLabel1 = new JLabel();
-			contigLabel1.setName("contigLabel");
 			leftContig1.add(contigLabel1);
 			leftContig1.addMouseListener(new ContigMouseListener());
 			
 			contigLabel2 = new JLabel();
-			contigLabel2.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
 			leftContig2.add(contigLabel2);
 			leftContig2.addMouseListener(new ContigMouseListener());
 
 			contigLabel3 = new JLabel();
-			contigLabel3.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
 			leftContig3.add(contigLabel3);
 			leftContig3.addMouseListener(new ContigMouseListener());
 
 			contigLabel4 = new JLabel();
-			contigLabel4.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
 			leftContig4.add(contigLabel4);
 			leftContig4.addMouseListener(new ContigMouseListener());
 
 			contigLabel5 = new JLabel();
-			contigLabel5.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
 			leftContig5.add(contigLabel5);
 			leftContig5.addMouseListener(new ContigMouseListener());
 
 			centralContigLabel = new JLabel();
-			centralContigLabel.setName("contigLabel");
 			centralContig.add(centralContigLabel);
 			centralContig.addMouseListener(new ContigMouseListener());
 			
 			rightcontigLabel1 = new JLabel();
-			rightcontigLabel1.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
 			rightContig1.add(rightcontigLabel1);
 			rightContig1.addMouseListener(new ContigMouseListener());
 			
 			rightcontigLabel2 = new JLabel();
-			rightcontigLabel2.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
 			rightContig2.add(rightcontigLabel2);
 			rightContig2.addMouseListener(new ContigMouseListener());
 			
 			rightcontigLabel3 = new JLabel();
-			rightcontigLabel3.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
 			rightContig3.add(rightcontigLabel3);
 			rightContig3.addMouseListener(new ContigMouseListener());
 			
 			rightcontigLabel4 = new JLabel();
-			rightcontigLabel4.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
 			rightContig4.add(rightcontigLabel4);
 			rightContig4.addMouseListener(new ContigMouseListener());
 			
 			rightcontigLabel5 = new JLabel();
-			rightcontigLabel5.setText("<html><font size = -2><u>contig 2</u><br>length 500 bp </html>");
 			rightContig5.add(rightcontigLabel5);
 			rightContig5.addMouseListener(new ContigMouseListener());
 
@@ -299,7 +288,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		 */
 		listContainer = new JPanel();//new GridLayout(1,1)
 		
-		/*TODO
+		/*
 		 * Diese Liste sollte alle Contigs beinhalten; muessen keinen Strings sein
 		 * JList nimmt einen beleibigen Objekttyp entgegen; werden aber in der Liste als strings repraesentiert
 		 * Mittels einer 
@@ -367,11 +356,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 								));
 	}
 	
-//	@Override
-//	public void actionPerformed(ActionEvent e) {
-//		// TODO Auto-generated method stub
-//		
-//	}
+
 	public class ContigChangedListener implements ListSelectionListener{
 
 		@Override
@@ -441,7 +426,7 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 		
 	}
 	/*
-	 * TODO fange weitere Events hab
+	 * TODO fange weitere Events ab
 	 */
 	@Override
 	public void event_fired(CagEvent event) {
@@ -460,39 +445,58 @@ public class CAGWindow extends JFrame implements CagEventListener{//  ActionList
 			if (isRepeat == true){				
 				centralContig.setBorder(new ContigBorder(true, false));
 				centralContig.setOpaque(false);
-				leftContig1.setBorder(new ContigBorder(true,false));
-				leftContig1.setOpaque(false);
-				leftContig2.setBorder(new ContigBorder(true,false));
-				leftContig2.setOpaque(false);
-				leftContig3.setBorder(new ContigBorder(true,false));
-				leftContig3.setOpaque(false);
-				leftContig4.setBorder(new ContigBorder(true,false));
-				leftContig4.setOpaque(false);
-				leftContig5.setBorder(new ContigBorder(true,false));
-				leftContig5.setOpaque(false);
 			}else{
 				centralContig.setBorder(new ContigBorder(false, false));
 				centralContig.setOpaque(false);
-				leftContig1.setBorder(new ContigBorder(false,false));
-				leftContig1.setOpaque(false);
-				leftContig2.setBorder(new ContigBorder(false,false));
-				leftContig2.setOpaque(false);
-				leftContig3.setBorder(new ContigBorder(false,false));
-				leftContig3.setOpaque(false);
-				leftContig4.setBorder(new ContigBorder(false,false));
-				leftContig4.setOpaque(false);
-				leftContig5.setBorder(new ContigBorder(false,false));
-				leftContig5.setOpaque(false);
 			}
 		}
-		if(event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBORS)){
-			/*
-			 * hier aus der Treemap die 5 wahrscheinlichsten contig namen sammeln
-			 * und die contigs entsprechend anzeigen.
-			 */
+		if(event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBOURS)){
+			Contig[] leftNeighbours = event.getContigData();
+			Contig contig1 = leftNeighbours[0];
+			contigLabel1.setText("<html><font size = -2><u>"+contig1.getName()+"</u>" +
+						"<br>length: "+contig1.getLenght()+" bp </html>");
+			leftContig1.setBorder(new ContigBorder(contig1.isRepetitiv(), contig1.isReverse()));
+			Contig contig2 = leftNeighbours[1];
+			contigLabel2.setText("<html><font size = -2><u>"+contig2.getName()+"</u>" +
+					"<br>length: "+contig2.getLenght()+" bp </html>");
+			leftContig2.setBorder(new ContigBorder(contig2.isRepetitiv(), contig2.isReverse()));
+			Contig contig3 = leftNeighbours[2];
+			contigLabel3.setText("<html><font size = -2><u>"+contig3.getName()+"</u>" +
+					"<br>length: "+contig3.getLenght()+" bp </html>");
+			leftContig3.setBorder(new ContigBorder(contig3.isRepetitiv(), contig3.isReverse()));
+			Contig contig4 = leftNeighbours[3];
+			contigLabel4.setText("<html><font size = -2><u>"+contig4.getName()+"</u>" +
+					"<br>length: "+contig4.getLenght()+" bp </html>");
+			leftContig4.setBorder(new ContigBorder(contig4.isRepetitiv(), contig4.isReverse()));
+			Contig contig5 = leftNeighbours[4];
+			contigLabel5.setText("<html><font size = -2><u>"+contig5.getName()+"</u>" +
+					"<br>length: "+contig5.getLenght()+" bp </html>");
+			leftContig5.setBorder(new ContigBorder(contig5.isRepetitiv(), contig5.isReverse()));
 		}
-		if(event.getEvent_type().equals(EventType.EVENT_SEND_RIGHT_NEIGHBORS)){
+		
+		if(event.getEvent_type().equals(EventType.EVENT_SEND_RIGHT_NEIGHBOURS)){
+			Contig[] rightNeighbours = event.getContigData();			
 			
+			Contig contig1 = rightNeighbours[0];
+			rightcontigLabel1.setText("<html><font size = -2><u>"+contig1.getName()+"</u>" +
+						"<br>length: "+contig1.getLenght()+" bp </html>");
+			rightContig1.setBorder(new ContigBorder(contig1.isRepetitiv(), contig1.isReverse()));
+			Contig contig2 = rightNeighbours[1];
+			rightcontigLabel2.setText("<html><font size = -2><u>"+contig2.getName()+"</u>" +
+					"<br>length: "+contig2.getLenght()+" bp </html>");
+			rightContig2.setBorder(new ContigBorder(contig2.isRepetitiv(), contig2.isReverse()));
+			Contig contig3 = rightNeighbours[2];
+			rightcontigLabel3.setText("<html><font size = -2><u>"+contig3.getName()+"</u>" +
+					"<br>length: "+contig3.getLenght()+" bp </html>");
+			rightContig3.setBorder(new ContigBorder(contig3.isRepetitiv(), contig3.isReverse()));
+			Contig contig4 = rightNeighbours[3];
+			rightcontigLabel4.setText("<html><font size = -2><u>"+contig4.getName()+"</u>" +
+					"<br>length: "+contig4.getLenght()+" bp </html>");
+			rightContig4.setBorder(new ContigBorder(contig4.isRepetitiv(), contig4.isReverse()));
+			Contig contig5 = rightNeighbours[4];
+			rightcontigLabel5.setText("<html><font size = -2><u>"+contig5.getName()+"</u>" +
+					"<br>length: "+contig5.getLenght()+" bp </html>");
+			rightContig5.setBorder(new ContigBorder(contig5.isRepetitiv(), contig5.isReverse()));
 		}
 		
 	}
