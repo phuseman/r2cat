@@ -242,30 +242,29 @@ public class CagCreator {
 		long length;
 		boolean isReverse;
 		boolean isRepetitiv;
+		boolean test = false;
 		/*
 		 * TODO feststellen, ob contig reverse oder nicht!
 		 */
-		System.out.println(contigIndex);
 		for (int k = 0; k < 5; k++) {
 
 			Entry<Double, AdjacencyEdge> currentNeighbour = allNeighbours
 					.lastEntry();
-			System.out.println("Wert "+currentNeighbour.getValue());
-			key = currentNeighbour.getKey();
-			System.out.println("Schluessel "+key);
-
 			AdjacencyEdge neighbourEdge = currentNeighbour.getValue();
-			int i = neighbourEdge.geti();
-			System.out.println("i "+ i);
-			int j = neighbourEdge.getj();
-			System.out.println("j "+ j);
+			System.out.println("nachbarkante aus treemap "+neighbourEdge);
+			key = currentNeighbour.getKey();
 
-		
+			int i = neighbourEdge.geti();
+			System.out.println(i);
+			int j = neighbourEdge.getj();
+			System.out.println(j);
+		if(i == contigIndex || j == contigIndex){
 			if (i == contigIndex) {
 				neighbour = contigs.get(j);
 				name = neighbour.getId();
 				length = neighbour.getSize();
 				isRepetitiv = neighbour.isRepetitive();
+				
 			} else {
 				neighbour = contigs.get(i);
 				name = neighbour.getId();
@@ -281,7 +280,9 @@ public class CagCreator {
 						isRepetitiv, false, key);
 			}
 
-			allNeighbours.remove(key);
+			
+		}
+		allNeighbours.remove(key);
 		}
 
 		if (isLeftNeighbour == true) {
@@ -289,6 +290,7 @@ public class CagCreator {
 		} else {
 			return fiveMostLikleyRightNeighbours;
 		}
+		
 	}
 
 	/**
