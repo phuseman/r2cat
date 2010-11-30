@@ -206,8 +206,9 @@ public class CagCreator {
 	private TreeMap<Double, AdjacencyEdge> mostLikelyLeftNeighbours() {
 
 		probabilityOfLeftNeighbours = new TreeMap<Double, AdjacencyEdge>();
-
+		
 		for (AdjacencyEdge edge : leftNeighbours.get(contigIndex)) {
+			
 			if (edge.isRightConnectori()) {
 				probabilityOfLeftNeighbours.put(edge.getRelativeSupporti(),
 						edge);
@@ -240,13 +241,22 @@ public class CagCreator {
 		DNASequence neighbour;
 		String name;
 		long length;
-		boolean isReverse;
-		boolean isRepetitiv;
-		boolean test = false;
+		boolean isRepetitiv = false;
+		boolean isReverse = false;
+//		boolean test = false;
 		/*
 		 * TODO feststellen, ob contig reverse oder nicht!
+		 * 
+		 * Dabei aufpassen mit der Orientierung vom aktuellem Contig! Es kann fuer
+		 * alle nachbarn nur eine orientierung geben! -> varibel erstellen, die angibt welche 
+		 * Orientierung das Contig hat (Default sollte |ZZ> sein)
+		 * Die kann dann auch beruecksichtigt werden bei der Berechnung welche Richtung 
+		 * der Nachbar bekommt.
 		 */
+		
 		for (int k = 0; k < 5; k++) {
+			boolean isReversei = false;
+			boolean isReversej = false;
 
 			Entry<Double, AdjacencyEdge> currentNeighbour = allNeighbours
 					.lastEntry();
@@ -255,32 +265,48 @@ public class CagCreator {
 			key = currentNeighbour.getKey();
 
 			int i = neighbourEdge.geti();
-			System.out.println(i);
+			System.out.println(" I leftC i: "+neighbourEdge.isLeftConnectori() + " rightC i: " + neighbourEdge.isRightConnectori());
 			int j = neighbourEdge.getj();
-			System.out.println(j);
-		if(i == contigIndex || j == contigIndex){
+			System.out.println("J leftC j: "+neighbourEdge.isLeftConnectorj() + " rightC j: " + neighbourEdge.isRightConnectorj());
+			
+			if (neighbourEdge.isLeftConnectori() == false && neighbourEdge.isRightConnectori() == false){
+				isReversej = true;
+			}
+			if (neighbourEdge.isLeftConnectori()== true){
+				if(neighbourEdge.isRightConnectori() == true){
+					isReversei = true;
+				}else{
+					isReversei = true;
+					isReversej = true;
+				}
+			}
+
 			if (i == contigIndex) {
 				neighbour = contigs.get(j);
 				name = neighbour.getId();
 				length = neighbour.getSize();
 				isRepetitiv = neighbour.isRepetitive();
+				if(isReversej == true){
+					isReverse = true;
+				}
 				
 			} else {
 				neighbour = contigs.get(i);
 				name = neighbour.getId();
 				length = neighbour.getSize();
 				isRepetitiv = neighbour.isRepetitive();
+				if(isReversei == true){
+					isReverse = true;
+				}
 
 			}
 			if (isLeftNeighbour == true) {
 				fiveMostLikleyLeftNeighbours[k] = new Contig(name, length,
-						isRepetitiv, false, key);
+						isRepetitiv, isReverse, key);
 			} else {
 				fiveMostLikleyRightNeighbours[k] = new Contig(name, length,
-						isRepetitiv, false, key);
-			}
+						isRepetitiv, isReverse, key);
 
-			
 		}
 		allNeighbours.remove(key);
 		}
@@ -318,7 +344,6 @@ public class CagCreator {
 			
 			for(DNASequence c : contigs){
 				contigIndex = contigs.indexOf(c);
-				
 				if(c.getId().equals(contigId)){
 					
 					contigSize = c.getSize();
@@ -333,7 +358,6 @@ public class CagCreator {
 	 */
 	public void sendCurrentContig() {
 
-		idOfCurrentContig(currentContig);
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
 				currentContig, contigSize, contigIsRepetitiv);
 		/*
@@ -438,6 +462,7 @@ public class CagCreator {
 	 */
 	public void changeContigs(String currentContig) {
 		this.currentContig = currentContig;
+		idOfCurrentContig(currentContig);
 		mostLikelyLeftNeighbours();
 		mostLikelyRightNeighbours();
 		System.out.println("Changed contig. Current Contig is: "

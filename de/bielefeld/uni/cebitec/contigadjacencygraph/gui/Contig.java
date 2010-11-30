@@ -45,8 +45,12 @@ public class Contig implements Comparable{
 	 * TODO Methode die Feststellt, ob das geg. Contig reverse ist oder nicht
 	 * und die dies auch bei den Nachbar feststellt.
 	 */
-	public void detectIfContigReverse(){
+	public boolean detectIfContigReverse(){
 		
+		isReverse = false; 
+		
+		
+		return isReverse;
 	}
 	
 	
