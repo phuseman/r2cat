@@ -73,6 +73,13 @@ public class DNASequence implements Comparable {
 		this.id = id;
 		this.size = size;
 	}
+	
+	public DNASequence(String id, long size, boolean isRepetitiv, boolean isReverse) {
+		this.id = id;
+		this.size = size;
+		this.repetitive = isRepetitiv;
+		this.reverseComplement = isReverse;
+	}
 
 	/**
 	 * The commonly used constructor providing several meta information:
