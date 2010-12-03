@@ -3,7 +3,9 @@ package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -16,44 +18,35 @@ import de.bielefeld.uni.cebitec.common.Timer;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.ContigAdjacencyGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
+import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.NeatoOutputType;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
 
 /*
  * ist mein model 
  * hier werden die Daten- Zustands- und Anwendungslogik implementiert
- * 
- * TODO heute
- * Feststellen wo der Fehler bei der Berechnung der Nachbarn liegt!
  */
 public class CagCreator {
 
-	private static LayoutGraph layoutGraph;
-	private static ContigAdjacencyGraph cag;
-	private static LayoutGraph completeGraph;
-
+	private LayoutGraph graph;
 	private Vector<DNASequence> contigs;
 	private String[] listData;
 	private ArrayList<CagEventListener> listeners;
-	/*
-	 * TODO ist es moeglich und sinnvoll die hashMap gleich zu Treemap zu machen
-	 * und die treemap nicht mehr zu berechenen?
-	 */
-	private HashMap<Integer, Vector<AdjacencyEdge>> leftNeighbours;
-	private HashMap<Integer, Vector<AdjacencyEdge>> rightNeighbours;
-	private TreeMap<Double, AdjacencyEdge> probabilityOfLeftNeighbours;
-	private TreeMap<Double, AdjacencyEdge> probabilityOfRightNeighbours;
+	private Vector<AdjacencyEdge>[] leftNeighbours;
+	private Vector<AdjacencyEdge>[] rightNeighbours;
 	private String currentContig;
-	private DNASequence contig;
 	private String contigId;
-	private long contigSize = 0;
-	private boolean contigIsRepetitiv = false;
-	private Contig[] fiveMostLikleyLeftNeighbours;
-	private Contig[] fiveMostLikleyRightNeighbours;
 	private int contigIndex;
+	private long contigSize = 0;
+	private DNASequence contig;
+	private boolean contigIsRepetitiv = false;
+	private boolean contigIsReverse = false;
+	private DNASequence[] fiveMostLikleyLeftNeighbours;
+	private DNASequence[] fiveMostLikleyRightNeighbours;
 
 	// private CAGWindow window;
-	public CagCreator() {
+	public CagCreator(LayoutGraph g) {
+		this.graph = g;
 		listeners = new ArrayList<CagEventListener>();
 		leftAndRightNeighbour();
 		createContigList();
@@ -86,6 +79,10 @@ public class CagCreator {
 				System.exit(1);
 			}
 
+			LayoutGraph layoutGraph;
+			ContigAdjacencyGraph cag;
+			LayoutGraph completeGraph;
+
 			Timer t = Timer.getInstance();
 			t.startTimer();
 			t.startTimer();
@@ -95,11 +92,13 @@ public class CagCreator {
 			t.restartTimer("matches");
 
 			layoutGraph = project.sortContigs();
+			layoutGraph.writeLayoutAsNeato(new File("test.dot"),
+					NeatoOutputType.ONENODE);
 
 			cag = project.getContigAdjacencyGraph();
 			completeGraph = cag.getCompleteGraph();
 
-			CagCreator model = new CagCreator();
+			CagCreator model = new CagCreator(completeGraph);
 			Controller controller = new Controller(model);
 
 			t.stopTimer("sorting");
@@ -113,15 +112,19 @@ public class CagCreator {
 
 	/*
 	 * Diese Hashmaps speichern die linken und rechten Nachbarn aller Contigs
-	 * TODO Zur Zeit kann eine Kante sowohl Rechter als auch linker Konnektor
-	 * sein soll das so bleiben?
 	 */
 	private void leftAndRightNeighbour() {
-		leftNeighbours = new LinkedHashMap<Integer, Vector<AdjacencyEdge>>();
-		rightNeighbours = new LinkedHashMap<Integer, Vector<AdjacencyEdge>>();
+
+		leftNeighbours = new Vector[graph.getNodes().size()];
+		rightNeighbours = new Vector[graph.getNodes().size()];
+
+		for (int i = 0; i < graph.getNodes().size(); i++) {
+			leftNeighbours[i] = new Vector<AdjacencyEdge>();
+			rightNeighbours[i] = new Vector<AdjacencyEdge>();
+		}
 
 		// fuer alle Kanten im layout Graphen
-		for (AdjacencyEdge e : completeGraph.getEdges()) {
+		for (AdjacencyEdge e : graph.getEdges()) {
 
 			// hole fuer die aktuelle Kante den Knoten i und j
 			int i = e.geti();
@@ -129,96 +132,26 @@ public class CagCreator {
 
 			// wenn diese Kante der linke konnektor von i ist
 			if (e.isLeftConnectori()) {
-				if (!leftNeighbours.containsKey(i)) {
-					leftNeighbours.put(i, new Vector<AdjacencyEdge>());
-				}
 				// dann ist sie die verbindung zum linken Knoten von i
-				leftNeighbours.get(i).add(e);
+				leftNeighbours[i].add(e);
 				// wenn nicht dann ist sie die verbindung zum rechten Knoten i
 			} else {
-				if (!rightNeighbours.containsKey(i)) {
-					rightNeighbours.put(i, new Vector<AdjacencyEdge>());
-				}
-				rightNeighbours.get(i).add(e);
+				rightNeighbours[i].add(e);
 			}
 
 			// wenn diese Kante der linke konnektor von j ist
 			if (e.isLeftConnectorj()) {
-				if (!leftNeighbours.containsKey(j)) {
-					leftNeighbours.put(j, new Vector<AdjacencyEdge>());
-				}
-				leftNeighbours.get(j).add(e);
+				leftNeighbours[j].add(e);
 			} else {
-				if (!rightNeighbours.containsKey(j)) {
-					rightNeighbours.put(j, new Vector<AdjacencyEdge>());
-				}
-				rightNeighbours.get(j).add(e);
+				rightNeighbours[j].add(e);
 			}
 
 		}
-		/*
-		 * for (Integer id : rightNeighbours.keySet()) {
-		 * System.out.println("Right neighbours for id : "+id); for
-		 * (AdjacencyEdge edge : rightNeighbours.get(id)) {
-		 * System.out.println(edge);
-		 * System.out.println(edge.getRelativeSupporti());
-		 * System.out.println(edge.getRelativeSupportj()); } }
-		 */
 
-	}
-
-	/*
-	 * Jede Kante wird durch zwei Knoten definiert (i,j) in right/leftNeigbours
-	 * ist in der Hashmap ist der Knoten i/j mit einem Vektor von Kanten
-	 * gespeichert. In dem Vektor sind Knoten (Vektoreinträge) mit den
-	 * entsprechenden Nachbarkanten gespeichert 0 (0,1) (0,13)(1,0)(11,0) 1
-	 * (1,3)(1,7)(9,1) usw. der entsprechende Knoten kann auf beiden Seiten sein
-	 * beide varianten sind gleichwertig (i,j)=(j,i) durch islefti/j kann die
-	 * Orientierung des Contigs ermittelt werden.
-	 */
-	/**
-	 * Get the support of all right neighbours from the current contig Save them
-	 * in a tree map, which automaticly sort the nodes by their support.
-	 * Attention! The most likely neightbours are at the end!
-	 */
-	private TreeMap<Double, AdjacencyEdge> mostLikelyRightNeighbours() {
-
-		probabilityOfRightNeighbours = new TreeMap<Double, AdjacencyEdge>();
-
-		for (AdjacencyEdge edge : rightNeighbours.get(contigIndex)) {
-			if (edge.isRightConnectori()) {
-				probabilityOfRightNeighbours.put(edge.getRelativeSupporti(),
-						edge);
-			} else {
-				probabilityOfRightNeighbours.put(edge.getRelativeSupportj(),
-						edge);
-			}
+		for (int x = 0; x < graph.getNodes().size(); x++) {
+			Collections.sort(leftNeighbours[x]);
+			Collections.sort(rightNeighbours[x]);
 		}
-		return probabilityOfRightNeighbours;
-		// ! Achtung kl element ist das erste höchste das letzte
-	}
-
-	/**
-	 * Get the support of all left neighbours from the current contig Save them
-	 * in a tree map, which automaticly sort the nodes by their support.
-	 * Attention! The most likely neightbours are at the end!
-	 */
-	private TreeMap<Double, AdjacencyEdge> mostLikelyLeftNeighbours() {
-
-		probabilityOfLeftNeighbours = new TreeMap<Double, AdjacencyEdge>();
-		
-		for (AdjacencyEdge edge : leftNeighbours.get(contigIndex)) {
-			
-			if (edge.isRightConnectori()) {
-				probabilityOfLeftNeighbours.put(edge.getRelativeSupporti(),
-						edge);
-			} else {
-				probabilityOfLeftNeighbours.put(edge.getRelativeSupportj(),
-						edge);
-			}
-		}
-		return probabilityOfLeftNeighbours;
-		// ! Achtung: kl element ist das erste, hoechste das letzte
 
 	}
 
@@ -227,95 +160,135 @@ public class CagCreator {
 	 * noch die Informationen zu dem Contig geholt werden, damit spaeter das
 	 * Contig auch richt dargestellet werden kann.
 	 */
-	public Contig[] calculateFiveMostLikleyNeighbours(
-			TreeMap<Double, AdjacencyEdge> allNeighbours,
-			boolean isLeftNeighbour) {
+	public DNASequence[] calculateFiveMostLikleyLeftNeighbours(int index) {
+		fiveMostLikleyLeftNeighbours = new DNASequence[5];
 
-		if (isLeftNeighbour == true) {
-			fiveMostLikleyLeftNeighbours = new Contig[5];
-		} else {
-			fiveMostLikleyRightNeighbours = new Contig[5];
-		}
 
-		double key;
+		int t = 0;
+		double support = 0;
+		boolean isReversei = false;
+		boolean isReversej = false;
 		DNASequence neighbour;
 		String name;
 		long length;
 		boolean isRepetitiv = false;
 		boolean isReverse = false;
-//		boolean test = false;
-		/*
-		 * TODO feststellen, ob contig reverse oder nicht!
-		 * 
-		 * Dabei aufpassen mit der Orientierung vom aktuellem Contig! Es kann fuer
-		 * alle nachbarn nur eine orientierung geben! -> varibel erstellen, die angibt welche 
-		 * Orientierung das Contig hat (Default sollte |ZZ> sein)
-		 * Die kann dann auch beruecksichtigt werden bei der Berechnung welche Richtung 
-		 * der Nachbar bekommt.
-		 */
-		
-		for (int k = 0; k < 5; k++) {
-			boolean isReversei = false;
-			boolean isReversej = false;
 
-			Entry<Double, AdjacencyEdge> currentNeighbour = allNeighbours
-					.lastEntry();
-			AdjacencyEdge neighbourEdge = currentNeighbour.getValue();
-			System.out.println("nachbarkante aus treemap "+neighbourEdge);
-			key = currentNeighbour.getKey();
+		for (Iterator<AdjacencyEdge> iterator = leftNeighbours[index]
+				.iterator(); iterator.hasNext();) {
 
-			int i = neighbourEdge.geti();
-			System.out.println(" I leftC i: "+neighbourEdge.isLeftConnectori() + " rightC i: " + neighbourEdge.isRightConnectori());
-			int j = neighbourEdge.getj();
-			System.out.println("J leftC j: "+neighbourEdge.isLeftConnectorj() + " rightC j: " + neighbourEdge.isRightConnectorj());
-			
-			if (neighbourEdge.isLeftConnectori() == false && neighbourEdge.isRightConnectori() == false){
+			AdjacencyEdge edge = iterator.next();
+
+			int nodeI = edge.geti();
+			int nodeJ = edge.getj();
+
+			if (edge.isLeftConnectori() == false
+					&& edge.isRightConnectori() == false) {
 				isReversej = true;
 			}
-			if (neighbourEdge.isLeftConnectori()== true){
-				if(neighbourEdge.isRightConnectori() == true){
+			if (edge.isLeftConnectori() == true) {
+				if (edge.isRightConnectori() == true) {
 					isReversei = true;
-				}else{
+				} else {
 					isReversei = true;
 					isReversej = true;
 				}
 			}
-
-			if (i == contigIndex) {
-				neighbour = contigs.get(j);
+			if (nodeI == contigIndex) {
+				support = edge.getRelativeSupportj();
+				System.out.println("Support of "+nodeJ+" is: "+support*100);
+				neighbour = contigs.get(nodeJ);
 				name = neighbour.getId();
 				length = neighbour.getSize();
 				isRepetitiv = neighbour.isRepetitive();
-				if(isReversej == true){
+				if (isReversej == true) {
 					isReverse = true;
 				}
-				
 			} else {
-				neighbour = contigs.get(i);
+				support = edge.getRelativeSupporti();
+				System.out.println("Support of "+nodeI+" is: "+support*100);
+				neighbour = contigs.get(nodeI);
 				name = neighbour.getId();
 				length = neighbour.getSize();
 				isRepetitiv = neighbour.isRepetitive();
-				if(isReversei == true){
+				if (isReversei == true) {
 					isReverse = true;
 				}
-
 			}
-			if (isLeftNeighbour == true) {
-				fiveMostLikleyLeftNeighbours[k] = new Contig(name, length,
-						isRepetitiv, isReverse, key);
+			// TODO und der support muss bestimmte groesse haben  support*1000 >2
+			if (t < 5 && (support*100) >1 ) {
+				fiveMostLikleyLeftNeighbours[t] = new DNASequence(name, length,
+						isRepetitiv, isReverse);
+			}
+			t++;
+		}
+
+		return fiveMostLikleyLeftNeighbours;
+
+	}
+	public DNASequence[] calculateFiveMostLikleyRightNeighbours(int index) {
+		fiveMostLikleyRightNeighbours = new DNASequence[5];
+		
+		int t = 0;
+		double support = 0;
+		boolean isReversei = false;
+		boolean isReversej = false;
+		DNASequence neighbour;
+		String name;
+		long length;
+		boolean isRepetitiv = false;
+		boolean isReverse = false;
+		
+		for (Iterator<AdjacencyEdge> iterator = rightNeighbours[index]
+		                                                       .iterator(); iterator.hasNext();) {
+			
+			AdjacencyEdge edge = iterator.next();
+			
+			int nodeI = edge.geti();
+			int nodeJ = edge.getj();
+			
+			if (edge.isLeftConnectori() == false
+					&& edge.isRightConnectori() == false) {
+				isReversej = true;
+			}
+			if (edge.isLeftConnectori() == true) {
+				if (edge.isRightConnectori() == true) {
+					isReversei = true;
+				} else {
+					isReversei = true;
+					isReversej = true;
+				}
+			}
+			if (nodeI == contigIndex) {
+				System.out.println("Support of "+nodeJ+" is: "+support*100);
+				support = edge.getRelativeSupportj();
+				neighbour = contigs.get(nodeJ);
+				name = neighbour.getId();
+				length = neighbour.getSize();
+				isRepetitiv = neighbour.isRepetitive();
+				if (isReversej == true) {
+					isReverse = true;
+				}
 			} else {
-				fiveMostLikleyRightNeighbours[k] = new Contig(name, length,
-						isRepetitiv, isReverse, key);
-
+				support = edge.getRelativeSupporti();
+				System.out.println("Support of "+nodeI+" is: "+support*100);
+				neighbour = contigs.get(nodeI);
+				name = neighbour.getId();
+				length = neighbour.getSize();
+				isRepetitiv = neighbour.isRepetitive();
+				if (isReversei == true) {
+					isReverse = true;
+				}
+			}
+			// TODO und der support muss bestimmte groesse haben
+			if (t < 5 && (support*100) >1 ) {
+				fiveMostLikleyRightNeighbours[t] = new DNASequence(name, length,
+						isRepetitiv, isReverse);				
+			}
+			t++;
 		}
-		allNeighbours.remove(key);
-		}
-
-		if (isLeftNeighbour == true) {
-			return fiveMostLikleyLeftNeighbours;
-		} else {
-			return fiveMostLikleyRightNeighbours;
-		}
+		
+		return fiveMostLikleyRightNeighbours;
 		
 	}
 
@@ -324,7 +297,7 @@ public class CagCreator {
 	 */
 	private String[] createContigList() {
 
-		contigs = completeGraph.getNodes();
+		contigs = graph.getNodes();
 		listData = new String[contigs.size()];
 
 		for (int i = 0; i < contigs.size(); i++) {
@@ -340,17 +313,17 @@ public class CagCreator {
 	 */
 	private void idOfCurrentContig(String name) {
 
-	contigId =currentContig.replace("Contig ", "");
-			
-			for(DNASequence c : contigs){
-				contigIndex = contigs.indexOf(c);
-				if(c.getId().equals(contigId)){
-					
-					contigSize = c.getSize();
-					contigIsRepetitiv = c.isRepetitive();
-					break;
-				}
+		contigId = currentContig.replace("Contig ", "");
+
+		for (DNASequence c : contigs) {
+			contigIndex = contigs.indexOf(c);
+			if (c.getId().equals(contigId)) {
+
+				contigSize = c.getSize();
+				contigIsRepetitiv = c.isRepetitive();
+				break;
 			}
+		}
 	}
 
 	/*
@@ -359,7 +332,7 @@ public class CagCreator {
 	public void sendCurrentContig() {
 
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
-				currentContig, contigSize, contigIsRepetitiv);
+				currentContig, contigSize, contigIsRepetitiv, contigIsReverse);
 		/*
 		 * CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG, new
 		 * Contig(contigId)); solls spaeter mal werden dazu in contig klasse
@@ -375,9 +348,9 @@ public class CagCreator {
 	 */
 	public void sendLeftNeighbours() {
 		System.out.println("linke nachbarn ");
+
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_LEFT_NEIGHBOURS,
-				calculateFiveMostLikleyNeighbours(probabilityOfLeftNeighbours,
-						true));
+				calculateFiveMostLikleyLeftNeighbours(contigIndex));
 		fireEvent(event);
 	}
 
@@ -388,9 +361,9 @@ public class CagCreator {
 	 */
 	public void sendRightNeighbours() {
 		System.out.println("rechte nachbarn ");
+
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_RIGHT_NEIGHBOURS,
-				calculateFiveMostLikleyNeighbours(probabilityOfRightNeighbours,
-						false));
+				calculateFiveMostLikleyRightNeighbours(contigIndex));
 		fireEvent(event);
 	}
 
@@ -426,11 +399,11 @@ public class CagCreator {
 		}
 	}
 
-	public HashMap<Integer, Vector<AdjacencyEdge>> getLeftNeighbours() {
+	public Vector<AdjacencyEdge>[] getLeftNeighbours() {
 		return leftNeighbours;
 	}
 
-	public HashMap<Integer, Vector<AdjacencyEdge>> getRightNeighbours() {
+	public Vector<AdjacencyEdge>[] getRightNeighbours() {
 		return rightNeighbours;
 	}
 
@@ -452,21 +425,15 @@ public class CagCreator {
 	}
 
 	/*
-	 * TODO Wenn das aktuelle Contig gewechselt hat, sollte nun dadurch der
-	 * Zustand vom Model ändern; und dadurch auf der Gui in der Mitte dieses
-	 * spezifische Contig erscheinen. Sprich es sollte als Reverse, Normal oder
-	 * Repetetiv erscheinen mit dem richtigen Namen drauf.
-	 * 
 	 * TODO Wenn schon einer dieser Nachbarn ausgewählt wurde sollte dieser
 	 * Nachbar eine andere Erscheinung haben als alle anderen Nachbarn.
 	 */
-	public void changeContigs(String currentContig) {
+	public void changeContigs(String currentContig, String isReverse) {
+
 		this.currentContig = currentContig;
+		this.contigIsReverse = Boolean.parseBoolean(isReverse);
 		idOfCurrentContig(currentContig);
-		mostLikelyLeftNeighbours();
-		mostLikelyRightNeighbours();
-		System.out.println("Changed contig. Current Contig is: "
-				+ currentContig);
+
 		sendCurrentContig();
 		sendLeftNeighbours();
 		sendRightNeighbours();

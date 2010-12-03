@@ -41,8 +41,8 @@ public class Controller {
 	 * Methode soll im Model den wert des aktuellen Contigs ändern
 	 * TODO
 	 */
-	public void selectContig(String contigName){
-		model.changeContigs(contigName);
+	public void selectContig(String contigName, String isReverse){
+		model.changeContigs(contigName, isReverse);
 		//model.sendCurrentContig();
 	}
 	

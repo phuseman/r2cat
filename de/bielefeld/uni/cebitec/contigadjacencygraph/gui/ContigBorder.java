@@ -42,7 +42,7 @@ public class ContigBorder extends AbstractBorder{
 		}
 		if(isRepeat == true && isReverse == true){
 			p = makeReverseRepeatContig(0,0, c.getWidth(),c.getHeight());
-			g2.setColor(Color.MAGENTA);
+			g2.setColor(Color.ORANGE);
 			g2.draw(p);
 		}
 		//g2.fill(p);
@@ -136,6 +136,10 @@ public class ContigBorder extends AbstractBorder{
 		return p;
 }
 
+	public boolean isReverse() {
+		return isReverse;
+	}
+	
 	public Insets getBorderInsets(Component c){
 		return new Insets(10, 10 ,10, 10);
 	}
@@ -147,5 +151,6 @@ public class ContigBorder extends AbstractBorder{
 	public boolean isBorderOpaque() {
 		return true;
 	}
+
 
 }
