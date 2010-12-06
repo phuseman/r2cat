@@ -130,9 +130,9 @@ public class CagCreator {
 			int i = e.geti();
 			int j = e.getj();
 
-			// wenn diese Kante der linke konnektor von i ist
+			// wenn die aktuelle Kante der linke konnektor von i
 			if (e.isLeftConnectori()) {
-				// dann ist sie die verbindung zum linken Knoten von i
+				// dann gehört der Knoten zu den linken Nachbarn
 				leftNeighbours[i].add(e);
 				// wenn nicht dann ist sie die verbindung zum rechten Knoten i
 			} else {
@@ -145,20 +145,30 @@ public class CagCreator {
 			} else {
 				rightNeighbours[j].add(e);
 			}
-
 		}
-
 		for (int x = 0; x < graph.getNodes().size(); x++) {
 			Collections.sort(leftNeighbours[x]);
 			Collections.sort(rightNeighbours[x]);
 		}
-
 	}
 
 	/*
 	 * Wenn ich die 5 wahrscheinlichsten Nachbarn aus der Map hole sollten auch
 	 * noch die Informationen zu dem Contig geholt werden, damit spaeter das
 	 * Contig auch richt dargestellet werden kann.
+	 * 
+	 * TODO
+	 * Es besteht hier folgendes Problem:
+	 * Die Arrays leftNeighbours und rightNeighbours werden nach dem support sortiert.
+	 * Dieser Support nehme ich an besteht aus relativeSupporti und relativeSupportj.
+	 * Wenn ich jetzt die Nachbarn anzeige und berechne, dann greife ich auf den 
+	 * relativeSupport zurück. Hier kann die Sortierung aber anders sein.
+	 * Frage: wie hängen diese beiden supports zusammen?
+	 * 
+	 * Mögliche Lösung: ich könnte immer den support nehmen statt relativeSupport
+	 * Wäre das sinnvoll? Ich glaube es macht keinen merklichen unterschied außer
+	 * das keine Lücken mehr in den angezeigten contigs sind.
+	 * 
 	 */
 	public DNASequence[] calculateFiveMostLikleyLeftNeighbours(int index) {
 		fiveMostLikleyLeftNeighbours = new DNASequence[5];
@@ -173,14 +183,18 @@ public class CagCreator {
 		long length;
 		boolean isRepetitiv = false;
 		boolean isReverse = false;
+//		System.out.println("linke nachbarn"+leftNeighbours[index]);
 
 		for (Iterator<AdjacencyEdge> iterator = leftNeighbours[index]
 				.iterator(); iterator.hasNext();) {
 
 			AdjacencyEdge edge = iterator.next();
 
+			support = edge.getSupport();
 			int nodeI = edge.geti();
 			int nodeJ = edge.getj();
+//			System.out.println("Nur support "+edge.getSupport());
+		//	System.out.println("Vorab relative support i "+edge.getRelativeSupporti());
 
 			if (edge.isLeftConnectori() == false
 					&& edge.isRightConnectori() == false) {
@@ -195,8 +209,8 @@ public class CagCreator {
 				}
 			}
 			if (nodeI == contigIndex) {
-				support = edge.getRelativeSupportj();
-				System.out.println("Support of "+nodeJ+" is: "+support*100);
+//				support = edge.getRelativeSupportj();
+				//System.out.println("Support of "+nodeJ+" is: "+support*100);
 				neighbour = contigs.get(nodeJ);
 				name = neighbour.getId();
 				length = neighbour.getSize();
@@ -205,8 +219,8 @@ public class CagCreator {
 					isReverse = true;
 				}
 			} else {
-				support = edge.getRelativeSupporti();
-				System.out.println("Support of "+nodeI+" is: "+support*100);
+//				support = edge.getRelativeSupporti();
+				//System.out.println("Support of "+nodeI+" is: "+support*100);
 				neighbour = contigs.get(nodeI);
 				name = neighbour.getId();
 				length = neighbour.getSize();
@@ -215,14 +229,14 @@ public class CagCreator {
 					isReverse = true;
 				}
 			}
-			// TODO und der support muss bestimmte groesse haben  support*1000 >2
-			if (t < 5 && (support*100) >1 ) {
+//			System.out.println("  ");
+
+			if (t < 5 && support > 2 ) {
 				fiveMostLikleyLeftNeighbours[t] = new DNASequence(name, length,
 						isRepetitiv, isReverse);
 			}
 			t++;
 		}
-
 		return fiveMostLikleyLeftNeighbours;
 
 	}
@@ -243,7 +257,7 @@ public class CagCreator {
 		                                                       .iterator(); iterator.hasNext();) {
 			
 			AdjacencyEdge edge = iterator.next();
-			
+			support = edge.getSupport();
 			int nodeI = edge.geti();
 			int nodeJ = edge.getj();
 			
@@ -260,8 +274,8 @@ public class CagCreator {
 				}
 			}
 			if (nodeI == contigIndex) {
-				System.out.println("Support of "+nodeJ+" is: "+support*100);
-				support = edge.getRelativeSupportj();
+//				support = edge.getRelativeSupportj();
+//				System.out.println("Support of "+nodeJ+" is: "+support*100);
 				neighbour = contigs.get(nodeJ);
 				name = neighbour.getId();
 				length = neighbour.getSize();
@@ -270,8 +284,8 @@ public class CagCreator {
 					isReverse = true;
 				}
 			} else {
-				support = edge.getRelativeSupporti();
-				System.out.println("Support of "+nodeI+" is: "+support*100);
+//				support = edge.getRelativeSupporti();
+//				System.out.println("Support of "+nodeI+" is: "+support*100);
 				neighbour = contigs.get(nodeI);
 				name = neighbour.getId();
 				length = neighbour.getSize();
@@ -280,14 +294,12 @@ public class CagCreator {
 					isReverse = true;
 				}
 			}
-			// TODO und der support muss bestimmte groesse haben
-			if (t < 5 && (support*100) >1 ) {
+			if (t < 5 && support > 2 ) {
 				fiveMostLikleyRightNeighbours[t] = new DNASequence(name, length,
 						isRepetitiv, isReverse);				
 			}
 			t++;
-		}
-		
+		}		
 		return fiveMostLikleyRightNeighbours;
 		
 	}
