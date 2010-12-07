@@ -8,6 +8,8 @@ import javax.swing.UIManager;
  * Übernimmt die Benutzereingaben und manipuliert dann das Model 
  * sodass auf die benutzereingaben ein neues model entsteht und 
  * dieses dann die View verändert!
+ * 
+ * TODO diese klasse kann in die view integriert werden
  */
 public class Controller {
 	
@@ -39,7 +41,6 @@ public class Controller {
 	
 	/*
 	 * Methode soll im Model den wert des aktuellen Contigs ändern
-	 * TODO
 	 */
 	public void selectContig(String contigName, String isReverse){
 		model.changeContigs(contigName, isReverse);

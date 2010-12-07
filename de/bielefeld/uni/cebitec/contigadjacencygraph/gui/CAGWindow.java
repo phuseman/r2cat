@@ -35,8 +35,8 @@ import de.bielefeld.uni.cebitec.qgram.DNASequence;
 /*
  * Ist das Abbild vom Model
  * 
- * TODO heute methode die die contigs erzeugt und
- * eine Mehtode um die groesse des Contigs zu veraendern
+ * TODO heute die contigs im Genompanel sollten die Größe wie im chooseContigPanel haben
+ * und auch die Beschriftung der Contigs sollte sich nicht ändern
  */
 public class CAGWindow extends JFrame implements CagEventListener {// ActionListener{
 	// CagEventListener{
@@ -284,20 +284,23 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		 * der Liste als strings repraesentiert Mittels einer
 		 */
 		/*
-		 * Liste mit den Namen der Contigs TODO am Ende sollte diese for
-		 * schleife verschwinden, da "Contig" schon im Namen sein sollte nur bei
-		 * diesen Testdaten ist das anders, weil die Contigs umbenannt wurden.
-		 * 
-		 * Dann auch im cagCreator ändern! Dort wird das Contig wieder abgeschnitten
+		 * Liste mit den Namen der Contigs
+		 * schleife hat Contig vor der id des Contig gesetzt war nur ästhetischer
+		 * später werden sowieso nur die Namen aus dem Fasta file verwendet
 		 */
-		for (int i = 0; i < listData.length; i++) {
-			String contigname = listData[i];
-			listData[i] = "Contig " + contigname;
-		}
+//		for (int i = 0; i < listData.length; i++) {
+//			String contigname = listData[i];
+//			listData[i] = "Contig " + contigname;
+//		}
 
+		/*
+		 * TODO länge der Liste sollte sich an die größe des Fensters anpassen
+		 * Und sie sollte ein wenig breiter sein.
+		 */
 		list = new JList(listData);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		list.setVisibleRowCount(10);
+		//list.getPreferredScrollableViewportSize(); 
+		list.setVisibleRowCount(35);
 		list.addListSelectionListener(new ContigChangedListener());
 
 		listScroller = new JScrollPane(list);
@@ -315,6 +318,9 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		// Hier sollen spaeter die ausgewaehlten Contigs angezeigt werden
 		genomePanel = new JPanel();
 		genomeScroller = new JScrollPane();
+		/*
+		 * TODO die Scrollbar ist noch nicht da
+		 */
 		genomeScroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		genomeScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		genomeScroller.setAlignmentX(TOP_ALIGNMENT);
@@ -366,19 +372,24 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			contig = rightContigs[contigIndex];
 		}
 		// int wSize =(int) Math.log((double)size)*10;
-
 		if (wSize < 80) {
 			contig.setPreferredSize(new Dimension(80, 50));
 			contig.setMaximumSize(new Dimension(80, 50));
 			contig.setMinimumSize(new Dimension(80, 50));
-		} else {
+		} else if (wSize > 400){
+			contig.setPreferredSize(new Dimension(400, 50));
+			contig.setMaximumSize(new Dimension(400, 50));
+			contig.setMinimumSize(new Dimension(400, 50));
+		}else {
 			contig.setPreferredSize(new Dimension(wSize, 50));
 			contig.setMaximumSize(new Dimension(wSize, 50));
 			contig.setMinimumSize(new Dimension(wSize, 50));
 		}
 	}
 	
-
+	/*
+	 * Listener für die Elemente der Contig Liste
+	 */
 	public class ContigChangedListener implements ListSelectionListener {
 
 		@Override
@@ -417,25 +428,28 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 
 		@Override
 		public void mouseEntered(MouseEvent e) {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 		}
 
 		@Override
 		public void mouseExited(MouseEvent e) {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 		}
 
 		@Override
 		public void mousePressed(MouseEvent e) {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 		}
 	}
 
+	/*
+	 * Listener für MenuItems
+	 */
 	public class ExitItemListener implements ActionListener {
 
 		@Override
@@ -446,7 +460,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 	}
 
 	/*
-	 * TODO fange weitere Events ab
+	 * Fange Events ab
 	 */
 	@Override
 	public void event_fired(CagEvent event) {
@@ -463,10 +477,10 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			centralContigLabel.setName(contigName);
 			centralContig.setName(new Boolean(isReverse).toString());
 			centralContig.setBorder(new ContigBorder(isRepeat, isReverse));
-			
-			selectedContig = new ContigPanel();
-			selectedContig = centralContig.clone();
-			genomePanel.add(selectedContig);
+//	TODO
+//			selectedContig = new ContigPanel();
+//			selectedContig = centralContig.clone();
+//			genomePanel.add(selectedContig);
 			}
 
 		if (event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBOURS)) {

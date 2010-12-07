@@ -25,6 +25,10 @@ import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
 /*
  * ist mein model 
  * hier werden die Daten- Zustands- und Anwendungslogik implementiert
+ * 
+ * TODO heute:
+ * Reverse Contigs im Moment nur auf der linken seite: sollten auch auf der Rechten Seite 
+ * vorkommen.
  */
 public class CagCreator {
 
@@ -325,7 +329,7 @@ public class CagCreator {
 	 */
 	private void idOfCurrentContig(String name) {
 
-		contigId = currentContig.replace("Contig ", "");
+		contigId = currentContig;//.replace("Contig ", "");
 
 		for (DNASequence c : contigs) {
 			contigIndex = contigs.indexOf(c);
@@ -439,6 +443,17 @@ public class CagCreator {
 	/*
 	 * TODO Wenn schon einer dieser Nachbarn ausgewählt wurde sollte dieser
 	 * Nachbar eine andere Erscheinung haben als alle anderen Nachbarn.
+	 * 
+	 * Im CagWindow wird schon eine Liste mit ausgewählten Contigs erstellt.
+	 * Diese könnte an diese Klasse gesendet werden und ständig aktualisiert werden.
+	 * Oder Besser ich könnte hier im Model diese Liste erstellen. Aus dem immer
+	 * wieder gegebenen currentContigs und diese Liste von Instanzen später 
+	 * mit den Nachbarn abgleichen. Sollte zu einem aktuellem Contig schon ein
+	 * Nachbar ausgewählt sein, kann diese Info auch an das Window übergeben werden
+	 * und der Hintergrund des Contigs in einer Anderen Farbe erscheinen.
+	 * Oder die Border in einer anderen Farbe: noch zu wählen in schwarz schon 
+	 * gewählt in rot oder so.
+	 *  
 	 */
 	public void changeContigs(String currentContig, String isReverse) {
 
