@@ -1,5 +1,6 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
+import java.util.Vector;
 import java.util.Map.Entry;
 
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
@@ -13,7 +14,8 @@ public class CagEvent {
 	private boolean repetitive;
 	private boolean reverse;
 	private Contig contig;
-	private  DNASequence[]  contigData;
+	private  Vector<DNASequence>  contigData;
+	private  DNASequence  contigNode;
 	/*
 	 * TODO
 	 * Evtl noch eine Varibel mit der ich Daten weiterleiten kann
@@ -22,20 +24,20 @@ public class CagEvent {
 		this.event_type = event;
 		this.data = data;
 	}
-	public CagEvent(EventType event, String data, long size, boolean repetitive, boolean reverse) {
+	public CagEvent(EventType event, DNASequence contig) {
 		this.event_type = event;
-		this.data = data;
-		this.size = size;
-		this.repetitive = repetitive;
-		this.reverse = reverse;
+		this.contigNode = contig;
 	}
 	
+	public DNASequence getContigNode() {
+		return contigNode;
+	}
 	public CagEvent(EventType event, Contig currentContig){
 		this.event_type = event;
 		
 	}
 	
-	public CagEvent(EventType event, DNASequence[]  neighbours){
+	public CagEvent(EventType event, Vector<DNASequence>  neighbours){
 		this.event_type = event;
 		this.contigData = neighbours;
 	}
@@ -58,7 +60,7 @@ public class CagEvent {
 		return data;
 	}
 	
-	public DNASequence[] getContigData() {
+	public  Vector<DNASequence> getContigData() {
 		return contigData;
 	}
 	public Contig getContig() {

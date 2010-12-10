@@ -45,8 +45,11 @@ public class CagCreator {
 	private DNASequence contig;
 	private boolean contigIsRepetitiv = false;
 	private boolean contigIsReverse = false;
-	private DNASequence[] fiveMostLikleyLeftNeighbours;
-	private DNASequence[] fiveMostLikleyRightNeighbours;
+//	private DNASequence[] fiveMostLikleyLeftNeighbours;
+	private Vector<DNASequence>fiveMostLikleyLeftNeighbours;
+//	private DNASequence[] fiveMostLikleyRightNeighbours;
+	private Vector<DNASequence>fiveMostLikleyRightNeighbours;
+	private DNASequence currentContigObject;
 
 	// private CAGWindow window;
 	public CagCreator(LayoutGraph g) {
@@ -174,31 +177,70 @@ public class CagCreator {
 	 * das keine Lücken mehr in den angezeigten contigs sind.
 	 * 
 	 */
-	public DNASequence[] calculateFiveMostLikleyLeftNeighbours(int index) {
-		fiveMostLikleyLeftNeighbours = new DNASequence[5];
-
-
-		int t = 0;
-		double support = 0;
+	public Vector<DNASequence> calculateFiveMostLikleyLeftNeighbours(int index) {
+		//fiveMostLikleyLeftNeighbours = new DNASequence[5];
+		fiveMostLikleyLeftNeighbours = new Vector<DNASequence>();
+	//	int t = 0;
+/*		double support = 0;
 		boolean isReversei = false;
 		boolean isReversej = false;
 		DNASequence neighbour;
 		String name;
 		long length;
 		boolean isRepetitiv = false;
-		boolean isReverse = false;
+		boolean isReverse = false;*/
+		boolean is_I_equals_X = false;
 //		System.out.println("linke nachbarn"+leftNeighbours[index]);
 
 		for (Iterator<AdjacencyEdge> iterator = leftNeighbours[index]
 				.iterator(); iterator.hasNext();) {
 
 			AdjacencyEdge edge = iterator.next();
+			
+			System.out.println(edge.getContigi() +" "+ edge.getContigj());
+			if(edge.getContigi().getId() == currentContigObject.getId()){
+				is_I_equals_X = true;
+			}
+			if (is_I_equals_X){// j ist der nachbar
+				/*
+				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
+				 * oder nicht.
+				 */
+				if(edge.isRightConnectori()){
+					if(edge.isLeftConnectori() == false && edge.isLeftConnectorj() ==true){
+						currentContigObject.setReverse(true);
+					}
+					if(edge.isLeftConnectori() == true && edge.isLeftConnectorj() == false){
+						currentContigObject.setReverse(true);
+					}
+				}
+				fiveMostLikleyLeftNeighbours.add(edge.getContigj());
+			}else{// i ist der nachbar
+				/*
+				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
+				 * oder nicht.
+				 */
+				if(edge.isLeftConnectorj()){
+					if(edge.isLeftConnectori() == true && edge.isRightConnectori() ==true){
+						currentContigObject.setReverse(true);
+					}
+					if(edge.isLeftConnectori() == true && edge.isRightConnectori() == false){
+						currentContigObject.setReverse(true);
+					}
+				}	
+				fiveMostLikleyLeftNeighbours.add(edge.getContigi());
+			}
+				
+			/*t++;
+			if (t==4){
+				break;
+			}*/
 
-			support = edge.getSupport();
+			/*support = edge.getSupport();
 			int nodeI = edge.geti();
 			int nodeJ = edge.getj();
-//			System.out.println("Nur support "+edge.getSupport());
-		//	System.out.println("Vorab relative support i "+edge.getRelativeSupporti());
+			System.out.println("Nur edg "+edge);
+			System.out.println("Node i "+edge.geti() + "Node j " + edge.getj());
 
 			if (edge.isLeftConnectori() == false
 					&& edge.isRightConnectori() == false) {
@@ -239,28 +281,69 @@ public class CagCreator {
 				fiveMostLikleyLeftNeighbours[t] = new DNASequence(name, length,
 						isRepetitiv, isReverse);
 			}
-			t++;
+			t++;*/
 		}
 		return fiveMostLikleyLeftNeighbours;
 
 	}
-	public DNASequence[] calculateFiveMostLikleyRightNeighbours(int index) {
-		fiveMostLikleyRightNeighbours = new DNASequence[5];
-		
-		int t = 0;
-		double support = 0;
+	public Vector<DNASequence> calculateFiveMostLikleyRightNeighbours(int index) {
+	//fiveMostLikleyRightNeighbours = new DNASequence[5];
+		fiveMostLikleyRightNeighbours = new Vector<DNASequence>();
+		//int t = 0;
+/*		double support = 0;
 		boolean isReversei = false;
 		boolean isReversej = false;
 		DNASequence neighbour;
 		String name;
 		long length;
 		boolean isRepetitiv = false;
-		boolean isReverse = false;
+		boolean isReverse = false;*/
+		boolean is_I_equals_X = false;
 		
 		for (Iterator<AdjacencyEdge> iterator = rightNeighbours[index]
 		                                                       .iterator(); iterator.hasNext();) {
 			
 			AdjacencyEdge edge = iterator.next();
+			System.out.println(edge.getContigi() +" "+ edge.getContigj());
+			if(edge.getContigi().getId() == currentContigObject.getId()){
+				is_I_equals_X = true;
+			}
+			if (is_I_equals_X){// j ist der nachbar
+				/*
+				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
+				 * oder nicht.
+				 */
+				if(edge.isRightConnectori()){
+					if(edge.isLeftConnectori() == false && edge.isLeftConnectorj() ==true){
+						currentContigObject.setReverse(true);
+					}
+					if(edge.isLeftConnectori() == true && edge.isLeftConnectorj() == false){
+						currentContigObject.setReverse(true);
+					}
+				}
+				fiveMostLikleyRightNeighbours.add(edge.getContigj());
+			}else{// i ist der nachbar
+				/*
+				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
+				 * oder nicht.
+				 */
+				if(edge.isLeftConnectorj()){
+					if(edge.isLeftConnectori() == true && edge.isRightConnectori() ==true){
+						currentContigObject.setReverse(true);
+					}
+					if(edge.isLeftConnectori() == true && edge.isRightConnectori() == false){
+						currentContigObject.setReverse(true);
+					}
+				}	
+				fiveMostLikleyLeftNeighbours.add(edge.getContigi());
+			}
+			/*t++;
+			if (t==4){
+				break;
+			}*/
+		}
+			
+		/*	AdjacencyEdge edge = iterator.next();
 			support = edge.getSupport();
 			int nodeI = edge.geti();
 			int nodeJ = edge.getj();
@@ -303,7 +386,7 @@ public class CagCreator {
 						isRepetitiv, isReverse);				
 			}
 			t++;
-		}		
+		}		*/
 		return fiveMostLikleyRightNeighbours;
 		
 	}
@@ -333,10 +416,12 @@ public class CagCreator {
 
 		for (DNASequence c : contigs) {
 			contigIndex = contigs.indexOf(c);
+			System.out.println(" c id "+c.getId());
+			System.out.println(" c index "+contigIndex);
 			if (c.getId().equals(contigId)) {
-
-				contigSize = c.getSize();
-				contigIsRepetitiv = c.isRepetitive();
+				currentContigObject = c;
+				//contigSize = c.getSize();
+				//contigIsRepetitiv = c.isRepetitive();
 				break;
 			}
 		}
@@ -348,11 +433,11 @@ public class CagCreator {
 	public void sendCurrentContig() {
 
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
-				currentContig, contigSize, contigIsRepetitiv, contigIsReverse);
+				currentContigObject);
 		/*
 		 * CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG, new
 		 * Contig(contigId)); solls spaeter mal werden dazu in contig klasse
-		 * TODO
+		 * TODO ist jetzt ein Objekt vom typ dna sequence
 		 */
 		fireEvent(event);
 	}
@@ -462,7 +547,7 @@ public class CagCreator {
 		idOfCurrentContig(currentContig);
 
 		sendCurrentContig();
-		sendLeftNeighbours();
 		sendRightNeighbours();
+		sendLeftNeighbours();
 	}
 }

@@ -44,6 +44,9 @@ public class DNASequence implements Comparable {
 
 	// this sequence is repetitive
 	private boolean repetitive = false;
+	
+	// this sequence is reverse
+	private boolean reverse = false;
 
 	// the percentage of the length of this sequence that occurs more than once
 	// on a reference genome
@@ -78,7 +81,7 @@ public class DNASequence implements Comparable {
 		this.id = id;
 		this.size = size;
 		this.repetitive = isRepetitiv;
-		this.reverseComplement = isReverse;
+		this.reverse = isReverse;
 	}
 
 	/**
@@ -271,6 +274,14 @@ public class DNASequence implements Comparable {
 	 */
 	public boolean isRepetitive() {
 		return this.repetitive;
+	}
+	
+	public void setReverse(boolean b) {
+		this.reverse = b;
+	}
+
+	public boolean isReverse() {
+		return this.reverse;
 	}
 
 	/**
