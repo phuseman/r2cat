@@ -31,6 +31,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -47,57 +48,49 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 
 	private CAGWindow window;
 	private JScrollPane listScroller;
-//	private JScrollPane genomeScroller;
 	private JList list;
 	private JPanel listContainer;
 	private JMenuBar menuBar;
 	private JMenu menu;
 	private JMenuItem menuItem;
-	// private ChooseContigPanel chooseContigPanel;
 	private JPanel chooseContigPanel;
-	//private GroupLayout layout;
 	private BoxLayout layout;
-//	private JPanel genomePanel;
 	private String[] listData;
 	private CagCreator model;
 	private Controller control;
-	
+
 	private ContigAppearance[] leftContigs;
 	private ContigAppearance[] rightContigs;
-//	private JLabel[] leftContigLabels;
-//	private JLabel[] rightContigLabels;
-	
-//	private JPanel selectedContig;
-//	private ArrayList<JPanel> selectedContigs;
+
 	private JPanel leftContainer;
 	private JPanel centerContainer;
 	private JPanel rightContainer;
 
 	private ContigAppearance leftContig1;
-//	private JLabel contigLabel1;
+	// private JLabel contigLabel1;
 	private ContigAppearance leftContig2;
-//	private JLabel contigLabel2;
+	// private JLabel contigLabel2;
 	private ContigAppearance leftContig3;
-//	private JLabel contigLabel3;
+	// private JLabel contigLabel3;
 	private ContigAppearance leftContig4;
-//	private JLabel contigLabel4;
+	// private JLabel contigLabel4;
 	private ContigAppearance leftContig5;
-//	private JLabel contigLabel5;
+	// private JLabel contigLabel5;
 
 	private JPanel centralContig;
-//	private JLabel centralContigLabel;
+	// private JLabel centralContigLabel;
 
 	private ContigAppearance rightContig1;
-//	private JLabel rightcontigLabel1;
+	// private JLabel rightcontigLabel1;
 	private ContigAppearance rightContig2;
-//	private JLabel rightcontigLabel2;
+	// private JLabel rightcontigLabel2;
 	private ContigAppearance rightContig3;
-//	private JLabel rightcontigLabel3;
+	// private JLabel rightcontigLabel3;
 	private ContigAppearance rightContig4;
-//	private JLabel rightcontigLabel4;
+	// private JLabel rightcontigLabel4;
 	private ContigAppearance rightContig5;
-//	private JLabel rightcontigLabel5;
 
+	// private JLabel rightcontigLabel5;
 
 	public CAGWindow(CagCreator myModel, Controller controller) {
 		window = this;
@@ -129,23 +122,62 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		 */
 		chooseContigPanel = new JPanel();
 		chooseContigPanel.setPreferredSize(new Dimension(1000, 400));
-		//layout = new GroupLayout(chooseContigPanel);
+		// layout = new GroupLayout(chooseContigPanel);
 		chooseContigPanel.setBackground(Color.WHITE);
 		add(chooseContigPanel, BorderLayout.CENTER);
-		
-		leftContigs = new ContigAppearance[5] ;
+
+		leftContigs = new ContigAppearance[5];
 		leftContigs[0] = leftContig1;
 		leftContigs[1] = leftContig2;
 		leftContigs[2] = leftContig3;
 		leftContigs[3] = leftContig4;
 		leftContigs[4] = leftContig5;
-		
+
 		rightContigs = new ContigAppearance[5];
 		rightContigs[0] = rightContig1;
 		rightContigs[1] = rightContig2;
 		rightContigs[2] = rightContig3;
 		rightContigs[3] = rightContig4;
 		rightContigs[4] = rightContig5;
+
+		layout = new BoxLayout(chooseContigPanel, BoxLayout.LINE_AXIS);
+		chooseContigPanel.setLayout(layout);
+
+		leftContainer = new JPanel();
+		centerContainer = new JPanel();
+		rightContainer = new JPanel();
+
+		BoxLayout leftBoxLayout = new BoxLayout(leftContainer,
+				BoxLayout.PAGE_AXIS);
+		BoxLayout centerBoxLayout = new BoxLayout(centerContainer,
+				BoxLayout.PAGE_AXIS);
+		BoxLayout rightBoxLayout = new BoxLayout(rightContainer,
+				BoxLayout.PAGE_AXIS);
+
+		leftContainer.setLayout(leftBoxLayout);
+		leftContainer.setBackground(Color.WHITE);
+		leftContainer.setPreferredSize(new Dimension(310, 1000));
+		leftContainer.setMinimumSize(new Dimension(310, 1000));
+		leftContainer.setMaximumSize(new Dimension(310, 1000));
+
+		centerContainer.setLayout(centerBoxLayout);
+		centerContainer.setBackground(Color.WHITE);
+		centerContainer.setPreferredSize(new Dimension(310, 1000));
+		centerContainer.setMinimumSize(new Dimension(310, 1000));
+		centerContainer.setMaximumSize(new Dimension(310, 1000));
+
+		rightContainer.setLayout(rightBoxLayout);
+		rightContainer.setBackground(Color.WHITE);
+		rightContainer.setPreferredSize(new Dimension(310, 1000));
+		rightContainer.setMinimumSize(new Dimension(310, 1000));
+		rightContainer.setMaximumSize(new Dimension(310, 1000));
+
+		chooseContigPanel.add(leftContainer);
+		chooseContigPanel.add(Box.createHorizontalGlue());
+		chooseContigPanel.add(centerContainer);
+		chooseContigPanel.add(Box.createHorizontalGlue());
+		chooseContigPanel.add(rightContainer);
+
 		/*
 		 * Dieses Panel enthaelt alle Contigs dieses Genoms als Liste
 		 */
@@ -158,21 +190,21 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		 * der Liste als strings repraesentiert Mittels einer
 		 */
 		/*
-		 * Liste mit den Namen der Contigs
-		 * schleife hat Contig vor der id des Contig gesetzt war nur ästhetischer
-		 * später werden sowieso nur die Namen aus dem Fasta file verwendet
+		 * Liste mit den Namen der Contigs schleife hat Contig vor der id des
+		 * Contig gesetzt war nur ästhetischer später werden sowieso nur die
+		 * Namen aus dem Fasta file verwendet
 		 */
-//		for (int i = 0; i < listData.length; i++) {
-//			String contigname = listData[i];
-//			listData[i] = "Contig " + contigname;
-//		}
+		// for (int i = 0; i < listData.length; i++) {
+		// String contigname = listData[i];
+		// listData[i] = "Contig " + contigname;
+		// }
 
 		/*
 		 * TODO länge der Liste sollte sich an die größe des Fensters anpassen
 		 * Und sie sollte ein wenig breiter sein.
 		 */
 		list = new JList(listData);
-		/*list.setPreferredSize(new Dimension(85, 490));*/
+		/* list.setPreferredSize(new Dimension(85, 490)); */
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setVisibleRowCount(20);
 		list.addListSelectionListener(new ContigChangedListener());
@@ -187,11 +219,11 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		listContainer.setPreferredSize(new Dimension(90, 500));
 		listContainer
 				.setBorder(BorderFactory.createTitledBorder("Contig List"));
-		listContainer.add(listScroller,BorderLayout.CENTER);
+		listContainer.add(listScroller, BorderLayout.CENTER);
 		add(listContainer, BorderLayout.EAST);
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-//		 setSize(Toolkit.getDefaultToolkit().getScreenSize());
+		// setSize(Toolkit.getDefaultToolkit().getScreenSize());
 		// hier wird das Fenster auf die Größe des Bildschirmes angepasst.
 		setSize(1000, 500);
 		setVisible(true);
@@ -199,72 +231,6 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		pack();
 	}
 
-	
-	private void setComponentsOnChooseContigPanel(){
-		chooseContigPanel.removeAll();
-		
-		layout = new BoxLayout(chooseContigPanel	, BoxLayout.LINE_AXIS);
-		chooseContigPanel.setLayout(layout);
-		
-		leftContainer = new JPanel();
-		centerContainer = new JPanel();
-		rightContainer = new JPanel();
-		
-		BoxLayout leftBoxLayout = new BoxLayout(leftContainer, BoxLayout.PAGE_AXIS);
-		BoxLayout centerBoxLayout = new BoxLayout(centerContainer, BoxLayout.PAGE_AXIS);
-		BoxLayout rightBoxLayout = new BoxLayout(rightContainer, BoxLayout.PAGE_AXIS);
-		
-		leftContainer.setLayout(leftBoxLayout);
-		leftContainer.setBackground(Color.WHITE);
-		leftContainer.setPreferredSize(new Dimension(310, 1000));
-		leftContainer.setMinimumSize(new Dimension(310, 1000));
-		leftContainer.setMaximumSize(new Dimension(310,1000));
-		
-		centerContainer.setLayout(centerBoxLayout);
-		centerContainer.setBackground(Color.WHITE);
-		centerContainer.setPreferredSize(new Dimension(310, 1000));
-		centerContainer.setMinimumSize(new Dimension(310, 1000));
-		centerContainer.setMaximumSize(new Dimension(310, 1000));
-		
-		rightContainer.setLayout(rightBoxLayout);
-		rightContainer.setBackground(Color.WHITE);
-		rightContainer.setPreferredSize(new Dimension(310, 1000));
-		rightContainer.setMinimumSize(new Dimension(310, 1000));
-		rightContainer.setMaximumSize(new Dimension(310, 1000));
-		
-		chooseContigPanel.add(leftContainer);
-		chooseContigPanel.add(Box.createHorizontalGlue());
-		chooseContigPanel.add(centerContainer);
-		chooseContigPanel.add(Box.createHorizontalGlue());
-		chooseContigPanel.add(rightContainer);
-		
-		/*leftContainer.add(leftContig1);
-		//leftContig1.setAlignmentX(RIGHT_ALIGNMENT);
-		leftContainer.add(Box.createVerticalGlue());
-		leftContainer.add(leftContig2);
-		leftContainer.add(Box.createVerticalGlue());
-		leftContainer.add(leftContig3);
-		leftContainer.add(Box.createVerticalGlue());
-		leftContainer.add(leftContig4);
-		leftContainer.add(Box.createVerticalGlue());
-		leftContainer.add(leftContig5);*/
-		
-		centerContainer.add(centralContig);
-
-		/*rightContainer.add(rightContig1);
-		rightContainer.add(Box.createVerticalGlue());
-		rightContainer.add(rightContig2);
-		rightContainer.add(Box.createVerticalGlue());
-		rightContainer.add(rightContig3);
-		rightContainer.add(Box.createVerticalGlue());
-		rightContainer.add(rightContig4);
-		rightContainer.add(Box.createVerticalGlue());
-		rightContainer.add(rightContig5);*/
-		
-		//chooseContigPanel.updateUI();
-		
-	}
-	
 	/*
 	 * Listener für die Elemente der Contig Liste
 	 */
@@ -273,11 +239,43 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
 			if (e.getValueIsAdjusting() == false) {
-			//	System.out.println("Selected value is: "
-			//			+ list.getSelectedValue());
 				String selection = (String) list.getSelectedValue();
 				control.selectContig(selection, "false");
+
+				SwingWorkerClass threadForLeftNeighbours = new SwingWorkerClass();
+				threadForLeftNeighbours.execute();
+
+				ThreadClassForRightNeighours threadForRightNeighbours = new ThreadClassForRightNeighours();
+				threadForRightNeighbours.execute();
 			}
+		}
+	}
+
+	class SwingWorkerClass extends SwingWorker<String, String> {
+
+		@Override
+		protected String doInBackground() {
+			model.sendLeftNeighbours();
+			return null;
+		}
+
+		@Override
+		protected void done() {
+			super.done();
+		}
+	}
+
+	class ThreadClassForRightNeighours extends SwingWorker<String, String> {
+
+		@Override
+		protected String doInBackground() {
+			model.sendRightNeighbours();
+			return null;
+		}
+
+		@Override
+		protected void done() {
+			super.done();
 		}
 	}
 
@@ -291,7 +289,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			JLabel child = null;
 			String name = null;
 			String isReverse = jp.getName();
-			//System.out.println(jp.getName());
+
 			for (int i = 0; i < subcomponents; i++) {
 				Component c = jp.getComponent(i);
 				if (c.getName().length() > 0) {
@@ -301,6 +299,12 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			}
 			if (child != null && name != null && isReverse != null) {
 				control.selectContig(name, isReverse);
+				
+				SwingWorkerClass threadForLeftNeighbours = new SwingWorkerClass();
+				threadForLeftNeighbours.execute();
+
+				ThreadClassForRightNeighours threadForRightNeighbours = new ThreadClassForRightNeighours();
+				threadForRightNeighbours.execute();
 			}
 		}
 
@@ -347,189 +351,72 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			DNASequence contigNode = event.getContigNode();
 			centralContig = new ContigAppearance(contigNode);
 			centralContig.addMouseListener(new ContigMouseListener());
-			setComponentsOnChooseContigPanel();
-			
-//	TODO untere leiste soll nicht angezeigt werden.
-			/*selectedContig = new JPanel();
-			selectedContig = centralContig.clone();
-			genomePanel.add(selectedContig);*/
+			if (centerContainer.getComponentCount() > 0) {
+				centerContainer.removeAll();
 			}
+			centerContainer.add(centralContig);
+			System.out.println(centerContainer.add(centralContig));
+			centerContainer.updateUI();
 
-		if(event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBOURS)){
-				System.out.println("vor dem ersten if");
-				Vector<DNASequence> leftNeighbours = null;
+		}
+
+		if (event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBOURS)) {
+			System.out.println("nehme event linke nachbarn entgegen");
+			Vector<DNASequence> leftNeighbours = null;
 			leftNeighbours = event.getContigData();
-				int t = 0;
-				//for(int i=0;i<5;i++)
-				for (Iterator<DNASequence> neighbour = leftNeighbours.iterator(); neighbour.hasNext();) {
-					while (t < 5){
-						DNASequence dnaSequence = (DNASequence) neighbour.next();
-						ContigAppearance contigPanel = leftContigs[t];
-						contigPanel = new ContigAppearance(dnaSequence);
-						System.out.println(contigPanel);
-						contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
-						contigPanel.addMouseListener(new ContigMouseListener());
-						contigPanel.setVisible(true);
-						leftContainer.add(contigPanel);
-						leftContainer.add(Box.createVerticalGlue());
-						t++;
-					}
-				}
-				
-			}
-			if(event.getEvent_type().equals(EventType.EVENT_SEND_RIGHT_NEIGHBOURS)){
-				System.out.println("vor dem zweiten if");
-				Vector<DNASequence> rightNeighbours = null;
-				rightNeighbours = event.getContigData();
-				int s = 0;
-				//for(int i=0;i<5;i++)
-				
-				for (Iterator<DNASequence> neighbour = rightNeighbours.iterator(); neighbour.hasNext();) {
-					while (s < 5){
-						DNASequence dnaSequence = (DNASequence) neighbour.next();
-						ContigAppearance contigPanel = rightContigs[s];
-						contigPanel = new ContigAppearance(dnaSequence);
-						contigPanel.setAlignmentX(LEFT_ALIGNMENT);
-						contigPanel.addMouseListener(new ContigMouseListener());
-						contigPanel.setVisible(true);
-						System.out.println(contigPanel);
-						rightContainer.add(contigPanel);
-						rightContainer.add(Box.createVerticalGlue());
-						s++;
-					}
-				}
-				chooseContigPanel.updateUI();
-			}
-			/*DNASequence contig1 = leftNeighbours[0];
-			if (contig1 == null) {
-			//	System.out.println("leftContig1 = null");
-				leftContig1.setVisible(false);
-			} else {
-				leftContig1 = new ContigAppearance(contig1);
-				leftContig1.addMouseListener(new ContigMouseListener());
-				this.leftContig1.validate();
-				leftContig1.setVisible(true);
-			}
 
-			DNASequence contig2 = leftNeighbours[1];
-			if (contig2 == null) {
-				leftContig2.setVisible(false);
-			} else {
-				leftContig2 = new ContigAppearance(contig2);
-				leftContig2.addMouseListener(new ContigMouseListener());
-				this.leftContig2.validate();
-				leftContig2.setVisible(true);
+			if (leftContainer.getComponentCount() > 0) {
+				leftContainer.removeAll();
 			}
-
-			DNASequence contig3 = leftNeighbours[2];
-			if (contig3 == null) {
-				leftContig3.setVisible(false);
-			} else {
-				leftContig3 = new ContigAppearance(contig3);
-				leftContig3.addMouseListener(new ContigMouseListener());
-				this.leftContig3.validate();
-				leftContig3.setVisible(true);
-			}
-
-			DNASequence contig4 = leftNeighbours[3];
-			if (contig4 == null) {
-				leftContig4.setVisible(false);
-			} else {
-				leftContig4 = new ContigAppearance(contig4);
-				leftContig4.addMouseListener(new ContigMouseListener());
-				this.leftContig4.validate();
-				leftContig4.setVisible(true);
-
-			}
-
-			DNASequence contig5 = leftNeighbours[4];
-			if (contig5 == null) {
-				leftContig5.setVisible(false);
-			} else {
-				leftContig5 = new ContigAppearance(contig5);
-				leftContig5.addMouseListener(new ContigMouseListener());
-				this.leftContig5.validate();
-				leftContig5.setVisible(true);
-			}
-*/		
-
-		/*if (event.getEvent_type().equals(EventType.EVENT_SEND_RIGHT_NEIGHBOURS)) {
-			this.chooseContigPanel.validate();
-			
-			Vector<DNASequence> rightNeighbours = null;
-			rightNeighbours = event.getContigData();
 			int t = 0;
-			//for(int i=0;i<5;i++)
-			
-			for (Iterator<DNASequence> neighbour = rightNeighbours.iterator(); neighbour.hasNext();) {
-				while (t < 5){
+			// for(int i=0;i<5;i++)
+			for (Iterator<DNASequence> neighbour = leftNeighbours.iterator(); neighbour
+					.hasNext();) {
+				while (t < 5) {
+					System.out.println("erstelle nun linkes Contig Objekt: "
+							+ t);
 					DNASequence dnaSequence = (DNASequence) neighbour.next();
-					ContigAppearance contigPanel = rightContigs[t];
+					ContigAppearance contigPanel = leftContigs[t];
 					contigPanel = new ContigAppearance(dnaSequence);
+					contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
 					contigPanel.setVisible(true);
+					leftContainer.add(contigPanel);
+					leftContainer.add(Box.createVerticalGlue());
 					t++;
 				}
 			}
-			
-			
-			
-			DNASequence[] rightNeighbours = null;
-			rightNeighbours = event.getContigData();
-
-			DNASequence contig1 = rightNeighbours[0];
-			if (contig1 == null) {
-				rightContig1.setVisible(false);
-			} else {
-				rightContig1 = new ContigAppearance(contig1);
-				rightContig1.addMouseListener(new ContigMouseListener());
-				this.rightContig1.validate();
-				rightContig1.setVisible(true);
-			}
-
-			DNASequence contig2 = rightNeighbours[1];
-			if (contig2 == null) {
-				rightContig2.setVisible(false);
-			} else {
-				rightContig2 = new ContigAppearance(contig2);
-				rightContig2.addMouseListener(new ContigMouseListener());
-				this.rightContig2.validate();
-				rightContig2.setVisible(true);
-			}
-
-			DNASequence contig3 = rightNeighbours[2];
-			if (contig3 == null) {
-				rightContig3.setVisible(false);
-			} else {
-				rightContig3 = new ContigAppearance(contig3);
-				rightContig3.addMouseListener(new ContigMouseListener());
-				this.rightContig3.validate();
-				rightContig3.setVisible(true);
-			}
-
-			DNASequence contig4 = rightNeighbours[3];
-			if (contig4 == null) {
-				rightContig4.setVisible(false);
-			} else {
-				rightContig4 = new ContigAppearance(contig4);
-				rightContig4.addMouseListener(new ContigMouseListener());
-				this.rightContig4.validate();
-				rightContig4.setVisible(true);
-			}
-
-			DNASequence contig5 = rightNeighbours[4];
-			if (contig5 == null) {
-				rightContig5.setVisible(false);
-			} else {
-				rightContig5 = new ContigAppearance(contig5);
-				rightContig5.addMouseListener(new ContigMouseListener());
-				this.rightContig5.validate();
-				rightContig5.setVisible(true);
-			}
-			setComponentsOnChooseContigPanel();
-
+			leftContainer.updateUI();
 		}
-*/
+
+		if (event.getEvent_type().equals(EventType.EVENT_SEND_RIGHT_NEIGHBOURS)) {
+			System.out.println("vor dem zweiten if");
+			Vector<DNASequence> rightNeighbours = null;
+			rightNeighbours = event.getContigData();
+			int s = 0;
+
+			if (rightContainer.getComponentCount() > 0) {
+				rightContainer.removeAll();
+			}
+
+			for (Iterator<DNASequence> neighbour = rightNeighbours.iterator(); neighbour
+					.hasNext();) {
+				while (s < 5) {
+					DNASequence dnaSequence = (DNASequence) neighbour.next();
+					ContigAppearance contigPanel = rightContigs[s];
+					contigPanel = new ContigAppearance(dnaSequence);
+					contigPanel.setAlignmentX(LEFT_ALIGNMENT);
+					contigPanel.addMouseListener(new ContigMouseListener());
+					contigPanel.setVisible(true);
+					System.out.println(contigPanel);
+					rightContainer.add(contigPanel);
+					rightContainer.add(Box.createVerticalGlue());
+					s++;
+				}
+			}
+			rightContainer.updateUI();
+		}
+
 	}
 
 }

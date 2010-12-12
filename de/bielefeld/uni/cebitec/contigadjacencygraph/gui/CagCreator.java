@@ -431,7 +431,7 @@ public class CagCreator {
 	 * Send an event, if the user selected a contig
 	 */
 	public void sendCurrentContig() {
-
+		System.out.println("Sende aktuelles Contig");
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
 				currentContigObject);
 		/*
@@ -547,7 +547,7 @@ public class CagCreator {
 		idOfCurrentContig(currentContig);
 
 		sendCurrentContig();
-		sendRightNeighbours();
-		sendLeftNeighbours();
+		//sendRightNeighbours();
+		//sendLeftNeighbours();
 	}
 }
