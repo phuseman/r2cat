@@ -66,6 +66,8 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 	private JPanel centerContainer;
 	private JPanel rightContainer;
 
+	private GlassPaneWithLines glassPanel;
+
 	private ContigAppearance leftContig1;
 	// private JLabel contigLabel1;
 	private ContigAppearance leftContig2;
@@ -89,6 +91,8 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 	private ContigAppearance rightContig4;
 	// private JLabel rightcontigLabel4;
 	private ContigAppearance rightContig5;
+	private boolean rightContainerFull = false;
+	private boolean leftContainerFull = false;
 
 	// private JLabel rightcontigLabel5;
 
@@ -200,8 +204,8 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		// }
 
 		/*
-		 * TODO länge der Liste sollte sich an die größe des Fensters anpassen
-		 * Und sie sollte ein wenig breiter sein.
+		 * TODO länge der Liste sollte sich an die größe des Fensters
+		 * anpassen Und sie sollte ein wenig breiter sein.
 		 */
 		list = new JList(listData);
 		/* list.setPreferredSize(new Dimension(85, 490)); */
@@ -225,10 +229,28 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		// setSize(Toolkit.getDefaultToolkit().getScreenSize());
 		// hier wird das Fenster auf die Größe des Bildschirmes angepasst.
+
+		glassPanel = new GlassPaneWithLines();
+		setGlassPane(glassPanel);
 		setSize(1000, 500);
 		setVisible(true);
 
 		pack();
+	}
+
+	private void setLineInPanel() {
+		if(rightContainerFull && leftContainerFull){
+			System.out.println("Linker Container: "+leftContainerFull+" rechter container: "+rightContainerFull);
+				//glassPanel.setLine(leftContainer, centralContig,true);
+	//	}else{
+			System.out.println("Rechter und linker container");
+				glassPanel.setLine(leftContainer,rightContainer, centralContig, rightContainerFull, leftContainerFull);
+		glassPanel.setOpaque(false);
+		glassPanel.setPreferredSize(chooseContigPanel.getSize());
+		getGlassPane().setVisible(true);
+		rightContainerFull=false;
+		leftContainerFull=false;
+		}
 	}
 
 	/*
@@ -255,6 +277,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 
 		@Override
 		protected String doInBackground() {
+			System.out.println("starte thread fuer linke Nachbarn");
 			model.sendLeftNeighbours();
 			return null;
 		}
@@ -269,6 +292,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 
 		@Override
 		protected String doInBackground() {
+			System.out.println("starte thread fuer rechte Nachbarn");
 			model.sendRightNeighbours();
 			return null;
 		}
@@ -299,7 +323,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			}
 			if (child != null && name != null && isReverse != null) {
 				control.selectContig(name, isReverse);
-				
+
 				SwingWorkerClass threadForLeftNeighbours = new SwingWorkerClass();
 				threadForLeftNeighbours.execute();
 
@@ -338,7 +362,6 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		public void actionPerformed(ActionEvent arg0) {
 			window.dispose();
 		}
-
 	}
 
 	/*
@@ -348,53 +371,58 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 	public void event_fired(CagEvent event) {
 
 		if (event.getEvent_type().equals(EventType.EVENT_CHOOSED_CONTIG)) {
+
 			DNASequence contigNode = event.getContigNode();
 			centralContig = new ContigAppearance(contigNode);
 			centralContig.addMouseListener(new ContigMouseListener());
+			
 			if (centerContainer.getComponentCount() > 0) {
 				centerContainer.removeAll();
-			}
+			}		
 			centerContainer.add(centralContig);
-			System.out.println(centerContainer.add(centralContig));
 			centerContainer.updateUI();
-
 		}
 
 		if (event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBOURS)) {
-			System.out.println("nehme event linke nachbarn entgegen");
+
 			Vector<DNASequence> leftNeighbours = null;
+			ContigAppearance contigPanel = null;
 			leftNeighbours = event.getContigData();
 
 			if (leftContainer.getComponentCount() > 0) {
 				leftContainer.removeAll();
 			}
 			int t = 0;
-			// for(int i=0;i<5;i++)
 			for (Iterator<DNASequence> neighbour = leftNeighbours.iterator(); neighbour
 					.hasNext();) {
 				while (t < 5) {
-					System.out.println("erstelle nun linkes Contig Objekt: "
-							+ t);
 					DNASequence dnaSequence = (DNASequence) neighbour.next();
-					ContigAppearance contigPanel = leftContigs[t];
+					//leftContigs[t] = contigPanel;
+
 					contigPanel = new ContigAppearance(dnaSequence);
 					contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
 					contigPanel.setVisible(true);
+
 					leftContainer.add(contigPanel);
-					leftContainer.add(Box.createVerticalGlue());
+					if(t <4){
+						leftContainer.add(Box.createVerticalGlue());
+					}
+					leftContainer.updateUI();
 					t++;
 				}
+				leftContainerFull = true;
+				setLineInPanel();
+				break;
 			}
-			leftContainer.updateUI();
 		}
 
 		if (event.getEvent_type().equals(EventType.EVENT_SEND_RIGHT_NEIGHBOURS)) {
-			System.out.println("vor dem zweiten if");
+	
 			Vector<DNASequence> rightNeighbours = null;
+			ContigAppearance contigPanel = null;
 			rightNeighbours = event.getContigData();
 			int s = 0;
-
 			if (rightContainer.getComponentCount() > 0) {
 				rightContainer.removeAll();
 			}
@@ -403,18 +431,24 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					.hasNext();) {
 				while (s < 5) {
 					DNASequence dnaSequence = (DNASequence) neighbour.next();
-					ContigAppearance contigPanel = rightContigs[s];
+				//	rightContigs[s] = contigPanel;
+
 					contigPanel = new ContigAppearance(dnaSequence);
 					contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
 					contigPanel.setVisible(true);
-					System.out.println(contigPanel);
+
 					rightContainer.add(contigPanel);
-					rightContainer.add(Box.createVerticalGlue());
+					if(s<4){
+						rightContainer.add(Box.createVerticalGlue());
+					}
+					rightContainer.updateUI();
 					s++;
 				}
+				rightContainerFull =true;
+				setLineInPanel();
+				break;
 			}
-			rightContainer.updateUI();
 		}
 
 	}

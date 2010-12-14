@@ -41,7 +41,7 @@ public class ContigAppearance extends JPanel {
 		setSizeOfContig(length);
 	}
 	
-	private void getDetailsOfContig(DNASequence contigNode){
+	private  void getDetailsOfContig(DNASequence contigNode){
 		
 		contigName = contigNode.getId();
 		length = contigNode.getSize();
@@ -49,30 +49,36 @@ public class ContigAppearance extends JPanel {
 		isReverse = contigNode.isReverse();
 		isReverseToString = new Boolean(isReverse).toString();
 		border = new ContigBorder(isRepeat, isReverse);
-	//	System.out.println(contigName + " " + length +" "+isRepeat +" "+ isReverse +" "+ isReverseToString  +" "+ border);
-		
 	}
 		
-	private void setContigAppearance(String contigId, String isReverseToString,
+	private  void setContigAppearance(String contigId, String isReverseToString,
 			long size, ContigBorder border) {		
 		
 		contigLabel.setName(contigId);
-		contigLabel.setText("<html><font size = -2><u>"
-				+ contigId + "</u>" + "<br>length: "
-				+ size / 1000 + " kb </html>");
-		this.setBorder(border);
-		this.setName(isReverseToString);
+		if(size <1000){			
+			contigLabel.setText("<html><font size = -2><u>"
+					+ contigId + "</u>" + "<br>length:"
+					+ "&lt; 1" + " kb</html>");
+			this.setBorder(border);
+			this.setName(isReverseToString);
+		}else{
+			contigLabel.setText("<html><font size = -2><u>"
+					+ contigId + "</u>" + "<br>length: "
+					+ size / 1000 + " kb </html>");
+			this.setBorder(border);
+			this.setName(isReverseToString);
+		}
 	}
 
-	private void setSizeOfContig(long size) {
+	private  void setSizeOfContig(long size) {
 
 		int wSize = (int) ((0.01 * size) / 4);
 		
 		// int wSize =(int) Math.log((double)size)*10;
-		if (wSize < 80) {
-			this.setPreferredSize(new Dimension(80, 50));
-			this.setMaximumSize(new Dimension(80, 50));
-			this.setMinimumSize(new Dimension(80, 50));
+		if (wSize < 85) {
+			this.setPreferredSize(new Dimension(85, 50));
+			this.setMaximumSize(new Dimension(85, 50));
+			this.setMinimumSize(new Dimension(85, 50));
 		} else if (wSize > 300){
 			this.setPreferredSize(new Dimension(300, 50));
 			this.setMaximumSize(new Dimension(300, 50));

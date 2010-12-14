@@ -29,9 +29,6 @@ public class CagEvent {
 		this.contigNode = contig;
 	}
 	
-	public DNASequence getContigNode() {
-		return contigNode;
-	}
 	public CagEvent(EventType event, Contig currentContig){
 		this.event_type = event;
 		
@@ -42,7 +39,10 @@ public class CagEvent {
 		this.contigData = neighbours;
 	}
 
-	public long getSize() {
+	public  DNASequence getContigNode() {
+		return contigNode;
+	}
+	public  long getSize() {
 		return size;
 	}
 	public boolean isRepetitive() {
@@ -52,7 +52,7 @@ public class CagEvent {
 		return reverse;
 	}
 	
-	public EventType getEvent_type() {
+	public  EventType getEvent_type() {
 		return event_type;
 	}
 	
@@ -60,7 +60,7 @@ public class CagEvent {
 		return data;
 	}
 	
-	public  Vector<DNASequence> getContigData() {
+	public Vector<DNASequence> getContigData() {
 		return contigData;
 	}
 	public Contig getContig() {
