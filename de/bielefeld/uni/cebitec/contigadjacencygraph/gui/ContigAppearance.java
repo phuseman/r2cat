@@ -24,6 +24,7 @@ public class ContigAppearance extends JPanel {
 	private double relativeSup;
 	
 	public ContigAppearance(){
+		super();
 		this.setBackground(Color.WHITE);
 		contigLabel = new JLabel();
 		this.add(contigLabel);		
@@ -31,12 +32,13 @@ public class ContigAppearance extends JPanel {
 	}
 
 	public ContigAppearance(DNASequence contigNode){
+		super();
+		this.contig=contigNode;
 		getDetailsOfContig(contigNode);
 		this.setBackground(Color.WHITE);
 		contigLabel = new JLabel();
 		this.add(contigLabel);
 		this.setName(contigName);
-		this.contig = contigNode;
 		setContigAppearance(contigName, isReverseToString, length, border);
 		setSizeOfContig(length);
 	}
@@ -49,12 +51,37 @@ public class ContigAppearance extends JPanel {
 		isReverse = contigNode.isReverse();
 		isReverseToString = new Boolean(isReverse).toString();
 		border = new ContigBorder(isRepeat, isReverse);
+		//relativeSup = TODO hier sollte ich eine Methode aufrufen koennen dir mir den
+		// 							relativen support des Contigs nennt. 
+		//							Muss ich noch in dem Model einbauen, dass es gespeichert wird.
 	}
 		
 	private  void setContigAppearance(String contigId, String isReverseToString,
-			long size, ContigBorder border) {		
+			long size, ContigBorder border) {
 		
+		char[] dst = null;
 		contigLabel.setName(contigId);
+		
+		if (contigId.length() > 10){
+			contigId.getChars(0, 2, dst, 0);
+			/*
+			 * TODO testen ob es funktioniert
+			 */
+			dst[3] = '.';
+			dst[4] = '.';
+			dst[5] = '.';
+			contigId.getChars(contigId.length() - 3,	 contigId.length(), dst, 6);
+			contigId = dst.toString();
+		}
+		/*
+		 * TODO erweitern
+		 * so viele Informationen wie moeglich in dieses ToolTip stecken.
+		 */
+		this.setToolTipText("<html><font size = -2><u>"
+					+ contigId + "</u>" + "<br>length:"
+					+ size + " b <br>"
+					+ "</html>");
+		
 		if(size <1000){			
 			contigLabel.setText("<html><font size = -2><u>"
 					+ contigId + "</u>" + "<br>length:"

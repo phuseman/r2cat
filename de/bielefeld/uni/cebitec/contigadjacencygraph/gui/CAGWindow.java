@@ -17,6 +17,7 @@ import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -28,6 +29,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
@@ -93,6 +95,12 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 	private ContigAppearance rightContig5;
 	private boolean rightContainerFull = false;
 	private boolean leftContainerFull = false;
+	
+	private ButtonGroup leftGroup = new ButtonGroup();
+	private ButtonGroup rightGroup = new ButtonGroup();
+	private JPanel leftRadioButtonContainer;
+	private JPanel rightRadioButtonContainer;
+
 
 	// private JLabel rightcontigLabel5;
 
@@ -131,29 +139,35 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		add(chooseContigPanel, BorderLayout.CENTER);
 
 		leftContigs = new ContigAppearance[5];
-		leftContigs[0] = leftContig1;
+	/*	leftContigs[0] = leftContig1;
 		leftContigs[1] = leftContig2;
 		leftContigs[2] = leftContig3;
 		leftContigs[3] = leftContig4;
-		leftContigs[4] = leftContig5;
+		leftContigs[4] = leftContig5;*/
 
 		rightContigs = new ContigAppearance[5];
-		rightContigs[0] = rightContig1;
+		/*rightContigs[0] = rightContig1;
 		rightContigs[1] = rightContig2;
 		rightContigs[2] = rightContig3;
 		rightContigs[3] = rightContig4;
-		rightContigs[4] = rightContig5;
+		rightContigs[4] = rightContig5;*/
 
 		layout = new BoxLayout(chooseContigPanel, BoxLayout.LINE_AXIS);
 		chooseContigPanel.setLayout(layout);
 
 		leftContainer = new JPanel();
+		leftRadioButtonContainer = new JPanel();
 		centerContainer = new JPanel();
+		rightRadioButtonContainer = new JPanel();
 		rightContainer = new JPanel();
 
 		BoxLayout leftBoxLayout = new BoxLayout(leftContainer,
 				BoxLayout.PAGE_AXIS);
+		BoxLayout leftRadioBoxLayout = new BoxLayout(leftRadioButtonContainer,
+				BoxLayout.PAGE_AXIS);
 		BoxLayout centerBoxLayout = new BoxLayout(centerContainer,
+				BoxLayout.PAGE_AXIS);
+		BoxLayout rightRadioBoxLayout = new BoxLayout(rightRadioButtonContainer,
 				BoxLayout.PAGE_AXIS);
 		BoxLayout rightBoxLayout = new BoxLayout(rightContainer,
 				BoxLayout.PAGE_AXIS);
@@ -163,6 +177,12 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		leftContainer.setPreferredSize(new Dimension(310, 1000));
 		leftContainer.setMinimumSize(new Dimension(310, 1000));
 		leftContainer.setMaximumSize(new Dimension(310, 1000));
+		
+		leftRadioButtonContainer.setLayout(leftRadioBoxLayout);
+		leftRadioButtonContainer.setBackground(Color.WHITE);
+		leftRadioButtonContainer.setPreferredSize(new Dimension(20, 1000));
+		leftRadioButtonContainer.setMinimumSize(new Dimension(20, 1000));
+		leftRadioButtonContainer.setMaximumSize(new Dimension(20, 1000));
 
 		centerContainer.setLayout(centerBoxLayout);
 		centerContainer.setBackground(Color.WHITE);
@@ -175,11 +195,19 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		rightContainer.setPreferredSize(new Dimension(310, 1000));
 		rightContainer.setMinimumSize(new Dimension(310, 1000));
 		rightContainer.setMaximumSize(new Dimension(310, 1000));
+		
+		rightRadioButtonContainer.setLayout(rightRadioBoxLayout);
+		rightRadioButtonContainer.setBackground(Color.WHITE);
+		rightRadioButtonContainer.setPreferredSize(new Dimension(20, 1000));
+		rightRadioButtonContainer.setMinimumSize(new Dimension(20, 1000));
+		rightRadioButtonContainer.setMaximumSize(new Dimension(20, 1000));
 
 		chooseContigPanel.add(leftContainer);
+		chooseContigPanel.add(leftRadioButtonContainer);
 		chooseContigPanel.add(Box.createHorizontalGlue());
 		chooseContigPanel.add(centerContainer);
 		chooseContigPanel.add(Box.createHorizontalGlue());
+		chooseContigPanel.add(rightRadioButtonContainer);
 		chooseContigPanel.add(rightContainer);
 
 		/*
@@ -388,9 +416,11 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			Vector<DNASequence> leftNeighbours = null;
 			ContigAppearance contigPanel = null;
 			leftNeighbours = event.getContigData();
+			JRadioButton radioButton;
 
-			if (leftContainer.getComponentCount() > 0) {
+			if (leftContainer.getComponentCount() > 0&& leftRadioButtonContainer.getComponentCount() > 0) {
 				leftContainer.removeAll();
+				leftRadioButtonContainer.removeAll();
 			}
 			int t = 0;
 			for (Iterator<DNASequence> neighbour = leftNeighbours.iterator(); neighbour
@@ -403,10 +433,16 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
 					contigPanel.setVisible(true);
+					
+					radioButton = new JRadioButton();
+					radioButton.setBackground(Color.WHITE);
+					leftGroup.add(radioButton);
+					leftRadioButtonContainer.add(radioButton);
 
 					leftContainer.add(contigPanel);
 					if(t <4){
 						leftContainer.add(Box.createVerticalGlue());
+						leftRadioButtonContainer.add(Box.createVerticalGlue());
 					}
 					leftContainer.updateUI();
 					t++;
@@ -421,10 +457,12 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 	
 			Vector<DNASequence> rightNeighbours = null;
 			ContigAppearance contigPanel = null;
+			JRadioButton radioButton;
 			rightNeighbours = event.getContigData();
 			int s = 0;
-			if (rightContainer.getComponentCount() > 0) {
+			if (rightContainer.getComponentCount() > 0 && rightRadioButtonContainer.getComponentCount() > 0) {
 				rightContainer.removeAll();
+				rightRadioButtonContainer.removeAll();
 			}
 
 			for (Iterator<DNASequence> neighbour = rightNeighbours.iterator(); neighbour
@@ -437,10 +475,16 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
 					contigPanel.setVisible(true);
-
+					
+					radioButton = new JRadioButton();
+					radioButton.setBackground(Color.WHITE);
+					rightGroup.add(radioButton);
+					rightRadioButtonContainer.add(radioButton);
+					
 					rightContainer.add(contigPanel);
 					if(s<4){
 						rightContainer.add(Box.createVerticalGlue());
+						rightRadioButtonContainer.add(Box.createVerticalGlue());
 					}
 					rightContainer.updateUI();
 					s++;

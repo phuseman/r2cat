@@ -26,6 +26,10 @@ public class GlassPaneWithLines extends JPanel {
 		super();
 	}
 
+	/*
+	 * relative support noch hinzufuegen
+	 * diesen dann nutzen um die dicke der Kante zu veraendern
+	 */
 	public void setLine(JPanel neigbourContainerleft, JPanel neigbourContainer,
 			JPanel centralContig, Boolean flag1, boolean flag2) {
 
@@ -41,7 +45,7 @@ public class GlassPaneWithLines extends JPanel {
 	public void paintComponent(Graphics gr) {
 		super.paintComponent(gr);
 
-		System.out.println("paint wird aufgerufen");
+//		System.out.println("paint wird aufgerufen");
 		if (rightflag && leftflag) {
 			Graphics2D g = (Graphics2D) gr;
 
@@ -77,6 +81,8 @@ public class GlassPaneWithLines extends JPanel {
 						g.setStroke(new BasicStroke(1.0f));
 						g.drawLine(x + laenge-5, y, x2-5, y2);
 					} else {
+
+						
 						Point point = neighbour.getComponent(
 								componentenArray[i]).getLocationOnScreen();
 						int x = (int) point.getX();
