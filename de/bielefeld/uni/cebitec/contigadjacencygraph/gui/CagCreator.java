@@ -50,6 +50,7 @@ public class CagCreator {
 //	private DNASequence[] fiveMostLikleyRightNeighbours;
 	private Vector<DNASequence>fiveMostLikleyRightNeighbours;
 	private DNASequence currentContigObject;
+	private DNASequence neighbourContigObject;
 
 	// private CAGWindow window;
 	public CagCreator(LayoutGraph g) {
@@ -177,54 +178,7 @@ public class CagCreator {
 	 * das keine Lücken mehr in den angezeigten contigs sind.
 	 * 
 	 */
-	/*public Vector<DNASequence> calculateFiveMostLikleyLeftNeighbours(int index) {
-	
-		fiveMostLikleyLeftNeighbours = new Vector<DNASequence>();
 
-		boolean is_I_equals_X = false;
-
-		for (Iterator<AdjacencyEdge> iterator = leftNeighbours[index]
-				.iterator(); iterator.hasNext();) {
-
-			AdjacencyEdge edge = iterator.next();
-			
-			//System.out.println(edge.getContigi() +" "+ edge.getContigj());
-			if(edge.getContigi().getId() == currentContigObject.getId()){
-				is_I_equals_X = true;
-			}
-			if (is_I_equals_X){// j ist der nachbar
-				
-				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
-				 * oder nicht.
-				 
-				if(edge.isRightConnectori()){
-					if(edge.isLeftConnectori() == false && edge.isLeftConnectorj() ==true){
-						currentContigObject.setReverse(true);
-					}
-					if(edge.isLeftConnectori() == true && edge.isLeftConnectorj() == false){
-						currentContigObject.setReverse(true);
-					}
-				}
-				fiveMostLikleyLeftNeighbours.add(edge.getContigj());
-			}else{// i ist der nachbar
-				
-				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
-				 * oder nicht.
-				 
-				if(edge.isLeftConnectorj()){
-					if(edge.isLeftConnectori() == true && edge.isRightConnectori() ==true){
-						currentContigObject.setReverse(true);
-					}
-					if(edge.isLeftConnectori() == true && edge.isRightConnectori() == false){
-						currentContigObject.setReverse(true);
-					}
-				}	
-				fiveMostLikleyLeftNeighbours.add(edge.getContigi());
-			}
-		}
-		return fiveMostLikleyLeftNeighbours;
-
-	}*/
 	public synchronized Vector<DNASequence> calculateFiveMostLikleyNeighbours(int index, boolean isLeft) {
 		
 		Vector <AdjacencyEdge>[] neighbours;
@@ -249,9 +203,11 @@ public class CagCreator {
 			//		System.out.println( isLeft+ " "+edge.getContigi() +" "+ edge.getContigj());
 			if(edge.getContigi().getId() == currentContigObject.getId()){
 				is_I_equals_X = true;
+				neighbourContigObject = edge.getContigj();
 				support = edge.getRelativeSupportj();
 			}else{
 				is_I_equals_X = false;
+				neighbourContigObject = edge.getContigi();
 				support = edge.getRelativeSupporti();
 			}
 	//		System.out.println("i also linke seite sollte die id des aktuellem Contigs haben: "+is_I_equals_X);
@@ -259,14 +215,18 @@ public class CagCreator {
 				/*
 				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
 				 * oder nicht.
+				 * TODO ist das currentContigObjekt wirklich richtig.
+				 * ist es nicht nur das central contig. Muss ich nicht noch eine extra variable fuer 
+				 * die nachbarn haben?
 				 */
 				if(edge.isRightConnectori()){
 					if(edge.isLeftConnectori() == false && edge.isLeftConnectorj() ==true){
-						currentContigObject.setReverse(true);
+						neighbourContigObject.setReverse(true);
 					}
 					if(edge.isLeftConnectori() == true && edge.isLeftConnectorj() == false){
-						currentContigObject.setReverse(true);
+						neighbourContigObject.setReverse(true);
 					}
+					neighbourContigObject.setSupportComparativeToCentralContig(support);
 				}
 				fiveNeighbours.add(edge.getContigj());
 			}else{// i ist der nachbar
@@ -276,11 +236,12 @@ public class CagCreator {
 				 */
 				if(edge.isLeftConnectorj()){
 					if(edge.isLeftConnectori() == true && edge.isRightConnectori() ==true){
-						currentContigObject.setReverse(true);
+						neighbourContigObject.setReverse(true);
 					}
 					if(edge.isLeftConnectori() == true && edge.isRightConnectori() == false){
-						currentContigObject.setReverse(true);
+						neighbourContigObject.setReverse(true);
 					}
+					neighbourContigObject.setSupportComparativeToCentralContig(support);
 				}	
 				fiveNeighbours.add(edge.getContigi());
 			}

@@ -51,41 +51,56 @@ public class ContigAppearance extends JPanel {
 		isReverse = contigNode.isReverse();
 		isReverseToString = new Boolean(isReverse).toString();
 		border = new ContigBorder(isRepeat, isReverse);
-		//relativeSup = TODO hier sollte ich eine Methode aufrufen koennen dir mir den
-		// 							relativen support des Contigs nennt. 
-		//							Muss ich noch in dem Model einbauen, dass es gespeichert wird.
+		relativeSup = contigNode.getSupportComparativeToCentralContig();
+			/*TODO hier sollte ich eine Methode aufrufen koennen dir mir den
+		 							relativen support des Contigs nennt. 
+									Muss ich noch in dem Model einbauen, dass es gespeichert wird.*/
 	}
 		
 	private  void setContigAppearance(String contigId, String isReverseToString,
 			long size, ContigBorder border) {
-		
-		char[] dst = null;
+		String contigNameAusChar = "";
+		char[] dst = new char[9];
 		contigLabel.setName(contigId);
-		
 		if (contigId.length() > 10){
-			contigId.getChars(0, 2, dst, 0);
-			/*
-			 * TODO testen ob es funktioniert
-			 */
+			contigId.getChars(0, 3, dst, 0);
+			
 			dst[3] = '.';
-			dst[4] = '.';
+			dst[4] = ' ';
 			dst[5] = '.';
+			
 			contigId.getChars(contigId.length() - 3,	 contigId.length(), dst, 6);
-			contigId = dst.toString();
+			
+			for (int i = 0; i < dst.length; i++) {
+				char c = dst[i];				
+				contigNameAusChar = contigNameAusChar + c;
+			}
+			contigId = contigNameAusChar;
 		}
+		
 		/*
 		 * TODO erweitern
 		 * so viele Informationen wie moeglich in dieses ToolTip stecken.
 		 */
-		this.setToolTipText("<html><font size = -2><u>"
+		if(relativeSup <= 0){
+			this.setToolTipText("<html><font size = -2><u>"
 					+ contigId + "</u>" + "<br>length:"
 					+ size + " b <br>"
+					+ "support: is not available for this contig <br>"
 					+ "</html>");
+		}else{
+				this.setToolTipText("<html><font size = -2><u>"
+							+ contigId + "</u>" + "<br>length:"
+							+ size + " b <br>"
+							+ "support: " + Math.ceil(relativeSup*10000)/100+" <br>"
+							+ "</html>");
+		}
 		
 		if(size <1000){			
 			contigLabel.setText("<html><font size = -2><u>"
-					+ contigId + "</u>" + "<br>length:"
-					+ "&lt; 1" + " kb</html>");
+					+ contigId+ "</u>" + "<br>length:"
+					+ "&lt; 1" + " kb<br>"
+					+	"</html>");
 			this.setBorder(border);
 			this.setName(isReverseToString);
 		}else{

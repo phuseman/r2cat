@@ -266,13 +266,13 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		pack();
 	}
 
-	private void setLineInPanel() {
+	private void setLineInPanel( double[] support) {
 		if(rightContainerFull && leftContainerFull){
 			System.out.println("Linker Container: "+leftContainerFull+" rechter container: "+rightContainerFull);
 				//glassPanel.setLine(leftContainer, centralContig,true);
 	//	}else{
 			System.out.println("Rechter und linker container");
-				glassPanel.setLine(leftContainer,rightContainer, centralContig, rightContainerFull, leftContainerFull);
+				glassPanel.setLine(leftContainer,rightContainer, centralContig, rightContainerFull, leftContainerFull, support);
 		glassPanel.setOpaque(false);
 		glassPanel.setPreferredSize(chooseContigPanel.getSize());
 		getGlassPane().setVisible(true);
@@ -417,6 +417,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			ContigAppearance contigPanel = null;
 			leftNeighbours = event.getContigData();
 			JRadioButton radioButton;
+			double[] support = null;
 
 			if (leftContainer.getComponentCount() > 0&& leftRadioButtonContainer.getComponentCount() > 0) {
 				leftContainer.removeAll();
@@ -426,9 +427,9 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			for (Iterator<DNASequence> neighbour = leftNeighbours.iterator(); neighbour
 					.hasNext();) {
 				while (t < 5) {
+					support = new double[5];
 					DNASequence dnaSequence = (DNASequence) neighbour.next();
-					//leftContigs[t] = contigPanel;
-
+					support[t] = dnaSequence.getSupportComparativeToCentralContig();
 					contigPanel = new ContigAppearance(dnaSequence);
 					contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
@@ -448,7 +449,8 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					t++;
 				}
 				leftContainerFull = true;
-				setLineInPanel();
+				System.out.println("support im window "+ support);
+				setLineInPanel(support);
 				break;
 			}
 		}
@@ -458,6 +460,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			Vector<DNASequence> rightNeighbours = null;
 			ContigAppearance contigPanel = null;
 			JRadioButton radioButton;
+			double support[] = null;
 			rightNeighbours = event.getContigData();
 			int s = 0;
 			if (rightContainer.getComponentCount() > 0 && rightRadioButtonContainer.getComponentCount() > 0) {
@@ -469,8 +472,9 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					.hasNext();) {
 				while (s < 5) {
 					DNASequence dnaSequence = (DNASequence) neighbour.next();
-				//	rightContigs[s] = contigPanel;
-
+					support = new double[5];
+					support[s] = dnaSequence.getSupportComparativeToCentralContig();
+					System.out.println("der support "+dnaSequence.getSupportComparativeToCentralContig()*10000);
 					contigPanel = new ContigAppearance(dnaSequence);
 					contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
@@ -490,7 +494,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					s++;
 				}
 				rightContainerFull =true;
-				setLineInPanel();
+				setLineInPanel(support);
 				break;
 			}
 		}
