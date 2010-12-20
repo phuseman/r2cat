@@ -57,7 +57,7 @@ public class CagCreator {
 	public CagCreator(LayoutGraph g) {
 		this.graph = g;
 		listeners = new ArrayList<CagEventListener>();
-		//selectedContigs = new Vector<DNASequence>();
+		selectedContigs = new Vector<DNASequence>();
 		leftAndRightNeighbour();
 		createContigList();
 	}
@@ -216,7 +216,7 @@ public class CagCreator {
 			if (is_I_equals_X){// j ist der nachbar
 				
 				fiveNeighbours.add(neighbourContigObject);
-			//	boolean flag = neighbourIsAlreadySelected(neighbourContigObject);
+				boolean flag = neighbourIsAlreadySelected(neighbourContigObject);
 				/*
 				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
 				 * oder nicht.
@@ -230,10 +230,10 @@ public class CagCreator {
 				}
 				
 				neighbourContigObject.setSupportComparativeToCentralContig(support);
-				//neighbourContigObject.setContigIsSelected(flag);
+				neighbourContigObject.setContigIsSelected(flag);
 			}else{// i ist der nachbar
 				fiveNeighbours.add(neighbourContigObject);
-				//boolean flag = neighbourIsAlreadySelected(neighbourContigObject);
+				boolean flag = neighbourIsAlreadySelected(neighbourContigObject);
 				/*
 				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
 				 * oder nicht.
@@ -248,7 +248,7 @@ public class CagCreator {
 					neighbourContigObject.setReverse(false);
 				}
 				neighbourContigObject.setSupportComparativeToCentralContig(support);
-			//	neighbourContigObject.setContigIsSelected(flag);
+				neighbourContigObject.setContigIsSelected(flag);
 			}
 		}
 		if(isLeft){
@@ -286,13 +286,13 @@ public class CagCreator {
 			contigIndex = contigs.indexOf(c);
 			if (c.getId().equals(contigId)) {
 				currentContigObject = c;
-//				System.out.println("Dieser Text darf nur einmal vorkommen");
-//				if (contigIsReverse == true){
-//					currentContigObject.setReverse(true);
-//				}else{
-//					System.out.println("Aktuelles Contig ist nicht !! reverse");
-//					currentContigObject.setReverse(false);
-//				}
+				System.out.println("Dieser Text darf nur einmal vorkommen");
+				if (contigIsReverse == true){
+					currentContigObject.setReverse(true);
+				}else{
+					System.out.println("Aktuelles Contig ist nicht !! reverse");
+					currentContigObject.setReverse(false);
+				}
 				break;
 			}
 		}
@@ -434,7 +434,7 @@ public class CagCreator {
 	public void  changeContigs(String currentContig, String isReverse) {
 
 		this.currentContig = currentContig;
-	//	this.contigIsReverse = Boolean.parseBoolean(isReverse);
+		this.contigIsReverse = Boolean.parseBoolean(isReverse);
 		idOfCurrentContig(currentContig);
 		sendCurrentContig();
 	}

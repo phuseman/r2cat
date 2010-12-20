@@ -346,15 +346,15 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 				selectedRadioButtons.add(idOfSelectedContig);
 				model.addSelectedContig(idOfSelectedContig);
 			}else{
-			for (String actionCommandOfContig : selectedRadioButtons) {
-				System.out.println("prüfe nun ob die Strings im Vektor mit dem ausgewähltem übereinstimmen.");
-				if(!actionCommandOfContig.equals(e.getActionCommand())){
-					System.out.println("Ein contig wurde ausgewählt");
-					String idOfSelectedContig = e.getActionCommand();
-					selectedRadioButtons.add(idOfSelectedContig);
-					model.addSelectedContig(idOfSelectedContig);
+				for (String actionCommandOfContig : selectedRadioButtons) {
+					System.out.println("prüfe nun ob die Strings im Vektor mit dem ausgewähltem übereinstimmen.");
+					if(!actionCommandOfContig.equals(e.getActionCommand())){
+						System.out.println("Ein contig wurde ausgewählt");
+						String idOfSelectedContig = e.getActionCommand();
+						selectedRadioButtons.add(idOfSelectedContig);
+						model.addSelectedContig(idOfSelectedContig);
+					}
 				}
-			}
 		}
 		}
 		
@@ -465,8 +465,8 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					
 					radioButton = new JRadioButton();
 					radioButton.setBackground(Color.WHITE);
-//					radioButton.setActionCommand(dnaSequence.getId());
-//					radioButton.addActionListener(new RadioButtonActionListener());
+					radioButton.setActionCommand(dnaSequence.getId());
+					radioButton.addActionListener(new RadioButtonActionListener());
 				
 					leftGroup.add(radioButton);
 					leftRadioButtonContainer.add(radioButton);
@@ -511,8 +511,8 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					
 					radioButton = new JRadioButton();
 					radioButton.setBackground(Color.WHITE);
-//					radioButton.setActionCommand(dnaSequence.getId());
-//					radioButton.addActionListener(new RadioButtonActionListener());
+					radioButton.setActionCommand(dnaSequence.getId());
+					radioButton.addActionListener(new RadioButtonActionListener());
 					
 					rightGroup.add(radioButton);
 					rightRadioButtonContainer.add(radioButton);

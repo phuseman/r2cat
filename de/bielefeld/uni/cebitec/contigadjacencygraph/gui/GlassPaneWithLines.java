@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.IllegalComponentStateException;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -148,6 +149,7 @@ public class GlassPaneWithLines extends JPanel {
 		}
 		}catch(IllegalComponentStateException ex){
 			System.out.println("Jetzt war der thread wieder zu früh");
+			
 			//Thread.sleep(100);
 		}
 	}

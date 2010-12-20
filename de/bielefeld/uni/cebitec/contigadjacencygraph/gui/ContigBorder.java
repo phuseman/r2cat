@@ -13,12 +13,16 @@ public class ContigBorder extends AbstractBorder{
 
 	private boolean isRepeat;
 	private boolean isReverse;
-	private boolean isSelected;
+	private boolean isSelected = false;
 	
-	public ContigBorder(boolean isRepeat, boolean isReverse, boolean isSelected ) {
+	public ContigBorder(boolean isRepeat, boolean isReverse) {
 		this.isRepeat = isRepeat;
 		this.isReverse = isReverse;
-		this.isSelected = isSelected;
+	}
+	public ContigBorder(boolean isRepeat, boolean isReverse, boolean flag) {
+		this.isRepeat = isRepeat;
+		this.isReverse = isReverse;
+		this.isSelected = flag;
 	}
 
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
