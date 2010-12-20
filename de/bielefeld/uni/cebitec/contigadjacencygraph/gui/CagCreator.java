@@ -34,6 +34,7 @@ public class CagCreator {
 
 	private LayoutGraph graph;
 	private Vector<DNASequence> contigs;
+	private Vector<DNASequence> selectedContigs;
 	private String[] listData;
 	private ArrayList<CagEventListener> listeners;
 	private Vector<AdjacencyEdge>[] leftNeighbours;
@@ -56,6 +57,7 @@ public class CagCreator {
 	public CagCreator(LayoutGraph g) {
 		this.graph = g;
 		listeners = new ArrayList<CagEventListener>();
+		//selectedContigs = new Vector<DNASequence>();
 		leftAndRightNeighbour();
 		createContigList();
 	}
@@ -184,10 +186,12 @@ public class CagCreator {
 		Vector <AdjacencyEdge>[] neighbours;
 		Vector<DNASequence> fiveNeighbours;
 		if (isLeft){
+			System.out.println("Berechne die linken nachbarn");
 			fiveMostLikleyLeftNeighbours = new Vector<DNASequence>();
 			fiveNeighbours = fiveMostLikleyLeftNeighbours;
 			neighbours = leftNeighbours;
 		}else{
+			System.out.println("Berechne die rechten nachbarn");
 			fiveMostLikleyRightNeighbours = new Vector<DNASequence>();
 			fiveNeighbours = fiveMostLikleyRightNeighbours;
 			neighbours = rightNeighbours;
@@ -198,9 +202,8 @@ public class CagCreator {
 		
 		for (Iterator<AdjacencyEdge> iterator = neighbours[index]
 		                                                       .iterator(); iterator.hasNext();) {
-			
 			AdjacencyEdge edge = iterator.next();
-			//		System.out.println( isLeft+ " "+edge.getContigi() +" "+ edge.getContigj());
+
 			if(edge.getContigi().getId() == currentContigObject.getId()){
 				is_I_equals_X = true;
 				neighbourContigObject = edge.getContigj();
@@ -210,40 +213,42 @@ public class CagCreator {
 				neighbourContigObject = edge.getContigi();
 				support = edge.getRelativeSupporti();
 			}
-	//		System.out.println("i also linke seite sollte die id des aktuellem Contigs haben: "+is_I_equals_X);
 			if (is_I_equals_X){// j ist der nachbar
+				
+				fiveNeighbours.add(neighbourContigObject);
+			//	boolean flag = neighbourIsAlreadySelected(neighbourContigObject);
 				/*
 				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
 				 * oder nicht.
-				 * TODO ist das currentContigObjekt wirklich richtig.
-				 * ist es nicht nur das central contig. Muss ich nicht noch eine extra variable fuer 
-				 * die nachbarn haben?
 				 */
-				if(edge.isRightConnectori()){
-					if(edge.isLeftConnectori() == false && edge.isLeftConnectorj() ==true){
+				if(edge.isLeftConnectorj() == true && edge.isRightConnectorj() == true){
 						neighbourContigObject.setReverse(true);
-					}
-					if(edge.isLeftConnectori() == true && edge.isLeftConnectorj() == false){
+				}else if(edge.isLeftConnectorj() == false && edge.isLeftConnectorj() == true){
 						neighbourContigObject.setReverse(true);
-					}
-					neighbourContigObject.setSupportComparativeToCentralContig(support);
+				}else{
+					neighbourContigObject.setReverse(false);
 				}
-				fiveNeighbours.add(edge.getContigj());
+				
+				neighbourContigObject.setSupportComparativeToCentralContig(support);
+				//neighbourContigObject.setContigIsSelected(flag);
 			}else{// i ist der nachbar
+				fiveNeighbours.add(neighbourContigObject);
+				//boolean flag = neighbourIsAlreadySelected(neighbourContigObject);
 				/*
 				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
 				 * oder nicht.
 				 */
-				if(edge.isLeftConnectorj()){
-					if(edge.isLeftConnectori() == true && edge.isRightConnectori() ==true){
-						neighbourContigObject.setReverse(true);
-					}
-					if(edge.isLeftConnectori() == true && edge.isRightConnectori() == false){
-						neighbourContigObject.setReverse(true);
-					}
-					neighbourContigObject.setSupportComparativeToCentralContig(support);
-				}	
-				fiveNeighbours.add(edge.getContigi());
+				if(edge.isLeftConnectori() == true && edge.isRightConnectori() ==true){
+					neighbourContigObject.setReverse(true);
+				}
+				else if(edge.isLeftConnectori() == true && edge.isRightConnectori() == false){
+					neighbourContigObject.setReverse(true);
+				}
+				else{
+					neighbourContigObject.setReverse(false);
+				}
+				neighbourContigObject.setSupportComparativeToCentralContig(support);
+			//	neighbourContigObject.setContigIsSelected(flag);
 			}
 		}
 		if(isLeft){
@@ -273,17 +278,44 @@ public class CagCreator {
 	 * Method to select some informations for the current contig. They will be
 	 * displayed in the view of the contig
 	 */
-	private void idOfCurrentContig(String name) {
+	private synchronized DNASequence idOfCurrentContig (String name) {
 
-		contigId = currentContig;
+		contigId = name;
 
 		for (DNASequence c : contigs) {
 			contigIndex = contigs.indexOf(c);
 			if (c.getId().equals(contigId)) {
 				currentContigObject = c;
+//				System.out.println("Dieser Text darf nur einmal vorkommen");
+//				if (contigIsReverse == true){
+//					currentContigObject.setReverse(true);
+//				}else{
+//					System.out.println("Aktuelles Contig ist nicht !! reverse");
+//					currentContigObject.setReverse(false);
+//				}
 				break;
 			}
 		}
+		return currentContigObject;
+	}
+	
+	private boolean neighbourIsAlreadySelected (DNASequence currentNeighbour){
+		System.out.println("Stelle fest, ob der Nachbar schon ausgewählt wurde.");
+		boolean flag = false;
+		
+		for (DNASequence neighbour : selectedContigs) {
+			if(neighbour == currentNeighbour){
+				flag = true;
+			}
+		}		
+		return flag;
+	}
+	
+	public Vector<DNASequence> addSelectedContig (String name){
+		System.out.println("Füge Contig zu den auswählten Contigs hinzu.");
+		DNASequence selectedContig = idOfCurrentContig(name);
+		selectedContigs.add(selectedContig);
+		return selectedContigs;
 	}
 
 	/*
@@ -402,7 +434,7 @@ public class CagCreator {
 	public void  changeContigs(String currentContig, String isReverse) {
 
 		this.currentContig = currentContig;
-		this.contigIsReverse = Boolean.parseBoolean(isReverse);
+	//	this.contigIsReverse = Boolean.parseBoolean(isReverse);
 		idOfCurrentContig(currentContig);
 		sendCurrentContig();
 	}

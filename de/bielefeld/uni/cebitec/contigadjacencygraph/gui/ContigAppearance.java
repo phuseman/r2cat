@@ -18,8 +18,9 @@ public class ContigAppearance extends JPanel {
 	private String isReverseToString;
 	private JLabel contigLabel;
 	private long length;
-	private boolean isRepeat;
-	private boolean isReverse; 	
+	private boolean isRepeat= false;
+	private boolean isReverse= false; 	
+	private boolean isSelected = false;
 	private ContigBorder border;
 	private double relativeSup;
 	
@@ -50,7 +51,8 @@ public class ContigAppearance extends JPanel {
 		isRepeat = contigNode.isRepetitive();
 		isReverse = contigNode.isReverse();
 		isReverseToString = new Boolean(isReverse).toString();
-		border = new ContigBorder(isRepeat, isReverse);
+		isSelected = contigNode.isContigIsSelected();
+		border = new ContigBorder(isRepeat, isReverse, isSelected);
 		relativeSup = contigNode.getSupportComparativeToCentralContig();
 			/*TODO hier sollte ich eine Methode aufrufen koennen dir mir den
 		 							relativen support des Contigs nennt. 

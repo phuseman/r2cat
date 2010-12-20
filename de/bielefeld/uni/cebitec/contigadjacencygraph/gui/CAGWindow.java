@@ -67,6 +67,9 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 	private JPanel leftContainer;
 	private JPanel centerContainer;
 	private JPanel rightContainer;
+	
+	private double[] leftSupport;
+	private double[] rightSupport;
 
 	private GlassPaneWithLines glassPanel;
 
@@ -100,6 +103,9 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 	private ButtonGroup rightGroup = new ButtonGroup();
 	private JPanel leftRadioButtonContainer;
 	private JPanel rightRadioButtonContainer;
+	
+	private Vector<String> selectedRadioButtons;
+	private int z = 0;
 
 
 	// private JLabel rightcontigLabel5;
@@ -112,6 +118,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		this.control = controller;
 		setTitle("View of contig adjacency graph");
 
+		selectedRadioButtons = new Vector<String>();
 		/*
 		 * Menu TODO Was fuer Funktionen sollte das Menu haben??
 		 */
@@ -266,18 +273,14 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		pack();
 	}
 
-	private void setLineInPanel( double[] support) {
+	private void setLineInPanel() {
 		if(rightContainerFull && leftContainerFull){
-			System.out.println("Linker Container: "+leftContainerFull+" rechter container: "+rightContainerFull);
-				//glassPanel.setLine(leftContainer, centralContig,true);
-	//	}else{
-			System.out.println("Rechter und linker container");
-				glassPanel.setLine(leftContainer,rightContainer, centralContig, rightContainerFull, leftContainerFull, support);
-		glassPanel.setOpaque(false);
-		glassPanel.setPreferredSize(chooseContigPanel.getSize());
-		getGlassPane().setVisible(true);
-		rightContainerFull=false;
-		leftContainerFull=false;
+			glassPanel.setLine(leftContainer,rightContainer, centralContig, leftContainerFull, rightContainerFull,leftSupport, rightSupport );
+			glassPanel.setOpaque(false);
+			glassPanel.setPreferredSize(chooseContigPanel.getSize());
+			getGlassPane().setVisible(true);
+			rightContainerFull=false;
+			leftContainerFull=false;
 		}
 	}
 
@@ -329,6 +332,32 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		protected void done() {
 			super.done();
 		}
+	}
+	
+	public class RadioButtonActionListener implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			
+			if (z == 0){
+				z++;
+				System.out.println("Ein contig wurde ausgewählt");
+				String idOfSelectedContig = e.getActionCommand();
+				selectedRadioButtons.add(idOfSelectedContig);
+				model.addSelectedContig(idOfSelectedContig);
+			}else{
+			for (String actionCommandOfContig : selectedRadioButtons) {
+				System.out.println("prüfe nun ob die Strings im Vektor mit dem ausgewähltem übereinstimmen.");
+				if(!actionCommandOfContig.equals(e.getActionCommand())){
+					System.out.println("Ein contig wurde ausgewählt");
+					String idOfSelectedContig = e.getActionCommand();
+					selectedRadioButtons.add(idOfSelectedContig);
+					model.addSelectedContig(idOfSelectedContig);
+				}
+			}
+		}
+		}
+		
 	}
 
 	public class ContigMouseListener implements MouseListener {
@@ -417,7 +446,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			ContigAppearance contigPanel = null;
 			leftNeighbours = event.getContigData();
 			JRadioButton radioButton;
-			double[] support = null;
+			leftSupport = new double[5];
 
 			if (leftContainer.getComponentCount() > 0&& leftRadioButtonContainer.getComponentCount() > 0) {
 				leftContainer.removeAll();
@@ -427,9 +456,8 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			for (Iterator<DNASequence> neighbour = leftNeighbours.iterator(); neighbour
 					.hasNext();) {
 				while (t < 5) {
-					support = new double[5];
 					DNASequence dnaSequence = (DNASequence) neighbour.next();
-					support[t] = dnaSequence.getSupportComparativeToCentralContig();
+					leftSupport[t] = dnaSequence.getSupportComparativeToCentralContig();
 					contigPanel = new ContigAppearance(dnaSequence);
 					contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
@@ -437,9 +465,12 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					
 					radioButton = new JRadioButton();
 					radioButton.setBackground(Color.WHITE);
+//					radioButton.setActionCommand(dnaSequence.getId());
+//					radioButton.addActionListener(new RadioButtonActionListener());
+				
 					leftGroup.add(radioButton);
 					leftRadioButtonContainer.add(radioButton);
-
+					
 					leftContainer.add(contigPanel);
 					if(t <4){
 						leftContainer.add(Box.createVerticalGlue());
@@ -449,8 +480,8 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					t++;
 				}
 				leftContainerFull = true;
-				System.out.println("support im window "+ support);
-				setLineInPanel(support);
+
+				setLineInPanel();
 				break;
 			}
 		}
@@ -460,7 +491,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 			Vector<DNASequence> rightNeighbours = null;
 			ContigAppearance contigPanel = null;
 			JRadioButton radioButton;
-			double support[] = null;
+			rightSupport = new double[5];
 			rightNeighbours = event.getContigData();
 			int s = 0;
 			if (rightContainer.getComponentCount() > 0 && rightRadioButtonContainer.getComponentCount() > 0) {
@@ -472,9 +503,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					.hasNext();) {
 				while (s < 5) {
 					DNASequence dnaSequence = (DNASequence) neighbour.next();
-					support = new double[5];
-					support[s] = dnaSequence.getSupportComparativeToCentralContig();
-					System.out.println("der support "+dnaSequence.getSupportComparativeToCentralContig()*10000);
+					rightSupport[s] = dnaSequence.getSupportComparativeToCentralContig();
 					contigPanel = new ContigAppearance(dnaSequence);
 					contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
@@ -482,6 +511,9 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					
 					radioButton = new JRadioButton();
 					radioButton.setBackground(Color.WHITE);
+//					radioButton.setActionCommand(dnaSequence.getId());
+//					radioButton.addActionListener(new RadioButtonActionListener());
+					
 					rightGroup.add(radioButton);
 					rightRadioButtonContainer.add(radioButton);
 					
@@ -493,8 +525,9 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					rightContainer.updateUI();
 					s++;
 				}
+
 				rightContainerFull =true;
-				setLineInPanel(support);
+				setLineInPanel();
 				break;
 			}
 		}

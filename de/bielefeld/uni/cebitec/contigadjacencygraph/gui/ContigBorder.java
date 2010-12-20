@@ -13,10 +13,12 @@ public class ContigBorder extends AbstractBorder{
 
 	private boolean isRepeat;
 	private boolean isReverse;
+	private boolean isSelected;
 	
-	public ContigBorder(boolean isRepeat, boolean isReverse ) {
+	public ContigBorder(boolean isRepeat, boolean isReverse, boolean isSelected ) {
 		this.isRepeat = isRepeat;
 		this.isReverse = isReverse;
+		this.isSelected = isSelected;
 	}
 
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
@@ -30,24 +32,31 @@ public class ContigBorder extends AbstractBorder{
 				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 		
 		GeneralPath p;
+		
+		if (isSelected) {
+			g2.setColor(Color.RED);
+		}else{
+			g2.setColor(Color.BLACK);
+		}
+		
 		if(isRepeat ==false && isReverse == false){
 			p = makeContig(0,0, c.getWidth(),c.getHeight());
-			g2.setColor(Color.BLUE);
+			//g2.setColor(Color.BLUE);
 			g2.draw(p);
 		}
 		if(isRepeat == true && isReverse == false){
 			p = makeRepeatContig(0,0, c.getWidth(),c.getHeight());
-			g2.setColor(Color.RED);
+//			g2.setColor(Color.RED);
 			g2.draw(p);
 		}
 		if(isRepeat == false && isReverse == true){
 			p = makeReverseContig(0,0, c.getWidth(),c.getHeight());
-			g2.setColor(Color.GREEN);
+//			g2.setColor(Color.GREEN);
 			g2.draw(p);
 		}
 		if(isRepeat == true && isReverse == true){
 			p = makeReverseRepeatContig(0,0, c.getWidth(),c.getHeight());
-			g2.setColor(Color.ORANGE);
+//			g2.setColor(Color.ORANGE);
 			g2.draw(p);
 		}
 		//g2.fill(p);

@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.IllegalComponentStateException;
 import java.awt.Point;
 import java.awt.RenderingHints;
 
@@ -25,6 +26,7 @@ public class GlassPaneWithLines extends JPanel {
 	private boolean leftflag;
 	private float lineStroke;
 	private double[] support;
+	private double[] supportleft;
 
 	public GlassPaneWithLines() {
 		super();
@@ -33,27 +35,35 @@ public class GlassPaneWithLines extends JPanel {
 	/*
 	 * relative support noch hinzufuegen
 	 * diesen dann nutzen um die dicke der Kante zu veraendern
+	 * 
+	 * TODO diese Klasse muss noch variabler gestaltet
+	 * und umstukturiert werden.
 	 */
 	public void setLine(JPanel neigbourContainerleft, JPanel neigbourContainer,
-			JPanel centralContig, Boolean flag1, boolean flag2, double[] supportOfEachContig) {
+			JPanel centralContig, Boolean flag1, boolean flag2, double[] supportOfEachContigleft,double[] supportOfEachContig) {
 
 		neighbour = neigbourContainer;
 		neighbourLeft = neigbourContainerleft;
 		b2 = centralContig;
 		rightflag = flag1;
 		leftflag = flag2;
+		supportleft = supportOfEachContigleft;
 		support = supportOfEachContig;
 		repaint();
 	}
 
 	@Override
 	public void paintComponent(Graphics gr) {
+		
+		try{
 		super.paintComponent(gr);
 
-//		System.out.println("paint wird aufgerufen");
 		if (rightflag && leftflag) {
 			Graphics2D g = (Graphics2D) gr;
 			
+			/*
+			 * Damit die Kanten weich gezeichnet werden.
+			 */
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 					RenderingHints.VALUE_ANTIALIAS_ON);
 			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
@@ -61,8 +71,15 @@ public class GlassPaneWithLines extends JPanel {
 
 			centralContig = b2.getLocationOnScreen();
 			int laenge2 = (int) b2.getSize().getWidth();
-			int[] componentenArray = { 0, 2, 4, 6, 8 };
+			int[] componentenArray = { 0, 2, 4, 6, 8 }; // TODO s.o.
 
+			/*
+			 * For wird hier eingesetzt um die unterschiedlichen Container zu beladen
+			 * zuerst wird diese Methode mit den rechten nachbarn und dann mit den linken
+			 * nachbarn gefüttert.
+			 * 
+			 * TODO s.o.
+			 */
 			for (int s = 0; s < 2; s++) {
 				if (s == 1) {
 					left = true;
@@ -79,23 +96,18 @@ public class GlassPaneWithLines extends JPanel {
 
 				for (int i = 0; i < componentenArray.length; i++) {
 					
-					
-					lineStroke =(float)Math.ceil(support[i]*10000)/100;
-					System.out.println("i "+ i+ " linien Dicke "+lineStroke);
-					//	System.out.println("Wie die berechnung von den Cotigs " + (100 * lineStroke)/2);
-					
-					
 					if (left) {
 						
-						if((float)Math.log(lineStroke +5) <= 0){
+						lineStroke =(float)Math.ceil(supportleft[i]*10000)/10;
+						
+						if((float)Math.log1p(lineStroke)+1 <= 0){
 							lineStroke = 1.0f;
-							System.out.println("LineStrocke ist eins ");
+						}else if ((float)Math.log1p(lineStroke)+1 > 5 ){
+							lineStroke = 5.0f;
 						}else{
-							lineStroke = (float)Math.log(lineStroke+5);
-							//lineStroke = lineStroke*100;
-							System.out.println("log +5/2" +
-									" "+lineStroke);
+							lineStroke = (float)Math.log1p(lineStroke)+1;
 						}
+						
 						Point point = neighbourLeft.getComponent(
 								componentenArray[i]).getLocationOnScreen();
 						Component p = neighbourLeft
@@ -105,32 +117,38 @@ public class GlassPaneWithLines extends JPanel {
 						int y = (int) point.getY();
 
 						g.setColor(Color.BLACK);
-						g.setStroke(new BasicStroke(0.1f));
-						g.drawLine(x + laenge-5, y, x2-5, y2);
-					} else {
-					/*	if((float)Math.log(lineStroke +1)/(2) <= 0){
-							lineStroke = 1.0f;
-							System.out.println("LineStrocke ist eins ");
-						}else{
-							lineStroke = (float)Math.log1p(lineStroke+1)/2;
-							//lineStroke = lineStroke*100;
-							System.out.println("log +5/2" +
-									" "+lineStroke);
-						}*/
+						g.setStroke(new BasicStroke(lineStroke));
+						g.drawLine(x + laenge, y, x2, y2);
+//						g.drawLine(x + laenge-5, y, x2-5, y2);
 
+					} else {
+						lineStroke =(float)Math.ceil(support[i]*10000)/10;
+
+						if((float)Math.log1p(lineStroke)+1 <= 0){
+							lineStroke = 1.0f;
+							
+						}else{
+							lineStroke = (float)Math.log1p(lineStroke)+1;
+							
+						}
 						
 						Point point = neighbour.getComponent(
 								componentenArray[i]).getLocationOnScreen();
+						
 						int x = (int) point.getX();
 						int y = (int) point.getY();
 
 						g.setColor(Color.BLACK);
 						g.setStroke(new BasicStroke(lineStroke));
-						g.drawLine(x-5, y, x2-5, y2);
-
+						g.drawLine(x, y, x2, y2);
+//						g.drawLine(x-5, y, x2-5, y2);
 					}
 				}
 			}
+		}
+		}catch(IllegalComponentStateException ex){
+			System.out.println("Jetzt war der thread wieder zu früh");
+			//Thread.sleep(100);
 		}
 	}
 }
