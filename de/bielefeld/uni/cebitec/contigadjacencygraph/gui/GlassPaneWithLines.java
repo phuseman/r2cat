@@ -148,7 +148,7 @@ public class GlassPaneWithLines extends JPanel {
 			}
 		}
 		}catch(IllegalComponentStateException ex){
-			System.out.println("Jetzt war der thread wieder zu früh");
+			//System.out.println("Jetzt war der thread wieder zu früh");
 			
 			//Thread.sleep(100);
 		}

@@ -34,7 +34,7 @@ public class CagCreator {
 
 	private LayoutGraph graph;
 	private Vector<DNASequence> contigs;
-	private Vector<DNASequence> selectedContigs;
+	private Vector<AdjacencyEdge> selectedContigs;
 	private String[] listData;
 	private ArrayList<CagEventListener> listeners;
 	private Vector<AdjacencyEdge>[] leftNeighbours;
@@ -57,7 +57,7 @@ public class CagCreator {
 	public CagCreator(LayoutGraph g) {
 		this.graph = g;
 		listeners = new ArrayList<CagEventListener>();
-		selectedContigs = new Vector<DNASequence>();
+		selectedContigs = new Vector<AdjacencyEdge>();
 		leftAndRightNeighbour();
 		createContigList();
 	}
@@ -216,7 +216,7 @@ public class CagCreator {
 			if (is_I_equals_X){// j ist der nachbar
 				
 				fiveNeighbours.add(neighbourContigObject);
-				boolean flag = neighbourIsAlreadySelected(neighbourContigObject);
+				boolean flag = neighbourIsAlreadySelected(edge);
 				/*
 				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
 				 * oder nicht.
@@ -233,7 +233,7 @@ public class CagCreator {
 				neighbourContigObject.setContigIsSelected(flag);
 			}else{// i ist der nachbar
 				fiveNeighbours.add(neighbourContigObject);
-				boolean flag = neighbourIsAlreadySelected(neighbourContigObject);
+				boolean flag = neighbourIsAlreadySelected(edge);
 				/*
 				 * Hier finde ich herraus, ob der Nachbar reverse angezeigt werden muss 
 				 * oder nicht.
@@ -286,11 +286,10 @@ public class CagCreator {
 			contigIndex = contigs.indexOf(c);
 			if (c.getId().equals(contigId)) {
 				currentContigObject = c;
-				System.out.println("Dieser Text darf nur einmal vorkommen");
+		
 				if (contigIsReverse == true){
 					currentContigObject.setReverse(true);
 				}else{
-					System.out.println("Aktuelles Contig ist nicht !! reverse");
 					currentContigObject.setReverse(false);
 				}
 				break;
@@ -299,22 +298,56 @@ public class CagCreator {
 		return currentContigObject;
 	}
 	
-	private boolean neighbourIsAlreadySelected (DNASequence currentNeighbour){
-		System.out.println("Stelle fest, ob der Nachbar schon ausgewählt wurde.");
+	private boolean neighbourIsAlreadySelected (AdjacencyEdge neighbour){
+	//	System.out.println("Stelle fest, ob der Nachbar schon ausgewählt wurde.");
 		boolean flag = false;
 		
-		for (DNASequence neighbour : selectedContigs) {
-			if(neighbour == currentNeighbour){
+		for (AdjacencyEdge edge : selectedContigs) {
+			if(edge.equals(neighbour)){
 				flag = true;
 			}
 		}		
 		return flag;
 	}
 	
-	public Vector<DNASequence> addSelectedContig (String name){
-		System.out.println("Füge Contig zu den auswählten Contigs hinzu.");
-		DNASequence selectedContig = idOfCurrentContig(name);
-		selectedContigs.add(selectedContig);
+	public Vector<AdjacencyEdge> addSelectedContig ( String neighbourName, String side){
+		
+		if (side.equals("left")){
+			System.out.println("links");
+			for (Iterator<AdjacencyEdge> iterator = leftNeighbours[contigIndex]
+		                                                       .iterator(); iterator.hasNext();) {
+					AdjacencyEdge edge = iterator.next();
+					/* TODO
+					 * erst abfragen, ob in dieser Kante 
+					 * zu dem Aktuellem Contig schon ein Eintrag vorhanden ist
+					 * wenn ja sollte es nicht moeglich sein einen neuen Eintrag zu machen
+					 * dann muss erst der Benutzer gefrage werden ob er
+					 * die bisher ausgewaehlte kante loeschen moechte
+					 * ist das der fall so loeschen
+					 * dann erst neue Kante hinzufuegen lassen.
+					 */
+					if(edge.getContigi().getId().equals(neighbourName)){
+						System.out.println("Edge "+edge);
+						selectedContigs.add(edge);
+					}if(edge.getContigj().getId().equals(neighbourName)){
+						System.out.println("Edge "+edge);
+						selectedContigs.add(edge);						
+					}
+			}
+		}else if(side.equals("right")){
+			System.out.println("rechts");
+			for (Iterator<AdjacencyEdge> iterator = leftNeighbours[contigIndex]
+			                                                       .iterator(); iterator.hasNext();) {
+						AdjacencyEdge edge = iterator.next();
+						if(edge.getContigi().getId().equals(neighbourName)){
+							System.out.println("Edge "+edge);
+							selectedContigs.add(edge);
+						}if(edge.getContigj().getId().equals(neighbourName)){
+							System.out.println("Edge "+edge);
+							selectedContigs.add(edge);						
+						}
+				}
+		}
 		return selectedContigs;
 	}
 
