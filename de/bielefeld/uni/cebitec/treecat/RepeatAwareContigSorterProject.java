@@ -38,6 +38,8 @@ import de.bielefeld.uni.cebitec.common.Timer;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.ContigAdjacencyGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.layouter.GreedyRepeatawareLayouter;
+import de.bielefeld.uni.cebitec.contigadjacencygraph.visualisation.ContigGraph;
+import de.bielefeld.uni.cebitec.contigadjacencygraph.visualisation.TreecatGraphFrame;
 import de.bielefeld.uni.cebitec.qgram.FastaFileReader;
 import de.bielefeld.uni.cebitec.qgram.MatchList;
 import de.bielefeld.uni.cebitec.qgram.QGramFilter;
@@ -103,6 +105,7 @@ public class RepeatAwareContigSorterProject {
 
 	private double maxProgress;
 	private ContigAdjacencyGraph contigAdjacencyGraph;
+	ContigGraph cg;
 
 	/**
 	 * Main method to try with a hard coded file.
@@ -118,7 +121,8 @@ public class RepeatAwareContigSorterProject {
 
 				boolean projectParsed = project
 						.readProject(new File(
-								"/homes/phuseman/compassemb/testdaten/repcat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"
+								"/home/chrm/Download/Projektdaten/repcat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"
+								//"/homes/phuseman/compassemb/testdaten/repcat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"
 						));
 				if (!projectParsed) {
 					System.err
@@ -141,11 +145,16 @@ public class RepeatAwareContigSorterProject {
 
 			t.restartTimer("matches");
 
-			LayoutGraph layoutGraph = project.sortContigs();
-			layoutGraph.writeLayoutAsNeato(new File(project.suggestOutputFile()), LayoutGraph.NeatoOutputType.ONENODE);
-			System.out.println("wrote "+project.suggestOutputFile());
+			LayoutGraph layoutGraph = project.sortContigs();	
 			
-			System.out.println(layoutGraph);
+			ContigGraph cg = new ContigGraph(layoutGraph);
+			TreecatGraphFrame tgf = new TreecatGraphFrame(cg);
+			tgf.getOutputFrame();
+						
+			//layoutGraph.writeLayoutAsNeato(new File(project.suggestOutputFile()), LayoutGraph.NeatoOutputType.ONENODE);
+			//System.out.println("wrote "+project.suggestOutputFile());
+			
+			//System.out.println(layoutGraph);
 
 			t.stopTimer("sorting");
 
