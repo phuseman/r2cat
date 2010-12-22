@@ -293,9 +293,15 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
+		/*
+		 * Waehle ich aus der Liste ein Contig aus, wird dieses Contig immer 
+		 * nicht reverse |  > angezeigt
+		 * Da fuer den Benutzter dies iritierend sein koennte. 
+		 * Dies koennte man auch in der Evaluation abfragen. 
+		 */
 			if (e.getValueIsAdjusting() == false) {
 				String selection = (String) list.getSelectedValue();
-				control.selectContig(selection, "false");
+					control.selectContig(selection, "false");
 
 				SwingWorkerClass threadForLeftNeighbours = new SwingWorkerClass();
 				threadForLeftNeighbours.execute();
@@ -310,7 +316,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 
 		@Override
 		protected String doInBackground() {
-			System.out.println("starte thread fuer linke Nachbarn");
+			System.out.println("gui: starte thread fuer linke Nachbarn");
 			model.sendLeftNeighbours();
 			return null;
 		}
@@ -325,7 +331,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 
 		@Override
 		protected String doInBackground() {
-			System.out.println("starte thread fuer rechte Nachbarn");
+			System.out.println("gui: starte thread fuer rechte Nachbarn");
 			model.sendRightNeighbours();
 			return null;
 		}
@@ -341,34 +347,51 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
+			Vector<String> copyOfSelectedContigs = (Vector<String>) selectedRadioButtons.clone();
+			
 			String actionCmd = e.getActionCommand();
 			String test[] = actionCmd.split(":");
-			String idOfSelectedContig = test[0];
-			String side = test[1];
+			String centralContigId = test[0];
+			String idOfSelectedContig = test[1];
+			String side = test[2];
+			System.out.println("gui: Groesse des Vektors "+copyOfSelectedContigs.size());
 
 			if (z == 0) {
 				z++;
-				selectedRadioButtons.add(idOfSelectedContig);
+				selectedRadioButtons.add(actionCmd);
 				model.addSelectedContig(idOfSelectedContig, side);
 			} else {
 				/*
 				 * Teste hier, ob genau dieses Contig schon einmal als nachbar
 				 * benutzt wurde
 				 */
-				for (Iterator<String> selectedButton = selectedRadioButtons
-						.iterator(); selectedButton.hasNext();) {
+				for (Iterator<String> selectedContig = copyOfSelectedContigs
+						.iterator(); selectedContig.hasNext();) {
 					
-					String id = (String) selectedButton.next();
+					String oldCmd = (String) selectedContig.next();
+					String old[] = oldCmd.split(":");
+					String oldcentralContigId = old[0];
+					String oldId = old[1];
+					String oldSide = old[2];
 
-					if (!id.equals(idOfSelectedContig)) {
-						break;
-					}
+					if (oldcentralContigId.equals(centralContigId)) {
+						System.out.println("gui: Diese ContigId wurde bereits ausgewaehlt.");
+						if(oldSide.equals(side)){
+							System.out.println("gui: Diese Contig wurde bereits ausgewaehlt");
+//							break;
+						}else{				
+							System.out.println("gui: Test");
+							selectedRadioButtons.add(actionCmd);
+							model.addSelectedContig(idOfSelectedContig, side);						
+						}
+					}else{
+						System.out.println("gui: Test2");
+						selectedRadioButtons.add(actionCmd);
+						model.addSelectedContig(idOfSelectedContig, side);						
 				}
-				selectedRadioButtons.add(idOfSelectedContig);
-				model.addSelectedContig(idOfSelectedContig, side);
 			}
 		}
-
+	  }
 	}
 
 	public class ContigMouseListener implements MouseListener {
@@ -480,7 +503,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 
 					radioButton = new JRadioButton();
 					radioButton.setBackground(Color.WHITE);
-					radioButton.setActionCommand(dnaSequence.getId() + ":left");
+					radioButton.setActionCommand(centralContigName +":"+dnaSequence.getId() + ":left");
 					radioButton
 							.addActionListener(new RadioButtonActionListener());
 
@@ -530,7 +553,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 					radioButton = new JRadioButton();
 					radioButton.setBackground(Color.WHITE);
 					radioButton
-							.setActionCommand(dnaSequence.getId() + ":right");
+							.setActionCommand(centralContigName +":"+dnaSequence.getId() + ":right");
 					radioButton
 							.addActionListener(new RadioButtonActionListener());
 
