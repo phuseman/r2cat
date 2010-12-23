@@ -47,7 +47,25 @@ public class DNASequence implements Comparable {
 	
 	// this sequence is reverse
 	private boolean reverse = false;
+	private double supportComparativeToCentralContig = 0;
 
+	public double getSupportComparativeToCentralContig() {
+		return supportComparativeToCentralContig;
+	}
+
+	public void setSupportComparativeToCentralContig(
+			double supportComparativeToCentralContig) {
+		this.supportComparativeToCentralContig = supportComparativeToCentralContig;
+	}
+	private boolean ContigIsSelected;
+
+	public boolean isContigIsSelected() {
+		return ContigIsSelected;
+	}
+
+	public void setContigIsSelected(boolean contigIsSelected) {
+		ContigIsSelected = contigIsSelected;
+	}
 	// the percentage of the length of this sequence that occurs more than once
 	// on a reference genome
 	private double repetitivePercentage = 0;
