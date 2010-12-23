@@ -75,7 +75,8 @@ public class CagCreator {
 
 				boolean projectParsed = project
 						.readProject(new File(
-								"/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
+				//				"/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
+				"/homes/aseidel/testdaten/perfekt/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
 				if (!projectParsed) {
 					System.err
 							.println("The given project file was not sucessfully parsed");

@@ -3,6 +3,7 @@ package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.IllegalComponentStateException;
@@ -95,62 +96,72 @@ public class GlassPaneWithLines extends JPanel {
 					x2 = (int) centralContig.getX() + laenge2;
 				}
 
-				for (int i = 0; i < componentenArray.length; i++) {
+			//	for (int i = 0; i < componentenArray.length; i++) {
 					
 					if (left) {
+						System.out.println("left");
+						int z = 1;
+						lineStroke =(float)Math.ceil(supportleft[z-1]*10000)/10;
 						
-						lineStroke =(float)Math.ceil(supportleft[i]*10000)/10;
-						
-						if((float)Math.log1p(lineStroke)+1 <= 0){
-							lineStroke = 1.0f;
-						}else if ((float)Math.log1p(lineStroke)+1 > 5 ){
-							lineStroke = 5.0f;
-						}else{
-							lineStroke = (float)Math.log1p(lineStroke)+1;
-						}
-						
-						Point point = neighbourLeft.getComponent(
-								componentenArray[i]).getLocationOnScreen();
-						Component p = neighbourLeft
-								.getComponent(componentenArray[i]);
-						int laenge = (int) p.getSize().getWidth();
+						for (Component co : neighbourLeft.getComponents()) {
+							z++;
+							if(z%2 == 0){
+									if ((float) Math.log1p(lineStroke) + 1 <= 0) {
+										lineStroke = 1.0f;
+									} else if ((float) Math.log1p(lineStroke) + 1 > 5) {
+										lineStroke = 5.0f;
+									} else {
+										lineStroke = (float) Math
+												.log1p(lineStroke) + 1;
+									}
+								Point point = co.getLocation();
+
+								
+						int laenge = (int)co.getSize().getWidth();
 						int x = (int) point.getX();
-						int y = (int) point.getY();
+						int y = (int) point.getY()+ (int)co.getParent().getParent().getY()+  (int) co.getHeight()/2;
 
 						g.setColor(Color.BLACK);
 						g.setStroke(new BasicStroke(lineStroke));
 						g.drawLine(x + laenge, y, x2, y2);
-//						g.drawLine(x + laenge-5, y, x2-5, y2);
+
+							}
+							}
 
 					} else {
-						lineStroke =(float)Math.ceil(support[i]*10000)/10;
+						System.out.println("rechts");
+						int z = 1;
+						for (Component co : neighbour.getComponents()) {
+							z++;
+							if(z%2 == 0){
+								lineStroke =(float)Math.ceil(support[z-1]*10000)/10;
+								
+								if((float)Math.log1p(lineStroke)+1 <= 0){
+									lineStroke = 1.0f;
+								} else if ((float) Math.log1p(lineStroke) + 1 > 5) {
+									lineStroke = 5.0f;
+								}else{
+									lineStroke = (float)Math.log1p(lineStroke)+1;
+									
+								}
+								Point point = co.getLocation();
+								
+								int x = (int) co.getParent().getX();
+								int y = (int) point.getY() + (int)co.getParent().getParent().getY() +  (int) co.getHeight()/2;
 
-						if((float)Math.log1p(lineStroke)+1 <= 0){
-							lineStroke = 1.0f;
-							
-						}else{
-							lineStroke = (float)Math.log1p(lineStroke)+1;
-							
+								g.setColor(Color.BLACK);
+								g.setStroke(new BasicStroke(lineStroke));
+								g.drawLine(x, y, x2, y2);
+
+							}
 						}
-						
-						Point point = neighbour.getComponent(
-								componentenArray[i]).getLocationOnScreen();
-						
-						int x = (int) point.getX();
-						int y = (int) point.getY();
-
-						g.setColor(Color.BLACK);
-						g.setStroke(new BasicStroke(lineStroke));
-						g.drawLine(x, y, x2, y2);
-//						g.drawLine(x-5, y, x2-5, y2);
 					}
 				}
 			}
-		}
+	//	}
 		}catch(IllegalComponentStateException ex){
 			//System.out.println("Jetzt war der thread wieder zu früh");
-			
-			//Thread.sleep(100);
+
 		}
 	}
 }

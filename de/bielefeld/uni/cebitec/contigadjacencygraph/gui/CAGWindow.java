@@ -140,6 +140,7 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		 * moegliche Nachbarn
 		 */
 		chooseContigPanel = new JPanel();
+		chooseContigPanel.setName("ChooseContigPanel");
 		chooseContigPanel.setPreferredSize(new Dimension(1000, 400));
 		// layout = new GroupLayout(chooseContigPanel);
 		chooseContigPanel.setBackground(Color.WHITE);
@@ -163,10 +164,12 @@ public class CAGWindow extends JFrame implements CagEventListener {// ActionList
 		chooseContigPanel.setLayout(layout);
 
 		leftContainer = new JPanel();
+		leftContainer.setName("leftContainer");
 		leftRadioButtonContainer = new JPanel();
 		centerContainer = new JPanel();
 		rightRadioButtonContainer = new JPanel();
 		rightContainer = new JPanel();
+		rightContainer.setName("rightContainer");
 
 		BoxLayout leftBoxLayout = new BoxLayout(leftContainer,
 				BoxLayout.PAGE_AXIS);

@@ -104,13 +104,13 @@ public class ContigAppearance extends JPanel {
 					+ "&lt; 1" + " kb<br>"
 					+	"</html>");
 			this.setBorder(border);
-			this.setName(isReverseToString);
+			this.setName(contigId);
 		}else{
 			contigLabel.setText("<html><font size = -2><u>"
 					+ contigId + "</u>" + "<br>length: "
 					+ size / 1000 + " kb </html>");
 			this.setBorder(border);
-			this.setName(isReverseToString);
+			this.setName(contigId);
 		}
 	}
 
