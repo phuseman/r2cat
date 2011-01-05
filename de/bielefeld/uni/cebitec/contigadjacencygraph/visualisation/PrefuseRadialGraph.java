@@ -76,7 +76,7 @@ public class PrefuseRadialGraph
 	private Visualization vis = new Visualization();
 	private JSearchPanel searchPanel;
 	
-	public PrefuseRadialGraph(Graph g)
+	public PrefuseRadialGraph(Graph g, Dimension d)
 	{
 		// Disable console output "INFO: Parsed Expression" - messages 
 		Logger prefuseLogger = Logger.getLogger("prefuse");
@@ -178,6 +178,7 @@ public class PrefuseRadialGraph
 	    this.display.addControlListener(new PanControl());
 	    this.display.addControlListener(new FocusControl(1, "filter"));
 	    this.display.setHighQuality(true);
+	    this.display.setSize(d);
 	        
 	    // set background - color
 	    Color col = new Color(84,84,84);
@@ -191,7 +192,7 @@ public class PrefuseRadialGraph
 	    SearchTupleSet search = new PrefixSearchTupleSet();
 	    this.vis.addFocusGroup(Visualization.SEARCH_ITEMS, search);
 		
-		fill.add("ingroup('_search_')", ColorLib.rgb(255,190,190));
+		fill.add("ingroup('_search_')", ColorLib.rgb(255,120,120));
 		
 		SearchQueryBinding sq = new SearchQueryBinding((Table) this.vis.getGroup("graph.nodes"), "label", (SearchTupleSet) this.vis.getGroup(Visualization.SEARCH_ITEMS));
 		this.searchPanel = sq.createSearchPanel();
@@ -207,9 +208,8 @@ public class PrefuseRadialGraph
 	}
 	
 	// returns the prefuse-display including a radial prefuse graph
-	public Display getOutputDisplay(Dimension d)
+	public Display getOutputDisplay()
 	{
-		this.display.setSize(d);
 		return this.display;
 	}
 	

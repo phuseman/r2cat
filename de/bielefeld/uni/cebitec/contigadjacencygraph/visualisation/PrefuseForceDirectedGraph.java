@@ -76,7 +76,7 @@ public class PrefuseForceDirectedGraph
 	private JSearchPanel searchPanel;
 	private Visualization vis = new Visualization();
 	
-	public PrefuseForceDirectedGraph(Graph g)
+	public PrefuseForceDirectedGraph(Graph g, Dimension d)
 	{
 		// Disable console output "INFO: Parsed Expression" - messages 
 		Logger prefuseLogger = Logger.getLogger("prefuse");
@@ -185,6 +185,7 @@ public class PrefuseForceDirectedGraph
 	    this.display.addControlListener(new ZoomControl());
 	    this.display.addControlListener(new NeighborHighlightControl());
 	    this.display.setHighQuality(true);
+	    this.display.setSize(d);
 	    
 	    // set background - color
 	    Color col = new Color(84,84,84);
@@ -198,7 +199,7 @@ public class PrefuseForceDirectedGraph
 	    SearchTupleSet search = new PrefixSearchTupleSet();
 		this.vis.addFocusGroup(Visualization.SEARCH_ITEMS, search);
 		
-		fill.add("ingroup('_search_')", ColorLib.rgb(255,190,190));
+		fill.add("ingroup('_search_')", ColorLib.rgb(255,120,120));
 		
 		SearchQueryBinding sq = new SearchQueryBinding((Table) vis.getGroup("graph.nodes"), "label", (SearchTupleSet) vis.getGroup(Visualization.SEARCH_ITEMS));
 		this.searchPanel = sq.createSearchPanel(); 
@@ -214,9 +215,8 @@ public class PrefuseForceDirectedGraph
 	}  
 	
 	// returns the prefuse-display including a force directed prefuse graph
-	public Display getOutputDisplay(Dimension d)
+	public Display getOutputDisplay()
 	{
-		this.display.setSize(d);
 		return this.display;
 	}
 	

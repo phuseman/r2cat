@@ -129,8 +129,8 @@ public class TreecatGraphFrame implements ActionListener
 
 	    if ( string.equals("fdl") )
 	    {
-	    	PrefuseForceDirectedGraph pfdg = new PrefuseForceDirectedGraph(graph);
-	    	this.disp = pfdg.getOutputDisplay(this.d);
+	    	PrefuseForceDirectedGraph pfdg = new PrefuseForceDirectedGraph(graph,d);
+	    	this.disp = pfdg.getOutputDisplay();
 	    	this.disp.pan(this.getHalfScreenWidth(this.screenSize)-30, this.getHalfScreenHeight(this.screenSize)-80);
 	    	this.displayPanel.add(this.disp);
 	    	this.searchPanel = pfdg.getPanel();
@@ -139,8 +139,8 @@ public class TreecatGraphFrame implements ActionListener
 	    }
 	    if ( string.equals("rl") )
 	    {
-	    	 PrefuseRadialGraph prg = new PrefuseRadialGraph(graph);
-	    	 this.disp = prg.getOutputDisplay(this.d);
+	    	 PrefuseRadialGraph prg = new PrefuseRadialGraph(graph,d);
+	    	 this.disp = prg.getOutputDisplay();
 	    	 this.displayPanel.add(this.disp);
 	    	 this.searchPanel = prg.getPanel();
 	    	 this.controlPanel.add(this.searchPanel);
@@ -148,8 +148,8 @@ public class TreecatGraphFrame implements ActionListener
 	    }
 	    if ( string.equals("frl") )
 	    {
-	    	 PrefuseFruchtermanReingoldGraph pfrg = new PrefuseFruchtermanReingoldGraph(graph);
-	    	 this.disp = pfrg.getOutputDisplay(this.d);
+	    	 PrefuseFruchtermanReingoldGraph pfrg = new PrefuseFruchtermanReingoldGraph(graph,d);
+	    	 this.disp = pfrg.getOutputDisplay();
 	    	 this.displayPanel.add(this.disp);
 	    	 this.searchPanel = pfrg.getPanel();	
 	    	 this.controlPanel.add(this.searchPanel);
