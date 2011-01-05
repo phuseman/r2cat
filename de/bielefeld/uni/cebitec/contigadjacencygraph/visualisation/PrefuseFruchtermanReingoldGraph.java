@@ -23,6 +23,8 @@ package de.bielefeld.uni.cebitec.contigadjacencygraph.visualisation;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import prefuse.Constants;
 import prefuse.Display;
@@ -58,7 +60,7 @@ import javax.swing.border.Border;
 /**
  *
  * This class anticipates a prefuse-graph and 
- * creates a prefuse-di splay including a 
+ * creates a prefuse-display including a 
  * FruchtermanReingold-layout.
  * 
  * @author cmiele
@@ -72,6 +74,10 @@ public class PrefuseFruchtermanReingoldGraph
 	
 	public PrefuseFruchtermanReingoldGraph(Graph g)
 	{
+		// Disable console output "INFO: Parsed Expression" - messages 
+		Logger prefuseLogger = Logger.getLogger("prefuse");
+		prefuseLogger.setLevel(Level.OFF);
+		
 		this.vis.add("graph", g);
 	     
 		// sets interactivity status for all items in given data group
@@ -117,7 +123,6 @@ public class PrefuseFruchtermanReingoldGraph
 		ActionList color = new ActionList(Activity.INFINITY);
 		ActionList filter = new ActionList(Activity.INFINITY);
 
-		
 		// create DataSizeAction for EdgeSupport
 		DataSizeAction edgeWeight = new DataSizeAction("graph.edges","drawableEdgeSupport");
 		edgeWeight.setMaximumSize(4);

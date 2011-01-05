@@ -23,6 +23,8 @@ package de.bielefeld.uni.cebitec.contigadjacencygraph.visualisation;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.UIManager;
@@ -76,6 +78,9 @@ public class PrefuseForceDirectedGraph
 	
 	public PrefuseForceDirectedGraph(Graph g)
 	{
+		// Disable console output "INFO: Parsed Expression" - messages 
+		Logger prefuseLogger = Logger.getLogger("prefuse");
+		prefuseLogger.setLevel(Level.OFF);
 		
 		this.vis.add("graph", g);
 	     

@@ -76,8 +76,8 @@ public class ContigGraph extends Graph
 			Double doubleOffset = (double)this.lg.getNodes().get(nodeCounter).getOffset();
 			this.nodes.set(nodeRowCounter, "offset", doubleOffset);
 			
-			int realConigLength = (int)this.lg.getNodes().get(nodeCounter).getSize();
-			String stringRealContigLength = String.valueOf(realConigLength);
+			int realContigLength = (int)this.lg.getNodes().get(nodeCounter).getSize();
+			String stringRealContigLength = String.valueOf(realContigLength);
 			stringRealContigLength = stringRealContigLength + " base pairs";
 			
 			this.nodes.set(nodeRowCounter, "realContigLength", stringRealContigLength);	
