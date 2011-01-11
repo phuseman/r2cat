@@ -63,7 +63,6 @@ public class ContigBorder extends AbstractBorder{
 //			g2.setColor(Color.ORANGE);
 			g2.draw(p);
 		}
-		//g2.fill(p);
 		
 		g.setColor(oldColor);
 	}

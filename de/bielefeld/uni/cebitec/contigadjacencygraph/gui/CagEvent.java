@@ -13,13 +13,9 @@ public class CagEvent {
 	private long size;
 	private boolean repetitive;
 	private boolean reverse;
-	private Contig contig;
 	private  Vector<DNASequence>  contigData;
 	private  DNASequence  contigNode;
-	/*
-	 * TODO
-	 * Evtl noch eine Varibel mit der ich Daten weiterleiten kann
-	 */
+	
 	public CagEvent(EventType event, String data) {
 		this.event_type = event;
 		this.data = data;
@@ -27,11 +23,6 @@ public class CagEvent {
 	public CagEvent(EventType event, DNASequence contig) {
 		this.event_type = event;
 		this.contigNode = contig;
-	}
-	
-	public CagEvent(EventType event, Contig currentContig){
-		this.event_type = event;
-		
 	}
 	
 	public CagEvent(EventType event, Vector<DNASequence>  neighbours){
@@ -63,9 +54,5 @@ public class CagEvent {
 	public Vector<DNASequence> getContigData() {
 		return contigData;
 	}
-	public Contig getContig() {
-		return contig;
-	}
-
 
 }

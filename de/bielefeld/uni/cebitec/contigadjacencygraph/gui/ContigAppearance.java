@@ -23,6 +23,7 @@ public class ContigAppearance extends JPanel {
 	private boolean isSelected = false;
 	private ContigBorder border;
 	private double relativeSup;
+	private int numberOfNeighbours = 5;
 	
 	public ContigAppearance(){
 		super();
@@ -32,10 +33,10 @@ public class ContigAppearance extends JPanel {
 		this.setName(contigName);
 	}
 
-	public ContigAppearance(DNASequence contigNode){
+	public ContigAppearance(DNASequence contigNode, String centralContigID){
 		super();
 		this.contig=contigNode;
-		getDetailsOfContig(contigNode);
+		getDetailsOfContig(contigNode, centralContigID);
 		this.setBackground(Color.WHITE);
 		contigLabel = new JLabel();
 		this.add(contigLabel);
@@ -44,13 +45,28 @@ public class ContigAppearance extends JPanel {
 		setSizeOfContig(length);
 	}
 	
-	private  void getDetailsOfContig(DNASequence contigNode){
+	private  void getDetailsOfContig(DNASequence contigNode, String idOfCentralContig){
 		
 		contigName = contigNode.getId();
 		length = contigNode.getSize();
 		isRepeat = contigNode.isRepetitive();
 		isReverse = contigNode.isReverse();
 		isReverseToString = new Boolean(isReverse).toString();
+//		if(contigNode.isContigIsSelected()){
+//			System.out.println("Central contig id "+idOfCentralContig);
+//			System.out.println( " first Neighbour "+contigNode.getFirstNeighbour());
+//			System.out.println(" second Neighbour "+contigNode.getSecondNeighbour());
+//			if(contigNode.getFirstNeighbour().equals(idOfCentralContig)){
+//				isSelected = true;				
+//			}else if(!(contigNode.getSecondNeighbour() == null) ){
+//				if(contigNode.getSecondNeighbour().equals(idOfCentralContig)){
+//					isSelected = true;					
+//				}
+//			}
+//			else{
+//				isSelected = false;
+//			}
+//		}
 		isSelected = contigNode.isContigIsSelected();
 		border = new ContigBorder(isRepeat, isReverse, isSelected);
 		relativeSup = contigNode.getSupportComparativeToCentralContig();
@@ -62,7 +78,7 @@ public class ContigAppearance extends JPanel {
 	private  void setContigAppearance(String contigId, String isReverseToString,
 			long size, ContigBorder border) {
 		String contigNameAusChar = "";
-		char[] dst = new char[9];
+		char[] dst = new char[numberOfNeighbours + (numberOfNeighbours-1)];
 		contigLabel.setName(contigId);
 		if (contigId.length() > 10){
 			contigId.getChars(0, 3, dst, 0);

@@ -12,6 +12,7 @@ import java.util.Vector;
 import java.util.Map.Entry;
 
 import javax.naming.CannotProceedException;
+import javax.swing.UIManager;
 
 import de.bielefeld.uni.cebitec.common.SimpleProgressReporter;
 import de.bielefeld.uni.cebitec.common.Timer;
@@ -26,9 +27,6 @@ import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
  * ist mein model 
  * hier werden die Daten- Zustands- und Anwendungslogik implementiert
  * 
- * TODO heute:
- * Reverse Contigs im Moment nur auf der linken seite: sollten auch auf der Rechten Seite 
- * vorkommen.
  */
 public class CagCreator {
 
@@ -39,19 +37,18 @@ public class CagCreator {
 	private ArrayList<CagEventListener> listeners;
 	private Vector<AdjacencyEdge>[] leftNeighbours;
 	private Vector<AdjacencyEdge>[] rightNeighbours;
-	private String currentContigID;
+	private String nowCentralContigID;
 	private String contigId;
 	private int contigIndex;
-	private long contigSize = 0;
-	private DNASequence contig;
-	private boolean contigIsRepetitiv = false;
 	private boolean contigIsReverse = false;
-	// private DNASequence[] fiveMostLikleyLeftNeighbours;
+
 	private Vector<DNASequence> fiveMostLikleyLeftNeighbours;
-	// private DNASequence[] fiveMostLikleyRightNeighbours;
 	private Vector<DNASequence> fiveMostLikleyRightNeighbours;
+	
 	private DNASequence currentContigObject;
 	private DNASequence neighbourContigObject;
+	private static CAGWindow window;
+	private static CagCreator model;
 
 	// private CAGWindow window;
 	public CagCreator(LayoutGraph g) {
@@ -60,6 +57,7 @@ public class CagCreator {
 		selectedContigs = new Vector<AdjacencyEdge>();
 		leftAndRightNeighbour();
 		createContigList();
+
 	}
 
 	/*
@@ -109,8 +107,21 @@ public class CagCreator {
 			cag = project.getContigAdjacencyGraph();
 			completeGraph = cag.getCompleteGraph();
 
-			CagCreator model = new CagCreator(completeGraph);
-			Controller controller = new Controller(model);
+//			model = new CagCreator(layoutGraph);
+			model = new CagCreator(completeGraph);
+
+			java.awt.EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					try {
+						UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+						// "com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+						// UIManager.getCrossPlatformLookAndFeelClassName());
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+					window = new CAGWindow(model);
+				}
+			});
 
 			t.stopTimer("sorting");
 
@@ -120,7 +131,7 @@ public class CagCreator {
 		}
 
 	}
-
+	
 	/*
 	 * Diese Hashmaps speichern die linken und rechten Nachbarn aller Contigs
 	 */
@@ -162,6 +173,21 @@ public class CagCreator {
 			Collections.sort(rightNeighbours[x]);
 		}
 	}
+	
+	/**
+	 * Create a List of all Nodes(Contigs) of LayoutGraph
+	 */
+	private String[] createContigList() {
+
+		contigs = graph.getNodes();
+		listData = new String[contigs.size()];
+
+		for (int i = 0; i < contigs.size(); i++) {
+			DNASequence contig = contigs.get(i);
+			listData[i] = contig.getId();
+		}
+		return listData;
+	}
 
 	/*
 	 * Wenn ich die 5 wahrscheinlichsten Nachbarn aus der Map hole sollten auch
@@ -176,8 +202,7 @@ public class CagCreator {
 	 * wie hängen diese beiden supports zusammen?
 	 * 
 	 * Mögliche Lösung: ich könnte immer den support nehmen statt
-	 * relativeSupport Wäre das sinnvoll? Ich glaube es macht keinen merklichen
-	 * unterschied außer das keine Lücken mehr in den angezeigten contigs sind.
+	 * relativeSupport Wäre das sinnvoll? 
 	 */
 
 	public synchronized Vector<DNASequence> calculateFiveMostLikleyNeighbours(
@@ -185,27 +210,29 @@ public class CagCreator {
 
 		Vector<AdjacencyEdge>[] neighbours;
 		Vector<DNASequence> fiveNeighbours;
-		int log = 0;
+		
 		if (isLeft) {
-			System.out.println("cag: Berechne die linken nachbarn");
+
 			fiveMostLikleyLeftNeighbours = new Vector<DNASequence>();
 			fiveNeighbours = fiveMostLikleyLeftNeighbours;
 			neighbours = leftNeighbours;
+			
 		} else {
-			System.out.println("cag: Berechne die rechten nachbarn");
+			
 			fiveMostLikleyRightNeighbours = new Vector<DNASequence>();
 			fiveNeighbours = fiveMostLikleyRightNeighbours;
 			neighbours = rightNeighbours;
 		}
 
 		Double support;
+		Double totalSupport;
 		boolean is_I_equals_X = false;
 
 		for (Iterator<AdjacencyEdge> iterator = neighbours[index].iterator(); iterator
 				.hasNext();) {
 			
 				AdjacencyEdge edge = iterator.next();
-		
+				totalSupport = edge.getSupport();
 
 				if (edge.getContigi().getId() == currentContigObject.getId()) {
 					is_I_equals_X = true;
@@ -235,6 +262,7 @@ public class CagCreator {
 
 					neighbourContigObject
 							.setSupportComparativeToCentralContig(support);
+					neighbourContigObject.setTotalSupport(totalSupport);
 					neighbourContigObject.setContigIsSelected(flag);
 					fiveNeighbours.add(neighbourContigObject);
 				} else {// i ist der nachbar
@@ -254,6 +282,7 @@ public class CagCreator {
 					}
 					neighbourContigObject
 							.setSupportComparativeToCentralContig(support);
+					neighbourContigObject.setTotalSupport(totalSupport);
 					neighbourContigObject.setContigIsSelected(flag);
 					fiveNeighbours.add(neighbourContigObject);
 				}
@@ -266,21 +295,15 @@ public class CagCreator {
 		}
 
 	}
+	
+//	private synchronized boolean detectIsContigReverse(AdjacencyEdge edge){
+//		
+//		boolean isReverse = false;
+//		
+//		return isReverse;
+//	}
 
-	/**
-	 * Create a List of all Nodes(Contigs) of LayoutGraph
-	 */
-	private String[] createContigList() {
-
-		contigs = graph.getNodes();
-		listData = new String[contigs.size()];
-
-		for (int i = 0; i < contigs.size(); i++) {
-			DNASequence contig = contigs.get(i);
-			listData[i] = contig.getId();
-		}
-		return listData;
-	}
+	
 
 	/*
 	 * Method to select some informations for the current contig. They will be
@@ -294,7 +317,10 @@ public class CagCreator {
 			contigIndex = contigs.indexOf(c);
 			if (c.getId().equals(contigId)) {
 				currentContigObject = c;
-
+				/*
+				 * TODO hier muss ich noch feststellen ob das mittlere Contig 
+				 * reverse dargestellt werden muss.
+				 */
 				if (contigIsReverse == true) {
 					currentContigObject.setReverse(true);
 				} else {
@@ -307,7 +333,7 @@ public class CagCreator {
 	}
 
 	private boolean neighbourIsAlreadySelected(AdjacencyEdge neighbour) {
-		// System.out.println("Stelle fest, ob der Nachbar schon ausgewählt wurde.");
+		
 		boolean flag = false;
 
 		for (AdjacencyEdge edge : selectedContigs) {
@@ -317,6 +343,7 @@ public class CagCreator {
 		}
 		return flag;
 	}
+	
 
 	public Vector<AdjacencyEdge> addSelectedContig(String neighbourName,
 			String side) {
@@ -326,6 +353,7 @@ public class CagCreator {
 			for (Iterator<AdjacencyEdge> iterator = leftNeighbours[contigIndex]
 					.iterator(); iterator.hasNext();) {
 				AdjacencyEdge edge = iterator.next();
+				
 				/*
 				 * TODO erst abfragen, ob in dieser Kante zu dem Aktuellem
 				 * Contig schon ein Eintrag vorhanden ist wenn ja sollte es
@@ -334,23 +362,35 @@ public class CagCreator {
 				 * ausgewaehlte kante loeschen moechte ist das der fall so
 				 * loeschen dann erst neue Kante hinzufuegen lassen.
 				 */
-				if (edge.getContigi().getId().equals(neighbourName)) {
+			
+				if (edge.getContigi().getId().equals(neighbourName) ) {
+					System.out.println(edge + " support of edge, i "+edge.getRelativeSupporti());
 					selectedContigs.add(edge);
+					break;
 				}
 				if (edge.getContigj().getId().equals(neighbourName)) {
+					System.out.println(edge + " support of edge, j "+edge.getRelativeSupportj());
 					selectedContigs.add(edge);
+					break;
+
 				}
+				
 			}
 		} else if (side.equals("right")) {
 			System.out.println("cag: rechts");
-			for (Iterator<AdjacencyEdge> iterator = leftNeighbours[contigIndex]
+			for (Iterator<AdjacencyEdge> iterator = rightNeighbours[contigIndex]
 					.iterator(); iterator.hasNext();) {
 				AdjacencyEdge edge = iterator.next();
+				
 				if (edge.getContigi().getId().equals(neighbourName)) {
+					System.out.println(edge + " support of edge, i "+edge.getRelativeSupporti());
 					selectedContigs.add(edge);
+					break;
 				}
 				if (edge.getContigj().getId().equals(neighbourName)) {
+					System.out.println(edge + " support of edge, j "+edge.getRelativeSupportj());
 					selectedContigs.add(edge);
+					break;
 				}
 			}
 		}
@@ -364,11 +404,6 @@ public class CagCreator {
 		System.out.println("cag: Sende aktuelles Contig");
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
 				currentContigObject);
-		/*
-		 * CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG, new
-		 * Contig(contigId)); solls spaeter mal werden dazu in contig klasse
-		 * TODO ist jetzt ein Objekt vom typ dna sequence
-		 */
 		fireEvent(event);
 	}
 
@@ -430,14 +465,6 @@ public class CagCreator {
 		}
 	}
 
-	public Vector<AdjacencyEdge>[] getLeftNeighbours() {
-		return leftNeighbours;
-	}
-
-	public Vector<AdjacencyEdge>[] getRightNeighbours() {
-		return rightNeighbours;
-	}
-
 	/*
 	 * This list has all names of contigs, which will be display in the
 	 * scrollbar / window the user is able to select a contig, such that this
@@ -452,7 +479,7 @@ public class CagCreator {
 	 * Return the current Contig Id/Name
 	 */
 	public String getCurrentContig() {
-		return currentContigID;
+		return nowCentralContigID;
 	}
 
 	/*
@@ -471,7 +498,7 @@ public class CagCreator {
 	 */
 	public void changeContigs(String currentContig, String isReverse) {
 
-		this.currentContigID = currentContig;
+		this.nowCentralContigID = currentContig;
 		this.contigIsReverse = Boolean.parseBoolean(isReverse);
 		detectCurrentContigObject(currentContig);
 		sendCurrentContig();
