@@ -163,8 +163,8 @@ public class GlassPaneWithLines extends JPanel {
 					int c = 0;
 
 					for (Component co : neighbour.getComponents()) {
-						lineStroke = (float) Math.ceil(support[c] * 10000) / 10;
-						System.out.println(support[c]);
+						//lineStroke = (float) Math.ceil(support[c] * 10000) / 10;
+						lineStroke = (float) support[c]/10;
 						z++;
 						if (z % 2 == 0) {
 							if ((float) Math.log1p(lineStroke) + 1 <= 0) {

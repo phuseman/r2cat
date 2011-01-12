@@ -40,16 +40,10 @@ import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import sun.org.mozilla.javascript.IdScriptableObject;
+//import sun.org.mozilla.javascript.IdScriptableObject;
 
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
-/*
- * Ist das Abbild vom Model
- * 
- * TODO heute die contigs im Genompanel sollten die Größe wie im chooseContigPanel haben
- * und auch die Beschriftung der Contigs sollte sich nicht ändern
- */
 public class CAGWindow extends JFrame implements CagEventListener {
 	
 	private CAGWindow window;
@@ -360,10 +354,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					leftContainer.updateUI();
 					leftRadioButtonContainer.updateUI();
 					t++;
-
-					if(t == terminator){
-						break;
-					}
+				}
+				if(t == terminator){
+					break;
 				}
 			}
 			leftContainerFull = true;
@@ -402,7 +395,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					rightSupport[s] = rightNeighbour
 //							.getSupportComparativeToCentralContig();
 					.getTotalSupport();
-					System.out.println(rightSupport[s]);
 					contigPanel = new ContigAppearance(rightNeighbour, centralContigName);
 					/*
 					 * Help that the user is only able to select one 
@@ -434,13 +426,12 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					rightContainer.updateUI();
 					rightRadioButtonContainer.updateUI();
 					s++;
-					if(s == terminator){
-						System.out.println("Breche for ab");
-						break;
-					}
+				}
+				if(s == terminator){
+					System.out.println("Breche for ab");
+					break;
 				}
 			}
-			System.out.println("Möchte nun linien setzten");
 			rightContainerFull = true;
 			setLineInPanel();
 		}
