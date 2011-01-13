@@ -107,8 +107,8 @@ public class CagCreator {
 			cag = project.getContigAdjacencyGraph();
 			completeGraph = cag.getCompleteGraph();
 
-//			model = new CagCreator(layoutGraph);
-			model = new CagCreator(completeGraph);
+			model = new CagCreator(layoutGraph);
+//			model = new CagCreator(completeGraph);
 
 			java.awt.EventQueue.invokeLater(new Runnable() {
 				public void run() {
