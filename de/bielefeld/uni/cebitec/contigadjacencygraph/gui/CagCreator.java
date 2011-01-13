@@ -107,8 +107,8 @@ public class CagCreator {
 			cag = project.getContigAdjacencyGraph();
 			completeGraph = cag.getCompleteGraph();
 
-			model = new CagCreator(layoutGraph);
-//			model = new CagCreator(completeGraph);
+//			model = new CagCreator(layoutGraph);
+			model = new CagCreator(completeGraph);
 
 			java.awt.EventQueue.invokeLater(new Runnable() {
 				public void run() {
@@ -172,6 +172,8 @@ public class CagCreator {
 			Collections.sort(leftNeighbours[x]);
 			Collections.sort(rightNeighbours[x]);
 		}
+		System.out.println(leftNeighbours[0]);
+		System.out.println(rightNeighbours[0]);
 	}
 	
 	/**
@@ -212,20 +214,20 @@ public class CagCreator {
 		Vector<DNASequence> fiveNeighbours;
 		
 		if (isLeft) {
-
+			System.out.println("linke nachbarn ");
 			fiveMostLikleyLeftNeighbours = new Vector<DNASequence>();
 			fiveNeighbours = fiveMostLikleyLeftNeighbours;
 			neighbours = leftNeighbours;
 			
 		} else {
-			
+			System.out.println("rechte nachbarn");
 			fiveMostLikleyRightNeighbours = new Vector<DNASequence>();
 			fiveNeighbours = fiveMostLikleyRightNeighbours;
 			neighbours = rightNeighbours;
 		}
 
-		Double support;
-		Double totalSupport;
+		double support;
+		double totalSupport;
 		boolean is_I_equals_X = false;
 
 		for (Iterator<AdjacencyEdge> iterator = neighbours[index].iterator(); iterator
@@ -233,6 +235,7 @@ public class CagCreator {
 			
 				AdjacencyEdge edge = iterator.next();
 				totalSupport = edge.getSupport();
+				System.out.println(edge.getContigi().getId()+"  "+edge.getContigj().getId()+"  " +totalSupport);
 
 				if (edge.getContigi().getId() == currentContigObject.getId()) {
 					is_I_equals_X = true;
@@ -243,6 +246,18 @@ public class CagCreator {
 					neighbourContigObject = edge.getContigi();
 					support = edge.getRelativeSupporti();
 				}
+				/*
+				 * Notwendig weil ein Contig mehrfach als Nachbar in verschiedenen Orientierungen 
+				 * vorkommen kann.
+				 * Die folgenden Nachbarn ueberschreiben dann die Infos zu dem eigentlich interessanten
+				 * Nachbarn.
+				 * Im Moment behandel ich den Nachbarn nur einmal.
+				 * TODO 
+				 * Besser waehre aber wenn ich diesen Nachbarn auch als moeglichen anderen Nachbarn
+				 * in Erwaegung ziehe aber auch kennlich mache das dieser Nachbar ein anderer ist,
+				 * indem die Orientierung dieses Nachbarn anders ist.
+				 */
+				if(!fiveNeighbours.contains(neighbourContigObject)){
 				if (is_I_equals_X) {// j ist der nachbar
 
 					boolean flag = neighbourIsAlreadySelected(edge);
@@ -264,7 +279,9 @@ public class CagCreator {
 							.setSupportComparativeToCentralContig(support);
 					neighbourContigObject.setTotalSupport(totalSupport);
 					neighbourContigObject.setContigIsSelected(flag);
+					
 					fiveNeighbours.add(neighbourContigObject);
+					
 				} else {// i ist der nachbar
 					boolean flag = neighbourIsAlreadySelected(edge);
 					/*
@@ -284,27 +301,28 @@ public class CagCreator {
 							.setSupportComparativeToCentralContig(support);
 					neighbourContigObject.setTotalSupport(totalSupport);
 					neighbourContigObject.setContigIsSelected(flag);
+					
 					fiveNeighbours.add(neighbourContigObject);
+					
 				}
 			}
-		
+		}
 		if (isLeft) {
+			
+			for (DNASequence dnaSequence : fiveMostLikleyLeftNeighbours) {
+				System.out.println("links total support in cag "+dnaSequence.getTotalSupport());
+			}
+			
 			return fiveMostLikleyLeftNeighbours;
 		} else {
+			for (DNASequence dnaSequence : fiveMostLikleyRightNeighbours) {
+				System.out.println("rechts total support in cag "+dnaSequence.getTotalSupport());
+			}
 			return fiveMostLikleyRightNeighbours;
 		}
 
 	}
 	
-//	private synchronized boolean detectIsContigReverse(AdjacencyEdge edge){
-//		
-//		boolean isReverse = false;
-//		
-//		return isReverse;
-//	}
-
-	
-
 	/*
 	 * Method to select some informations for the current contig. They will be
 	 * displayed in the view of the contig
@@ -349,7 +367,7 @@ public class CagCreator {
 			String side) {
 
 		if (side.equals("left")) {
-			System.out.println("cag: links");
+			//System.out.println("cag: links");
 			for (Iterator<AdjacencyEdge> iterator = leftNeighbours[contigIndex]
 					.iterator(); iterator.hasNext();) {
 				AdjacencyEdge edge = iterator.next();
@@ -364,12 +382,12 @@ public class CagCreator {
 				 */
 			
 				if (edge.getContigi().getId().equals(neighbourName) ) {
-					System.out.println(edge + " support of edge, i "+edge.getRelativeSupporti());
+				//	System.out.println(edge + " support of edge, i "+edge.getRelativeSupporti());
 					selectedContigs.add(edge);
 					break;
 				}
 				if (edge.getContigj().getId().equals(neighbourName)) {
-					System.out.println(edge + " support of edge, j "+edge.getRelativeSupportj());
+				//	System.out.println(edge + " support of edge, j "+edge.getRelativeSupportj());
 					selectedContigs.add(edge);
 					break;
 
@@ -377,18 +395,18 @@ public class CagCreator {
 				
 			}
 		} else if (side.equals("right")) {
-			System.out.println("cag: rechts");
+	//		System.out.println("cag: rechts");
 			for (Iterator<AdjacencyEdge> iterator = rightNeighbours[contigIndex]
 					.iterator(); iterator.hasNext();) {
 				AdjacencyEdge edge = iterator.next();
 				
 				if (edge.getContigi().getId().equals(neighbourName)) {
-					System.out.println(edge + " support of edge, i "+edge.getRelativeSupporti());
+		//			System.out.println(edge + " support of edge, i "+edge.getRelativeSupporti());
 					selectedContigs.add(edge);
 					break;
 				}
 				if (edge.getContigj().getId().equals(neighbourName)) {
-					System.out.println(edge + " support of edge, j "+edge.getRelativeSupportj());
+				//	System.out.println(edge + " support of edge, j "+edge.getRelativeSupportj());
 					selectedContigs.add(edge);
 					break;
 				}
@@ -401,7 +419,7 @@ public class CagCreator {
 	 * Send an event, if the user selected a contig
 	 */
 	public void sendCurrentContig() {
-		System.out.println("cag: Sende aktuelles Contig");
+	//	System.out.println("cag: Sende aktuelles Contig");
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
 				currentContigObject);
 		fireEvent(event);
@@ -413,7 +431,7 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendLeftNeighbours() {
-		System.out.println("cag: linke nachbarn ");
+//		System.out.println("cag: linke nachbarn ");
 
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_LEFT_NEIGHBOURS,
 				calculateFiveMostLikleyNeighbours(contigIndex, true));
@@ -426,7 +444,7 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendRightNeighbours() {
-		System.out.println("cag: rechte nachbarn ");
+//		System.out.println("cag: rechte nachbarn ");
 
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_RIGHT_NEIGHBOURS,
 				calculateFiveMostLikleyNeighbours(contigIndex, false));

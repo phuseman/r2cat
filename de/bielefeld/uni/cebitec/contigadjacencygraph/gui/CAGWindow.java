@@ -248,7 +248,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	private void setLineInPanel() {
 
 		if (rightContainerFull && leftContainerFull) {
-			System.out.println(rightSupport[0]);
+
 			glassPanel.setOpaque(false);
 			glassPanel.setPreferredSize(chooseContigPanel.getSize());
 			glassPanel.setLine(leftContainer, rightContainer, centralContig,
@@ -311,14 +311,16 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			}else if(numberOfNeighbours > leftNeighbours.size()){
 				terminator = leftNeighbours.size();
 			}
+			
 			for (Iterator<DNASequence> neighbour = leftNeighbours.iterator(); neighbour
 					.hasNext();) {
 				while (t < terminator) {
 					DNASequence dnaSequence = (DNASequence) neighbour.next();
-					
+					System.out.println("links "+dnaSequence.getId()+":  "+dnaSequence.getTotalSupport());
 					leftSupport[t] = dnaSequence
 							//.getSupportComparativeToCentralContig();
 							.getTotalSupport();
+			
 					contigPanel = new ContigAppearance(dnaSequence, centralContigName);
 					/*
 					 * Help that the user is only able to select one 
@@ -388,13 +390,15 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 			for (Iterator<DNASequence> neighbour = rightNeighbours.iterator(); neighbour
 					.hasNext();) {
+				
 				while (s < terminator) {
-					System.out.println(" Terminator  "+terminator);
 					DNASequence rightNeighbour = (DNASequence) neighbour.next();
+					System.out.println("rechts "+rightNeighbour.getId()+":  "+rightNeighbour.getTotalSupport());
 
 					rightSupport[s] = rightNeighbour
 //							.getSupportComparativeToCentralContig();
 					.getTotalSupport();
+
 					contigPanel = new ContigAppearance(rightNeighbour, centralContigName);
 					/*
 					 * Help that the user is only able to select one 
@@ -428,7 +432,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					s++;
 				}
 				if(s == terminator){
-					System.out.println("Breche for ab");
 					break;
 				}
 			}
@@ -538,7 +541,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			}else{
 				use = oneOfRightNeigboursSelected;
 			}
-			System.out.println(use);
 			if (z == 0) {
 				z++;
 				selectedRadioButtons.add(actionCmd);
