@@ -9,11 +9,16 @@ import java.awt.event.MouseListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
+import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
 public class ContigAppearance extends JPanel {
 	
+	private LayoutGraph lGraph;
 	private DNASequence contig;
+	private AdjacencyEdge edge;
+	private int i;
 	private String contigName;
 	private String isReverseToString;
 	private JLabel contigLabel;
@@ -33,10 +38,16 @@ public class ContigAppearance extends JPanel {
 		this.setName(contigName);
 	}
 
-	public ContigAppearance(DNASequence contigNode, String centralContigID){
+	public ContigAppearance(LayoutGraph graph, AdjacencyEdge includingEdge, int indexOfContigI){
 		super();
-		this.contig=contigNode;
-		getDetailsOfContig(contigNode, centralContigID);
+		
+		this.lGraph = graph;
+		this.edge = includingEdge;
+		this.i = indexOfContigI;
+		
+		contig=lGraph.getNodes().get(i);
+		
+		getDetailsOfContig(contig);
 		this.setBackground(Color.WHITE);
 		contigLabel = new JLabel();
 		this.add(contigLabel);
@@ -45,28 +56,17 @@ public class ContigAppearance extends JPanel {
 		setSizeOfContig(length);
 	}
 	
-	private  void getDetailsOfContig(DNASequence contigNode, String idOfCentralContig){
+
+	
+
+	private  void getDetailsOfContig(DNASequence contigNode){
 		
 		contigName = contigNode.getId();
 		length = contigNode.getSize();
 		isRepeat = contigNode.isRepetitive();
 		isReverse = contigNode.isReverse();
 		isReverseToString = new Boolean(isReverse).toString();
-//		if(contigNode.isContigIsSelected()){
-//			System.out.println("Central contig id "+idOfCentralContig);
-//			System.out.println( " first Neighbour "+contigNode.getFirstNeighbour());
-//			System.out.println(" second Neighbour "+contigNode.getSecondNeighbour());
-//			if(contigNode.getFirstNeighbour().equals(idOfCentralContig)){
-//				isSelected = true;				
-//			}else if(!(contigNode.getSecondNeighbour() == null) ){
-//				if(contigNode.getSecondNeighbour().equals(idOfCentralContig)){
-//					isSelected = true;					
-//				}
-//			}
-//			else{
-//				isSelected = false;
-//			}
-//		}
+
 		isSelected = contigNode.isContigIsSelected();
 		border = new ContigBorder(isRepeat, isReverse, isSelected);
 		relativeSup = contigNode.getSupportComparativeToCentralContig();
@@ -151,5 +151,24 @@ public class ContigAppearance extends JPanel {
 	}
 	
 	
+	public LayoutGraph getlGraph() {
+		return lGraph;
+	}
+
+	public AdjacencyEdge getEdge() {
+		return edge;
+	}
+	
+	public int getI() {
+		return i;
+	}
+
+	public String getContigName() {
+		return contigName;
+	}
+
+	public boolean isReverse() {
+		return isReverse;
+	}
 	
 }
