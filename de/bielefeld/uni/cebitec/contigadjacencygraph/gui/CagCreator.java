@@ -33,7 +33,7 @@ public class CagCreator {
 	private LayoutGraph graph;
 	private Vector<DNASequence> contigs;
 	private Vector<AdjacencyEdge> selectedContigs;
-	private String[] listData;
+	private String[] list;
 	private ArrayList<CagEventListener> listeners;
 	private Vector<AdjacencyEdge>[] leftNeighbours;
 	private Vector<AdjacencyEdge>[] rightNeighbours;
@@ -44,9 +44,11 @@ public class CagCreator {
 
 	private Vector<AdjacencyEdge> fiveMostLikleyLeftNeighbours;
 	private Vector<AdjacencyEdge> fiveMostLikleyRightNeighbours;
-	
+
 	private DNASequence currentContigObject;
 	private DNASequence neighbourContigObject;
+	private Vector<Integer> indexOfFiveMostLikleyLeftNeighbours;
+	private Vector<Integer> indexOfFiveMostLikleyRightNeighbours;
 	private static CAGWindow window;
 	private static CagCreator model;
 
@@ -73,8 +75,8 @@ public class CagCreator {
 
 				boolean projectParsed = project
 						.readProject(new File(
-				//				"/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
-				"/homes/aseidel/testdaten/perfekt/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
+						// "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
+								"/homes/aseidel/testdaten/perfekt/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
 				if (!projectParsed) {
 					System.err
 							.println("The given project file was not sucessfully parsed");
@@ -107,13 +109,14 @@ public class CagCreator {
 			cag = project.getContigAdjacencyGraph();
 			completeGraph = cag.getCompleteGraph();
 
-//			model = new CagCreator(layoutGraph);
+			// model = new CagCreator(layoutGraph);
 			model = new CagCreator(completeGraph);
 
 			java.awt.EventQueue.invokeLater(new Runnable() {
 				public void run() {
 					try {
-						UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+						UIManager
+								.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
 						// "com.sun.java.swing.plaf.motif.MotifLookAndFeel");
 						// UIManager.getCrossPlatformLookAndFeelClassName());
 					} catch (Exception ex) {
@@ -131,7 +134,7 @@ public class CagCreator {
 		}
 
 	}
-	
+
 	/*
 	 * Diese Hashmaps speichern die linken und rechten Nachbarn aller Contigs
 	 */
@@ -172,10 +175,10 @@ public class CagCreator {
 			Collections.sort(leftNeighbours[x]);
 			Collections.sort(rightNeighbours[x]);
 		}
-		System.out.println(leftNeighbours[0]);
-		System.out.println(rightNeighbours[0]);
+//		System.out.println(leftNeighbours[0]);
+//		System.out.println(rightNeighbours[0]);
 	}
-	
+
 	public LayoutGraph getGraph() {
 		return graph;
 	}
@@ -184,15 +187,15 @@ public class CagCreator {
 	 * Create a List of all Nodes(Contigs) of LayoutGraph
 	 */
 	private String[] createContigList() {
-
+		AdjacencyEdge test = graph.getEdges().get(contigIndex);
 		contigs = graph.getNodes();
-		listData = new String[contigs.size()];
+		list = new String[contigs.size()];
 
 		for (int i = 0; i < contigs.size(); i++) {
 			DNASequence contig = contigs.get(i);
-			listData[i] = contig.getId();
+			list[i] = contig.getId();
 		}
-		return listData;
+		return list;
 	}
 
 	/*
@@ -208,73 +211,82 @@ public class CagCreator {
 	 * wie hängen diese beiden supports zusammen?
 	 * 
 	 * Mögliche Lösung: ich könnte immer den support nehmen statt
-	 * relativeSupport Wäre das sinnvoll? 
+	 * relativeSupport Wäre das sinnvoll?
 	 */
 
 	public synchronized Vector<AdjacencyEdge> calculateFiveMostLikleyNeighbours(
-			int index, boolean isLeft) {
-/*
- * TODO
- * Noch Kontrollieren ob alles einstellungen die jetzt bzgl des ContigObjects geamcht werden noch stimmen
- * setReverse z.B. -> Methode schreiben die feststellt ob ein Contig reverse gezeichnet werden muss!
- * 
- * Meochte ich nur mit der Kante arbeiten!!!
- * Verbessern!
- * 
- */
+			int centralContigIndex, boolean isLeft) {
+		/*
+		 * TODO Noch Kontrollieren ob alles einstellungen die jetzt bzgl des
+		 * ContigObjects geamcht werden noch stimmen setReverse z.B. -> Methode
+		 * schreiben die feststellt ob ein Contig reverse gezeichnet werden
+		 * muss!
+		 * 
+		 * Meochte ich nur mit der Kante arbeiten!!! Verbessern!
+		 * 
+		 * Hier auch noch mal schauen ob ich wirklich so viele Variblen als
+		 * Klassenvariblen def muss. Währe glaube ich besser wenn ich das local
+		 * gestallten würde. Auch währe es besser wenn ich hier was basteln
+		 * würde, womit ich indices und neighbours gleichzeitig zurückgeben
+		 * kann.
+		 */
 		Vector<AdjacencyEdge>[] neighbours;
 		Vector<AdjacencyEdge> fiveNeighbours;
-		
+
 		if (isLeft) {
 			System.out.println("linke nachbarn ");
 			fiveMostLikleyLeftNeighbours = new Vector<AdjacencyEdge>();
+			indexOfFiveMostLikleyLeftNeighbours = new Vector<Integer>();
 			fiveNeighbours = fiveMostLikleyLeftNeighbours;
 			neighbours = leftNeighbours;
-			
 		} else {
 			System.out.println("rechte nachbarn");
 			fiveMostLikleyRightNeighbours = new Vector<AdjacencyEdge>();
+			indexOfFiveMostLikleyRightNeighbours = new Vector<Integer>();
 			fiveNeighbours = fiveMostLikleyRightNeighbours;
 			neighbours = rightNeighbours;
+
 		}
 
 		double support;
 		double totalSupport;
 		boolean is_I_equals_X = false;
 
-		for (Iterator<AdjacencyEdge> iterator = neighbours[index].iterator(); iterator
-				.hasNext();) {
-			
-				AdjacencyEdge edge = iterator.next();
-				totalSupport = edge.getSupport();
+		for (Iterator<AdjacencyEdge> iterator = neighbours[centralContigIndex]
+				.iterator(); iterator.hasNext();) {
 
-				if (edge.getContigi().getId() == currentContigObject.getId()) {
-					is_I_equals_X = true;
-					neighbourContigObject = edge.getContigj();
-					support = edge.getRelativeSupportj();
-				} else {
-					is_I_equals_X = false;
-					neighbourContigObject = edge.getContigi();
-					support = edge.getRelativeSupporti();
-				}
-				/*
-				 * Notwendig weil ein Contig mehrfach als Nachbar in verschiedenen Orientierungen 
-				 * vorkommen kann.
-				 * Die folgenden Nachbarn ueberschreiben dann die Infos zu dem eigentlich interessanten
-				 * Nachbarn.
-				 * Im Moment behandel ich den Nachbarn nur einmal.
-				 * TODO 
-				 * Besser waehre aber wenn ich diesen Nachbarn auch als moeglichen anderen Nachbarn
-				 * in Erwaegung ziehe aber auch kennlich mache das dieser Nachbar ein anderer ist,
-				 * indem die Orientierung dieses Nachbarn anders ist.
-				 */
-				if(!fiveNeighbours.contains(neighbourContigObject)){
+			AdjacencyEdge edge = iterator.next();
+			totalSupport = edge.getSupport();
+
+			if (edge.geti() == centralContigIndex) {
+				is_I_equals_X = true;
+				neighbourContigObject = edge.getContigj();
+				support = edge.getRelativeSupportj();
+			} else {
+				is_I_equals_X = false;
+				neighbourContigObject = edge.getContigi();
+				support = edge.getRelativeSupporti();
+			}
+			/*
+			 * Notwendig weil ein Contig mehrfach als Nachbar in verschiedenen
+			 * Orientierungen vorkommen kann. Die folgenden Nachbarn
+			 * ueberschreiben dann die Infos zu dem eigentlich interessanten
+			 * Nachbarn. Im Moment behandel ich den Nachbarn nur einmal. TODO
+			 * Besser waehre aber wenn ich diesen Nachbarn auch als moeglichen
+			 * anderen Nachbarn in Erwaegung ziehe aber auch kennlich mache das
+			 * dieser Nachbar ein anderer ist, indem die Orientierung dieses
+			 * Nachbarn anders ist.
+			 */
+			if (!fiveNeighbours.contains(edge)) {
 				if (is_I_equals_X) {// j ist der nachbar
 
 					boolean flag = neighbourIsAlreadySelected(edge);
+					int index = edge.getj();
 					/*
 					 * Hier finde ich herraus, ob der Nachbar reverse angezeigt
 					 * werden muss oder nicht.
+					 * 
+					 * TODO hier eine Reverse Methode aufrufen!
 					 */
 					if (edge.isLeftConnectorj() == true
 							&& edge.isRightConnectorj() == true) {
@@ -290,11 +302,11 @@ public class CagCreator {
 							.setSupportComparativeToCentralContig(support);
 					neighbourContigObject.setTotalSupport(totalSupport);
 					neighbourContigObject.setContigIsSelected(flag);
-					
 					fiveNeighbours.add(edge);
-					
+
 				} else {// i ist der nachbar
 					boolean flag = neighbourIsAlreadySelected(edge);
+					int index = edge.geti();
 					/*
 					 * Hier finde ich herraus, ob der Nachbar reverse angezeigt
 					 * werden muss oder nicht.
@@ -312,9 +324,9 @@ public class CagCreator {
 							.setSupportComparativeToCentralContig(support);
 					neighbourContigObject.setTotalSupport(totalSupport);
 					neighbourContigObject.setContigIsSelected(flag);
-					
+
 					fiveNeighbours.add(edge);
-					
+
 				}
 			}
 		}
@@ -327,7 +339,7 @@ public class CagCreator {
 	}
 
 	private boolean neighbourIsAlreadySelected(AdjacencyEdge neighbour) {
-		
+
 		boolean flag = false;
 
 		for (AdjacencyEdge edge : selectedContigs) {
@@ -337,54 +349,36 @@ public class CagCreator {
 		}
 		return flag;
 	}
-	
 
-	public Vector<AdjacencyEdge> addSelectedContig(String neighbourName,
-			String side) {
+	public Vector<AdjacencyEdge> addSelectedContig(AdjacencyEdge selectedEdge) {
 
-		if (side.equals("left")) {
-			//System.out.println("cag: links");
-			for (Iterator<AdjacencyEdge> iterator = leftNeighbours[contigIndex]
-					.iterator(); iterator.hasNext();) {
-				AdjacencyEdge edge = iterator.next();
-				
-				/*
-				 * TODO erst abfragen, ob in dieser Kante zu dem Aktuellem
-				 * Contig schon ein Eintrag vorhanden ist wenn ja sollte es
-				 * nicht moeglich sein einen neuen Eintrag zu machen dann muss
-				 * erst der Benutzer gefrage werden ob er die bisher
-				 * ausgewaehlte kante loeschen moechte ist das der fall so
-				 * loeschen dann erst neue Kante hinzufuegen lassen.
-				 */
-			
-				if (edge.getContigi().getId().equals(neighbourName) ) {
-					selectedContigs.add(edge);
-					break;
-				}
-				if (edge.getContigj().getId().equals(neighbourName)) {
-					selectedContigs.add(edge);
-					break;
+		for (Iterator<AdjacencyEdge> iterator = selectedContigs.iterator(); iterator
+				.hasNext();) {
+			AdjacencyEdge edge = iterator.next();
 
-				}
-				
+			if (!edge.equals(selectedEdge)) {
+				selectedContigs.add(edge);
+				break;
 			}
-		} else if (side.equals("right")) {
-	//		System.out.println("cag: rechts");
-			for (Iterator<AdjacencyEdge> iterator = rightNeighbours[contigIndex]
-					.iterator(); iterator.hasNext();) {
-				AdjacencyEdge edge = iterator.next();
-				
-				if (edge.getContigi().getId().equals(neighbourName)) {
-		//			System.out.println(edge + " support of edge, i "+edge.getRelativeSupporti());
-					selectedContigs.add(edge);
-					break;
-				}
-				if (edge.getContigj().getId().equals(neighbourName)) {
-				//	System.out.println(edge + " support of edge, j "+edge.getRelativeSupportj());
-					selectedContigs.add(edge);
-					break;
-				}
+		}
+		return selectedContigs;
+	}
+
+	public Vector<AdjacencyEdge> removeSelecedEdge(AdjacencyEdge selectedEdge) {
+
+		boolean flag = false;
+
+		for (AdjacencyEdge edge : selectedContigs) {
+			if (edge.equals(selectedEdge)) {
+				selectedContigs.removeElement(selectedEdge);
+				flag = true;
+				break;
 			}
+		}
+		if (!flag) {
+			javax.swing.JOptionPane.showMessageDialog(window, "Sorry.\n"
+					+ "Can't remove this neighbour\n"
+					+ "Probably you didn't selected this neighbour.");
 		}
 		return selectedContigs;
 	}
@@ -393,7 +387,7 @@ public class CagCreator {
 	 * Send an event, if the user selected a contig
 	 */
 	public void sendCurrentContig() {
-	//	System.out.println("cag: Sende aktuelles Contig");
+		// System.out.println("cag: Sende aktuelles Contig");
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
 				currentContigObject);
 		fireEvent(event);
@@ -405,7 +399,7 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendLeftNeighbours() {
-//		System.out.println("cag: linke nachbarn ");
+		// System.out.println("cag: linke nachbarn ");
 
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_LEFT_NEIGHBOURS,
 				calculateFiveMostLikleyNeighbours(contigIndex, true));
@@ -418,7 +412,7 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendRightNeighbours() {
-//		System.out.println("cag: rechte nachbarn ");
+		// System.out.println("cag: rechte nachbarn ");
 
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_RIGHT_NEIGHBOURS,
 				calculateFiveMostLikleyNeighbours(contigIndex, false));
@@ -464,15 +458,15 @@ public class CagCreator {
 	 */
 	public String[] getListData() {
 		this.createContigList();
-		return listData;
+		return list;
 	}
 
 	/*
 	 * Return the current Contig Id/Name
 	 */
-	public String getCurrentContig() {
-		return nowCentralContigID;
-	}
+//	public String getCurrentContig() {
+//		return nowCentralContigID;
+//	}
 
 	/*
 	 * TODO Wenn schon einer dieser Nachbarn ausgewählt wurde sollte dieser
@@ -495,4 +489,5 @@ public class CagCreator {
 		this.currentContigObject = graph.getNodes().get(index);
 		sendCurrentContig();
 	}
+	
 }

@@ -18,6 +18,8 @@ public class CagEvent {
 	private boolean repetitive;
 	private boolean reverse;
 	private  Vector<DNASequence>  contigData;
+	private  Vector<AdjacencyEdge>  edges;
+	private  Vector<Integer>  indices;
 	private  DNASequence  contigNode;
 	
 	public CagEvent(EventType event, String data) {
@@ -35,17 +37,15 @@ public class CagEvent {
 		this.index = i;
 	}
 	
-	public CagEvent(EventType event,  LayoutGraph layoutGraph, AdjacencyEdge includingEdge, int i) {
+	public CagEvent(EventType event, AdjacencyEdge includingEdge, int i) {
 		this.event_type = event;
-		this.graph = layoutGraph;
 		this.edge = includingEdge;
 		this.index = i;
 	}
-	
-	
-	public CagEvent(EventType event, Vector<DNASequence>  neighbours){
+	public CagEvent(EventType event, Vector<AdjacencyEdge> neighbourEdges) {
 		this.event_type = event;
-		this.contigData = neighbours;
+		this.edges = neighbourEdges;
+
 	}
 
 	public  DNASequence getContigNode() {
@@ -78,5 +78,12 @@ public class CagEvent {
 	}
 	public AdjacencyEdge getEdge() {
 		return edge;
+	}
+	
+	public Vector<AdjacencyEdge> getEdges() {
+		return edges;
+	}
+	public Vector<Integer> getIndices() {
+		return indices;
 	}
 }

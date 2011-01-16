@@ -6,6 +6,7 @@ import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
 public class ContigRadioButton extends JRadioButton {
 	
 	private AdjacencyEdge edge;
+	private boolean isOneNeighbourOfThisSideAlreadySelected = false;
 	private int i;
 	
 	public ContigRadioButton (AdjacencyEdge includingEdge, int index){
@@ -20,5 +21,16 @@ public class ContigRadioButton extends JRadioButton {
 	public int getI() {
 		return i;
 	}
+
+	public boolean isOneNeighbourOfThisSideAlreadySelected() {
+		return isOneNeighbourOfThisSideAlreadySelected;
+	}
+
+	public void setOneNeighbourOfThisSideAlreadySelected(
+			boolean isOneNeighbourOfThisSideAlreadySelected) {
+		this.isOneNeighbourOfThisSideAlreadySelected = isOneNeighbourOfThisSideAlreadySelected;
+	}
+
+	
 
 }

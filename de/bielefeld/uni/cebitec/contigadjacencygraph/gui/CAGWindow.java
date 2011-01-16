@@ -79,7 +79,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	private JPanel leftRadioButtonContainer;
 	private JPanel rightRadioButtonContainer;
 
-	private Vector<String> selectedRadioButtons;
+	private Vector<ContigRadioButton> selectedRadioButtons;
 	private int z = 0;
 	private String centralContigName;
 
@@ -98,7 +98,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		myModel.addEventListener(this);
 		setTitle("View of contig adjacency graph");
 
-		selectedRadioButtons = new Vector<String>();
+		selectedRadioButtons = new Vector<ContigRadioButton>();
 		/*
 		 * Menu TODO Was fuer Funktionen sollte das Menu haben??
 		 */
@@ -281,7 +281,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		if (event.getEvent_type().equals(EventType.EVENT_CHOOSED_CONTIG)) {
 
 			AdjacencyEdge edge = event.getEdge();
-			LayoutGraph graph = event.getGraph();
+			LayoutGraph graph = this.layoutGraph;
 			centralContigIndex = event.getIndex();
 			centralContig = new ContigAppearance(graph, edge,
 					centralContigIndex);
@@ -301,12 +301,12 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 			leftContainerFull = false;
 
-			Vector<DNASequence> leftNeighbours = null;
+			Vector<AdjacencyEdge> neighbourEdges = event.getEdges();
+
 			ContigAppearance contigPanel = null;
 			oneOfLeftNeigboursSelected = false;
 			ContigRadioButton radioButton;
 			leftSupport = new double[numberOfNeighbours];
-			leftNeighbours = event.getContigData();
 			int t = 0;
 
 			if (leftContainer.getComponentCount() > 0
@@ -315,24 +315,35 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				leftRadioButtonContainer.removeAll();
 			}
 			int terminator = 1;
-			if (numberOfNeighbours < leftNeighbours.size()) {
+			if (numberOfNeighbours < neighbourEdges.size()) {
 				terminator = numberOfNeighbours;
-			} else if (numberOfNeighbours > leftNeighbours.size()) {
-				terminator = leftNeighbours.size();
+			} else if (numberOfNeighbours > neighbourEdges.size()) {
+				terminator = neighbourEdges.size();
 			}
 
-			for (Iterator<DNASequence> neighbour = leftNeighbours.iterator(); neighbour
+			for (Iterator<AdjacencyEdge> edges = neighbourEdges.iterator(); ((Iterator) neighbourEdges)
 					.hasNext();) {
 				while (t < terminator) {
-					DNASequence dnaSequence = (DNASequence) neighbour.next();
+					AdjacencyEdge edge = ((Iterator<AdjacencyEdge>) neighbourEdges)
+							.next();
+					DNASequence dnaSequence;
+					int indexOfContig;
+					if (edge.geti() == centralContigIndex) {
+						dnaSequence = edge.getContigj();
+						indexOfContig = edge.getj();
+					} else {
+						dnaSequence = edge.getContigi();
+						indexOfContig = edge.geti();
+					}
+
 					System.out.println("links " + dnaSequence.getId() + ":  "
 							+ dnaSequence.getTotalSupport());
 					leftSupport[t] = dnaSequence
 					// .getSupportComparativeToCentralContig();
 							.getTotalSupport();
 
-					contigPanel = new ContigAppearance(dnaSequence,
-							centralContigName);
+					contigPanel = new ContigAppearance(layoutGraph, edge,
+							indexOfContig);
 					/*
 					 * Help that the user is only able to select one neighbour
 					 * for each side.
@@ -341,16 +352,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						oneOfLeftNeigboursSelected = true;
 					}
 					contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
-
 					contigPanel.addMouseListener(new ContigMouseListener());
 					contigPanel.setVisible(true);
 
-					radioButton = new ContigRadioButton();
-					radioButton.setBackground(Color.WHITE);
-					// ist relevat um nur einen nachbarn des centralen Contigs
-					// auswählbar zu machen.
-					radioButton.setActionCommand(centralContigName + ":"
-							+ dnaSequence.getId() + ":left");
+					radioButton = new ContigRadioButton(edge, indexOfContig);
+					radioButton.setBackground(Color.WHITE);			
 					radioButton
 							.addActionListener(new RadioButtonActionListener());
 
@@ -381,53 +387,58 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			int terminator = 1;
 
 			rightContainerFull = false;
-			Vector<DNASequence> rightNeighbours = null;
+			Vector<AdjacencyEdge> neighbourEdges = event.getEdges();
 			ContigAppearance contigPanel = null;
 			oneOfRightNeigboursSelected = false;
-			JRadioButton radioButton;
+			ContigRadioButton radioButton;
 			rightSupport = new double[numberOfNeighbours];
-			rightNeighbours = event.getContigData();
+
 			int s = 0;
 			if (rightContainer.getComponentCount() > 0
 					|| rightRadioButtonContainer.getComponentCount() > 0) {
 				rightContainer.removeAll();
 				rightRadioButtonContainer.removeAll();
 			}
-			if (numberOfNeighbours < rightNeighbours.size()) {
+			if (numberOfNeighbours < neighbourEdges.size()) {
 				terminator = numberOfNeighbours;
-			} else if (numberOfNeighbours > rightNeighbours.size()) {
-				terminator = rightNeighbours.size();
+			} else if (numberOfNeighbours > neighbourEdges.size()) {
+				terminator = neighbourEdges.size();
 			}
 
-			for (Iterator<DNASequence> neighbour = rightNeighbours.iterator(); neighbour
+			for (Iterator<AdjacencyEdge> edges = neighbourEdges.iterator(); ((Iterator) neighbourEdges)
 					.hasNext();) {
-
 				while (s < terminator) {
-					DNASequence rightNeighbour = (DNASequence) neighbour.next();
-					System.out.println("rechts " + rightNeighbour.getId()
-							+ ":  " + rightNeighbour.getTotalSupport());
+					AdjacencyEdge edge = ((Iterator<AdjacencyEdge>) neighbourEdges)
+							.next();
+					DNASequence dnaSequence;
+					int indexOfContig;
+					if (edge.geti() == centralContigIndex) {
+						dnaSequence = edge.getContigj();
+						indexOfContig = edge.getj();
+					} else {
+						dnaSequence = edge.getContigi();
+						indexOfContig = edge.geti();
+					}
 
-					rightSupport[s] = rightNeighbour
+					rightSupport[s] = dnaSequence
 					// .getSupportComparativeToCentralContig();
 							.getTotalSupport();
 
-					contigPanel = new ContigAppearance(rightNeighbour,
-							centralContigName);
+					contigPanel = new ContigAppearance(layoutGraph, edge,
+							indexOfContig);
 					/*
 					 * Help that the user is only able to select one neighbour
 					 * for each side.
 					 */
-					if (rightNeighbour.isContigIsSelected()) {
+					if (dnaSequence.isContigIsSelected()) {
 						oneOfRightNeigboursSelected = true;
 					}
 					contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
 					contigPanel.setVisible(true);
 
-					radioButton = new JRadioButton();
+					radioButton = new ContigRadioButton(edge, indexOfContig);
 					radioButton.setBackground(Color.WHITE);
-					radioButton.setActionCommand(centralContigName + ":"
-							+ rightNeighbour.getId() + ":right");
 					radioButton
 							.addActionListener(new RadioButtonActionListener());
 
@@ -469,7 +480,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			if (e.getValueIsAdjusting() == false) {
 
 				String selection = (String) list.getSelectedValue();
-				model.changeContigs(selection, "false");
+				model.changeContigs(null, index, false);
 				getGlassPane().setVisible(false);
 				glassPanel.setFlag(false);
 
@@ -522,61 +533,28 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	 */
 	public class RadioButtonActionListener implements ActionListener {
 
-		private boolean neighbourAlreadySelected;
-		private String actionCmd;
-		private String test[];
-		private String centralContigId;
-		private String idOfSelectedContig;
-		private String side;
-
-		private String oldCmd;
-		private String old[];
-		private String oldcentralContigId;
-		private String oldId;
-		private String oldSide;
-		private boolean contigPossibleNeighbour;
+		private boolean neighbourAlreadySelected = false;
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 
-			Vector<String> copyOfSelectedContigs = (Vector<String>) selectedRadioButtons
+			Vector<ContigRadioButton> copyOfSelectedContigs = (Vector<ContigRadioButton>) selectedRadioButtons
 					.clone();
 
-			neighbourAlreadySelected = false;
+			ContigRadioButton radioButton = (ContigRadioButton) e.getSource();
 
-			actionCmd = e.getActionCommand();
-			test = actionCmd.split(":");
-			centralContigId = test[0];
-			idOfSelectedContig = test[1];
-			side = test[2];
-
-			boolean use;
-			if (side.equals("left")) {
-				use = oneOfLeftNeigboursSelected;
-			} else {
-				use = oneOfRightNeigboursSelected;
-			}
-			if (z == 0) {
-				z++;
-				selectedRadioButtons.add(actionCmd);
-				model.addSelectedContig(idOfSelectedContig, side);
-			} else {
-				/*
-				 * Für jedes bisher gespeicherte Contig Paar
-				 */
-				for (Iterator<String> selectedContig = copyOfSelectedContigs
-						.iterator(); selectedContig.hasNext();) {
-
-					oldCmd = (String) selectedContig.next();
-					old = oldCmd.split(":");
-					oldcentralContigId = old[0];
-					oldId = old[1];
-					oldSide = old[2];
-					/*
-					 * Test, ob diese Contig Id schon als Nachbar ausgewählt
-					 * worden ist
-					 */
-					if (oldId.equals(idOfSelectedContig) && !use) {
+			AdjacencyEdge edge = radioButton.getEdge();
+			int index = radioButton.getI();
+			boolean isANeighourSelected = radioButton
+					.isOneNeighbourOfThisSideAlreadySelected();
+			/*
+			 * Vllt ist die Seite noch relevant dann in der radionButtonClass
+			 * hinzufügen
+			 */
+			if (!isANeighourSelected) {
+				for (ContigRadioButton button : copyOfSelectedContigs) {
+					AdjacencyEdge adjacencyEdge = button.getEdge();
+					if (adjacencyEdge.equals(edge)) {
 						javax.swing.JOptionPane
 								.showMessageDialog(
 										window,
@@ -584,60 +562,24 @@ public class CAGWindow extends JFrame implements CagEventListener {
 												+ "You already selected this neighbour\n");
 						neighbourAlreadySelected = true;
 						break;
-					}
-					/*
-					 * Test, ob das centrale Contig schon einmal ausgewählt
-					 * worden ist.
-					 */
-					if (oldcentralContigId.equals(centralContigId)) {
-
-						// Wenn dem zentrale Contig schon auf beiden Seiten
-						// einen Nachbar zugewiesen wurde ist es nicht
-						// möglich einen weiteren hinzuzufügen.
-
-						if (oldSide.equals(side)) {
-							javax.swing.JOptionPane
-									.showMessageDialog(
-											window,
-											"Sorry.\n"
-													+ "You already selected a neighbour for this side of central contig\n"
-													+ "First you have to delete the other Contig");
-							break;
-						} else {
-							contigPossibleNeighbour = true;
-						}
 					} else {
-						contigPossibleNeighbour = true;
-					}
-
-				}
-				if (!use) {
-					if (!neighbourAlreadySelected) {
-						/*
-						 * Entweder ist hier der ausgewählte Nachbar der zweite
-						 * Nachbar eines zentralen Contigs
+						selectedRadioButtons.add(radioButton);
+						/*TODO
+						 * Bis jetzt wird nur dieser eine radio Button gesetzt.
+						 * Möchte aber das alle button der group als ausgewählt 
+						 * gesetzt werden.
+						 * Und dadurch kein weiterer Ausgewählt werden kann.
 						 */
-						if (contigPossibleNeighbour) {
-							selectedRadioButtons.add(actionCmd);
-							model.addSelectedContig(idOfSelectedContig, side);
-						}
-						/*
-						 * oder die Nachbarn von diesem centralem Contig wurden
-						 * noch nicht ausgewählt
-						 */
-					} else {
-
-						selectedRadioButtons.add(actionCmd);
-						model.addSelectedContig(idOfSelectedContig, side);
+						radioButton.setOneNeighbourOfThisSideAlreadySelected(true);
+						model.addSelectedContig(edge);
 					}
-				} else {
-					javax.swing.JOptionPane
-							.showMessageDialog(
-									window,
-									"Sorry.\n"
-											+ "You already selected a neighbour for this side of central contig\n"
-											+ "First you have to delete the other Contig");
 				}
+			} else {
+				javax.swing.JOptionPane
+						.showMessageDialog(
+								window,
+								"Sorry.\n"
+										+ "You already selected a neighbour for this contig.\n");
 			}
 		}
 	}
