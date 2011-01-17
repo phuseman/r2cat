@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-OpenIDE-Module: de.bielefeld.uni.cebitec.dnasequences
+OpenIDE-Module: de.bielefeld.uni.cebitec.dnasequences/1
 OpenIDE-Module-Localizing-Bundle: de/bielefeld/uni/cebitec/dnasequences/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0
+OpenIDE-Module-Specification-Version: 0.0.1
 
