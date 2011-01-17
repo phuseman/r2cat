@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
-OpenIDE-Module: de.bielefeld.uni.cebitec.contigorderingproject
+OpenIDE-Module: de.bielefeld.uni.cebitec.contigorderingproject/1
 OpenIDE-Module-Localizing-Bundle: de/bielefeld/uni/cebitec/contigorderingproject/Bundle.properties
+OpenIDE-Module-Layer: de/bielefeld/uni/cebitec/contigorderingproject/layer.xml
 OpenIDE-Module-Requires: org.openide.windows.WindowManager
-OpenIDE-Module-Specification-Version: 1.0
+OpenIDE-Module-Specification-Version: 0.0.1
 
