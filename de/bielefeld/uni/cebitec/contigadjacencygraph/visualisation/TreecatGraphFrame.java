@@ -114,12 +114,9 @@ public class TreecatGraphFrame implements ActionListener
 	    this.window.setVisible(true);
 	    
 	    this.d = this.displayPanel.getSize();
-	    Double displayPanelHeight = d.getHeight()-15;
-	    Double displayPanelWidth = d.getWidth()-30;
-	    this.d.setSize(displayPanelWidth, displayPanelHeight);
 	    
 		this.setactualGraph(g);
-		this.init("fdl", this.getactualGraph());
+		this.init("frl", this.getactualGraph());
 	}  
 
 	private void init(String str, Graph g)

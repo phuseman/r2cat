@@ -32,6 +32,7 @@ import javax.swing.border.Border;
 import javax.swing.plaf.ColorUIResource;
 
 import prefuse.data.Table;
+import prefuse.data.Tuple;
 import prefuse.Constants;
 import prefuse.Display;
 import prefuse.Visualization;
@@ -48,9 +49,11 @@ import prefuse.controls.PanControl;
 import prefuse.controls.ToolTipControl;
 import prefuse.controls.ZoomToFitControl;
 import prefuse.data.Graph;
+import prefuse.data.event.TupleSetListener;
 import prefuse.data.query.SearchQueryBinding;
 import prefuse.data.search.PrefixSearchTupleSet;
 import prefuse.data.search.SearchTupleSet;
+import prefuse.data.tuple.TupleSet;
 import prefuse.demos.RadialGraphView.TreeRootAction;
 import prefuse.render.DefaultRendererFactory;
 import prefuse.render.EdgeRenderer;
@@ -111,6 +114,7 @@ public class PrefuseRadialGraph
 		// light grey edges
 		ColorAction edgeStroke = new ColorAction("graph.edges", VisualItem.STROKECOLOR);
 		edgeStroke.setDefaultColor(ColorLib.rgb(164,171,134));
+		edgeStroke.add("_fixed", ColorLib.rgb(0,0,0));
 		edgeStroke.add("_highlight", ColorLib.rgb(0,0,0));
 	     
 		// highlighting adjacency nodes
@@ -205,6 +209,25 @@ public class PrefuseRadialGraph
 		this.searchPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		this.searchPanel.setShowCancel(false);
 		this.searchPanel.setShowResultCount(false);
+		
+		// fix selected focus nodes
+        TupleSet focusGroup = vis.getGroup(Visualization.FOCUS_ITEMS); 
+        focusGroup.addTupleSetListener(new TupleSetListener() {
+            public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem)
+            {
+                for ( int i=0; i<rem.length; ++i )
+                    ((VisualItem)rem[i]).setFixed(false);
+                for ( int i=0; i<add.length; ++i ) {
+                    ((VisualItem)add[i]).setFixed(false);
+                    ((VisualItem)add[i]).setFixed(true);
+                }
+                if ( ts.getTupleCount() == 0 ) {
+                    ts.addTuple(rem[0]);
+                    ((VisualItem)rem[0]).setFixed(false);
+                }
+                vis.run("color");
+            }
+        });
 	}
 	
 	// returns the prefuse-display including a radial prefuse graph

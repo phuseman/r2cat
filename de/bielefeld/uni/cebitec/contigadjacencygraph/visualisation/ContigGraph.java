@@ -69,7 +69,6 @@ public class ContigGraph extends Graph
 			
 			String arrangedDescription = this.lg.getNodes().get(nodeCounter).getDescription();
 			this.nodes.set(nodeRowCounter, "description", arrangedDescription);
-			
 			this.nodes.set(nodeRowCounter, "totalAlignmentLength", this.lg.getNodes().get(nodeCounter).getTotalAlignmentLength());
 			this.nodes.set(nodeRowCounter, "repetetivePercent", this.lg.getNodes().get(nodeCounter).getRepetitivePercent());
 			

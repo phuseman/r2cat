@@ -49,6 +49,7 @@ import prefuse.controls.PanControl;
 import prefuse.controls.ToolTipControl;
 import prefuse.controls.ZoomControl;
 import prefuse.data.Graph;
+import prefuse.data.Tuple;
 import prefuse.render.DefaultRendererFactory;
 import prefuse.render.EdgeRenderer;
 import prefuse.util.ColorLib;
@@ -56,10 +57,13 @@ import prefuse.visual.VisualItem;
 import prefuse.controls.NeighborHighlightControl;
 import prefuse.data.search.SearchTupleSet;
 import prefuse.data.search.PrefixSearchTupleSet;
+import prefuse.data.tuple.TupleSet;
+import prefuse.data.event.TupleSetListener;
 import prefuse.data.query.SearchQueryBinding;
 import prefuse.util.ui.JSearchPanel; 
 import prefuse.data.Table;
 import prefuse.util.FontLib;
+import prefuse.controls.FocusControl;
 
 /**
  * 
@@ -111,6 +115,7 @@ public class PrefuseForceDirectedGraph
 		// light grey edges
 		ColorAction edgeStrokes = new ColorAction("graph.edges", VisualItem.STROKECOLOR);
 		edgeStrokes.setDefaultColor(ColorLib.rgb(164,171,134));
+		edgeStrokes.add("_fixed", ColorLib.rgb(0,0,0));
 		edgeStrokes.add("_highlight", ColorLib.rgb(0,0,0));
 	     
 		// highlighting Adjacency nodes
@@ -183,6 +188,7 @@ public class PrefuseForceDirectedGraph
 	    this.display.addControlListener(new DragControl());
 	    this.display.addControlListener(new PanControl());
 	    this.display.addControlListener(new ZoomControl());
+	    this.display.addControlListener(new FocusControl());
 	    this.display.addControlListener(new NeighborHighlightControl());
 	    this.display.setHighQuality(true);
 	    this.display.setSize(d);
@@ -212,6 +218,25 @@ public class PrefuseForceDirectedGraph
 		this.searchPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		this.searchPanel.setShowCancel(false);
 		this.searchPanel.setShowResultCount(false);
+		
+		// fix selected focus nodes
+        TupleSet focusGroup = vis.getGroup(Visualization.FOCUS_ITEMS); 
+        focusGroup.addTupleSetListener(new TupleSetListener() {
+            public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem)
+            {
+                for ( int i=0; i<rem.length; ++i )
+                    ((VisualItem)rem[i]).setFixed(false);
+                for ( int i=0; i<add.length; ++i ) {
+                    ((VisualItem)add[i]).setFixed(false);
+                    ((VisualItem)add[i]).setFixed(true);
+                }
+                if ( ts.getTupleCount() == 0 ) {
+                    ts.addTuple(rem[0]);
+                    ((VisualItem)rem[0]).setFixed(false);
+                }
+                vis.run("color");
+            }
+        });
 	}  
 	
 	// returns the prefuse-display including a force directed prefuse graph

@@ -40,9 +40,12 @@ import prefuse.controls.PanControl;
 import prefuse.controls.ZoomControl;
 import prefuse.data.Graph;
 import prefuse.data.Table;
+import prefuse.data.Tuple;
+import prefuse.data.event.TupleSetListener;
 import prefuse.data.query.SearchQueryBinding;
 import prefuse.data.search.PrefixSearchTupleSet;
 import prefuse.data.search.SearchTupleSet;
+import prefuse.data.tuple.TupleSet;
 import prefuse.render.DefaultRendererFactory;
 import prefuse.render.EdgeRenderer;
 import prefuse.util.ColorLib;
@@ -51,6 +54,7 @@ import prefuse.util.ui.JSearchPanel;
 import prefuse.visual.VisualItem;
 import prefuse.controls.NeighborHighlightControl;
 import prefuse.controls.ToolTipControl;
+import prefuse.controls.FocusControl;
 
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
@@ -108,6 +112,7 @@ public class PrefuseFruchtermanReingoldGraph
 		ColorAction edgeStrokes = new ColorAction("graph.edges", VisualItem.STROKECOLOR);
 		edgeStrokes.setDefaultColor(ColorLib.rgb(164,171,134));
 		edgeStrokes.add("_highlight", ColorLib.rgb(0,0,0));
+		edgeStrokes.add("_fixed", ColorLib.rgb(0,0,0));
 	     
 		// highlighting Adjacency nodes
 		ColorAction fill = new ColorAction("graph.nodes", VisualItem.FILLCOLOR, ColorLib.rgb(204,204,153)); 
@@ -115,13 +120,13 @@ public class PrefuseFruchtermanReingoldGraph
 		fill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(230,204,102)); 
 		
 		ColorAction filledges = new ColorAction("graph.edges", VisualItem.FILLCOLOR, ColorLib.rgb(0,0,0)); 
-		//fill.add(VisualItem.FIXED, ColorLib.rgb(255,204,51)); 
 		filledges.add(VisualItem.HIGHLIGHT, ColorLib.rgb(0,0,0)); 
 		
 		// create action lists
 		ActionList layout = new ActionList();
 		ActionList color = new ActionList(Activity.INFINITY);
 		ActionList filter = new ActionList(Activity.INFINITY);
+
 
 		// create DataSizeAction for EdgeSupport
 		DataSizeAction edgeWeight = new DataSizeAction("graph.edges","drawableEdgeSupport");
@@ -172,6 +177,7 @@ public class PrefuseFruchtermanReingoldGraph
 	    this.display.addControlListener(new DragControl());
 	    this.display.addControlListener(new PanControl());
 	    this.display.addControlListener(new ZoomControl());
+	    this.display.addControlListener(new FocusControl());
 	    this.display.addControlListener(new NeighborHighlightControl());
 	    this.display.setHighQuality(true);
 	    this.display.setSize(d);
@@ -201,6 +207,25 @@ public class PrefuseFruchtermanReingoldGraph
 		this.searchPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		this.searchPanel.setShowCancel(false);
 		this.searchPanel.setShowResultCount(false);
+		
+		// fix selected focus nodes
+        TupleSet focusGroup = vis.getGroup(Visualization.FOCUS_ITEMS); 
+        focusGroup.addTupleSetListener(new TupleSetListener() {
+            public void tupleSetChanged(TupleSet ts, Tuple[] add, Tuple[] rem)
+            {
+                for ( int i=0; i<rem.length; ++i )
+                    ((VisualItem)rem[i]).setFixed(false);
+                for ( int i=0; i<add.length; ++i ) {
+                    ((VisualItem)add[i]).setFixed(false);
+                    ((VisualItem)add[i]).setFixed(true);
+                }
+                if ( ts.getTupleCount() == 0 ) {
+                    ts.addTuple(rem[0]);
+                    ((VisualItem)rem[0]).setFixed(false);
+                }
+                vis.run("color");
+            }
+        });
 	}  
 	
 	// returns the prefuse-display including a FruchtermanReingold prefuse graph
