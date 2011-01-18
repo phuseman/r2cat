@@ -47,6 +47,14 @@
     <file name="Licenses_hidden"/>
     <folder name="Project">
       <file name="Import_hidden"/>
+      <folder name="Contig Ordering">
+        <file name="Reference based">
+          <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.contigorderingproject.Bundle#Templates/Project/ContigOrdering/Referencebased"/>
+          <attr name="instantiatingIterator" newvalue="de.bielefeld.uni.cebitec.contigorderingproject.ContigOrderingProjectWizardIterator"/>
+          <attr name="template" boolvalue="true"/>
+          <attr name="templateWizardURL" urlvalue="nbresloc:/de/bielefeld/uni/cebitec/contigorderingproject/contigOrderingProject.html"/>
+        </file>
+      </folder>
       <file name="Samples_hidden"/>
     </folder>
     <file name="Services_hidden"/>
