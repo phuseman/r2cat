@@ -5,8 +5,30 @@
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
             <code-name-base>de.bielefeld.uni.cebitec</code-name-base>
             <suite-component/>
-            <module-dependencies/>
-            <public-packages/>
+            <module-dependencies>
+                <dependency>
+                    <code-name-base>org.freehep</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <release-version>1</release-version>
+                        <specification-version>1.0</specification-version>
+                    </run-dependency>
+                </dependency>
+            </module-dependencies>
+            <public-packages>
+                <package>de.bielefeld.uni.cebitec.common</package>
+                <package>de.bielefeld.uni.cebitec.contigadjacencygraph</package>
+                <package>de.bielefeld.uni.cebitec.contigadjacencygraph.layouter</package>
+                <package>de.bielefeld.uni.cebitec.primerdesign</package>
+                <package>de.bielefeld.uni.cebitec.primerdesign.gui</package>
+                <package>de.bielefeld.uni.cebitec.qgram</package>
+                <package>de.bielefeld.uni.cebitec.r2cat</package>
+                <package>de.bielefeld.uni.cebitec.r2cat.gui</package>
+                <package>de.bielefeld.uni.cebitec.r2cat.help</package>
+                <package>de.bielefeld.uni.cebitec.treecat</package>
+                <package>de.bielefeld.uni.cebitec.treecat.gui</package>
+            </public-packages>
         </data>
     </configuration>
 </project>
