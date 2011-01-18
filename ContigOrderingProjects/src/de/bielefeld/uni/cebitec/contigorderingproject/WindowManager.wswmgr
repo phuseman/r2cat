@@ -6,7 +6,7 @@
 
 <windowmanager version="2.1">
     <main-window> 
-        <joined-properties centered-horizontally="false" centered-vertically="false"
+        <joined-properties centered-horizontally="true" centered-vertically="true"
                            relative-width="0.618" relative-height="0.618" />
         <separated-properties centered-horizontally="true" relative-y="0.1"
                            relative-width="0.8" relative-height="0.08" />
