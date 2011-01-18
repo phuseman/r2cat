@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.apisupport.project</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
+            <code-name-base>org.freehep</code-name-base>
+            <suite-component/>
+            <module-dependencies/>
+            <public-packages>
+                <package>org.freehep.graphics2d</package>
+                <package>org.freehep.graphics2d.font</package>
+                <package>org.freehep.graphicsio</package>
+                <package>org.freehep.graphicsio.exportchooser</package>
+                <package>org.freehep.graphicsio.font</package>
+                <package>org.freehep.graphicsio.latex</package>
+                <package>org.freehep.graphicsio.pdf</package>
+                <package>org.freehep.graphicsio.png</package>
+                <package>org.freehep.graphicsio.ps</package>
+                <package>org.freehep.graphicsio.raw</package>
+                <package>org.freehep.graphicsio.svg</package>
+                <package>org.freehep.swing</package>
+                <package>org.freehep.swing.layout</package>
+                <package>org.freehep.util</package>
+                <package>org.freehep.util.export</package>
+                <package>org.freehep.util.images</package>
+                <package>org.freehep.util.io</package>
+                <package>org.freehep.util.xml</package>
+            </public-packages>
+            <class-path-extension>
+                <runtime-relative-path>ext/freehepGraphicsExport.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/freehepGraphicsExport.jar</binary-origin>
+            </class-path-extension>
+        </data>
+    </configuration>
+</project>
