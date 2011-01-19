@@ -11,8 +11,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
 import org.openide.WizardDescriptor;
 
 public final class ContigOrderingProjectWizardIterator implements WizardDescriptor.InstantiatingIterator {
@@ -26,6 +24,7 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
    * various properties for them influencing wizard appearance.
    */
   private WizardDescriptor.Panel[] getPanels() {
+
     if (panels == null) {
       panels = new WizardDescriptor.Panel[]{
                 new ContigOrderingProjectWizardPanel()
@@ -47,27 +46,17 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
           // Sets steps names for a panel
           jc.putClientProperty("WizardPanel_contentData", steps);
           // Turn on subtitle creation on each step
-          jc.putClientProperty("WizardPanel_autoWizardStyle", Boolean.TRUE);
+          jc.putClientProperty("WizardPanel_autoWizardStyle", Boolean.FALSE);
           // Show steps on the left side with the image on the background
-          jc.putClientProperty("WizardPanel_contentDisplayed", Boolean.TRUE);
+          jc.putClientProperty("WizardPanel_contentDisplayed", Boolean.FALSE);
           // Turn on numbering of all steps
-          jc.putClientProperty("WizardPanel_contentNumbered", Boolean.TRUE);
+          jc.putClientProperty("WizardPanel_contentNumbered", Boolean.FALSE);
         }
       }
     }
     return panels;
   }
 
-public Set instantiate() throws IOException {
-  boolean cancelled = wizard.getValue() != wizard.FINISH_OPTION;
-  if (!cancelled) {
-    StringBuffer message = new StringBuffer();
-//    Integer question = (Integer) wizard.getProperty(ContigOrderingProjectWizardPanel1.QUIZ_QUESTION);
-//    message.append("Your question: " + ContigOrderingProjectWizardPanel1.getAsString(question.intValue()));
-//    DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(message.toString()));
-  }
-  return Collections.EMPTY_SET;
-}
 
   public void initialize(WizardDescriptor wizard) {
     this.wizard = wizard;
@@ -165,4 +154,18 @@ public Set instantiate() throws IOException {
     }
     return res;
   }
+
+
+
+  public Set instantiate() throws IOException {
+  boolean cancelled = wizard.getValue() != wizard.FINISH_OPTION;
+  if (!cancelled) {
+    StringBuffer message = new StringBuffer();
+//    Integer question = (Integer) wizard.getProperty(ContigOrderingProjectWizardPanel1.QUIZ_QUESTION);
+//    message.append("Your question: " + ContigOrderingProjectWizardPanel1.getAsString(question.intValue()));
+//    DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(message.toString()));
+  }
+  return Collections.EMPTY_SET;
+}
+
 }

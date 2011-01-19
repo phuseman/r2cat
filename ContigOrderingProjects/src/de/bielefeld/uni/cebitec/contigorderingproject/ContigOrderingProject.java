@@ -1,12 +1,11 @@
 package de.bielefeld.uni.cebitec.contigorderingproject;
 
-import de.bielefeld.uni.cebitec.contigorderingproject.ContigOrderingProjectLogicalView;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectInformation;
 import org.netbeans.spi.project.ActionProvider;
@@ -14,7 +13,7 @@ import org.netbeans.spi.project.DeleteOperationImplementation;
 import org.netbeans.spi.project.ProjectState;
 import org.netbeans.spi.project.ui.support.DefaultProjectOperations;
 import org.openide.filesystems.FileObject;
-import org.openide.util.ImageUtilities;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 
@@ -42,8 +41,10 @@ public class ContigOrderingProject implements Project {
   public Lookup getLookup() {
     if (lkp == null) {
       lkp = Lookups.fixed(new Object[]{
+                this, //project spec requires a project be in its own lookup
                 state, //allow outside code to mark the project as needing saving
                 new ActionProviderImpl(), //Provides standard actions like Build and Clean
+                loadProperties(), //The project properties
                 new ContigOrderingProjectDeleteOperation(),
                 new ContigOrderingProjectInfo(), //Project information implementation
                 new ContigOrderingProjectLogicalView(this), //Logical view of project implementation
@@ -51,6 +52,36 @@ public class ContigOrderingProject implements Project {
     }
     return lkp;
   }
+
+  private Properties loadProperties() {
+    FileObject fob = projectDir.getFileObject(ContigOrderingProjectFactory.PROJECT_FILE);
+    Properties properties = new NotifyProperties(state);
+    if (fob != null) {
+        try {
+            properties.load(fob.getInputStream());
+        } catch (Exception e) {
+            Exceptions.printStackTrace(e);
+        }
+    }
+    return properties;
+}
+
+private static class NotifyProperties extends Properties {
+    private final ProjectState state;
+    NotifyProperties (ProjectState state) {
+        this.state = state;
+    }
+
+    @Override
+    public Object put(Object key, Object val) {
+        Object result = super.put (key, val);
+        if (((result == null) != (val == null)) || (result != null &&
+            val != null && !val.equals(result))) {
+            state.markModified();
+        }
+        return result;
+    }
+}
 
   private final class ActionProviderImpl implements ActionProvider {
 

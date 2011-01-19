@@ -4,11 +4,15 @@
  */
 package de.bielefeld.uni.cebitec.contigorderingproject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Properties;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ProjectFactory;
 import org.netbeans.spi.project.ProjectState;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 
 /**
  *
@@ -32,11 +36,24 @@ public class ContigOrderingProjectFactory implements ProjectFactory {
   @Override
   public void saveProject(Project project) throws IOException, ClassCastException {
     FileObject projectRoot = project.getProjectDirectory();
-    if (projectRoot.getFileObject(PROJECT_FILE) == null) {
+    if (!projectRoot.isValid()) {
       throw new IOException("Project dir " + projectRoot.getPath()
               + " deleted,"
               + " cannot save project");
     }
-  }
 
+    FileObject propertiesFile = projectRoot.getFileObject(PROJECT_FILE);
+    if (propertiesFile == null) {
+      //Recreate the Properties file if needed
+      propertiesFile = projectRoot.createData(PROJECT_FILE);
+    }
+
+    Properties properties = (Properties) project.getLookup().lookup(Properties.class);
+    File f = FileUtil.toFile(propertiesFile);
+    properties.store(new FileOutputStream(f), "NetBeans Povray Project Properties");
+
+
+
+
+  }
 }

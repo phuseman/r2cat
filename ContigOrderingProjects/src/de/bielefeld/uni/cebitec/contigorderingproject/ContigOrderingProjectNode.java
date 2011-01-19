@@ -3,7 +3,9 @@ package de.bielefeld.uni.cebitec.contigorderingproject;
 import java.awt.Image;
 import javax.swing.Action;
 import org.netbeans.spi.project.ui.support.CommonProjectActions;
+import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObjectNotFoundException;
+import org.openide.nodes.AbstractNode;
 import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
 import org.openide.util.ImageUtilities;
@@ -19,13 +21,14 @@ final class ContigOrderingProjectNode extends FilterNode {
   final ContigOrderingProject project;
 
   public ContigOrderingProjectNode(Node node, ContigOrderingProject project) throws DataObjectNotFoundException {
-    super(node, new FilterNode.Children(node),
+    super(node, node.getChildren(),
             //The projects system wants the project in the Node's lookup.
             //NewAction and friends want the original Node's lookup.
             //Make a merge of both
             new ProxyLookup(new Lookup[]{Lookups.singleton(project),
               node.getLookup()
             }));
+
     this.project = project;
   }
 
@@ -42,7 +45,7 @@ final class ContigOrderingProjectNode extends FilterNode {
 
   @Override
   public Image getIcon(int type) {
-    return ImageUtilities.loadImage("org/netbeans/demo/project/icon1.png");
+    return ImageUtilities.loadImage("de/bielefeld/uni/cebitec/contigorderingproject/recources/contigproject.png");
   }
 
   @Override

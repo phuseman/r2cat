@@ -22,7 +22,7 @@ public class ContigOrderingProjectLogicalView implements LogicalViewProvider {
   }
 
   @Override
-  public org.openide.nodes.Node createLogicalView() {
+  public Node createLogicalView() {
     try {
       //Get the DataObject that represents it
       FileObject folder = project.getProjectDirectory();
