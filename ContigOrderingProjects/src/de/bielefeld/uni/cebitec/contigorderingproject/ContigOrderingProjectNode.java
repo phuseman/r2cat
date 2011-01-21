@@ -21,7 +21,7 @@ final class ContigOrderingProjectNode extends FilterNode {
   final ContigOrderingProject project;
 
   public ContigOrderingProjectNode(Node node, ContigOrderingProject project) throws DataObjectNotFoundException {
-    super(node, node.getChildren(),
+    super(node, new FilterNode.Children (node),
             //The projects system wants the project in the Node's lookup.
             //NewAction and friends want the original Node's lookup.
             //Make a merge of both

@@ -5,13 +5,17 @@
 package de.bielefeld.uni.cebitec.contigorderingproject;
 
 import java.awt.Component;
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
 import org.openide.WizardDescriptor;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 
 public final class ContigOrderingProjectWizardIterator implements WizardDescriptor.InstantiatingIterator {
 
@@ -46,42 +50,48 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
           // Sets steps names for a panel
           jc.putClientProperty("WizardPanel_contentData", steps);
           // Turn on subtitle creation on each step
-          jc.putClientProperty("WizardPanel_autoWizardStyle", Boolean.FALSE);
+          jc.putClientProperty("WizardPanel_autoWizardStyle", Boolean.TRUE);
           // Show steps on the left side with the image on the background
-          jc.putClientProperty("WizardPanel_contentDisplayed", Boolean.FALSE);
+          jc.putClientProperty("WizardPanel_contentDisplayed", Boolean.TRUE);
           // Turn on numbering of all steps
-          jc.putClientProperty("WizardPanel_contentNumbered", Boolean.FALSE);
+          jc.putClientProperty("WizardPanel_contentNumbered", Boolean.TRUE);
         }
       }
     }
     return panels;
   }
 
-
+  @Override
   public void initialize(WizardDescriptor wizard) {
     this.wizard = wizard;
   }
 
+  @Override
   public void uninitialize(WizardDescriptor wizard) {
     panels = null;
   }
 
+  @Override
   public WizardDescriptor.Panel current() {
     return getPanels()[index];
   }
 
+  @Override
   public String name() {
     return index + 1 + ". from " + getPanels().length;
   }
 
+  @Override
   public boolean hasNext() {
     return index < getPanels().length - 1;
   }
 
+  @Override
   public boolean hasPrevious() {
     return index > 0;
   }
 
+  @Override
   public void nextPanel() {
     if (!hasNext()) {
       throw new NoSuchElementException();
@@ -89,6 +99,7 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
     index++;
   }
 
+  @Override
   public void previousPanel() {
     if (!hasPrevious()) {
       throw new NoSuchElementException();
@@ -155,17 +166,25 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
     return res;
   }
 
-
-
+  @Override
   public Set instantiate() throws IOException {
-  boolean cancelled = wizard.getValue() != wizard.FINISH_OPTION;
-  if (!cancelled) {
-    StringBuffer message = new StringBuffer();
-//    Integer question = (Integer) wizard.getProperty(ContigOrderingProjectWizardPanel1.QUIZ_QUESTION);
-//    message.append("Your question: " + ContigOrderingProjectWizardPanel1.getAsString(question.intValue()));
-//    DialogDisplayer.getDefault().notify(new NotifyDescriptor.Message(message.toString()));
-  }
-  return Collections.EMPTY_SET;
-}
+    Set<FileObject> resultSet = new LinkedHashSet<FileObject>();
 
+    boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
+    if (!cancelled) {
+      String path = (String) wizard.getProperty(ContigOrderingProjectVisualPanel.PROP_PROJECT_PATH);
+      File pathToNewProject = FileUtil.normalizeFile(new File(path));
+      FileObject newProject = FileUtil.createFolder(pathToNewProject);
+
+      //create the marker file that recognizes this as a project
+      newProject.createData(ContigOrderingProjectFactory.PROJECT_FILE);
+
+      //provide the created project folder
+      resultSet.add(newProject);
+    } else {
+      return Collections.EMPTY_SET;
+    }
+    return resultSet;
+
+  }
 }

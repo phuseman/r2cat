@@ -4,18 +4,32 @@
  */
 package de.bielefeld.uni.cebitec.contigorderingproject;
 
+import java.io.File;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import org.netbeans.spi.project.ui.support.ProjectChooser;
+import org.openide.filesystems.FileUtil;
 
-public final class ContigOrderingProjectVisualPanel extends JPanel {
+public final class ContigOrderingProjectVisualPanel extends JPanel implements DocumentListener {
+
+  public static final String PROP_PROJECT_PATH = "projectPath";
+  public static final String PROP_CONTIGS_FILE = "contigs";
+  public static final String PROP_REFERENCES = "references";
 
   /** Creates new form ContigOrderingProjectVisualPanel1 */
   public ContigOrderingProjectVisualPanel() {
     initComponents();
+    projectParentTextField.getDocument().addDocumentListener(this);
+    projectNameTextField.getDocument().addDocumentListener(this);
+
+    projectParentTextField.setText(ProjectChooser.getProjectsFolder().getAbsolutePath());
   }
 
   @Override
   public String getName() {
-    return "Step #1";
+    return "Select project location";
   }
 
   /** This method is called from within the constructor to
@@ -26,38 +40,159 @@ public final class ContigOrderingProjectVisualPanel extends JPanel {
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    contigs = new javax.swing.JTextField();
+    projectNameLabel = new javax.swing.JLabel();
+    projectNameTextField = new javax.swing.JTextField();
+    projectParentLabel = new javax.swing.JLabel();
+    projectParentTextField = new javax.swing.JTextField();
+    browseButton = new javax.swing.JButton();
+    projectPathLabel = new javax.swing.JLabel();
+    projectPathTextField = new javax.swing.JTextField();
 
-    contigs.setText(org.openide.util.NbBundle.getMessage(ContigOrderingProjectVisualPanel.class, "ContigOrderingProjectVisualPanel.contigs.text")); // NOI18N
-    contigs.addActionListener(new java.awt.event.ActionListener() {
+    org.openide.awt.Mnemonics.setLocalizedText(projectNameLabel, org.openide.util.NbBundle.getMessage(ContigOrderingProjectVisualPanel.class, "ContigOrderingProjectVisualPanel.projectNameLabel.text")); // NOI18N
+
+    org.openide.awt.Mnemonics.setLocalizedText(projectParentLabel, org.openide.util.NbBundle.getMessage(ContigOrderingProjectVisualPanel.class, "ContigOrderingProjectVisualPanel.projectParentLabel.text")); // NOI18N
+
+    org.openide.awt.Mnemonics.setLocalizedText(browseButton, org.openide.util.NbBundle.getMessage(ContigOrderingProjectVisualPanel.class, "ContigOrderingProjectVisualPanel.browseButton.text")); // NOI18N
+    browseButton.setActionCommand(org.openide.util.NbBundle.getMessage(ContigOrderingProjectVisualPanel.class, "ContigOrderingProjectVisualPanel.browseButton.actionCommand")); // NOI18N
+    browseButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        contigsActionPerformed(evt);
+        browseButtonActionPerformed(evt);
       }
     });
+
+    org.openide.awt.Mnemonics.setLocalizedText(projectPathLabel, org.openide.util.NbBundle.getMessage(ContigOrderingProjectVisualPanel.class, "ContigOrderingProjectVisualPanel.projectPathLabel.text")); // NOI18N
+
+    projectPathTextField.setEditable(false);
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGap(0, 400, Short.MAX_VALUE)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(contigs, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addContainerGap(196, Short.MAX_VALUE))
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(projectNameLabel)
+          .addComponent(projectParentLabel)
+          .addComponent(projectPathLabel))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(projectNameTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+          .addComponent(projectParentTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+          .addComponent(projectPathTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(browseButton)
+        .addContainerGap())
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGap(0, 300, Short.MAX_VALUE)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(contigs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addContainerGap(269, Short.MAX_VALUE))
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(projectNameLabel)
+          .addComponent(projectNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(projectParentLabel)
+          .addComponent(projectParentTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+          .addComponent(browseButton))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(projectPathLabel)
+          .addComponent(projectPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addContainerGap(213, Short.MAX_VALUE))
     );
   }// </editor-fold>//GEN-END:initComponents
 
-  private void contigsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_contigsActionPerformed
-    // TODO add your handling code here:
-  }//GEN-LAST:event_contigsActionPerformed
+  private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
+    String command = evt.getActionCommand();
+    if ("BROWSE".equals(command)) {
 
+      JFileChooser chooser = new JFileChooser();
+      chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      chooser.setDialogTitle("Select Project Location");
+      String path = this.projectParentTextField.getText();
+      if (path != null && !path.isEmpty()) {
+        File f = new File(path);
+        if (f.exists()) {
+          chooser.setSelectedFile(f);
+        }
+      }
+
+      int result = chooser.showOpenDialog(this);
+
+      if (result == JFileChooser.APPROVE_OPTION) {
+        File projectDir = chooser.getSelectedFile();
+        projectParentTextField.setText(FileUtil.normalizeFile(projectDir).getAbsolutePath());
+
+        ProjectChooser.setProjectsFolder(chooser.getSelectedFile());
+      }
+    }
+  }//GEN-LAST:event_browseButtonActionPerformed
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JTextField contigs;
+  private javax.swing.JButton browseButton;
+  private javax.swing.JLabel projectNameLabel;
+  private javax.swing.JTextField projectNameTextField;
+  private javax.swing.JLabel projectParentLabel;
+  private javax.swing.JTextField projectParentTextField;
+  private javax.swing.JLabel projectPathLabel;
+  private javax.swing.JTextField projectPathTextField;
   // End of variables declaration//GEN-END:variables
+
+  @Override
+  public void insertUpdate(DocumentEvent e) {
+    updatePath();
+  }
+
+  @Override
+  public void removeUpdate(DocumentEvent e) {
+    updatePath();
+  }
+
+  @Override
+  public void changedUpdate(DocumentEvent e) {
+    updatePath();
+  }
+
+  private void updatePath() {
+    String projectspath = getProjectPath();
+    if (projectspath.length() > 0) {
+      String oldPath = projectPathTextField.getText();
+      projectPathTextField.setText(projectspath);
+      firePropertyChange(PROP_PROJECT_PATH, oldPath, projectspath);
+    }
+  }
+
+  public String getProjectPath() {
+    if (getProjectParentPath().length() > 0 && getProjectName().length() > 0) {
+      return getProjectParentPath() + File.separatorChar + getProjectName();
+    } else {
+      return "";
+    }
+  }
+
+  public String getProjectName() {
+    if (projectNameTextField != null) {
+      return projectNameTextField.getText().trim();
+    } else {
+      return "";
+    }
+  }
+
+  public String getProjectParentPath() {
+    if (projectParentTextField != null) {
+      return projectParentTextField.getText().trim();
+    } else {
+      return "";
+    }
+  }
+
+  public String getContigsFile() {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  public String[] getReferences() {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 }

@@ -50,10 +50,7 @@ public class ContigOrderingProjectFactory implements ProjectFactory {
 
     Properties properties = (Properties) project.getLookup().lookup(Properties.class);
     File f = FileUtil.toFile(propertiesFile);
-    properties.store(new FileOutputStream(f), "NetBeans Povray Project Properties");
-
-
-
+    properties.store(new FileOutputStream(f), "Contig Ordering Project Properties");
 
   }
 }
