@@ -339,9 +339,9 @@ public class DotPlotMatchViewerActionListener implements ActionListener,
 		Dimension newDimension = dotPlotMatchViewer.getSize();
 
 		double factorWidth = newDimension.getWidth()
-				/ (double) oldDimension.getWidth();
+				/ oldDimension.getWidth();
 		double factorHeight = newDimension.getHeight()
-				/ (double) oldDimension.getHeight();
+				/ oldDimension.getHeight();
 
 		Rectangle oldViewportScaled = new Rectangle(
 				(int) (oldViewport.x * factorWidth),

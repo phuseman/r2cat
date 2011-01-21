@@ -207,7 +207,7 @@ public class EpsilonZone {
 
 	public int getNumberOfZones(int inputSize) {
 		int delta= this.getDelta();
-		return 1 + (int) inputSize/delta;
+		return 1 + inputSize/delta;
 //		return (int) Math.ceil( (inputSize-width_-delta)/((double) delta + 1.0) );
 	}
 

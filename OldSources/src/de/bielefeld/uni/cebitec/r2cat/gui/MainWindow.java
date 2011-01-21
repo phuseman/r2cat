@@ -173,9 +173,9 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener {
 					Dimension newDimension = matchViewerPlugin.getSize();
 
 					double factorWidth = newDimension.getWidth()
-							/ (double) oldDimension.getWidth();
+							/ oldDimension.getWidth();
 					double factorHeight = newDimension.getHeight()
-							/ (double) oldDimension.getHeight();
+							/ oldDimension.getHeight();
 
 					Rectangle oldViewportScaled = new Rectangle(
 							(int) (oldViewport.x * factorWidth),
