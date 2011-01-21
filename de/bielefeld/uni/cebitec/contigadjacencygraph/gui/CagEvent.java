@@ -26,21 +26,22 @@ public class CagEvent {
 		this.event_type = event;
 		this.data = data;
 	}
-	public CagEvent(EventType event, DNASequence contig) {
+	public CagEvent(EventType event, DNASequence contig,int currentContigIndex) {
 		this.event_type = event;
 		this.contigNode = contig;
+		this.index = currentContigIndex;
 	}
 	
-	public CagEvent(EventType event, LayoutGraph layoutGraph, int i){
+	public CagEvent(EventType event, LayoutGraph layoutGraph, int currentContigIndex){
 		this.event_type = event;
 		this.graph = layoutGraph;
-		this.index = i;
+		this.index = currentContigIndex;
 	}
 	
-	public CagEvent(EventType event, AdjacencyEdge includingEdge, int i) {
+	public CagEvent(EventType event, AdjacencyEdge includingEdge, int currentContigIndex) {
 		this.event_type = event;
 		this.edge = includingEdge;
-		this.index = i;
+		this.index = currentContigIndex;
 	}
 	public CagEvent(EventType event, Vector<AdjacencyEdge> neighbourEdges) {
 		this.event_type = event;

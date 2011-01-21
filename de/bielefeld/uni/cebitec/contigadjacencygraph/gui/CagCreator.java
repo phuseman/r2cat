@@ -31,26 +31,27 @@ import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
 public class CagCreator {
 
 	private LayoutGraph graph;
-	private Vector<DNASequence> contigs;
+	private DNASequence[] contigs;
 	private Vector<AdjacencyEdge> selectedContigs;
-	private String[] list;
+	private Vector<DNASequence> list;
 	private ArrayList<CagEventListener> listeners;
 	private Vector<AdjacencyEdge>[] leftNeighbours;
 	private Vector<AdjacencyEdge>[] rightNeighbours;
 	private String nowCentralContigID;
 	private String contigId;
-	private int contigIndex;
-	private boolean contigIsReverse = false;
+	private int currentContigIndex;
+	private boolean currentContigIsReverse = false;
 
-	private Vector<AdjacencyEdge> fiveMostLikleyLeftNeighbours;
-	private Vector<AdjacencyEdge> fiveMostLikleyRightNeighbours;
+	
 
 	private DNASequence currentContigObject;
-	private DNASequence neighbourContigObject;
 	private Vector<Integer> indexOfFiveMostLikleyLeftNeighbours;
 	private Vector<Integer> indexOfFiveMostLikleyRightNeighbours;
+	private AdjacencyEdge currentEdge;
 	private static CAGWindow window;
 	private static CagCreator model;
+	
+	private int z;
 
 	// private CAGWindow window;
 	public CagCreator(LayoutGraph g) {
@@ -152,7 +153,7 @@ public class CagCreator {
 		for (AdjacencyEdge e : graph.getEdges()) {
 
 			// hole fuer die aktuelle Kante den Knoten i und j
-			int i = e.geti();
+			int i = e.geti();//ist das der Index?
 			int j = e.getj();
 
 			// wenn die aktuelle Kante der linke konnektor von i
@@ -175,8 +176,8 @@ public class CagCreator {
 			Collections.sort(leftNeighbours[x]);
 			Collections.sort(rightNeighbours[x]);
 		}
-//		System.out.println(leftNeighbours[0]);
-//		System.out.println(rightNeighbours[0]);
+		System.out.println(leftNeighbours[0]);
+		System.out.println(rightNeighbours[0]);
 	}
 
 	public LayoutGraph getGraph() {
@@ -186,16 +187,18 @@ public class CagCreator {
 	/**
 	 * Create a List of all Nodes(Contigs) of LayoutGraph
 	 */
-	private String[] createContigList() {
-		AdjacencyEdge test = graph.getEdges().get(contigIndex);
-		contigs = graph.getNodes();
-		list = new String[contigs.size()];
-
-		for (int i = 0; i < contigs.size(); i++) {
-			DNASequence contig = contigs.get(i);
-			list[i] = contig.getId();
+	private DNASequence[] createContigList() {
+		
+		contigs = new DNASequence[graph.getNodes().size()];
+		
+		for (AdjacencyEdge e : graph.getEdges()) {
+		
+				int i = e.geti();
+				if(contigs[i]== null){
+					contigs[i]=e.getContigi();
+				}			
 		}
-		return list;
+		return contigs;
 	}
 
 	/*
@@ -213,129 +216,253 @@ public class CagCreator {
 	 * Mögliche Lösung: ich könnte immer den support nehmen statt
 	 * relativeSupport Wäre das sinnvoll?
 	 */
+	/*
+	 * TODO Noch Kontrollieren ob alles einstellungen die jetzt bzgl des
+	 * ContigObjects geamcht werden noch stimmen setReverse z.B. -> Methode
+	 * schreiben die feststellt ob ein Contig reverse gezeichnet werden
+	 * muss!
+	 * 
+	 * Meochte ich nur mit der Kante arbeiten!!! Verbessern!
+	 * 
+	 * Hier auch noch mal schauen ob ich wirklich so viele Variblen als
+	 * Klassenvariblen def muss. Währe glaube ich besser wenn ich das local
+	 * gestallten würde. Auch währe es besser wenn ich hier was basteln
+	 * würde, womit ich indices und neighbours gleichzeitig zurückgeben
+	 * kann.
+	 */
 
-	public synchronized Vector<AdjacencyEdge> calculateFiveMostLikleyNeighbours(
+	/*public synchronized Vector<AdjacencyEdge> calculateFiveMostLikleyNeighbours(
 			int centralContigIndex, boolean isLeft) {
-		/*
-		 * TODO Noch Kontrollieren ob alles einstellungen die jetzt bzgl des
-		 * ContigObjects geamcht werden noch stimmen setReverse z.B. -> Methode
-		 * schreiben die feststellt ob ein Contig reverse gezeichnet werden
-		 * muss!
-		 * 
-		 * Meochte ich nur mit der Kante arbeiten!!! Verbessern!
-		 * 
-		 * Hier auch noch mal schauen ob ich wirklich so viele Variblen als
-		 * Klassenvariblen def muss. Währe glaube ich besser wenn ich das local
-		 * gestallten würde. Auch währe es besser wenn ich hier was basteln
-		 * würde, womit ich indices und neighbours gleichzeitig zurückgeben
-		 * kann.
-		 */
+		
+		
 		Vector<AdjacencyEdge>[] neighbours;
 		Vector<AdjacencyEdge> fiveNeighbours;
-
-		if (isLeft) {
-			System.out.println("linke nachbarn ");
-			fiveMostLikleyLeftNeighbours = new Vector<AdjacencyEdge>();
-			indexOfFiveMostLikleyLeftNeighbours = new Vector<Integer>();
-			fiveNeighbours = fiveMostLikleyLeftNeighbours;
-			neighbours = leftNeighbours;
-		} else {
-			System.out.println("rechte nachbarn");
-			fiveMostLikleyRightNeighbours = new Vector<AdjacencyEdge>();
-			indexOfFiveMostLikleyRightNeighbours = new Vector<Integer>();
-			fiveNeighbours = fiveMostLikleyRightNeighbours;
-			neighbours = rightNeighbours;
-
-		}
-
+		
+		boolean isNeighbourReverse;
+		boolean isNeighbourSelected;
 		double support;
 		double totalSupport;
-		boolean is_I_equals_X = false;
+		boolean is_I_equals_central_Contig = false;
 
+
+			if(currentContigIsReverse){
+				fiveMostLikleyRightNeighbours = new Vector<AdjacencyEdge>();
+				fiveNeighbours = fiveMostLikleyRightNeighbours;
+				neighbours = rightNeighbours;
+			}else{
+							
+			fiveMostLikleyLeftNeighbours = new Vector<AdjacencyEdge>();
+			fiveNeighbours = fiveMostLikleyLeftNeighbours;
+			neighbours = leftNeighbours;
+			}
+		
+		
 		for (Iterator<AdjacencyEdge> iterator = neighbours[centralContigIndex]
 				.iterator(); iterator.hasNext();) {
-
+			
 			AdjacencyEdge edge = iterator.next();
 			totalSupport = edge.getSupport();
 
 			if (edge.geti() == centralContigIndex) {
-				is_I_equals_X = true;
+
+				is_I_equals_central_Contig = true;
 				neighbourContigObject = edge.getContigj();
 				support = edge.getRelativeSupportj();
+				
 			} else {
-				is_I_equals_X = false;
+
+				is_I_equals_central_Contig = false;
 				neighbourContigObject = edge.getContigi();
 				support = edge.getRelativeSupporti();
+				
 			}
-			/*
-			 * Notwendig weil ein Contig mehrfach als Nachbar in verschiedenen
-			 * Orientierungen vorkommen kann. Die folgenden Nachbarn
-			 * ueberschreiben dann die Infos zu dem eigentlich interessanten
-			 * Nachbarn. Im Moment behandel ich den Nachbarn nur einmal. TODO
-			 * Besser waehre aber wenn ich diesen Nachbarn auch als moeglichen
-			 * anderen Nachbarn in Erwaegung ziehe aber auch kennlich mache das
-			 * dieser Nachbar ein anderer ist, indem die Orientierung dieses
-			 * Nachbarn anders ist.
-			 */
-			if (!fiveNeighbours.contains(edge)) {
-				if (is_I_equals_X) {// j ist der nachbar
-
-					boolean flag = neighbourIsAlreadySelected(edge);
-					int index = edge.getj();
-					/*
+			
+			isNeighbourSelected = neighbourIsAlreadySelected(edge);
+			
+				if (is_I_equals_central_Contig) {// j ist der nachbar
+					
 					 * Hier finde ich herraus, ob der Nachbar reverse angezeigt
 					 * werden muss oder nicht.
-					 * 
-					 * TODO hier eine Reverse Methode aufrufen!
-					 */
-					if (edge.isLeftConnectorj() == true
-							&& edge.isRightConnectorj() == true) {
-						neighbourContigObject.setReverse(true);
-					} else if (edge.isLeftConnectorj() == false
-							&& edge.isLeftConnectorj() == true) {
-						neighbourContigObject.setReverse(true);
-					} else {
-						neighbourContigObject.setReverse(false);
-					}
-
+					 
+					isNeighbourReverse = detectIfContigIsReverse(edge, currentContigIsReverse, false);
+					
+					
+					 * Gebe dem DNASequence Objekt Informationen ueber
+					 * 			ist das Contig Reverse?
+					 * 			welchen (relativen|| absoluten) Support hat die Kante?
+					 
+					neighbourContigObject.setReverse(isNeighbourReverse);
 					neighbourContigObject
 							.setSupportComparativeToCentralContig(support);
 					neighbourContigObject.setTotalSupport(totalSupport);
-					neighbourContigObject.setContigIsSelected(flag);
+					neighbourContigObject.setContigIsSelected(isNeighbourSelected);
+					
 					fiveNeighbours.add(edge);
-
+					
 				} else {// i ist der nachbar
-					boolean flag = neighbourIsAlreadySelected(edge);
-					int index = edge.geti();
-					/*
+					
 					 * Hier finde ich herraus, ob der Nachbar reverse angezeigt
 					 * werden muss oder nicht.
-					 */
-					if (edge.isLeftConnectori() == true
-							&& edge.isRightConnectori() == true) {
-						neighbourContigObject.setReverse(true);
-					} else if (edge.isLeftConnectori() == true
-							&& edge.isRightConnectori() == false) {
-						neighbourContigObject.setReverse(true);
-					} else {
-						neighbourContigObject.setReverse(false);
-					}
+					 
+					isNeighbourReverse = detectIfContigIsReverse(edge, currentContigIsReverse, true);					
+					
+					neighbourContigObject.setReverse(isNeighbourReverse);
 					neighbourContigObject
 							.setSupportComparativeToCentralContig(support);
 					neighbourContigObject.setTotalSupport(totalSupport);
-					neighbourContigObject.setContigIsSelected(flag);
-
+					neighbourContigObject.setContigIsSelected(isNeighbourSelected);
+					
 					fiveNeighbours.add(edge);
-
 				}
 			}
-		}
+
 		if (isLeft) {
 			return fiveMostLikleyLeftNeighbours;
-		} else {
+		} else {			
 			return fiveMostLikleyRightNeighbours;
 		}
 
+	}
+	*/
+	
+	private Vector<AdjacencyEdge> calculateFiveMostLikleyRightNeighbours(
+			int cContigIndex, boolean IsReverse) {
+		/*
+		 * hier muss unterschieden werden, ob das zentrale Contig reverse dargestellt wird
+		 * dann muss ich den nachbarnvektor entsprechend waehelen
+		 * die Richtung fuer das Contig bestimmt die sicht auf die nachbarn
+		 * die Spitze(rechter connector) zeigt wenn es reverse ist ja in die andere Richtung
+		 */
+		Vector<AdjacencyEdge> test = IsReverse?leftNeighbours[cContigIndex]:rightNeighbours[cContigIndex];
+		
+		Vector<AdjacencyEdge> fiveMostLikleyRightNeighbours = new Vector<AdjacencyEdge>();
+		DNASequence neighbourContigObject;
+		
+		boolean neighbourIsReverse= false;
+		boolean isNeighbourSelected;
+		
+		double totalSupport;
+		double support;
+		
+		
+		for (AdjacencyEdge edge : test) {
+			if(edge.geti() == cContigIndex){//j ist der Nachbar
+				neighbourContigObject = edge.getContigj();
+				neighbourIsReverse = edge.isRightConnectorj(); // stelle fest, ob der Nachbar reverse dargestellt werden muss
+				support = edge.getRelativeSupportj();
+			}else{//i ist der Nachbar
+				neighbourContigObject = edge.getContigi();
+				neighbourIsReverse = edge.isRightConnectori();
+				support = edge.getRelativeSupportj();
+			}
+			totalSupport = edge.getSupport();
+			isNeighbourSelected = neighbourIsAlreadySelected(edge);
+			neighbourContigObject.setTotalSupport(totalSupport);
+			neighbourContigObject.setReverse(neighbourIsReverse);
+			neighbourContigObject
+			.setSupportComparativeToCentralContig(support);
+			neighbourContigObject.setContigIsSelected(isNeighbourSelected);
+			
+			fiveMostLikleyRightNeighbours.add(edge);
+		}
+
+		return fiveMostLikleyRightNeighbours;
+		
+	}
+	
+	private Vector<AdjacencyEdge> calculateFiveMostLikleyLeftNeighbours(
+			int centralContigIndex, boolean currentContigIsReverse) {
+		/*
+		 * hier muss unterschieden werden, ob das zentrale Contig reverse dargestellt wird
+		 * dann muss ich den nachbarnvektor entsprechend waehelen
+		 * die Richtung fuer das Contig bestimmt die sicht auf die nachbarn
+		 * die Spitze(rechter connector) zeigt wenn es reverse ist ja in die andere Richtung
+		 */
+		Vector<AdjacencyEdge> test = currentContigIsReverse?rightNeighbours[centralContigIndex]:leftNeighbours[centralContigIndex];
+		
+		Vector<AdjacencyEdge> fiveMostLikleyLeftNeighbours = new Vector<AdjacencyEdge>();
+		DNASequence neighbourContigObject;
+		
+		boolean neighbourIsReverse= false;
+		boolean isNeighbourSelected;
+		
+		double totalSupport;
+		double support;
+		
+		for (AdjacencyEdge edge : test) {
+			if(edge.geti() == centralContigIndex){//j ist der Nachbar
+				neighbourContigObject = edge.getContigj();
+				neighbourIsReverse = edge.isLeftConnectorj(); // stelle fest, ob der Nachbar reverse dargestellt werden muss
+				support = edge.getRelativeSupportj();
+			}else{//i ist der Nachbar
+				neighbourContigObject = edge.getContigi();
+				neighbourIsReverse = edge.isLeftConnectori();
+				support = edge.getRelativeSupportj();
+			}
+			totalSupport = edge.getSupport();
+			isNeighbourSelected = neighbourIsAlreadySelected(edge);
+			neighbourContigObject.setTotalSupport(totalSupport);
+			neighbourContigObject.setReverse(neighbourIsReverse);
+			neighbourContigObject
+			.setSupportComparativeToCentralContig(support);
+			neighbourContigObject.setContigIsSelected(isNeighbourSelected);
+			
+			fiveMostLikleyLeftNeighbours.add(edge);
+		}
+
+		return fiveMostLikleyLeftNeighbours;
+		
+	}
+	
+	private boolean detectIfContigIsReverse(AdjacencyEdge edge, boolean centralContigIsReverse, boolean neighbourIsContigI){
+		boolean solution = false;
+		
+		boolean iIsReverse = false;
+		boolean jIsReverse = false;
+		
+		/*System.out.println(edge);
+		System.out.println("linker konnektor i: "+edge.isLeftConnectori());
+		System.out.println("rechter konnektor i: "+edge.isRightConnectori());*/
+		
+		/*
+		 * Abfragen der 4 Moeglichkeiten, wie die Contigs zu einander
+		 * orientiert sein koennen.
+		 * Ist es keine von den folgenden 3 if dann tritt default in kraft beide false
+		 * was die 4 moeglichkeit darstellt.
+		 */
+		if (edge.isLeftConnectori() == true
+				&& edge.isRightConnectori() == true
+				&& edge.isLeftConnectorj() ==false
+				&& edge.isRightConnectorj()== false) {
+				
+			iIsReverse = true;
+			jIsReverse = false;
+			
+		} else if (edge.isLeftConnectori() == true
+				&& edge.isRightConnectori() == false
+				&& edge.isLeftConnectorj() == false
+				&& edge.isRightConnectorj() == true) {
+			
+			iIsReverse = true;
+			jIsReverse = true;
+			
+		} else if(edge.isLeftConnectori()== false
+				&& edge.isRightConnectori()== false
+				&& edge.isLeftConnectorj() == true
+				&& edge.isRightConnectorj() == true) {
+			
+			iIsReverse = false;
+			jIsReverse = true;
+			
+		}
+		
+	if(neighbourIsContigI){
+			solution = iIsReverse;				
+		}else{
+			solution = jIsReverse;				
+		}		
+		
+		return solution;
 	}
 
 	private boolean neighbourIsAlreadySelected(AdjacencyEdge neighbour) {
@@ -343,33 +470,40 @@ public class CagCreator {
 		boolean flag = false;
 
 		for (AdjacencyEdge edge : selectedContigs) {
+						
 			if (edge.equals(neighbour)) {
 				flag = true;
+				break;
 			}
 		}
 		return flag;
 	}
 
 	public Vector<AdjacencyEdge> addSelectedContig(AdjacencyEdge selectedEdge) {
-
+	
 		for (Iterator<AdjacencyEdge> iterator = selectedContigs.iterator(); iterator
 				.hasNext();) {
 			AdjacencyEdge edge = iterator.next();
-
-			if (!edge.equals(selectedEdge)) {
-				selectedContigs.add(edge);
+			
+			if (!edge.equals(selectedEdge) ) {
+					selectedContigs.add(selectedEdge);				
 				break;
 			}
 		}
+		if(selectedContigs.size()==0){
+			selectedContigs.add(selectedEdge);
+		}
+
 		return selectedContigs;
 	}
 
-	public Vector<AdjacencyEdge> removeSelecedEdge(AdjacencyEdge selectedEdge) {
+	public Vector<AdjacencyEdge> removeSelectedEdge(AdjacencyEdge selectedEdge) {
 
 		boolean flag = false;
-
+		System.out.println("So bin schon mal drin");
 		for (AdjacencyEdge edge : selectedContigs) {
 			if (edge.equals(selectedEdge)) {
+				System.out.println("Loesche kante ");
 				selectedContigs.removeElement(selectedEdge);
 				flag = true;
 				break;
@@ -387,9 +521,9 @@ public class CagCreator {
 	 * Send an event, if the user selected a contig
 	 */
 	public void sendCurrentContig() {
-		// System.out.println("cag: Sende aktuelles Contig");
+
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
-				currentContigObject);
+				currentContigObject,currentContigIndex);
 		fireEvent(event);
 	}
 
@@ -399,10 +533,9 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendLeftNeighbours() {
-		// System.out.println("cag: linke nachbarn ");
-
+		
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_LEFT_NEIGHBOURS,
-				calculateFiveMostLikleyNeighbours(contigIndex, true));
+				calculateFiveMostLikleyLeftNeighbours(currentContigIndex, currentContigIsReverse));
 		fireEvent(event);
 	}
 
@@ -412,10 +545,9 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendRightNeighbours() {
-		// System.out.println("cag: rechte nachbarn ");
-
+		
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_RIGHT_NEIGHBOURS,
-				calculateFiveMostLikleyNeighbours(contigIndex, false));
+				calculateFiveMostLikleyRightNeighbours(currentContigIndex, currentContigIsReverse));
 		fireEvent(event);
 	}
 
@@ -456,17 +588,10 @@ public class CagCreator {
 	 * scrollbar / window the user is able to select a contig, such that this
 	 * contig will be display at the central contig
 	 */
-	public String[] getListData() {
-		this.createContigList();
-		return list;
+	public DNASequence[] getListData() {
+		return contigs;
 	}
 
-	/*
-	 * Return the current Contig Id/Name
-	 */
-//	public String getCurrentContig() {
-//		return nowCentralContigID;
-//	}
 
 	/*
 	 * TODO Wenn schon einer dieser Nachbarn ausgewählt wurde sollte dieser
@@ -482,10 +607,11 @@ public class CagCreator {
 	 * erscheinen. Oder die Border in einer anderen Farbe: noch zu wählen in
 	 * schwarz schon gewählt in rot oder so.
 	 */
-	public void changeContigs(AdjacencyEdge edge, int index, boolean isReverse) {
 
-		this.nowCentralContigID = graph.getNodes().get(index).getId();
-		this.contigIsReverse = isReverse;
+	public void changeContigs( int index, boolean isReverse) {
+
+		this.currentContigIndex = index;
+		this.currentContigIsReverse = isReverse;
 		this.currentContigObject = graph.getNodes().get(index);
 		sendCurrentContig();
 	}

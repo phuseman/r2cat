@@ -37,6 +37,13 @@ public class ContigAppearance extends JPanel {
 		this.add(contigLabel);		
 		this.setName(contigName);
 	}
+	
+	public ContigAppearance(DNASequence node, int indexOfCentralContig){
+		this.i = indexOfCentralContig;
+		getDetailsOfContig(node);
+		setContigAppearance(contigName, isReverseToString, length, border);
+		setSizeOfContig(length);
+	}
 
 	public ContigAppearance(LayoutGraph graph, AdjacencyEdge includingEdge, int indexOfContigI){
 		super();
@@ -74,7 +81,11 @@ public class ContigAppearance extends JPanel {
 		 							relativen support des Contigs nennt. 
 									Muss ich noch in dem Model einbauen, dass es gespeichert wird.*/
 	}
-		
+		/*TODO
+		 * Koennte ich hier nicht auch die attribute weglassen? Habe da ja fast nur 
+		 * klassenvariblen und damit sind die auch in dieser Methode zugaenglich
+		 * 
+		 */
 	private  void setContigAppearance(String contigId, String isReverseToString,
 			long size, ContigBorder border) {
 		String contigNameAusChar = "";
