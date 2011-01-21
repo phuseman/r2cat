@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="Actions">
+        <folder name="Window">
+            <file name="de-bielefeld-uni-cebitec-dotplotviewer-DotPlotViewerAction.instance">
+                <attr name="component" methodvalue="de.bielefeld.uni.cebitec.dotplotviewer.DotPlotViewerTopComponent.findInstance"/>
+                <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#CTL_DotPlotViewerAction"/>
+                <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Menu">
+        <folder name="Window">
+            <file name="DotPlotViewerAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/de-bielefeld-uni-cebitec-dotplotviewer-DotPlotViewerAction.instance"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Windows2">
+        <folder name="Components">
+            <file name="DotPlotViewerTopComponent.settings" url="DotPlotViewerTopComponentSettings.xml"/>
+        </folder>
+        <folder name="Modes">
+            <folder name="editor">
+                <file name="DotPlotViewerTopComponent.wstcref" url="DotPlotViewerTopComponentWstcref.xml"/>
+            </folder>
+        </folder>
+    </folder>
+</filesystem>
