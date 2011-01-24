@@ -52,6 +52,8 @@
           <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.contigorderingproject.Bundle#Templates/Project/ContigOrdering/Referencebased"/>
           <attr name="instantiatingIterator" newvalue="de.bielefeld.uni.cebitec.contigorderingproject.ContigOrderingProjectWizardIterator"/>
           <attr name="template" boolvalue="true"/>
+           <attr name="SystemFileSystem.icon"
+                                urlvalue="nbresloc:de/bielefeld/uni/cebitec/contigorderingproject/recources/contigproject.png"/>
           <attr name="templateWizardURL" urlvalue="nbresloc:/de/bielefeld/uni/cebitec/contigorderingproject/contigOrderingProject.html"/>
         </file>
       </folder>
