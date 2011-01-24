@@ -4,7 +4,6 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import javax.swing.Icon;
@@ -16,7 +15,6 @@ import org.netbeans.spi.project.DeleteOperationImplementation;
 import org.netbeans.spi.project.ProjectState;
 import org.netbeans.spi.project.ui.support.DefaultProjectOperations;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataFolder;
 import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
@@ -54,6 +52,7 @@ public class ContigOrderingProject implements Project {
                 new ContigOrderingProjectInfo(), //Project information implementation
                 new ContigOrderingProjectLogicalView(this), //Logical view of project implementation
               });
+
     }
     return lkp;
   }

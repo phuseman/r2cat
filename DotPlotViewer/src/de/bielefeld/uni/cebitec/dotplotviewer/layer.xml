@@ -7,7 +7,7 @@
         <attr name="component" methodvalue="de.bielefeld.uni.cebitec.dotplotviewer.DotPlotViewerTopComponent.findInstance"/>
         <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#CTL_DotPlotViewerAction"/>
         <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
-        <attr name="iconbase" stringvalue="de/bielefeld/uni/cebitec/dotplotviewer/recources/dotploticon.png"/>
+        <attr name="iconBase" stringvalue="de/bielefeld/uni/cebitec/dotplotviewer/recources/dotploticon.png"/>
       </file>
     </folder>
   </folder>
