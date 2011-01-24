@@ -2,7 +2,9 @@ package de.bielefeld.uni.cebitec.contigorderingproject;
 
 import org.netbeans.spi.project.ui.LogicalViewProvider;
 import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataFilter;
 import org.openide.loaders.DataFolder;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -27,10 +29,8 @@ public class ContigOrderingProjectLogicalView implements LogicalViewProvider {
       //Get the DataObject that represents it
       FileObject folder = project.getProjectDirectory();
       DataFolder dataFolder = DataFolder.findFolder(folder);
-      Node projectdir = dataFolder.getNodeDelegate();
 
-      //This FilterNode will be our project node
-      return new ContigOrderingProjectNode(projectdir, project);
+      return new ContigOrderingProjectNode(dataFolder, project);
 
     } catch (DataObjectNotFoundException donfe) {
       Exceptions.printStackTrace(donfe);

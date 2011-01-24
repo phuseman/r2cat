@@ -1,9 +1,16 @@
 package de.bielefeld.uni.cebitec.contigorderingproject;
 
 import java.awt.Image;
+import java.util.Enumeration;
+import java.util.Vector;
 import javax.swing.Action;
 import org.netbeans.spi.project.ui.support.CommonProjectActions;
 import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataFilter;
+import org.openide.loaders.DataFolder;
+import org.openide.loaders.DataLoaderPool;
+import org.openide.loaders.DataNode;
+import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.FilterNode;
@@ -20,14 +27,43 @@ final class ContigOrderingProjectNode extends FilterNode {
 
   final ContigOrderingProject project;
 
-  public ContigOrderingProjectNode(Node node, ContigOrderingProject project) throws DataObjectNotFoundException {
-    super(node, new FilterNode.Children (node),
+
+  public static class MatchListFilter implements DataFilter {
+    @Override
+    public boolean acceptDataObject(DataObject obj) {
+      if (obj.getPrimaryFile().getExt().equals(ContigOrderingProjectFactory.MATCH_FILE_EXTENSION)) {
+        return true;
+      }
+      return false;
+    }
+  }
+
+  public ContigOrderingProjectNode(DataFolder dataFolder, ContigOrderingProject project) throws DataObjectNotFoundException {
+    super(dataFolder.getNodeDelegate(),
+            dataFolder.createNodeChildren(new MatchListFilter()),
             //The projects system wants the project in the Node's lookup.
             //NewAction and friends want the original Node's lookup.
             //Make a merge of both
             new ProxyLookup(new Lookup[]{Lookups.singleton(project),
-              node.getLookup()
+              dataFolder.getNodeDelegate().getLookup()
             }));
+
+//    FileObject projectFolder = project.getProjectDirectory();
+//
+//    Vector<Node> nodes = new Vector<Node>();
+//
+//    Enumeration<? extends FileObject> allFiles = projectFolder.getData(false);
+//    FileObject fileObject;
+//
+//    while (allFiles.hasMoreElements()) {
+//      fileObject = allFiles.nextElement();
+//      if (fileObject.getExt().equals(ContigOrderingProjectFactory.MATCH_FILE_EXTENSION)) {
+//
+//        nodes.add(DataObject.find(fileObject).getNodeDelegate());
+//      }
+//    }
+//
+//    this.setChildren(new Children(nodes.toArray(Nodes.class)));
 
     this.project = project;
   }
