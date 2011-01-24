@@ -3,9 +3,12 @@ package de.bielefeld.uni.cebitec.contigorderingproject;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectInformation;
 import org.netbeans.spi.project.ActionProvider;
@@ -13,7 +16,9 @@ import org.netbeans.spi.project.DeleteOperationImplementation;
 import org.netbeans.spi.project.ProjectState;
 import org.netbeans.spi.project.ui.support.DefaultProjectOperations;
 import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataFolder;
 import org.openide.util.Exceptions;
+import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 
@@ -45,7 +50,7 @@ public class ContigOrderingProject implements Project {
                 state, //allow outside code to mark the project as needing saving
                 new ActionProviderImpl(), //Provides standard actions like Build and Clean
                 loadProperties(), //The project properties
-                new ContigOrderingProjectDeleteOperation(),
+                new ContigOrderingProjectDeleteOperation(this),
                 new ContigOrderingProjectInfo(), //Project information implementation
                 new ContigOrderingProjectLogicalView(this), //Logical view of project implementation
               });
@@ -118,19 +123,44 @@ private static class NotifyProperties extends Properties {
 
   private final class ContigOrderingProjectDeleteOperation implements DeleteOperationImplementation {
 
+    Project project = null;
+
+    public ContigOrderingProjectDeleteOperation(Project project) {
+      this.project = project;
+    }
+
+
+    @Override
     public void notifyDeleting() throws IOException {
     }
 
+    @Override
     public void notifyDeleted() throws IOException {
     }
 
+    @Override
     public List<FileObject> getMetadataFiles() {
-      List<FileObject> dataFiles = new ArrayList<FileObject>();
-      return dataFiles;
+      FileObject projectFolder = project.getProjectDirectory();
+      List<FileObject> metaFiles = new ArrayList<FileObject>();
+      metaFiles.add(projectFolder.getFileObject(ContigOrderingProjectFactory.PROJECT_FILE));
+      return metaFiles;
     }
 
+    @Override
     public List<FileObject> getDataFiles() {
       List<FileObject> dataFiles = new ArrayList<FileObject>();
+      FileObject projectFolder = project.getProjectDirectory();
+
+      Enumeration<? extends FileObject> allFiles = projectFolder.getData(false);
+      FileObject fileObject;
+
+      while(allFiles.hasMoreElements()) {
+        fileObject = allFiles.nextElement();
+        if(fileObject.getExt().equals(ContigOrderingProjectFactory.MATCH_FILE_EXTENSION)) {
+          dataFiles.add(fileObject);
+        }
+      }
+
       return dataFiles;
     }
   }
@@ -139,9 +169,7 @@ private static class NotifyProperties extends Properties {
 
     @Override
     public Icon getIcon() {
-      return null;
-//      return new ImageIcon(ImageUtilities.loadImage(
-//              "org/netbeans/demo/project/icon2.png"));
+      return new ImageIcon(ImageUtilities.loadImage("de/bielefeld/uni/cebitec/contigorderingproject/recources/contigproject.png"));
     }
 
     @Override

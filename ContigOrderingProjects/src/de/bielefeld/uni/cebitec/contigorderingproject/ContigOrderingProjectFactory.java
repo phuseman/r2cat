@@ -22,6 +22,7 @@ import org.openide.filesystems.FileUtil;
 public class ContigOrderingProjectFactory implements ProjectFactory {
 
   public static final String PROJECT_FILE = ".contigproject";
+  public static final String MATCH_FILE_EXTENSION = "r2c";
 
   @Override
   public boolean isProject(FileObject projectDirectory) {
