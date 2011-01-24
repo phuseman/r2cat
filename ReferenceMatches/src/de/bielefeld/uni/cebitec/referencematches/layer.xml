@@ -80,12 +80,4 @@
             </file>
         </folder>
     </folder>
-    <folder name="Templates">
-        <folder name="Other">
-            <file name="ReferenceMatchesTemplate.r2c" url="ReferenceMatchesTemplate.r2c">
-                <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.referencematches.Bundle#Templates/Other/ReferenceMatchesTemplate.r2c"/>
-                <attr name="template" boolvalue="true"/>
-            </file>
-        </folder>
-    </folder>
 </filesystem>
