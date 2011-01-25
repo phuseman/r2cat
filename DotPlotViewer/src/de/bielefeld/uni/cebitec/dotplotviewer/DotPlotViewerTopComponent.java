@@ -146,6 +146,11 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 
     }
 
+      if (dotplotMatchViewer.getMatchDisplayerList() != null) {
+          this.add(dotplotMatchViewer);
+      } else {
+        this.remove(dotplotMatchViewer);
+      }
 
   }
 }
