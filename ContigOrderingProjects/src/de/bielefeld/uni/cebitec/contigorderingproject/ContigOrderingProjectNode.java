@@ -27,8 +27,8 @@ final class ContigOrderingProjectNode extends FilterNode {
 
   final ContigOrderingProject project;
 
-
   public static class MatchListFilter implements DataFilter {
+
     @Override
     public boolean acceptDataObject(DataObject obj) {
       if (obj.getPrimaryFile().getExt().equals(ContigOrderingProjectFactory.MATCH_FILE_EXTENSION)) {
@@ -48,34 +48,18 @@ final class ContigOrderingProjectNode extends FilterNode {
               dataFolder.getNodeDelegate().getLookup()
             }));
 
-//    FileObject projectFolder = project.getProjectDirectory();
-//
-//    Vector<Node> nodes = new Vector<Node>();
-//
-//    Enumeration<? extends FileObject> allFiles = projectFolder.getData(false);
-//    FileObject fileObject;
-//
-//    while (allFiles.hasMoreElements()) {
-//      fileObject = allFiles.nextElement();
-//      if (fileObject.getExt().equals(ContigOrderingProjectFactory.MATCH_FILE_EXTENSION)) {
-//
-//        nodes.add(DataObject.find(fileObject).getNodeDelegate());
-//      }
-//    }
-//
-//    this.setChildren(new Children(nodes.toArray(Nodes.class)));
-
     this.project = project;
   }
 
   @Override
   public Action[] getActions(boolean arg0) {
-    Action[] nodeActions = new Action[7];
+    Action[] nodeActions = new Action[4];
     nodeActions[0] = CommonProjectActions.newFileAction();
-    //            nodeActions[1] = CommonProjectActions.copyProjectAction();
+    //null value results in a separator
     nodeActions[2] = CommonProjectActions.deleteProjectAction();
-    //            nodeActions[5] = CommonProjectActions.setAsMainProjectAction();
-    nodeActions[6] = CommonProjectActions.closeProjectAction();
+    nodeActions[3] = CommonProjectActions.closeProjectAction();
+    //nodeActions[5] = CommonProjectActions.setAsMainProjectAction();
+//    nodeActions[1] = CommonProjectActions.copyProjectAction();
     return nodeActions;
   }
 

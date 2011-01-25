@@ -5,9 +5,9 @@
     <folder name="Window">
       <file name="de-bielefeld-uni-cebitec-dotplotviewer-DotPlotViewerAction.instance">
         <attr name="component" methodvalue="de.bielefeld.uni.cebitec.dotplotviewer.DotPlotViewerTopComponent.findInstance"/>
-        <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#CTL_DotPlotViewerAction"/>
-        <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+        <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#Actions/Window/de-bielefeld-uni-cebitec-dotplotviewer-DotPlotViewerAction.instance"/>
         <attr name="iconBase" stringvalue="de/bielefeld/uni/cebitec/dotplotviewer/recources/dotploticon.png"/>
+        <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
       </file>
     </folder>
   </folder>

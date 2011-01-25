@@ -4,36 +4,67 @@
   <folder name="Actions">
     <file name="Build_hidden"/>
     <file name="Debug_hidden"/>
-    <file name="GlassFish_hidden"/>
+    <folder name="File">
+            <file name="de-bielefeld-uni-cebitec-contigorderingproject-NewReferenceAction.instance">
+                <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+                <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.contigorderingproject.Bundle#CTL_NewReferenceAction"/>
+                <attr name="iconBase" stringvalue="de/bielefeld/uni/cebitec/contigorderingproject/recources/newRef.png"/>
+                <attr name="injectable" stringvalue="de.bielefeld.uni.cebitec.contigorderingproject.NewReferenceAction"/>
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+                <attr name="noIconInMenu" boolvalue="false"/>
+                <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+                <attr name="type" stringvalue="de.bielefeld.uni.cebitec.contigorderingproject.ContigOrderingProject"/>
+            </file>
+        </folder>
+        <file name="GlassFish_hidden"/>
     <file name="Mercurial_hidden"/>
+    <file name="Profile_hidden"/>
     <folder name="Project">
       <file name="org-netbeans-modules-project-ui-BuildMainProject.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-BuildProject.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-CleanMainProject.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-CleanProject.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-CompileSingle.instance_hidden"/>
+      <file name="org-netbeans-modules-project-ui-JavadocProject.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-NewFile$WithSubMenu.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-NewFile.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-RebuildMainProject.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-RebuildProject.instance_hidden"/>
+      <file name="org-netbeans-modules-project-ui-Rerun.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-RunMainProject.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-RunProject.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-RunSingle.instance_hidden"/>
+      <file name="org-netbeans-modules-project-ui-SetMainProject.instance_hidden"/>
+      <file name="org-netbeans-modules-project-ui-SetMainProjectPopupWithoutContext.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-TestProject.instance_hidden"/>
       <file name="org-netbeans-modules-project-ui-TestSingle.instance_hidden"/>
+      <file name="org-netbeans-modules-project-ui-actions-OpenSubprojects.instance_hidden"/>
+      <file name="org-netbeans-modules-project-ui-actions-StopBuildingAction.instance_hidden"/>
     </folder>
     <file name="Refactoring_hidden"/>
     <file name="Repository_hidden"/>
     <file name="Source_hidden"/>
     <file name="Subversion_hidden"/>
+    <folder name="System">
+      <file name="org-netbeans-core-actions-JumpNextAction.instance_hidden"/>
+      <file name="org-netbeans-core-actions-JumpPrevAction.instance_hidden"/>
+      <file name="org-netbeans-modules-db-sql-editor-ui-actions-RunSQLAction.instance_hidden"/>
+      <file name="org-netbeans-modules-db-sql-editor-ui-actions-RunSQLSelectionAction.instance_hidden"/>
+      <file name="org-netbeans-modules-db-sql-editor-ui-actions-SQLHistoryAction.instance_hidden"/>
+      <file name="org-netbeans-modules-server-ui-node-AddServerInstanceAction.instance_hidden"/>
+      <file name="org-netbeans-modules-xml-catalog-CatalogAction.instance_hidden"/>
+    </folder>
     <file name="Team_hidden"/>
     <file name="UnitTests_hidden"/>
     <file name="Versioning_hidden"/>
+    <folder name="Window">
+      <file name="Debug_hidden"/>
+    </folder>
   </folder>
   <folder name="Menu">
     <file name="BuildProject_hidden"/>
     <folder name="File">
-      <file name="org-netbeans-modules-kenai-ui-OpenKenaiProjectAction.shadow_hidden"/>
+            <file name="org-netbeans-modules-kenai-ui-OpenKenaiProjectAction.shadow_hidden"/>
       <file name="org-netbeans-modules-openfile-OpenFileAction.shadow_hidden"/>
       <file name="org-netbeans-modules-openfile-RecentFileAction.shadow_hidden"/>
       <file name="org-netbeans-modules-project-ui-NewFile.shadow_hidden"/>
@@ -52,23 +83,28 @@
           <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.contigorderingproject.Bundle#Templates/Project/ContigOrdering/Referencebased"/>
           <attr name="instantiatingIterator" newvalue="de.bielefeld.uni.cebitec.contigorderingproject.ContigOrderingProjectWizardIterator"/>
           <attr name="template" boolvalue="true"/>
-           <attr name="SystemFileSystem.icon"
-                                urlvalue="nbresloc:de/bielefeld/uni/cebitec/contigorderingproject/recources/contigproject.png"/>
+          <attr name="SystemFileSystem.icon" urlvalue="nbresloc:de/bielefeld/uni/cebitec/contigorderingproject/recources/contigproject.png"/>
           <attr name="templateWizardURL" urlvalue="nbresloc:/de/bielefeld/uni/cebitec/contigorderingproject/contigOrderingProject.html"/>
         </file>
       </folder>
       <file name="Samples_hidden"/>
     </folder>
-    <file name="Services_hidden"/>
+    <file name="Properties_hidden"/>
+        <file name="Services_hidden"/>
     <file name="XML_hidden"/>
   </folder>
   <folder name="Toolbars">
+    <file name="Debugging.xml_hidden"/>
     <file name="Build_hidden"/>
     <file name="Clipboard_hidden"/>
     <file name="Debug_hidden"/>
     <folder name="File">
       <file name="org-netbeans-modules-project-ui-NewFile.shadow_hidden"/>
     </folder>
+    <folder name="Memory">
+      <file name="org-netbeans-modules-profiler-actions-SelfSamplerAction.shadow_hidden"/>
+    </folder>
+    <file name="Standard.xml" url="Standard.xml"/>
   </folder>
   <folder name="Windows2">
     <folder name="Modes">

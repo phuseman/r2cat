@@ -4,7 +4,9 @@
  */
 package de.bielefeld.uni.cebitec.dotplotviewer;
 
-import de.bielefeld.uni.cebitec.contigorderingproject.ContigOrderingProject;
+import de.bielefeld.uni.cebitec.qgram.MatchList;
+import de.bielefeld.uni.cebitec.r2cat.gui.DotPlotMatchViewer;
+import de.bielefeld.uni.cebitec.r2cat.gui.MatchViewerPlugin;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Logger;
@@ -25,13 +27,17 @@ import org.openide.util.Utilities;
 autostore = false)
 public final class DotPlotViewerTopComponent extends TopComponent implements LookupListener {
 
+  private DotPlotMatchViewer dpview;
+
   private static DotPlotViewerTopComponent instance;
   /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
   private static final String PREFERRED_ID = "DotPlotViewerTopComponent";
+  private DotPlotMatchViewer dotplotMatchViewer;
 
   public DotPlotViewerTopComponent() {
     initComponents();
+    dotplotMatchViewer=new DotPlotMatchViewer();
     setName(NbBundle.getMessage(DotPlotViewerTopComponent.class, "CTL_DotPlotViewerTopComponent"));
     setToolTipText(NbBundle.getMessage(DotPlotViewerTopComponent.class, "HINT_DotPlotViewerTopComponent"));
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
@@ -46,20 +52,9 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
-    jScrollPane2 = new javax.swing.JScrollPane();
-    jTextArea1 = new javax.swing.JTextArea();
-
     setLayout(new java.awt.BorderLayout());
-
-    jTextArea1.setColumns(20);
-    jTextArea1.setRows(5);
-    jScrollPane2.setViewportView(jTextArea1);
-
-    add(jScrollPane2, java.awt.BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JScrollPane jScrollPane2;
-  private javax.swing.JTextArea jTextArea1;
   // End of variables declaration//GEN-END:variables
 
   /**
@@ -95,13 +90,13 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 
   @Override
   public int getPersistenceType() {
-    return TopComponent.PERSISTENCE_ALWAYS;
+    return TopComponent.PERSISTENCE_NEVER;
   }
   private Lookup.Result result = null;
 
   @Override
   public void componentOpened() {
-    result = Utilities.actionsGlobalContext().lookupResult(ContigOrderingProject.class);
+    result = Utilities.actionsGlobalContext().lookupResult(MatchList.class);
     result.addLookupListener(this);
   }
 
@@ -141,9 +136,16 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
     Lookup.Result r = (Lookup.Result) ev.getSource();
     //jTextArea1.setText("");
     Collection c = r.allInstances();
+
+
+    if (c.size() == 1) {
     for (Iterator it = c.iterator(); it.hasNext();) {
-      ContigOrderingProject project = (ContigOrderingProject) it.next();
-      jTextArea1.append(project.toString() + "\n");
+      MatchList matchList = (MatchList) it.next();
+      this.dotplotMatchViewer.setAlignmentsPositionsList(matchList);
     }
+
+    }
+
+
   }
 }

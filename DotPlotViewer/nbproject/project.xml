@@ -7,7 +7,7 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>de.bielefeld.uni.cebitec.contigorderingproject</code-name-base>
+                    <code-name-base>de.bielefeld.uni.cebitec</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
