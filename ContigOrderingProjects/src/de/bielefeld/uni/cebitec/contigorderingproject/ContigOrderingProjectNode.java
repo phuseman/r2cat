@@ -31,7 +31,7 @@ final class ContigOrderingProjectNode extends FilterNode {
 
     @Override
     public boolean acceptDataObject(DataObject obj) {
-      if (obj.getPrimaryFile().getExt().equals(ContigOrderingProjectFactory.MATCH_FILE_EXTENSION)) {
+      if (obj.getPrimaryFile().getExt().equals(ContigOrderingProjectFactory.DATA_FILE_EXTENSION)) {
         return true;
       }
       return false;

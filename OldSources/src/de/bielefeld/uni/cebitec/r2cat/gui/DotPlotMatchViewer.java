@@ -741,7 +741,7 @@ public class DotPlotMatchViewer extends MatchViewerPlugin {
 	 *            the drawGrid to set
 	 */
 	public void drawGrid(boolean drawGrid) {
-		R2cat.preferences.setDisplayGrid(drawGrid);
+//		R2cat.preferences.setDisplayGrid(drawGrid);
 		this.drawGrid = drawGrid;
 	}
 	

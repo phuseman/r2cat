@@ -6,6 +6,7 @@ package de.bielefeld.uni.cebitec.dotplotviewer;
 
 import de.bielefeld.uni.cebitec.qgram.MatchList;
 import de.bielefeld.uni.cebitec.r2cat.gui.DotPlotMatchViewer;
+import de.bielefeld.uni.cebitec.r2cat.gui.DotPlotMatchViewerActionListener;
 import de.bielefeld.uni.cebitec.r2cat.gui.MatchViewerPlugin;
 import java.util.Collection;
 import java.util.Iterator;
@@ -37,6 +38,21 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
   public DotPlotViewerTopComponent() {
     initComponents();
     dotplotMatchViewer = new DotPlotMatchViewer();
+    		DotPlotMatchViewerActionListener dotPlotVisualisationListener = new DotPlotMatchViewerActionListener(
+				null, dotplotMatchViewer);
+
+		dotplotMatchViewer
+				.addMouseMotionListener(dotPlotVisualisationListener);
+		dotplotMatchViewer.addMouseListener(dotPlotVisualisationListener);
+		dotplotMatchViewer
+				.addMouseWheelListener(dotPlotVisualisationListener);
+		dotplotMatchViewer.addKeyListener(dotPlotVisualisationListener);
+
+		// load the previous state from prefs
+		dotplotMatchViewer.drawGrid(true);
+
+
+
     setName(NbBundle.getMessage(DotPlotViewerTopComponent.class, "CTL_DotPlotViewerTopComponent"));
     setToolTipText(NbBundle.getMessage(DotPlotViewerTopComponent.class, "HINT_DotPlotViewerTopComponent"));
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
@@ -155,6 +171,14 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
   public void setMatchList(MatchList ml) {
     if (ml != null && !ml.isEmpty()) {
       this.dotplotMatchViewer.setAlignmentsPositionsList(ml);
+      		dotplotMatchViewer.getMatchDisplayerList()
+				.showReversedComplements(true);
+
+          //TODO: remember and set this properly
+		dotplotMatchViewer.getMatchDisplayerList()
+				.setDisplayOffsets(true);
+
+//TODO: remember and set this properly
       dotplotMatchViewer.getMatchDisplayerList().setNeedsRegeneration(true);
       this.add(dotplotMatchViewer);
     } else {

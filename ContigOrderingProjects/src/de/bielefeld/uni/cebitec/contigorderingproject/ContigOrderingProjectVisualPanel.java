@@ -29,7 +29,7 @@ public final class ContigOrderingProjectVisualPanel extends JPanel implements Do
 
   @Override
   public String getName() {
-    return "Select project location";
+    return "Select Project Location";
   }
 
   /** This method is called from within the constructor to

@@ -10,12 +10,15 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
+import org.netbeans.api.project.ProjectManager;
 import org.openide.WizardDescriptor;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Lookup;
 
 public final class ContigOrderingProjectWizardIterator implements WizardDescriptor.InstantiatingIterator {
 
@@ -140,30 +143,12 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
   }
   }
    */
-  // You could safely ignore this method. Is is here to keep steps which were
-  // there before this wizard was instantiated. It should be better handled
-  // by NetBeans Wizard API itself rather than needed to be implemented by a
-  // client code.
   private String[] createSteps() {
-    String[] beforeSteps = null;
-    Object prop = wizard.getProperty("WizardPanel_contentData");
-    if (prop != null && prop instanceof String[]) {
-      beforeSteps = (String[]) prop;
+    String[] steps = new String[panels.length];
+    for (int i = 0; i < steps.length; i++) {
+      steps[i]=panels[i].getComponent().getName();;
     }
-
-    if (beforeSteps == null) {
-      beforeSteps = new String[0];
-    }
-
-    String[] res = new String[(beforeSteps.length - 1) + panels.length];
-    for (int i = 0; i < res.length; i++) {
-      if (i < (beforeSteps.length - 1)) {
-        res[i] = beforeSteps[i];
-      } else {
-        res[i] = panels[i - beforeSteps.length + 1].getComponent().getName();
-      }
-    }
-    return res;
+    return steps;
   }
 
   @Override
@@ -178,6 +163,10 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
 
       //create the marker file that recognizes this as a project
       newProject.createData(ContigOrderingProjectFactory.PROJECT_FILE);
+
+      Properties projectProperties = ProjectManager.getDefault().findProject(newProject).getLookup().lookup(Properties.class);
+      projectProperties.put("contigs", (String) wizard.getProperty(ContigOrderingProjectVisualPanel.PROP_CONTIGS_FILE));
+
 
       //provide the created project folder
       resultSet.add(newProject);

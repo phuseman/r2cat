@@ -12,10 +12,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
-import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectUtils;
-import org.openide.DialogDisplayer;
-import org.openide.NotifyDescriptor;
 import org.openide.awt.DynamicMenuContent;
 import org.openide.awt.StatusDisplayer;
 import org.openide.filesystems.FileUtil;
@@ -65,7 +62,6 @@ public final class NewReferenceAction extends AbstractAction implements ContextA
       InputOutput io = IOProvider.getDefault().getIO("TestIO", true);
       io.select();
       io.getOut().print(fastafile.getAbsoluteFile());
-
 
 
       //show status line

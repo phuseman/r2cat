@@ -152,4 +152,5 @@ public class ContigOrderingProjectWizardPanel implements WizardDescriptor.Panel<
   private void setMessage(String message) {
     model.putProperty(WizardDescriptor.PROP_ERROR_MESSAGE, message);
   }
+
 }

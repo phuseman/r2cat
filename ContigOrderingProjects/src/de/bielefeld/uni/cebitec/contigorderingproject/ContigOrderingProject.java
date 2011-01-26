@@ -155,7 +155,7 @@ private static class NotifyProperties extends Properties {
 
       while(allFiles.hasMoreElements()) {
         fileObject = allFiles.nextElement();
-        if(fileObject.getExt().equals(ContigOrderingProjectFactory.MATCH_FILE_EXTENSION)) {
+        if(fileObject.getExt().equals(ContigOrderingProjectFactory.DATA_FILE_EXTENSION)) {
           dataFiles.add(fileObject);
         }
       }
