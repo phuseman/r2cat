@@ -28,7 +28,6 @@ autostore = false)
 public final class DotPlotViewerTopComponent extends TopComponent implements LookupListener {
 
   private DotPlotMatchViewer dpview;
-
   private static DotPlotViewerTopComponent instance;
   /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
@@ -37,7 +36,7 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 
   public DotPlotViewerTopComponent() {
     initComponents();
-    dotplotMatchViewer=new DotPlotMatchViewer();
+    dotplotMatchViewer = new DotPlotMatchViewer();
     setName(NbBundle.getMessage(DotPlotViewerTopComponent.class, "CTL_DotPlotViewerTopComponent"));
     setToolTipText(NbBundle.getMessage(DotPlotViewerTopComponent.class, "HINT_DotPlotViewerTopComponent"));
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
@@ -138,19 +137,30 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
     Collection c = r.allInstances();
 
 
+    if (c.size() < 1) {
+      //no match object in lookup; do nothing
+      return;
+    }
     if (c.size() == 1) {
-    for (Iterator it = c.iterator(); it.hasNext();) {
-      MatchList matchList = (MatchList) it.next();
-      this.dotplotMatchViewer.setAlignmentsPositionsList(matchList);
-    }
-
-    }
-
-      if (dotplotMatchViewer.getMatchDisplayerList() != null) {
-          this.add(dotplotMatchViewer);
-      } else {
-        this.remove(dotplotMatchViewer);
+      for (Iterator it = c.iterator(); it.hasNext();) {
+        MatchList matchList = (MatchList) it.next();
+        this.setMatchList(matchList);
       }
+    } else if (c.size() > 1) {
+      this.setMatchList(null);
+    }
 
+  }
+
+  public void setMatchList(MatchList ml) {
+    if (ml != null && !ml.isEmpty()) {
+      this.dotplotMatchViewer.setAlignmentsPositionsList(ml);
+      dotplotMatchViewer.getMatchDisplayerList().setNeedsRegeneration(true);
+      this.add(dotplotMatchViewer);
+    } else {
+      this.remove(dotplotMatchViewer);
+    }
+    this.invalidate();
+    this.repaint();
   }
 }

@@ -54,7 +54,8 @@ final class ContigOrderingProjectNode extends FilterNode {
   @Override
   public Action[] getActions(boolean arg0) {
     Action[] nodeActions = new Action[4];
-    nodeActions[0] = CommonProjectActions.newFileAction();
+    nodeActions[0] = new NewReferenceAction();
+//    nodeActions[0] = CommonProjectActions.newFileAction();
     //null value results in a separator
     nodeActions[2] = CommonProjectActions.deleteProjectAction();
     nodeActions[3] = CommonProjectActions.closeProjectAction();

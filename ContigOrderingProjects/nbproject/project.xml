@@ -7,6 +7,15 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
+                    <code-name-base>de.bielefeld.uni.cebitec</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <release-version>1</release-version>
+                        <specification-version>0.0.1</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>de.bielefeld.uni.cebitec.dnasequences</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -90,6 +99,14 @@
                     <compile-dependency/>
                     <run-dependency>
                         <specification-version>7.38.2</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>org.openide.io</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.23.1</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>

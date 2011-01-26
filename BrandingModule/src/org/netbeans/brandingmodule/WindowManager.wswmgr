@@ -22,5 +22,5 @@
     <screen width="1280" height="1024" />
     <active-mode name="explorer" />
     <maximized-mode name="" />
-    <toolbar configuration="Standard" preferred-icon-size="24" />
+    <toolbar configuration="Standard" preferred-icon-size="16" />
 </windowmanager>
