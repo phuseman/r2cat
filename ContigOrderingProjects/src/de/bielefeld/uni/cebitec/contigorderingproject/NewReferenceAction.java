@@ -1,7 +1,21 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *  Copyright (C) 2011 Peter Husemann <peter.husemann at cebitec uni bielefeld.de>
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version 2
+ *  of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+
 package de.bielefeld.uni.cebitec.contigorderingproject;
 
 import de.bielefeld.uni.cebitec.common.CustomFileFilter;
@@ -58,15 +72,6 @@ public final class NewReferenceAction extends AbstractAction implements ContextA
     void actionPerformed(ActionEvent e) {
       File fastafile = MiscFileUtils.chooseFile(WindowManager.getDefault().getMainWindow(), "Open fasta", FileUtil.toFile(p.getProjectDirectory()), true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
 
-      // open output window
-      InputOutput io = IOProvider.getDefault().getIO("TestIO", true);
-      io.select();
-      io.getOut().print(fastafile.getAbsoluteFile());
-
-
-      //show status line
-      StatusDisplayer.getDefault().setStatusText("Matching contigs on a reference genome");
-
 
       //show progress bar
       Runnable run = new Runnable() {
@@ -86,6 +91,20 @@ public final class NewReferenceAction extends AbstractAction implements ContextA
             }
         }
       };
+
+      if(fastafile==null) {
+          return;
+      }
+
+      // open output window
+      InputOutput io = IOProvider.getDefault().getIO("TestIO", true);
+      io.select();
+      io.getOut().print(fastafile.getAbsoluteFile());
+
+
+      //show status line
+      StatusDisplayer.getDefault().setStatusText("Matching contigs on a reference genome");
+
 
       Thread t = new Thread(run);
       t.start();

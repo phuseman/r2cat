@@ -81,9 +81,6 @@
         <folder name="File">
             <file name="org-netbeans-modules-project-ui-NewFile.shadow_hidden"/>
         </folder>
-        <folder name="Memory">
-            <file name="org-netbeans-modules-profiler-actions-SelfSamplerAction.shadow_hidden"/>
-        </folder>
     </folder>
     <folder name="Windows2">
         <folder name="Modes">
