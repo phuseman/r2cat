@@ -118,17 +118,17 @@ public class GlassPaneWithLines extends JPanel {
 					int zaehler = 0;
 
 					for (Component co : neighbourLeft.getComponents()) {
-						lineStrokeLeft = (float) Math
-						.ceil(supportleft[zaehler] * 10000) / 10;
+						
+						lineStrokeLeft = (float) Math.log1p(supportleft[zaehler]/1000) +1;
+					
+						/*lineStrokeLeft = (float) Math
+						.ceil(supportleft[zaehler] * 10000) / 10;*/
 						z++;
 						if (z % 2 == 0) {
-							if ((float) Math.log1p(lineStrokeLeft) + 1 <= 0) {
-								lineStrokeLeft = 1.0f;
-							} else if ((float) Math.log1p(lineStrokeLeft) + 1 > 5) {
+							if (lineStrokeLeft <= 0) {
+								lineStrokeLeft = 0.1f;
+							} else if (lineStrokeLeft > 5) {
 								lineStrokeLeft = 5.0f;
-							} else {
-								lineStrokeLeft = (float) Math
-										.log1p(lineStrokeLeft) + 1;
 							}
 							
 							Point point = co.getLocation();
@@ -164,16 +164,13 @@ public class GlassPaneWithLines extends JPanel {
 
 					for (Component co : neighbour.getComponents()) {
 						//lineStroke = (float) Math.ceil(support[c] * 10000) / 10;
-						lineStroke = (float) support[c]/10;
+						lineStroke = (float) Math.log1p(support[c]/1000)+1;
 						z++;
 						if (z % 2 == 0) {
-							if ((float) Math.log1p(lineStroke) + 1 <= 0) {
+							if (lineStroke <= 0) {
 								lineStroke = 1.0f;
-							} else if ((float) Math.log1p(lineStroke) + 1 > 5) {
+							} else if (lineStroke > 5) {
 								lineStroke = 5.0f;
-							} else {
-								lineStroke = (float) Math.log1p(lineStroke) + 1;
-
 							}
 							
 							Point point = co.getLocation();

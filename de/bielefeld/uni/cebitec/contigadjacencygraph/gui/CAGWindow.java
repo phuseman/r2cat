@@ -345,9 +345,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					 * System.out.println("links " + dnaSequence.getId() + ":  "
 					 * + dnaSequence.getTotalSupport());
 					 */
-					leftSupport[t] = dnaSequence
+					leftSupport[t] = edge.getSupport(); 
+						//dnaSequence
 					// .getSupportComparativeToCentralContig();
-							.getTotalSupport();
+							//.getTotalSupport();
 
 					contigPanel = new ContigAppearance(layoutGraph, edge,
 							indexOfContig);
@@ -360,16 +361,21 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					contigPanel.setVisible(true);
 
 					radioButton = new ContigRadioButton(edge, indexOfContig);
-					radioButton.getModel().setSelected(false);
+					radioButton.getModel().setActionCommand("notSelected");
 					radioButton.setBackground(Color.WHITE);
 					radioButton
 							.addActionListener(new RadioButtonActionListener());
-
+					
+					/*
+					 * Help that the user is only able to select one neighbour
+					 * for each side.
+					 */
 					if (dnaSequence.isContigIsSelected()) {
-						radioButton.getModel().setSelected(true);
-						leftGroup.setAllRadioButtonAsSelected();
-						oneOfLeftNeigboursSelected = true;
+						radioButton.getModel().setActionCommand("isSelected");
+						rightGroup.setAllRadioButtonAsSelected(true);
+						oneOfRightNeigboursSelected = true;
 					}
+
 					// add here Contigs and RadioButton with automatical space
 					leftContainer.add(contigPanel);
 
@@ -431,10 +437,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						indexOfContig = edge.geti();
 					}
 
-					rightSupport[s] = dnaSequence
-					// .getSupportComparativeToCentralContig();
-							.getTotalSupport();
-
+					rightSupport[s] = edge.getSupport();
+				
 					contigPanel = new ContigAppearance(layoutGraph, edge,
 							indexOfContig);
 					contigPanel.setAlignmentX(LEFT_ALIGNMENT);
@@ -453,7 +457,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					 */
 					if (dnaSequence.isContigIsSelected()) {
 						radioButton.getModel().setActionCommand("isSelected");
-						rightGroup.setAllRadioButtonAsSelected();
+						rightGroup.setAllRadioButtonAsSelected(true);
 						oneOfRightNeigboursSelected = true;
 					}
 
@@ -560,7 +564,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					.clone();
 
 			ContigRadioButton radioButton = (ContigRadioButton) e.getSource();
-			AdjacencyEdge edge = radioButton.getEdge();
+			AdjacencyEdge selectedEdge = radioButton.getEdge();
 
 			boolean isANeighourSelected = radioButton
 					.isOneNeighbourOfThisSideAlreadySelected();
@@ -569,12 +573,12 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			 * hinzufügen
 			 */
 
-			for (AdjacencyEdge test : copyOfSelectedContigs) {
+			for (AdjacencyEdge savedEdge : copyOfSelectedContigs) {
 				if (!isANeighourSelected
 						&& radioButton.getModel().getActionCommand() == "notSelected") {
 
-					if (!edge.equals(test)) {
-						selectedRadioButtons.add(edge);
+					if (!selectedEdge.equals(savedEdge)) {
+						selectedRadioButtons.add(selectedEdge);
 						/*
 						 * TODO Bis jetzt wird nur dieser eine radio Button
 						 * gesetzt. Möchte aber das alle button der group als
@@ -583,10 +587,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						 */
 						radioButton
 								.setOneNeighbourOfThisSideAlreadySelected(true);
-						model.addSelectedContig(edge);
+						model.addSelectedContig(selectedEdge);
 						break;
 					}
-				} else if (edge.equals(test)) {
+				 else if (selectedEdge.equals(savedEdge)) {
 					neighbourAlreadySelected = true;
 					
 					Object[] options = {"Yes",  "No"};
@@ -598,12 +602,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 							JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 					
 					if(n == JOptionPane.YES_OPTION){
-						model.removeSelectedEdge(edge);
-						copyOfSelectedContigs.remove(edge);
-						radioButton.setOneNeighbourOfThisSideAlreadySelected(false);
+						model.removeSelectedEdge(selectedEdge);
+						selectedRadioButtons.remove(selectedEdge);
+					//	radioButton.setOneNeighbourOfThisSideAlreadySelected(false);
 						neighbourAlreadySelected= false;
-						
-						window.repaint();
 					}
 					break;
 
@@ -618,14 +620,15 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				}
 			}
 			if (selectedRadioButtons.size() == 0) {
-				selectedRadioButtons.add(edge);
+				selectedRadioButtons.add(selectedEdge);
 				/*
 				 * TODO Bis jetzt wird nur dieser eine radio Button gesetzt.
 				 * Möchte aber das alle button der group als ausgewählt gesetzt
 				 * werden. Und dadurch kein weiterer Ausgewählt werden kann.
 				 */
 				radioButton.setOneNeighbourOfThisSideAlreadySelected(true);
-				model.addSelectedContig(edge);
+				model.addSelectedContig(selectedEdge);
+			}
 			}
 		}
 	}

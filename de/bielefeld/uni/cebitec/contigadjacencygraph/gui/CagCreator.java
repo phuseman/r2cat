@@ -355,9 +355,8 @@ public class CagCreator {
 				neighbourIsReverse = edge.isRightConnectori();
 				support = edge.getRelativeSupportj();
 			}
-			totalSupport = edge.getSupport();
+
 			isNeighbourSelected = neighbourIsAlreadySelected(edge);
-			neighbourContigObject.setTotalSupport(totalSupport);
 			neighbourContigObject.setReverse(neighbourIsReverse);
 			neighbourContigObject
 			.setSupportComparativeToCentralContig(support);
@@ -399,13 +398,15 @@ public class CagCreator {
 				neighbourIsReverse = edge.isLeftConnectori();
 				support = edge.getRelativeSupportj();
 			}
-			totalSupport = edge.getSupport();
-			isNeighbourSelected = neighbourIsAlreadySelected(edge);
+			/*totalSupport = edge.getSupport();
 			neighbourContigObject.setTotalSupport(totalSupport);
+			*/
+			isNeighbourSelected = neighbourIsAlreadySelected(edge);
+			neighbourContigObject.setContigIsSelected(isNeighbourSelected);
+			
 			neighbourContigObject.setReverse(neighbourIsReverse);
 			neighbourContigObject
 			.setSupportComparativeToCentralContig(support);
-			neighbourContigObject.setContigIsSelected(isNeighbourSelected);
 			
 			fiveMostLikleyLeftNeighbours.add(edge);
 		}
@@ -472,6 +473,7 @@ public class CagCreator {
 		for (AdjacencyEdge edge : selectedContigs) {
 						
 			if (edge.equals(neighbour)) {
+				System.out.println("Tatsaechlich noch in selected Contigs");
 				flag = true;
 				break;
 			}
@@ -500,11 +502,14 @@ public class CagCreator {
 	public Vector<AdjacencyEdge> removeSelectedEdge(AdjacencyEdge selectedEdge) {
 
 		boolean flag = false;
-		System.out.println("So bin schon mal drin");
+
 		for (AdjacencyEdge edge : selectedContigs) {
 			if (edge.equals(selectedEdge)) {
-				System.out.println("Loesche kante ");
+
 				selectedContigs.removeElement(selectedEdge);
+				sendCurrentContig();
+				sendLeftNeighbours();
+				sendRightNeighbours();
 				flag = true;
 				break;
 			}
