@@ -24,6 +24,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -34,6 +35,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingWorker;
@@ -80,8 +82,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	private JPanel rightRadioButtonContainer;
 
 	private Vector<AdjacencyEdge> selectedRadioButtons;
-	private int z = 0;
-	private String centralContigName;
 
 	private int numberOfNeighbours = 5;
 	private boolean oneOfLeftNeigboursSelected;
@@ -90,6 +90,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	private LayoutGraph layoutGraph;
 	private int centralContigIndex;
 	private String[] dataForList;
+	
+	private JPanel inputOption;
 
 	public CAGWindow(CagCreator myModel) {
 		window = this;
@@ -246,9 +248,21 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		// setSize(Toolkit.getDefaultToolkit().getScreenSize());
 		// hier wird das Fenster auf die Größe des Bildschirmes angepasst.
-
+		
+		inputOption = new JPanel();
+		JLabel chooseNumberOfNeighbours = new JLabel("Anzahl Nachbarn");
+		JFormattedTextField inputOptionForNumberOfNeighbours = new JFormattedTextField(1);
+		inputOptionForNumberOfNeighbours.setValue(new Integer(numberOfNeighbours));
+	//	inputOptionForNumberOfNeighbours.addPropertyChangeListener("numberOfNeighbours", numberOfNeighboursListener)
+		
+		inputOption.add(chooseNumberOfNeighbours);
+		inputOption.add(inputOptionForNumberOfNeighbours);
+		add(inputOption, BorderLayout.SOUTH);
+		
 		glassPanel = new GlassPaneWithLines();
 		setGlassPane(glassPanel);
+		
+		
 		setSize(1000, 500);
 		setVisible(true);
 
@@ -685,6 +699,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		public void actionPerformed(ActionEvent arg0) {
 			window.dispose();
 		}
+	}
+	
+	public class PropertyChangeListener{
+		
 	}
 
 }
