@@ -20,7 +20,6 @@ package de.bielefeld.uni.cebitec.dotplotviewer;
 import de.bielefeld.uni.cebitec.qgram.MatchList;
 import de.bielefeld.uni.cebitec.r2cat.gui.DotPlotMatchViewer;
 import de.bielefeld.uni.cebitec.r2cat.gui.DotPlotMatchViewerActionListener;
-import de.bielefeld.uni.cebitec.r2cat.gui.MatchViewerPlugin;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Logger;
@@ -80,9 +79,13 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
 
+    jScrollPane1 = new javax.swing.JScrollPane();
+
     setLayout(new java.awt.BorderLayout());
+    add(jScrollPane1, java.awt.BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JScrollPane jScrollPane1;
   // End of variables declaration//GEN-END:variables
 
   /**
@@ -184,6 +187,7 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
   public void setMatchList(MatchList ml) {
     if (ml != null && !ml.isEmpty()) {
       this.dotplotMatchViewer.setAlignmentsPositionsList(ml);
+//TODO: remember and set this properly
       		dotplotMatchViewer.getMatchDisplayerList()
 				.showReversedComplements(true);
 
@@ -191,11 +195,10 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 		dotplotMatchViewer.getMatchDisplayerList()
 				.setDisplayOffsets(true);
 
-//TODO: remember and set this properly
       dotplotMatchViewer.getMatchDisplayerList().setNeedsRegeneration(true);
-      this.add(dotplotMatchViewer);
+      this.jScrollPane1.getViewport().add(dotplotMatchViewer);
     } else {
-      this.remove(dotplotMatchViewer);
+      this.jScrollPane1.getViewport().remove(dotplotMatchViewer);
     }
     this.invalidate();
     this.repaint();
