@@ -41,7 +41,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import de.bielefeld.uni.cebitec.qgram.MatchList.NotifyEvent;
-import de.bielefeld.uni.cebitec.r2cat.R2cat;
 
 /**
  * @author Peter Husemann
@@ -125,10 +124,8 @@ public class DotPlotMatchViewerActionListener implements ActionListener,
 			// remove selection if too far away
 			dotPlotMatchViewer.getMatchDisplayerList().unmakAll();
 		}
-		R2cat.dataModelController
-				.getMatchesList().markQueriesWithSelectedAps();
-		R2cat.dataModelController
-				.getMatchesList().notifyObservers(NotifyEvent.MARK);
+		dotPlotMatchViewer.getMatchList().markQueriesWithSelectedAps();
+		dotPlotMatchViewer.getMatchList().notifyObservers(NotifyEvent.MARK);
 	}
 
 	/*
@@ -381,11 +378,13 @@ public class DotPlotMatchViewerActionListener implements ActionListener,
 		((JPanel) e.getSource()).scrollRectToVisible(newViewport);
 		Object test = e.getSource();
 
+    if(guiController!=null && guiController.getMainWindow() != null) {
 		// change the slider and the textfield
 		guiController.getMainWindow().zoomSlider
 				.setValue((int) (newZoomValue * 20));
 		guiController.getMainWindow().zoomValue.setText(Double
 				.toString(((int) (newZoomValue * 20) / 20.)));
+    }
 
 	}
 
@@ -439,10 +438,8 @@ public class DotPlotMatchViewerActionListener implements ActionListener,
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			dotPlotMatchViewer.getMatchDisplayerList()
 			.unmakAll();
-			R2cat.dataModelController
-			.getMatchesList().markQueriesWithSelectedAps();
-	R2cat.dataModelController
-			.getMatchesList().notifyObservers(NotifyEvent.MARK);
+			dotPlotMatchViewer.getMatchList().markQueriesWithSelectedAps();
+	    dotPlotMatchViewer.getMatchList().notifyObservers(NotifyEvent.MARK);
 		}
 
 		changeSelectionCursor(e);

@@ -111,7 +111,7 @@ public class DotPlotMatchViewer extends MatchViewerPlugin {
 	// a histogram generated from the alignments
 	private double[] histogram = {};
 
-	private boolean drawGrid = false;
+	private boolean drawGrid = true;
 	
 	private JTextField referenceLabel;
 	private JTextField contigsLabel;
@@ -219,7 +219,7 @@ public class DotPlotMatchViewer extends MatchViewerPlugin {
 		this.matchList = ap;
 		this.matchDisplayerList = new MatchDisplayerList(
 				ap);
-
+    this.setLables();
 	}
 
 	/**
@@ -654,12 +654,21 @@ public class DotPlotMatchViewer extends MatchViewerPlugin {
 	}
 
 	/**
-	 * Gives the list of the AlignmentDisplayer objects.
+	 * Gives the view of the list of matches.
 	 * 
 	 * @return
 	 */
 	public MatchDisplayerList getMatchDisplayerList() {
 		return matchDisplayerList;
+	}
+
+  	/**
+	 * Gives the list matches.
+	 *
+	 * @return
+	 */
+	public MatchList getMatchList() {
+		return matchList;
 	}
 
 	/*
@@ -686,30 +695,29 @@ public class DotPlotMatchViewer extends MatchViewerPlugin {
 	 * @see java.awt.event.ComponentListener#componentResized(java.awt.event.ComponentEvent)
 	 *      Calculate new alignment drawing positions if the window was resized.
 	 */
-	public void componentResized(ComponentEvent e) {
-		int width = this.getParent().getWidth() - 2 * border;
-		int heigth = this.getParent().getHeight() - 2 * border;
+  public void componentResized(ComponentEvent e) {
+    if (this.getParent() != null && this.getParent().isVisible()) {
+      int width = this.getParent().getWidth() - 2 * border;
+      int heigth = this.getParent().getHeight() - 2 * border;
 
-		if (width != drawingWidth || heigth != drawingHeight) {
-			drawingHeight = heigth;
-			drawingWidth = width;
+      if (width != drawingWidth || heigth != drawingHeight) {
+        drawingHeight = heigth;
+        drawingWidth = width;
 
-			if (matchDisplayerList.isEmpty()) {
-				matchDisplayerList
-						.generateMatchDisplayerList(drawingWidth,
-								drawingHeight);
-			} else {
-				matchDisplayerList
-						.rescaleMatchDisplayerList(drawingWidth,
-								drawingHeight);
-			}
+        if (matchDisplayerList.isEmpty()) {
+          matchDisplayerList.generateMatchDisplayerList(drawingWidth,
+                  drawingHeight);
+        } else {
+          matchDisplayerList.rescaleMatchDisplayerList(drawingWidth,
+                  drawingHeight);
+        }
 
-			histogram = matchDisplayerList
-					.getTargetHistogram(drawingWidth);
+        histogram = matchDisplayerList.getTargetHistogram(drawingWidth);
 
-			this.repaint();
-		}
-	}
+        this.repaint();
+      }
+    }
+  }
 
 	/*
 	 * (non-Javadoc)
@@ -741,7 +749,9 @@ public class DotPlotMatchViewer extends MatchViewerPlugin {
 	 *            the drawGrid to set
 	 */
 	public void drawGrid(boolean drawGrid) {
-//		R2cat.preferences.setDisplayGrid(drawGrid);
+    if(R2cat.preferences != null){
+      		R2cat.preferences.setDisplayGrid(drawGrid);
+    }
 		this.drawGrid = drawGrid;
 	}
 	

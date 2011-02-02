@@ -40,7 +40,6 @@ import org.openide.util.Utilities;
 autostore = false)
 public final class DotPlotViewerTopComponent extends TopComponent implements LookupListener {
 
-  private DotPlotMatchViewer dpview;
   private static DotPlotViewerTopComponent instance;
   /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
@@ -62,6 +61,9 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 
 		// load the previous state from prefs
 		dotplotMatchViewer.drawGrid(true);
+
+    //this way, the visualisation can react to window size changes
+    this.addComponentListener(dotplotMatchViewer);
 
 
 
@@ -121,7 +123,7 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 
   @Override
   public int getPersistenceType() {
-    return TopComponent.PERSISTENCE_NEVER;
+    return TopComponent.PERSISTENCE_ONLY_OPENED;
   }
   private Lookup.Result result = null;
 
@@ -183,6 +185,9 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
     }
 
   }
+//		drawing.setViewportView(matchViewerPlugin);
+//		drawing.setVisible(true);
+//		drawing.validate();
 
   public void setMatchList(MatchList ml) {
     if (ml != null && !ml.isEmpty()) {
@@ -196,10 +201,13 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 				.setDisplayOffsets(true);
 
       dotplotMatchViewer.getMatchDisplayerList().setNeedsRegeneration(true);
-      this.jScrollPane1.getViewport().add(dotplotMatchViewer);
+      this.jScrollPane1.setViewportView(dotplotMatchViewer);
+      this.jScrollPane1.setVisible(true);
     } else {
-      this.jScrollPane1.getViewport().remove(dotplotMatchViewer);
+      this.jScrollPane1.getViewport().removeAll();
+      this.jScrollPane1.setVisible(false);
     }
+
     this.invalidate();
     this.repaint();
   }
