@@ -60,7 +60,28 @@
         <file name="Refactoring_hidden"/>
         <file name="RunProject_hidden"/>
         <file name="Source_hidden"/>
+        <folder name="Tools">
+            <file name="LibrariesCustomizerAction.shadow_hidden"/>
+            <file name="PaletteManager_hidden"/>
+            <file name="Separator1.instance_hidden"/>
+            <file name="ServerManagerAction3.shadow_hidden"/>
+            <file name="VariablesCustomizerAction.shadow_hidden"/>
+            <file name="org-netbeans-modules-favorites-templates-TemplatesAction.shadow_hidden"/>
+            <file name="org-netbeans-modules-xml-catalog-CatalogAction.shadow_hidden"/>
+        </folder>
         <file name="Versioning_hidden"/>
+        <folder name="Window">
+            <file name="CloneDocumentAction.shadow_hidden"/>
+            <file name="Debug_hidden"/>
+                <file name="Other_hidden"/>
+            <folder name="Output">
+                <file name="GsfTestRunnerResultWindowOpenAction.shadow_hidden"/>
+                <file name="RefactoringPreviewOpenAction.shadow_hidden"/>
+                <file name="org-netbeans-modules-versioning-util-OpenVersioningOutputAction.shadow_hidden"/>
+            </folder>
+            <file name="ProgressListAction.shadow_hidden"/>
+            <file name="Versioning_hidden"/>
+        </folder>
     </folder>
     <folder name="Templates">
         <file name="Licenses_hidden"/>
