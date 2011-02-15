@@ -172,7 +172,7 @@ public class PrefuseFruchtermanReingoldGraph
 	    
 	    // put visualized data on display
 	    this.display.setVisualization(vis);
-	    this.display.addControlListener(new ToolTipControl("realEdgeSupport"));
+	    this.display.addControlListener(new ToolTipControl("asciSupport"));
 	    this.display.addControlListener(new ToolTipControl("realContigLength"));
 	    this.display.addControlListener(new DragControl());
 	    this.display.addControlListener(new PanControl());

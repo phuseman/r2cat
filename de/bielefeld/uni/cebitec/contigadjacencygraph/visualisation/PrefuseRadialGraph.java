@@ -173,7 +173,7 @@ public class PrefuseRadialGraph
 	    
 	    // put visualized data on display
 	    this.display.setVisualization(this.vis);
-	    this.display.addControlListener(new ToolTipControl("realEdgeSupport"));
+	    this.display.addControlListener(new ToolTipControl("asciSupport"));
 	    this.display.addControlListener(new ToolTipControl("realContigLength"));
 	    this.display.addControlListener(new NeighborHighlightControl());
 	    this.display.setItemSorter(new TreeDepthItemSorter());

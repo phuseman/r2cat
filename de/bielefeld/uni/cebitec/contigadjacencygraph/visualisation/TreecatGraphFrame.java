@@ -30,11 +30,15 @@ import java.awt.Color;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JButton;
+
+import org.freehep.util.export.ExportDialog;
 
 import prefuse.Display;
 import prefuse.data.Graph;
@@ -114,6 +118,9 @@ public class TreecatGraphFrame implements ActionListener
 	    this.window.setVisible(true);
 	    
 	    this.d = this.displayPanel.getSize();
+	    double dispHeight = this.d.getHeight() - 40;
+	    double dispWidth = this.d.getWidth();
+	    d.setSize((int)dispWidth,(int)dispHeight);
 	    
 		this.setactualGraph(g);
 		this.init("frl", this.getactualGraph());
