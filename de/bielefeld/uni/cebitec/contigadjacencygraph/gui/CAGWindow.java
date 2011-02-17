@@ -4,12 +4,15 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -249,15 +252,36 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		// setSize(Toolkit.getDefaultToolkit().getScreenSize());
 		// hier wird das Fenster auf die Größe des Bildschirmes angepasst.
 		
+		FlowLayout inputOptionLayout = new FlowLayout();
+		
 		inputOption = new JPanel();
+		inputOption.setLayout(inputOptionLayout);
+		
 		JLabel chooseNumberOfNeighbours = new JLabel("Anzahl Nachbarn");
 		JFormattedTextField inputOptionForNumberOfNeighbours = new JFormattedTextField(1);
 		inputOptionForNumberOfNeighbours.setValue(new Integer(numberOfNeighbours));
-	//	inputOptionForNumberOfNeighbours.addPropertyChangeListener("numberOfNeighbours", numberOfNeighboursListener)
+		inputOptionForNumberOfNeighbours.addPropertyChangeListener("numberOfNeighbours", new NumberOfNeighboursListener());
+		
+		JLabel toggelBwAbsolutAndRelativeSupport =new JLabel("Support");
+		JPanel toggelOption = new JPanel();
+		
+		JRadioButton absoluteSupport = new JRadioButton("absolute");
+		
+		JRadioButton relativeSupport = new JRadioButton("relative");
+		toggelOption.add(absoluteSupport);
+		toggelOption.add(relativeSupport);
 		
 		inputOption.add(chooseNumberOfNeighbours);
+		inputOption.add(Box.createHorizontalGlue());
 		inputOption.add(inputOptionForNumberOfNeighbours);
+	
+		inputOption.add(toggelBwAbsolutAndRelativeSupport);
+		inputOption.add(Box.createHorizontalGlue());
+		inputOption.add(toggelOption);
+		
 		add(inputOption, BorderLayout.SOUTH);
+		
+		
 		
 		glassPanel = new GlassPaneWithLines();
 		setGlassPane(glassPanel);
@@ -701,7 +725,13 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		}
 	}
 	
-	public class PropertyChangeListener{
+	
+	public class NumberOfNeighboursListener implements PropertyChangeListener {
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			System.out.println("Event wurde ausgeloest. "+evt.getNewValue());
+		}
 		
 	}
 
