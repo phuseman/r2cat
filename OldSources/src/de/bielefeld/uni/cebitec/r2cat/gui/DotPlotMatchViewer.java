@@ -334,6 +334,7 @@ public class DotPlotMatchViewer extends MatchViewerPlugin {
 		}
 	}
 
+
 	/**
 	 * Draws a coordinate system.
 	 * 
@@ -357,7 +358,7 @@ public class DotPlotMatchViewer extends MatchViewerPlugin {
 	/**
 	 * Draws a histogram of the alignments below the x-axis.<br>
 	 * The darker the color the more overlapping are the alignments.<br>
-	 * Special case: When tere is no overlap the color will be red.
+	 * Special case: When there is no overlap the color will be red.
 	 * 
 	 * @param g2d
 	 *            graphics object to draw on

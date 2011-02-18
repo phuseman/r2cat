@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.netbeans.spi.project.ui.support.ProjectChooser;
+import org.openide.filesystems.FileChooserBuilder;
 import org.openide.filesystems.FileUtil;
 
 public final class ContigOrderingProjectVisualPanel extends JPanel implements DocumentListener {
@@ -37,7 +38,13 @@ public final class ContigOrderingProjectVisualPanel extends JPanel implements Do
     projectParentTextField.getDocument().addDocumentListener(this);
     projectNameTextField.getDocument().addDocumentListener(this);
 
-    projectParentTextField.setText(ProjectChooser.getProjectsFolder().getAbsolutePath());
+    //this is often the netbeans directory. if so, take the user dir.
+    String defaultPath = ProjectChooser.getProjectsFolder().getAbsolutePath();
+    if (defaultPath.matches("NetBeansProjects")) {
+      defaultPath=System.getProperty("user.home");
+    }
+
+    projectParentTextField.setText(defaultPath);
   }
 
   @Override
@@ -121,26 +128,23 @@ public final class ContigOrderingProjectVisualPanel extends JPanel implements Do
   private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
     String command = evt.getActionCommand();
     if ("BROWSE".equals(command)) {
-
-      JFileChooser chooser = new JFileChooser();
-      chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      chooser.setDialogTitle("Select Project Location");
-      String path = this.projectParentTextField.getText();
-      if (path != null && !path.isEmpty()) {
-        File f = new File(path);
-        if (f.exists()) {
-          chooser.setSelectedFile(f);
-        }
+      
+      File defaultWorkingDir = new File(projectParentTextField.getText());
+      if(!defaultWorkingDir.exists()) {
+        defaultWorkingDir=new File(System.getProperty("user.home"));
       }
 
-      int result = chooser.showOpenDialog(this);
+      File projectLocation = new FileChooserBuilder("ContigOrderingProjectLocation")
+              .setDefaultWorkingDirectory(defaultWorkingDir)
+              .setDirectoriesOnly(true)
+              .setTitle("Select Project Location")
+              .showOpenDialog();
 
-      if (result == JFileChooser.APPROVE_OPTION) {
-        File projectDir = chooser.getSelectedFile();
-        projectParentTextField.setText(FileUtil.normalizeFile(projectDir).getAbsolutePath());
-
-        ProjectChooser.setProjectsFolder(chooser.getSelectedFile());
+      if(projectLocation!=null){
+                projectParentTextField.setText(FileUtil.normalizeFile(projectLocation).getAbsolutePath());
+                ProjectChooser.setProjectsFolder(projectLocation);
       }
+
     }
   }//GEN-LAST:event_browseButtonActionPerformed
   // Variables declaration - do not modify//GEN-BEGIN:variables

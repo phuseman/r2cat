@@ -15,7 +15,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
 package de.bielefeld.uni.cebitec.contigorderingproject;
 
 import de.bielefeld.uni.cebitec.common.CustomFileFilter;
@@ -29,6 +28,7 @@ import org.netbeans.api.progress.ProgressHandleFactory;
 import org.netbeans.api.project.ProjectUtils;
 import org.openide.awt.DynamicMenuContent;
 import org.openide.awt.StatusDisplayer;
+import org.openide.filesystems.FileChooserBuilder;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.ContextAwareAction;
 import org.openide.util.Exceptions;
@@ -70,44 +70,52 @@ public final class NewReferenceAction extends AbstractAction implements ContextA
     public
     @Override
     void actionPerformed(ActionEvent e) {
-      File fastafile = MiscFileUtils.chooseFile(WindowManager.getDefault().getMainWindow(), "Open fasta", FileUtil.toFile(p.getProjectDirectory()), true, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
 
 
-      //show progress bar
-      Runnable run = new Runnable() {
+      File[] fastaFiles = new FileChooserBuilder("ReferenceFastaFile")
+              .addFileFilter(new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"))
+              .setFilesOnly(true).setTitle("Select Reference Genome(s)")
+              .showMultiOpenDialog();
 
-        @Override
-        public void run() {
-          ProgressHandle p = ProgressHandleFactory.createHandle("Matcher Task");
-          p.start(100);
-            try {
-          for (int i = 0; i < 10; i++) {
-              Thread.sleep(500); //do work
-              p.progress("Step" + i, (i + 1) * 10);
-          }
-          p.finish();
-            } catch (InterruptedException ex) {
-              Exceptions.printStackTrace(ex);
+      if (fastaFiles != null) {
+        for (int i = 0; i < fastaFiles.length; i++) {
+          File file = fastaFiles[i];
+
+          //show status line
+          StatusDisplayer.getDefault().setStatusText("Matching contigs on a reference genome");
+
+          // open output window
+          InputOutput io = IOProvider.getDefault().getIO("Matching of" + file.getName(), true);
+//          io.select();
+          io.getOut().print("Trying to match " + file.getAbsolutePath());
+
+          //show progress bar
+          Runnable run = new Runnable() {
+
+            @Override
+            public void run() {
+              ProgressHandle p = ProgressHandleFactory.createHandle("Matcher Task");
+              p.start(100);
+              try {
+                for (int i = 0; i < 10; i++) {
+                  Thread.sleep(500); //do work
+                  p.progress("Step" + i, (i + 1) * 10);
+                }
+                p.finish();
+              } catch (InterruptedException ex) {
+                Exceptions.printStackTrace(ex);
+              }
             }
-        }
-      };
+          };
 
-      if(fastafile==null) {
-          return;
+          Thread t = new Thread(run);
+          t.start();
+
+
+        }
       }
 
-      // open output window
-      InputOutput io = IOProvider.getDefault().getIO("TestIO", true);
-      io.select();
-      io.getOut().print(fastafile.getAbsoluteFile());
 
-
-      //show status line
-      StatusDisplayer.getDefault().setStatusText("Matching contigs on a reference genome");
-
-
-      Thread t = new Thread(run);
-      t.start();
     }
   }
 }
