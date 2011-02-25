@@ -8,17 +8,7 @@ import javax.swing.ButtonGroup;
 
 public class ContigButtonGroup extends ButtonGroup{
 
-
-	public void setAllRadioButtonAsSelected(boolean flag ){
-		
-		
-		for ( Enumeration<AbstractButton> e = this.getElements(); e.hasMoreElements(); )
-		   {
-			ContigRadioButton button =(ContigRadioButton) e.nextElement();
-			button.setOneNeighbourOfThisSideAlreadySelected(flag);
-		   }
-		
-		
-	}
+ //TODO kann gelöscht werden:
+// dann aber die group der Radion Button in ButtonGroup ändern!
 
 }

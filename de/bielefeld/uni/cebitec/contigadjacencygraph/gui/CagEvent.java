@@ -7,6 +7,9 @@ import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
+/*
+ * Event Typen die ich senden kann.
+ */
 public class CagEvent {
 
 	private EventType event_type;
@@ -22,27 +25,33 @@ public class CagEvent {
 	private  Vector<Integer>  indices;
 	private  DNASequence  contigNode;
 	
-	public CagEvent(EventType event, String data) {
-		this.event_type = event;
-		this.data = data;
-	}
+//	public CagEvent(EventType event, String data) {
+//		this.event_type = event;
+//		this.data = data;
+//	}
+//	public CagEvent(EventType event, LayoutGraph layoutGraph, int currentContigIndex){
+//		this.event_type = event;
+//		this.graph = layoutGraph;
+//		this.index = currentContigIndex;
+//	}
+//	
+//	public CagEvent(EventType event, AdjacencyEdge includingEdge, int currentContigIndex) {
+//		this.event_type = event;
+//		this.edge = includingEdge;
+//		this.index = currentContigIndex;
+//	}
+	/*
+	 * Zum Senden des aktuellem zentralen Contigs
+	 */
 	public CagEvent(EventType event, DNASequence contig,int currentContigIndex) {
 		this.event_type = event;
 		this.contigNode = contig;
 		this.index = currentContigIndex;
 	}
 	
-	public CagEvent(EventType event, LayoutGraph layoutGraph, int currentContigIndex){
-		this.event_type = event;
-		this.graph = layoutGraph;
-		this.index = currentContigIndex;
-	}
-	
-	public CagEvent(EventType event, AdjacencyEdge includingEdge, int currentContigIndex) {
-		this.event_type = event;
-		this.edge = includingEdge;
-		this.index = currentContigIndex;
-	}
+	/*
+	 * Zum Senden der Nachbarn
+	 */
 	public CagEvent(EventType event, Vector<AdjacencyEdge> neighbourEdges) {
 		this.event_type = event;
 		this.edges = neighbourEdges;

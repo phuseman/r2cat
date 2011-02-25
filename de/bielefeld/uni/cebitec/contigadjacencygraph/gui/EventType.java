@@ -6,20 +6,15 @@ public enum EventType {
 	 * Event which will be fired, if the user select a contig of the List
 	 */
 	EVENT_CHOOSED_CONTIG,
-	
-
 	/*
-	 * Event which will be fired, if the user select a neighbor 
+	 * Event which will be fired to send right neighbours
 	 */
-	EVENT_CHOOSED_NEIGHBOUR,
-	
-
 	EVENT_SEND_RIGHT_NEIGHBOURS,
-	EVENT_SEND_LEFT_NEIGHBOURS,
+	
 	/*
-	 * Event which will be fired, if the user cancel a contig from the order
+	 * Event which will be fired to send left neighbours
 	 */
-	EVENT_CANCEL_CONTIG,
+	EVENT_SEND_LEFT_NEIGHBOURS,
 	
 	/*
 	 * Event which will be fired, if the user quit the programm 

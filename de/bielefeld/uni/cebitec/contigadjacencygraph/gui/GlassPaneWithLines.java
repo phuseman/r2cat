@@ -33,22 +33,23 @@ public class GlassPaneWithLines extends JPanel {
 	private double[] support;
 	private double[] supportleft;
 	private int numberOfNeighbours = 5;
-	private Point[] leftComponentPositions = new Point[numberOfNeighbours];
-	private Point[] rightComponentPositions = new Point[numberOfNeighbours];
+
+
+	private Point[] leftComponentPositions;
+	private Point[] rightComponentPositions;
 	private Point[] centralPosition = new Point[2];
 
 	private boolean flag;
-	private float[] leftSupport = new float[numberOfNeighbours];
-	private float[] rightSupport = new float[numberOfNeighbours];
+	private float[] leftSupport;
+	private float[] rightSupport;
+	
+	private boolean isRelativeSupport = false;
 
 	public GlassPaneWithLines() {
 		super();
 	}
 
 	/*
-	 * relative support noch hinzufuegen diesen dann nutzen um die dicke der
-	 * Kante zu veraendern
-	 * 
 	 * TODO diese Klasse muss noch variabler gestaltet und umstukturiert werden.
 	 */
 	public void setLine(JPanel neigbourContainerleft, JPanel neigbourContainer,
@@ -77,20 +78,33 @@ public class GlassPaneWithLines extends JPanel {
 		Graphics2D g = (Graphics2D) gr;
 
 		/*
-		 * Damit die Kanten weich gezeichnet werden.
+		 * Sicherung der Positionen der Punkte, damit es keine Probleme 
+		 * beim Zeichnen der Linien gibt.
+		 */
+		leftComponentPositions = new Point[numberOfNeighbours];
+		rightComponentPositions = new Point[numberOfNeighbours];
+		leftSupport = new float[numberOfNeighbours];
+		rightSupport = new float[numberOfNeighbours];
+		
+		/*
+		 * Damit die Kanten "weich" gezeichnet werden.
 		 */
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
 				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		
+		/*
+		 * Dieser Teil wird nur dann nicht ausgeführt, wenn
+		 * die neuen Nachbarn berechnet werden.
+		 */
 		if (flag) {
-
 			int laenge2 = (int) b2.getSize().getWidth();
 			int höhe2 = (int) b2.getHeight();
 
 			/*
-			 * For wird hier eingesetzt um die unterschiedlichen Container zu
-			 * beladen zuerst wird diese Methode mit den rechten nachbarn und
+			 * For wird hier eingesetzt um die beiden Container nacheinander zu
+			 * beladen; zuerst wird diese Methode mit den rechten nachbarn und
 			 * dann mit den linken nachbarn gefüttert.
 			 * 
 			 * TODO s.o.
@@ -112,6 +126,10 @@ public class GlassPaneWithLines extends JPanel {
 					centralPosition[1] = new Point(x2, y2);
 				}
 				
+				/*
+				 * Berechnen der Linien zwischen den linken Nachbarn und
+				 * dem zentralem Contig
+				 */
 				if (left) {
 					
 					int z = 1;
@@ -119,12 +137,21 @@ public class GlassPaneWithLines extends JPanel {
 
 					for (Component co : neighbourLeft.getComponents()) {
 						
-						lineStrokeLeft = (float) Math.log1p(supportleft[zaehler]/1000) +1;
-					
-						/*lineStrokeLeft = (float) Math
-						.ceil(supportleft[zaehler] * 10000) / 10;*/
+						/*
+						 * Berechnen der Liniendicke, abhängig davon ob der Nutzer den 
+						 * relativen oder absoluten Support wählt.
+						 */
+						if(isRelativeSupport){
+							lineStrokeLeft = (float) Math.ceil(supportleft[zaehler] * 10000) / 10;
+						}else{
+							lineStrokeLeft = (float) Math.log1p(supportleft[zaehler]/1000) +1;
+						}
+						
 						z++;
 						if (z % 2 == 0) {
+							/*
+							 * Begrenze die Liniendicke
+							 */
 							if (lineStrokeLeft <= 0) {
 								lineStrokeLeft = 0.1f;
 							} else if (lineStrokeLeft > 5) {
@@ -158,13 +185,20 @@ public class GlassPaneWithLines extends JPanel {
 					}
 
 				} else {
-					
+					/*
+					 * äquivalent zu oben, 
+					 * nur das dies hier für die rechten Nachbarn ist.
+					 */
 					int z = 1;
 					int c = 0;
 
 					for (Component co : neighbour.getComponents()) {
-						//lineStroke = (float) Math.ceil(support[c] * 10000) / 10;
-						lineStroke = (float) Math.log1p(support[c]/1000)+1;
+						if(isRelativeSupport){
+							lineStroke = (float) Math.ceil(support[c] * 10000) / 10;
+						}else{
+							lineStroke = (float) Math.log1p(support[c]/1000)+1;
+						}
+						
 						z++;
 						if (z % 2 == 0) {
 							if (lineStroke <= 0) {
@@ -200,5 +234,14 @@ public class GlassPaneWithLines extends JPanel {
 				}
 			}
 		}
+	}
+	
+	
+	public void setRelativeSupport(boolean isRelativeSupport) {
+		this.isRelativeSupport = isRelativeSupport;
+	}
+
+	public void setNumberOfNeighbours(int numberOfNeighbours) {
+		this.numberOfNeighbours = numberOfNeighbours;
 	}
 }

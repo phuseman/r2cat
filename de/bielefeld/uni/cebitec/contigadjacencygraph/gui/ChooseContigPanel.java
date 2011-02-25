@@ -8,6 +8,9 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 
+/*
+ * TODO Kann gelöscht werden!
+ */
 public class ChooseContigPanel extends JPanel {
 
 	private ContigBorder border;

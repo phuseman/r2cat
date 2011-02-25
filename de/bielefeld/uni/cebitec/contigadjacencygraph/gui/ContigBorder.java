@@ -8,7 +8,9 @@ import java.awt.RenderingHints;
 import java.awt.geom.GeneralPath;
 
 import javax.swing.border.AbstractBorder;
-
+/**
+ * Diese Klasse zeichnet die Ränder der Contig Panel
+ */
 public class ContigBorder extends AbstractBorder{
 
 	private boolean isRepeat;
@@ -30,6 +32,9 @@ public class ContigBorder extends AbstractBorder{
 	    Color oldColor = g.getColor();     
 		Graphics2D g2 = (Graphics2D) g;
 		
+		/*
+		 * Hiermit werden die Ränder "weich" gezeichnet.
+		 */
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
@@ -37,6 +42,10 @@ public class ContigBorder extends AbstractBorder{
 		
 		GeneralPath p;
 		
+		/*
+		 * Wenn das entsprechende Contig ein Ausgewähltes Contig ist, 
+		 * wird es mit rotem Rand dargestellt. Ansonsten mit schwarzem.
+		 */
 		if (isSelected) {
 			g2.setColor(Color.RED);
 		}else{
@@ -70,6 +79,8 @@ public class ContigBorder extends AbstractBorder{
 	/*
 	 * (x, y + height)------------(x + width, y + height) (x + width + 10, y +
 	 * height/2) Startpunkt *(x, y)-------------(x + width, y)
+	 * 
+	 * Hier wird er Rand es "normalen" Contigs erstellt, der Form | >
 	 */
 	private  GeneralPath makeContig(int x, int y, int width, int height) {
 
@@ -85,6 +96,10 @@ public class ContigBorder extends AbstractBorder{
 		return p;
 	}
 	
+	/*
+	 * Hier wird der Rand eines Repeats erstellt, d.h. die Kante oben und
+	 * an der rechten Seite werden 3 Fach gemalt.
+	 */
 	private GeneralPath makeRepeatContig(int x, int y, int width, int height) {
 		
 		GeneralPath p = new GeneralPath();
@@ -109,6 +124,11 @@ public class ContigBorder extends AbstractBorder{
 		p.lineTo(x+width-11, y+height-1);
 		return p;
 	}
+	
+	/*
+	 * Hier wird der Rand eines reversen Repeats erstellt, d.h. die Kante oben und
+	 * an der linken Seite werden 3 Fach gemalt. 
+	 */
 	private GeneralPath makeReverseRepeatContig(int x, int y, int width, int height) {
 		
 		GeneralPath p = new GeneralPath();
@@ -139,6 +159,8 @@ public class ContigBorder extends AbstractBorder{
 	 * 							 	2------------3
 	 * 						1						
 	 * 			Startpunkt *|5-------------4
+	 * 
+	 * Hier wird er Rand es reversen Contigs erstellt, der Form: < |
 	 */
 	private GeneralPath makeReverseContig(int x, int y, int width, int height) {
 		

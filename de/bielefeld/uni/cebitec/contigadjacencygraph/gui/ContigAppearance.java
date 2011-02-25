@@ -13,6 +13,10 @@ import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
+/**
+ *	Erstellt, das Aussehen eines Contigs.
+ *	D.h.  Länge, Orientierung und Beschriftung 
+ */
 public class ContigAppearance extends JPanel {
 	
 	private LayoutGraph lGraph;
@@ -35,7 +39,7 @@ public class ContigAppearance extends JPanel {
 		this.setBackground(Color.WHITE);
 		contigLabel = new JLabel();
 		this.add(contigLabel);		
-		this.setName(contigName);
+//		this.setName(contigName);
 	}
 	
 	public ContigAppearance(DNASequence node, int indexOfCentralContig){
@@ -53,12 +57,13 @@ public class ContigAppearance extends JPanel {
 		this.i = indexOfContigI;
 		
 		contig=lGraph.getNodes().get(i);
-		
 		getDetailsOfContig(contig);
-		this.setBackground(Color.WHITE);
 		contigLabel = new JLabel();
+		
+		this.setBackground(Color.WHITE);
 		this.add(contigLabel);
 		this.setName(contigName);
+		
 		setContigAppearance(contigName, isReverseToString, length, border);
 		setSizeOfContig(length);
 	}
@@ -77,9 +82,7 @@ public class ContigAppearance extends JPanel {
 		isSelected = contigNode.isContigIsSelected();
 		border = new ContigBorder(isRepeat, isReverse, isSelected);
 		relativeSup = contigNode.getSupportComparativeToCentralContig();
-			/*TODO hier sollte ich eine Methode aufrufen koennen dir mir den
-		 							relativen support des Contigs nennt. 
-									Muss ich noch in dem Model einbauen, dass es gespeichert wird.*/
+			
 	}
 		/*TODO
 		 * Koennte ich hier nicht auch die attribute weglassen? Habe da ja fast nur 
