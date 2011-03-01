@@ -286,9 +286,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		ButtonGroup supportGroup = new ButtonGroup();
 
 		JRadioButton absoluteSupport = new JRadioButton("absolute");
+		absoluteSupport.setToolTipText("  ");
 		absoluteSupport.setActionCommand("absolute");
 		absoluteSupport.addActionListener(new RadioButtonActionListener());
 		JRadioButton relativeSupport = new JRadioButton("relative");
+		relativeSupport.setToolTipText("  ");
 		relativeSupport.setActionCommand("relative");
 		relativeSupport.addActionListener(new RadioButtonActionListener());
 
