@@ -214,28 +214,36 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		/*
 		 * Dieses Panel enthaelt alle Contigs dieses Genoms als Liste
 		 */
+		
+		int breite = nodes[1].getId().getBytes().length;
+		
+		if (breite*10 <= 100){
+			breite = 100;
+		}else if(breite *10 >= 200){
+			breite = 200;
+		}else{
+			breite = breite *10;
+		}
+		
 		listContainer = new JPanel();// new GridLayout(1,1)
-		listContainer.setMinimumSize(new Dimension(100, 400));
-		listContainer.setMaximumSize(new Dimension(100, (int) Toolkit
+		listContainer.setMinimumSize(new Dimension(breite , 400));
+		listContainer.setMaximumSize(new Dimension(breite , (int) Toolkit
 				.getDefaultToolkit().getScreenSize().getHeight()));
-		listContainer.setPreferredSize(new Dimension(100, 400));
+		listContainer.setPreferredSize(new Dimension(breite , 400));
 
 		/*
-		 * Diese Liste sollte alle Contigs beinhalten; muessen keinen Strings
-		 * sein JList nimmt einen beleibigen Objekttyp entgegen; werden aber in
-		 * der Liste als strings repraesentiert Mittels einer
+		 *In dieser For werden alle Contig ids gesammelt und gespeichert.
 		 */
 
 		/*
 		 * TODO länge der Liste sollte sich an die größe des Fensters anpassen
-		 * Und sie sollte ein wenig breiter sein.
 		 */
 		dataForList = new String[nodes.length];
 		for (int i = 0; i < nodes.length; i++) {
 			String id = nodes[i].getId();
 			dataForList[i] = id;
 		}
-
+		
 		list = new JList(dataForList);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setVisibleRowCount(20);
