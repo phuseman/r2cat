@@ -124,8 +124,10 @@ public class ContigOrderingProjectWizardPanel implements WizardDescriptor.Panel<
     setMessage(null);
 
     if (projectName.isEmpty()) {
-      setMessage("Please provide a projects name");
+          model.putProperty(WizardDescriptor.PROP_INFO_MESSAGE,"Please provide a projects name");
       return false;
+    } else {
+      model.putProperty(WizardDescriptor.PROP_INFO_MESSAGE,null);
     }
 
     if (projectName.contains(" ")) {
@@ -148,7 +150,7 @@ public class ContigOrderingProjectWizardPanel implements WizardDescriptor.Panel<
 
     File project = new File(getComponent().getProjectPath());
     if (project.exists()) {
-      setMessage("Thr project directory exists already.");
+      setMessage("The project directory already exists.");
 
       if (ProjectManager.getDefault().isProject(FileUtil.toFileObject(project))) {
         setMessage("The directory already contains a project");

@@ -90,6 +90,7 @@ public class ContigOrderingProject implements Project {
 private static class NotifyProperties extends Properties {
     private final ProjectState state;
     NotifyProperties (ProjectState state) {
+        super();
         this.state = state;
     }
 

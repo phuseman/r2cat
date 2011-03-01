@@ -63,13 +63,14 @@ public final class NewReferenceAction extends AbstractAction implements ContextA
 
       if (p != null) {
         String name = ProjectUtils.getInformation(p).getDisplayName();
-        putValue(NAME, "&Add new reference genome for " + name);
+        putValue(NAME, "&Match new reference genome for " + name);
       }
     }
 
     public
     @Override
     void actionPerformed(ActionEvent e) {
+
 
 
       File[] fastaFiles = new FileChooserBuilder("ReferenceFastaFile")
@@ -79,6 +80,7 @@ public final class NewReferenceAction extends AbstractAction implements ContextA
 
       if (fastaFiles != null) {
         for (int i = 0; i < fastaFiles.length; i++) {
+
           File file = fastaFiles[i];
 
           //show status line

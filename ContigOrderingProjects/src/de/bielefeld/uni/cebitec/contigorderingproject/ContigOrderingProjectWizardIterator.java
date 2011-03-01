@@ -178,8 +178,9 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
       newProject.createData(ContigOrderingProjectFactory.PROJECT_FILE);
 
       Properties projectProperties = ProjectManager.getDefault().findProject(newProject).getLookup().lookup(Properties.class);
-      projectProperties.put("contigs", (String) wizard.getProperty(ContigOrderingProjectVisualPanel.PROP_CONTIGS_FILE));
 
+      String contigs = (String) wizard.getProperty(ContigOrderingProjectVisualPanel.PROP_CONTIGS_FILE);
+      projectProperties.put("contigs", contigs);
 
       //provide the created project folder
       resultSet.add(newProject);

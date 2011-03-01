@@ -40,7 +40,7 @@ public final class ContigOrderingProjectVisualPanel extends JPanel implements Do
 
     //this is often the netbeans directory. if so, take the user dir.
     String defaultPath = ProjectChooser.getProjectsFolder().getAbsolutePath();
-    if (defaultPath.matches("NetBeansProjects")) {
+    if (defaultPath.matches(".*NetBeansProjects.*")) {
       defaultPath=System.getProperty("user.home");
     }
 
@@ -126,9 +126,6 @@ public final class ContigOrderingProjectVisualPanel extends JPanel implements Do
   }// </editor-fold>//GEN-END:initComponents
 
   private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
-    String command = evt.getActionCommand();
-    if ("BROWSE".equals(command)) {
-      
       File defaultWorkingDir = new File(projectParentTextField.getText());
       if(!defaultWorkingDir.exists()) {
         defaultWorkingDir=new File(System.getProperty("user.home"));
@@ -144,8 +141,6 @@ public final class ContigOrderingProjectVisualPanel extends JPanel implements Do
                 projectParentTextField.setText(FileUtil.normalizeFile(projectLocation).getAbsolutePath());
                 ProjectChooser.setProjectsFolder(projectLocation);
       }
-
-    }
   }//GEN-LAST:event_browseButtonActionPerformed
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton browseButton;
@@ -203,13 +198,5 @@ public final class ContigOrderingProjectVisualPanel extends JPanel implements Do
     } else {
       return "";
     }
-  }
-
-  public String getContigsFile() {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public String[] getReferences() {
-    throw new UnsupportedOperationException("Not supported yet.");
   }
 }
