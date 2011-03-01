@@ -30,27 +30,21 @@ import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
  */
 public class CagCreator {
 
-	private LayoutGraph graph;
-	private DNASequence[] contigs;
-	private Vector<AdjacencyEdge> selectedContigs;
-	private Vector<DNASequence> list;
-	private ArrayList<CagEventListener> listeners;
-	private Vector<AdjacencyEdge>[] leftNeighbours;
-	private Vector<AdjacencyEdge>[] rightNeighbours;
-	private String nowCentralContigID;
-	private String contigId;
-	private int currentContigIndex;
-	private boolean currentContigIsReverse = false;
-
-	private DNASequence currentContigObject;
-	private Vector<Integer> indexOfFiveMostLikleyLeftNeighbours;
-	private Vector<Integer> indexOfFiveMostLikleyRightNeighbours;
-	private AdjacencyEdge currentEdge;
 	private static CAGWindow window;
 	private static CagCreator model;
-
-	private int z;
+	
+	private LayoutGraph graph;
+	private DNASequence[] contigs;
+	private Vector<AdjacencyEdge>[] leftNeighbours;
+	private Vector<AdjacencyEdge>[] rightNeighbours;
+	
+	private int currentContigIndex;
+	private boolean currentContigIsReverse = false;
+	private DNASequence currentContigObject;
 	private int neighbourNumber = 5;
+	
+	private Vector<AdjacencyEdge> selectedContigs;
+	private ArrayList<CagEventListener> listeners;
 
 	// private CAGWindow window;
 	public CagCreator(LayoutGraph g) {
@@ -211,7 +205,7 @@ public class CagCreator {
 	 */
 
 	private Vector<AdjacencyEdge> calculateFiveMostLikleyRightNeighbours(
-			int cContigIndex, boolean IsReverse) {
+			int cContigIndex, boolean isReverse) {
 		/*
 		 * hier muss unterschieden werden, ob das zentrale Contig reverse
 		 * dargestellt wird dann muss ich den nachbarnvektor entsprechend
@@ -219,7 +213,7 @@ public class CagCreator {
 		 * nachbarn die Spitze(rechter connector) zeigt wenn es reverse ist ja
 		 * in die andere Richtung
 		 */
-		Vector<AdjacencyEdge> test = IsReverse ? leftNeighbours[cContigIndex]
+		Vector<AdjacencyEdge> test = isReverse ? leftNeighbours[cContigIndex]
 				: rightNeighbours[cContigIndex];
 
 		Vector<AdjacencyEdge> fiveMostLikleyRightNeighbours = new Vector<AdjacencyEdge>();
