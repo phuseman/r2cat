@@ -47,7 +47,8 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
 
     if (panels == null) {
       panels = new WizardDescriptor.Panel[]{
-                new ContigOrderingProjectWizardPanel()
+                new ContigOrderingProjectWizardPanel(),
+                new ContigOrderingProjectWizardPanel2()
               };
       String[] steps = createSteps();
       for (int i = 0; i < panels.length; i++) {
@@ -179,7 +180,7 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
 
       Properties projectProperties = ProjectManager.getDefault().findProject(newProject).getLookup().lookup(Properties.class);
 
-      String contigs = (String) wizard.getProperty(ContigOrderingProjectVisualPanel.PROP_CONTIGS_FILE);
+      String contigs = (String) wizard.getProperty(ContigOrderingProjectVisualPanel2.PROP_CONTIGS_FILE);
       projectProperties.put("contigs", contigs);
 
       //provide the created project folder

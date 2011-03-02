@@ -29,8 +29,6 @@ import org.openide.filesystems.FileUtil;
 public final class ContigOrderingProjectVisualPanel extends JPanel implements DocumentListener {
 
   public static final String PROP_PROJECT_PATH = "projectPath";
-  public static final String PROP_CONTIGS_FILE = "contigs";
-  public static final String PROP_REFERENCES = "references";
 
   /** Creates new form ContigOrderingProjectVisualPanel1 */
   public ContigOrderingProjectVisualPanel() {
@@ -88,7 +86,6 @@ public final class ContigOrderingProjectVisualPanel extends JPanel implements Do
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 400, Short.MAX_VALUE)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -106,7 +103,6 @@ public final class ContigOrderingProjectVisualPanel extends JPanel implements Do
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 300, Short.MAX_VALUE)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
