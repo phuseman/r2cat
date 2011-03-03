@@ -350,12 +350,13 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		 */
 		if (event.getEvent_type().equals(EventType.EVENT_CHOOSED_CONTIG)) {
 
-			AdjacencyEdge edge = event.getEdge();
+			DNASequence currentContig = event.getContigNode();
 			LayoutGraph graph = this.layoutGraph;
 			centralContigIndex = event.getIndex();
-			centralContig = new ContigAppearance(graph, edge,
+			
+			centralContig = new ContigAppearance(currentContig,
 					centralContigIndex);
-
+			
 			if (centerContainer.getComponentCount() > 0) {
 				centerContainer.removeAll();
 			}
@@ -368,9 +369,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		if (event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBOURS)) {
 
 			leftContainerFull = false;
-
 			leftNeighbourEdges = event.getEdges();
-
 			ContigAppearance contigPanel = null;
 
 			ContigRadioButton radioButton;
@@ -411,7 +410,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						indexOfContig = edge.geti();
 					}
 					
-					if (dnaSequence.isContigIsSelected()) {
+					if (edge.isSelected()) {
 						isALeftNeighourSelected = true;
 					}
 					/*
@@ -424,9 +423,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					} else {
 						leftSupport[t] = edge.getSupport();
 					}
-
+					System.out.println("Setzte aussehen fuer die linken nachbarn");
 					contigPanel = new ContigAppearance(layoutGraph, edge,
-							indexOfContig);
+							indexOfContig, true);
 					/*
 					 * Help that the user is only able to select one neighbour
 					 * for each side.
@@ -527,7 +526,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					/* Setzten des Flags, falls einer der Nachbarn schon ausgewählt
 					 * ist er das so wird damit kein anderer rechter Nachbarn auswählbar. 
 					 */
-					if (dnaSequence.isContigIsSelected()) {
+					if (edge.isSelected()) {
 						isARightNeighourSelected = true;
 					}
 					
@@ -542,12 +541,12 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					} else {
 						rightSupport[s] = edge.getSupport();
 					}
-
+					System.out.println("Setzte aussehen fuer die rechten nachbarn");
 					/*
 					 * Hier wird für jeden Nachbarn sein Aussehen erstellt.
 					 */
 					contigPanel = new ContigAppearance(layoutGraph, edge,
-							indexOfContig);
+							indexOfContig,false);
 					contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
 					contigPanel.setVisible(true);
@@ -643,12 +642,13 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				}
 
 				model.changeContigs(index, false);
+				System.out.println("habe ein contig ausgewaehlt");
 				getGlassPane().setVisible(false);
 				glassPanel.setFlag(false);
 
 				ThreadClassForRightNeighours threadForRightNeighbours = new ThreadClassForRightNeighours();
 				threadForRightNeighbours.execute();
-
+				
 				SwingWorkerClass threadForLeftNeighbours = new SwingWorkerClass();
 				threadForLeftNeighbours.execute();
 			}
@@ -700,6 +700,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				 */
 				if (selectedRadioButtons.size() == 0) {
 					System.out.println("Contig wird hinzugefügt");
+					selectedEdge.select();
 					selectedRadioButtons.add(selectedEdge);
 					model.addSelectedContig(selectedEdge);
 					model.sendCurrentContig();
@@ -755,6 +756,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 							options[0]);
 
 					if (n == JOptionPane.YES_OPTION) {
+						selectedEdge.deselect();
 						model.removeSelectedEdge(selectedEdge);
 						selectedRadioButtons.remove(selectedEdge);
 					}
@@ -763,6 +765,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				 * Oder füge die Kante zu den Ausgewählten Contigs hinzu
 				 */
 				if (rechteKante) {
+					selectedEdge.select();
 					selectedRadioButtons.add(selectedEdge);
 					model.addSelectedContig(selectedEdge);
 					model.sendCurrentContig();
@@ -771,6 +774,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				}
 
 				if (linkeKante) {
+					selectedEdge.select();
 					selectedRadioButtons.add(selectedEdge);
 					model.addSelectedContig(selectedEdge);
 					model.sendCurrentContig();

@@ -70,8 +70,8 @@ public class CagCreator {
 				boolean projectParsed = project
 						.readProject(new File(
 						// "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
-								 "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs.tcp"));
-//								"/homes/aseidel/testdaten/perfekt/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
+						//"/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs.tcp"));
+								"/homes/aseidel/testdaten/perfekt/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
 				if (!projectParsed) {
 					System.err
 							.println("The given project file was not sucessfully parsed");
@@ -206,6 +206,7 @@ public class CagCreator {
 
 	private Vector<AdjacencyEdge> calculateFiveMostLikleyRightNeighbours(
 			int cContigIndex, boolean isReverse) {
+		System.out.println("Berechne Rechte Nachbarn");
 		/*
 		 * hier muss unterschieden werden, ob das zentrale Contig reverse
 		 * dargestellt wird dann muss ich den nachbarnvektor entsprechend
@@ -219,7 +220,7 @@ public class CagCreator {
 		Vector<AdjacencyEdge> fiveMostLikleyRightNeighbours = new Vector<AdjacencyEdge>();
 		DNASequence neighbourContigObject;
 
-		boolean neighbourIsReverse = false;
+//		boolean neighbourIsReverse = false;
 		boolean isNeighbourSelected;
 
 		double support;
@@ -239,7 +240,7 @@ public class CagCreator {
 
 				if (edge.geti() == cContigIndex) {// j ist der Nachbar
 					neighbourContigObject = edge.getContigj();
-					neighbourIsReverse = edge.isRightConnectorj(); // stelle
+//					neighbourIsReverse = edge.isRightConnectorj(); // stelle
 					// fest, ob
 					// der
 					// Nachbar
@@ -250,15 +251,16 @@ public class CagCreator {
 					support = edge.getRelativeSupportj();
 				} else {// i ist der Nachbar
 					neighbourContigObject = edge.getContigi();
-					neighbourIsReverse = edge.isRightConnectori();
+	//				neighbourIsReverse = edge.isRightConnectori();
 					support = edge.getRelativeSupportj();
 				}
 
-				isNeighbourSelected = neighbourIsAlreadySelected(edge);
-				neighbourContigObject.setReverse(neighbourIsReverse);
+//				isNeighbourSelected = neighbourIsAlreadySelected(edge);
+				
+//				neighbourContigObject.setContigIsSelected(isNeighbourSelected);
+//				neighbourContigObject.setReverse(neighbourIsReverse);
 				neighbourContigObject
 						.setSupportComparativeToCentralContig(support);
-				neighbourContigObject.setContigIsSelected(isNeighbourSelected);
 
 				fiveMostLikleyRightNeighbours.add(edge);
 				counter++;
@@ -274,6 +276,8 @@ public class CagCreator {
 
 	private Vector<AdjacencyEdge> calculateFiveMostLikleyLeftNeighbours(
 			int centralContigIndex, boolean currentContigIsReverse) {
+		
+		System.out.println("Berechne linke Nachbarn");
 		/*
 		 * hier muss unterschieden werden, ob das zentrale Contig reverse
 		 * dargestellt wird dann muss ich den nachbarnvektor entsprechend
@@ -287,7 +291,7 @@ public class CagCreator {
 		Vector<AdjacencyEdge> fiveMostLikleyLeftNeighbours = new Vector<AdjacencyEdge>();
 		DNASequence neighbourContigObject;
 
-		boolean neighbourIsReverse = false;
+	//	boolean neighbourIsReverse = false;
 		boolean isNeighbourSelected;
 
 		double support;
@@ -304,7 +308,7 @@ public class CagCreator {
 			if(counter<terminator){
 				if (edge.geti() == centralContigIndex) {// j ist der Nachbar
 					neighbourContigObject = edge.getContigj();
-					neighbourIsReverse = edge.isLeftConnectorj(); // stelle
+	//				neighbourIsReverse = edge.isLeftConnectorj(); // stelle
 																	// fest, ob
 					// der Nachbar
 					// reverse
@@ -313,17 +317,17 @@ public class CagCreator {
 					support = edge.getRelativeSupportj();
 				} else {// i ist der Nachbar
 					neighbourContigObject = edge.getContigi();
-					neighbourIsReverse = edge.isLeftConnectori();
+//					neighbourIsReverse = edge.isLeftConnectori();
 					support = edge.getRelativeSupportj();
 				}
 				/*
 				 * totalSupport = edge.getSupport();
 				 * neighbourContigObject.setTotalSupport(totalSupport);
 				 */
-				isNeighbourSelected = neighbourIsAlreadySelected(edge);
-				neighbourContigObject.setContigIsSelected(isNeighbourSelected);
+//				isNeighbourSelected = neighbourIsAlreadySelected(edge);
+//				neighbourContigObject.setContigIsSelected(isNeighbourSelected);
 
-				neighbourContigObject.setReverse(neighbourIsReverse);
+//				neighbourContigObject.setReverse(neighbourIsReverse);
 				neighbourContigObject
 						.setSupportComparativeToCentralContig(support);
 
@@ -339,24 +343,24 @@ public class CagCreator {
 
 	}
 
-	private boolean detectIfContigIsReverse(AdjacencyEdge edge,
+/*	private boolean detectIfContigIsReverse(AdjacencyEdge edge,
 			boolean centralContigIsReverse, boolean neighbourIsContigI) {
 		boolean solution = false;
 
 		boolean iIsReverse = false;
 		boolean jIsReverse = false;
 
-		/*
+		
 		 * System.out.println(edge);
 		 * System.out.println("linker konnektor i: "+edge.isLeftConnectori());
 		 * System.out.println("rechter konnektor i: "+edge.isRightConnectori());
-		 */
+		 
 
-		/*
+		
 		 * Abfragen der 4 Moeglichkeiten, wie die Contigs zu einander orientiert
 		 * sein koennen. Ist es keine von den folgenden 3 if dann tritt default
 		 * in kraft beide false was die 4 moeglichkeit darstellt.
-		 */
+		 
 		if (edge.isLeftConnectori() == true && edge.isRightConnectori() == true
 				&& edge.isLeftConnectorj() == false
 				&& edge.isRightConnectorj() == false) {
@@ -390,7 +394,7 @@ public class CagCreator {
 
 		return solution;
 	}
-
+*/
 	private boolean neighbourIsAlreadySelected(AdjacencyEdge neighbour) {
 
 		boolean flag = false;
@@ -457,7 +461,7 @@ public class CagCreator {
 	 * Send an event, if the user selected a contig
 	 */
 	public void sendCurrentContig() {
-
+		System.out.println("sende aktuelles contig");
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
 				currentContigObject, currentContigIndex);
 		fireEvent(event);
@@ -469,7 +473,7 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendLeftNeighbours() {
-
+		System.out.println("sende linke nachbarn");
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_LEFT_NEIGHBOURS,
 				calculateFiveMostLikleyLeftNeighbours(currentContigIndex,
 						currentContigIsReverse));
@@ -482,7 +486,7 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendRightNeighbours() {
-
+		System.out.println("sende rechte nachbarn");
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_RIGHT_NEIGHBOURS,
 				calculateFiveMostLikleyRightNeighbours(currentContigIndex,
 						currentContigIsReverse));
