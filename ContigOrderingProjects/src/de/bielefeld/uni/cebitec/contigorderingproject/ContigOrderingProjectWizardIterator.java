@@ -17,6 +17,8 @@
  */
 package de.bielefeld.uni.cebitec.contigorderingproject;
 
+import de.bielefeld.uni.cebitec.common.MiscFileUtils;
+import de.bielefeld.uni.cebitec.matchingtask.CombinedNetbeansProgressReporter;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
@@ -25,15 +27,19 @@ import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import javax.swing.JComponent;
 import javax.swing.event.ChangeListener;
+import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.project.ProjectManager;
 import org.openide.WizardDescriptor;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Lookup;
+import de.bielefeld.uni.cebitec.matchingtask.MatchingTask;
+import de.bielefeld.uni.cebitec.qgram.MatchList;
+import org.openide.util.Exceptions;
 
-public final class ContigOrderingProjectWizardIterator implements WizardDescriptor.InstantiatingIterator {
+public final class ContigOrderingProjectWizardIterator implements WizardDescriptor.ProgressInstantiatingIterator {
 
   private int index;
   private WizardDescriptor wizard;
@@ -131,42 +137,26 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
   public void removeChangeListener(ChangeListener l) {
   }
 
-  // If something changes dynamically (besides moving between panels), e.g.
-  // the number of panels changes in response to user input, then uncomment
-  // the following and call when needed: fireChangeEvent();
-    /*
-  private Set<ChangeListener> listeners = new HashSet<ChangeListener>(1); // or can use ChangeSupport in NB 6.0
-  public final void addChangeListener(ChangeListener l) {
-  synchronized (listeners) {
-  listeners.add(l);
-  }
-  }
-  public final void removeChangeListener(ChangeListener l) {
-  synchronized (listeners) {
-  listeners.remove(l);
-  }
-  }
-  protected final void fireChangeEvent() {
-  Iterator<ChangeListener> it;
-  synchronized (listeners) {
-  it = new HashSet<ChangeListener>(listeners).iterator();
-  }
-  ChangeEvent ev = new ChangeEvent(this);
-  while (it.hasNext()) {
-  it.next().stateChanged(ev);
-  }
-  }
-   */
   private String[] createSteps() {
     String[] steps = new String[panels.length];
     for (int i = 0; i < steps.length; i++) {
-      steps[i]=panels[i].getComponent().getName();;
+      steps[i] = panels[i].getComponent().getName();
+      ;
     }
     return steps;
   }
 
   @Override
+  public Set instantiate(ProgressHandle handle) throws IOException {
+    return createProjectAndMatchContigs(handle);
+  }
+
+  @Override
   public Set instantiate() throws IOException {
+    return createProjectAndMatchContigs(null);
+  }
+
+  public Set createProjectAndMatchContigs(ProgressHandle handle) throws IOException {
     Set<FileObject> resultSet = new LinkedHashSet<FileObject>();
 
     boolean cancelled = wizard.getValue() != WizardDescriptor.FINISH_OPTION;
@@ -180,15 +170,58 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
 
       Properties projectProperties = ProjectManager.getDefault().findProject(newProject).getLookup().lookup(Properties.class);
 
-      String contigs = (String) wizard.getProperty(ContigOrderingProjectVisualPanel2.PROP_CONTIGS_FILE);
-      projectProperties.put("contigs", contigs);
+      File contigs = new File((String) wizard.getProperty(ContigOrderingProjectVisualPanel2.PROP_CONTIGS_FILE));
+      projectProperties.put("contigs", FileUtil.normalizeFile(contigs).getPath());
+
 
       //provide the created project folder
       resultSet.add(newProject);
+
+
+      String[] references = (String[]) wizard.getProperty(ContigOrderingProjectVisualPanel2.PROP_REFERENCES);
+
+
+      if (references != null) {
+        handle.start(references.length);
+
+        for (int i = 0; i < references.length; i++) {
+          File reference = new File(references[i]);
+          String referenceString = MiscFileUtils.getFileNameWithoutExtension(reference);
+
+          MatchingTask matcher = new MatchingTask(contigs, reference);
+
+          CombinedNetbeansProgressReporter progress = new CombinedNetbeansProgressReporter(
+                  "Matching Contigs:" + MiscFileUtils.getFileNameWithoutExtension(contigs),
+                  "Matching on " + referenceString,
+                  referenceString);
+          progress.useAdditionalProgressMonitor(current().getComponent());
+
+          matcher.setProgressReporter(progress);
+          matcher.execute();
+          try {
+            handle.progress("Matching " + referenceString, i);
+            MatchList matches = matcher.get();
+            if (matches != null && !matches.isEmpty()) {
+              FileObject matchFile = newProject.createData(referenceString + ".r2c");
+              matches.writeToFile(FileUtil.toFile(matchFile));
+              FileObject logfile = newProject.createData(referenceString + ".log");
+              progress.writeCommentsToFile(FileUtil.toFile(logfile));
+            }
+          } catch (InterruptedException ex) {
+            Exceptions.printStackTrace(ex);
+          } catch (ExecutionException ex) {
+            Exceptions.printStackTrace(ex);
+          }
+
+        }
+        handle.finish();
+      }
+
+
+
     } else {
       return Collections.EMPTY_SET;
     }
     return resultSet;
-
   }
 }

@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: de.bielefeld.uni.cebitec.matchingtask/1
+OpenIDE-Module-Localizing-Bundle: de/bielefeld/uni/cebitec/matchingtask/Bundle.properties
+OpenIDE-Module-Specification-Version: 0.0.1
+
