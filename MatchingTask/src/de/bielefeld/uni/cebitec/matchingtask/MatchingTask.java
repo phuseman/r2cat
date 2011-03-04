@@ -20,6 +20,7 @@
 package de.bielefeld.uni.cebitec.matchingtask;
 
 import de.bielefeld.uni.cebitec.common.AbstractProgressReporter;
+import de.bielefeld.uni.cebitec.common.MiscFileUtils;
 import de.bielefeld.uni.cebitec.common.Timer;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 import de.bielefeld.uni.cebitec.qgram.FastaFileReader;
@@ -40,6 +41,9 @@ public class MatchingTask extends SwingWorker<MatchList, String> implements Abst
 
   private AbstractProgressReporter progress = null;
   final private File reference;
+
+
+  
   final private File contigs;
   private MatchList result = null;
 
@@ -69,6 +73,18 @@ public class MatchingTask extends SwingWorker<MatchList, String> implements Abst
     }
   }
 
+    public File getContigs() {
+    return contigs;
+  }
+
+  public File getReference() {
+    return reference;
+  }
+
+  public String getReferenceFilenameWithoutExtension() {
+    return MiscFileUtils.getFileNameWithoutExtension(reference);
+  }
+  
   @Override
   protected MatchList doInBackground() {
     try { // catches OutOfMemoryError s
