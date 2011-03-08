@@ -37,58 +37,50 @@ public class ContigAppearance extends JPanel {
 	}
 
 	/*
-	 * Konstruktor, fuer das zentrale Contig, wenn es
-	 * zum Beispiel aus der Liste ausgewaehlt wird.
+	 * Konstruktor, fuer das zentrale Contig, wenn es zum Beispiel aus der Liste
+	 * ausgewaehlt wird.
 	 */
-	public ContigAppearance(DNASequence node, int indexOfCentralContig) {
+	public ContigAppearance(DNASequence node, int indexOfCentralContig,
+			boolean isCurrentContigReverse, long maxSize, long minSize) {
 		this.i = indexOfCentralContig;
-		boolean isReverse = false;
+		boolean cIsReverse = isCurrentContigReverse;
 
 		contigLabel = new JLabel();
 		this.setBackground(Color.WHITE);
 		this.add(contigLabel);
 		this.setName(node.getId());
-		setContigAppearance(node.getId(), node.getSize(), new ContigBorder(node.isRepetitive(), isReverse, false));
-		setSizeOfContig(node.getSize());
+		setContigAppearance(node.getId(), node.getSize(), new ContigBorder(node
+				.isRepetitive(), cIsReverse, false));
+		setSizeOfContig(node.getSize(), maxSize, minSize);
 	}
 
 	/*
 	 * Konstruktor fuer die Nachbarn, hier ist die Kante relevant
 	 */
 	public ContigAppearance(LayoutGraph graph, AdjacencyEdge includingEdge,
-			int indexOfNeighbour, boolean sideIsLeft) {
+			int indexOfNeighbour, boolean sideIsLeft, long maxSize, long minSize) {
 		super();
 
 		this.lGraph = graph;
 		this.i = indexOfNeighbour;
-		System.out.println(" ");
 
 		boolean neighbourIsReverse;
 		boolean selected = false;
 		if (sideIsLeft) {
-			System.out.println("linker nachbar ");
+
 			if (includingEdge.geti() == indexOfNeighbour) {
 				neighbourIsReverse = includingEdge.isLeftConnectori();
-				System.out.println(" i "+includingEdge.getContigi().getId()+" ist zentral j Nachbar "+includingEdge.getContigj().getId()+" " + neighbourIsReverse);
 			} else {
 				neighbourIsReverse = includingEdge.isLeftConnectorj();
-				System.out.println(" j "+includingEdge.getContigj().getId()+"ist zentral i Nachbar " +includingEdge.getContigi().getId()+" " + neighbourIsReverse);
-
 			}
 		} else {
-			System.out.println("rechter nachbar");
 			if (includingEdge.geti() == indexOfNeighbour) {
-				neighbourIsReverse = includingEdge.isLeftConnectori();
-				System.out.println(" i "+includingEdge.getContigi().getId()+" ist zentral j Nachbar "+includingEdge.getContigj().getId()+" " + neighbourIsReverse);
+				neighbourIsReverse = includingEdge.isRightConnectori();
 			} else {
 				neighbourIsReverse = includingEdge.isRightConnectorj();
-				System.out.println(" j "+includingEdge.getContigj().getId()+"ist zentral i Nachbar " +includingEdge.getContigi().getId()+" " + neighbourIsReverse);
-
 			}
 		}
-		
-		System.out.println(includingEdge + " ist reverse " + neighbourIsReverse);
-		System.out.println("  ");
+		this.isReverse = neighbourIsReverse;
 		DNASequence contig = lGraph.getNodes().get(i);
 
 		contigLabel = new JLabel();
@@ -96,13 +88,14 @@ public class ContigAppearance extends JPanel {
 		this.setBackground(Color.WHITE);
 		this.add(contigLabel);
 		this.setName(contig.getId());
-		
-		if(includingEdge.isSelected()){
+
+		if (includingEdge.isSelected()) {
 			selected = true;
 		}
 
-		setContigAppearance(contig.getId(), contig.getSize(), new ContigBorder(contig.isRepetitive(), neighbourIsReverse, selected));
-		setSizeOfContig(contig.getSize());
+		setContigAppearance(contig.getId(), contig.getSize(), new ContigBorder(
+				contig.isRepetitive(), neighbourIsReverse, selected));
+		setSizeOfContig(contig.getSize(), maxSize, minSize);
 	}
 
 	/*
@@ -113,7 +106,7 @@ public class ContigAppearance extends JPanel {
 			ContigBorder border) {
 		String contigNameAusChar = "";
 		char[] dst = new char[numberOfNeighbours + (numberOfNeighbours - 1)];
-		
+
 		contigLabel.setName(contigId);
 		if (contigId.length() > 10) {
 			contigId.getChars(0, 3, dst, 0);
@@ -160,27 +153,22 @@ public class ContigAppearance extends JPanel {
 		}
 	}
 
-	private synchronized void setSizeOfContig(long size) {
+	private synchronized void setSizeOfContig(long size, long maxSize,
+			long minSize) {
 
-		int wSize = (int) ((0.01 * size) / 4);
+		float nenner = (float) (Math.log(size) - Math.log(minSize));
+		float zaehler = (float) (Math.log(maxSize) - Math.log(minSize));
 
-		// int wSize =(int) Math.log((double)size)*10;
-		if (wSize < 85) {
-			this.setPreferredSize(new Dimension(85, 50));
-			this.setMaximumSize(new Dimension(85, 50));
-			this.setMinimumSize(new Dimension(85, 50));
-		} else if (wSize > 300) {
-			this.setPreferredSize(new Dimension(300, 50));
-			this.setMaximumSize(new Dimension(300, 50));
-			this.setMinimumSize(new Dimension(300, 50));
-		} else {
-			this.setPreferredSize(new Dimension(wSize, 50));
-			this.setMaximumSize(new Dimension(wSize, 50));
-			this.setMinimumSize(new Dimension(wSize, 50));
-		}
+		float xInIntervall = nenner / zaehler;
+
+		int wSize = (int) ((xInIntervall * 215) + 85);
+
+		this.setPreferredSize(new Dimension(wSize, 50));
+		this.setMaximumSize(new Dimension(wSize, 50));
+		this.setMinimumSize(new Dimension(wSize, 50));
+
 	}
 
-	
 	public synchronized LayoutGraph getlGraph() {
 		return lGraph;
 	}

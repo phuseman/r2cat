@@ -34,7 +34,6 @@ public class GlassPaneWithLines extends JPanel {
 	private double[] supportleft;
 	private int numberOfNeighbours = 5;
 
-
 	private Point[] leftComponentPositions;
 	private Point[] rightComponentPositions;
 	private Point[] centralPosition = new Point[2];
@@ -42,8 +41,9 @@ public class GlassPaneWithLines extends JPanel {
 	private boolean flag;
 	private float[] leftSupport;
 	private float[] rightSupport;
-	
-	private boolean isRelativeSupport = false;
+
+	private double maxSupportOfAllEdges;
+	private double minSupportOfAllEdges;
 
 	public GlassPaneWithLines() {
 		super();
@@ -62,9 +62,46 @@ public class GlassPaneWithLines extends JPanel {
 
 		supportleft = supportOfEachContigleft;
 		support = supportOfEachContig;
-		
+		double maxLeftSupport = calculateMax(supportOfEachContigleft);
+		double maxRightSupport = calculateMax(supportOfEachContig);
+		if (maxLeftSupport > maxRightSupport) {
+			maxSupportOfAllEdges = maxLeftSupport;
+		} else {
+			maxSupportOfAllEdges = maxRightSupport;
+		}
+
+		double minLeftSupport = calculateMin(supportOfEachContigleft);
+		double minRightSupport = calculateMin(supportOfEachContig);
+		if (minLeftSupport < minRightSupport) {
+			minSupportOfAllEdges = minLeftSupport;
+		} else {
+			minSupportOfAllEdges = minRightSupport;
+		}
+
 		flag = true;
 		repaint();
+	}
+
+	private double calculateMax(double[] support) {
+		double max = 0;
+
+		for (double d : support) {
+			if (d > max) {
+				max = d;
+			}
+		}
+		return max;
+	}
+
+	private double calculateMin(double[] support) {
+		double min = support[0];
+
+		for (double d : support) {
+			if (d < min) {
+				min = d;
+			}
+		}
+		return min;
 	}
 
 	public void setFlag(boolean b) {
@@ -78,14 +115,14 @@ public class GlassPaneWithLines extends JPanel {
 		Graphics2D g = (Graphics2D) gr;
 
 		/*
-		 * Sicherung der Positionen der Punkte, damit es keine Probleme 
-		 * beim Zeichnen der Linien gibt.
+		 * Sicherung der Positionen der Punkte, damit es keine Probleme beim
+		 * Zeichnen der Linien gibt.
 		 */
 		leftComponentPositions = new Point[numberOfNeighbours];
 		rightComponentPositions = new Point[numberOfNeighbours];
 		leftSupport = new float[numberOfNeighbours];
 		rightSupport = new float[numberOfNeighbours];
-		
+
 		/*
 		 * Damit die Kanten "weich" gezeichnet werden.
 		 */
@@ -93,10 +130,10 @@ public class GlassPaneWithLines extends JPanel {
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
 				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-		
+
 		/*
-		 * Dieser Teil wird nur dann nicht ausgeführt, wenn
-		 * die neuen Nachbarn berechnet werden.
+		 * Dieser Teil wird nur dann nicht ausgeführt, wenn die neuen Nachbarn
+		 * berechnet werden.
 		 */
 		if (flag) {
 			int laenge2 = (int) b2.getSize().getWidth();
@@ -125,39 +162,33 @@ public class GlassPaneWithLines extends JPanel {
 							+ laenge2;
 					centralPosition[1] = new Point(x2, y2);
 				}
-				
+
 				/*
-				 * Berechnen der Linien zwischen den linken Nachbarn und
-				 * dem zentralem Contig
+				 * Berechnen der Linien zwischen den linken Nachbarn und dem
+				 * zentralem Contig
 				 */
 				if (left) {
-					
+
 					int z = 1;
 					int zaehler = 0;
 
 					for (Component co : neighbourLeft.getComponents()) {
-						
+
 						/*
-						 * Berechnen der Liniendicke, abhängig davon ob der Nutzer den 
-						 * relativen oder absoluten Support wählt.
+						 * Berechnen der Liniendicke, abhängig davon ob der
+						 * Nutzer den relativen oder absoluten Support wählt.
 						 */
-						if(isRelativeSupport){
-							lineStrokeLeft = (float) Math.ceil(supportleft[zaehler] * 10000) / 10;
-						}else{
-							lineStrokeLeft = (float) Math.log1p(supportleft[zaehler]/1000) +1;
-						}
-						
+
+						float nenner = (float) (Math.log(supportleft[zaehler]) - Math
+								.log(minSupportOfAllEdges));
+						float counter = (float) (Math.log(maxSupportOfAllEdges) - Math
+								.log(minSupportOfAllEdges));
+						float xInIntervall = nenner / counter;
+						lineStrokeLeft = (float) ((xInIntervall * 3.9) + 0.1);
+
 						z++;
 						if (z % 2 == 0) {
-							/*
-							 * Begrenze die Liniendicke
-							 */
-							if (lineStrokeLeft <= 0) {
-								lineStrokeLeft = 0.1f;
-							} else if (lineStrokeLeft > 5) {
-								lineStrokeLeft = 5.0f;
-							}
-							
+
 							Point point = co.getLocation();
 							/*
 							 * Arbeite hier mit verschiedenen Panel. Es ist
@@ -186,27 +217,24 @@ public class GlassPaneWithLines extends JPanel {
 
 				} else {
 					/*
-					 * äquivalent zu oben, 
-					 * nur das dies hier für die rechten Nachbarn ist.
+					 * äquivalent zu oben, nur das dies hier für die rechten
+					 * Nachbarn ist.
 					 */
 					int z = 1;
 					int c = 0;
 
 					for (Component co : neighbour.getComponents()) {
-						if(isRelativeSupport){
-							lineStroke = (float) Math.ceil(support[c] * 10000) / 10;
-						}else{
-							lineStroke = (float) Math.log1p(support[c]/1000)+1;
-						}
-						
+
+						float nenner = (float) (Math.log(support[c]) - Math
+								.log(minSupportOfAllEdges));
+						float counter = (float) (Math.log(maxSupportOfAllEdges) - Math
+								.log(minSupportOfAllEdges));
+						float xInIntervall = nenner / counter;
+						lineStroke = (float) ((xInIntervall * 3.9) + 0.1);
+
 						z++;
 						if (z % 2 == 0) {
-							if (lineStroke <= 0) {
-								lineStroke = 1.0f;
-							} else if (lineStroke > 5) {
-								lineStroke = 5.0f;
-							}
-							
+
 							Point point = co.getLocation();
 							/*
 							 * Arbeite hier mit verschiedenen Panel. Es ist
@@ -235,13 +263,17 @@ public class GlassPaneWithLines extends JPanel {
 			}
 		}
 	}
-	
-	
-	public void setRelativeSupport(boolean isRelativeSupport) {
-		this.isRelativeSupport = isRelativeSupport;
-	}
 
 	public void setNumberOfNeighbours(int numberOfNeighbours) {
 		this.numberOfNeighbours = numberOfNeighbours;
 	}
+
+	public double getMaxSupportOfAllEdges() {
+		return maxSupportOfAllEdges;
+	}
+
+	public double getMinSupportOfAllEdges() {
+		return minSupportOfAllEdges;
+	}
+
 }
