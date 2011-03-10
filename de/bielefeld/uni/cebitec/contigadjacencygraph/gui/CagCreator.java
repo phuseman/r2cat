@@ -47,8 +47,8 @@ public class CagCreator {
 	private ArrayList<CagEventListener> listeners;
 	private long maxSizeOfContigs;
 	private long minSizeOfContigs;
-//	private double minSupport;
-//	private double maxSupport;
+	private double minSupport;
+	private double maxSupport;
 
 
 	// private CAGWindow window;
@@ -60,8 +60,9 @@ public class CagCreator {
 		createContigList();
 		calculateMinSizeOfContigs(contigs);
 		calculateMaxSizeOfContigs(contigs);
-//		calculateMaxSupport(g);
-//		calculateMinSupport(g);
+		calculateMaxSupport(g);
+		calculateMinSupport(g);
+		System.out.println("min support "+minSupport+" max support "+maxSupport);
 	}
 
 	/*
@@ -184,33 +185,7 @@ public class CagCreator {
 		return graph;
 	}
 	
-//	private double calculateMinSupport (LayoutGraph graph){
-//		
-//		minSupport = 10000000;
-//		
-//		Vector<AdjacencyEdge> kanten = graph.getEdges();
-//		for (AdjacencyEdge adjacencyEdge : kanten) {
-//			double support = adjacencyEdge.getSupport();
-//			if(support < minSupport){
-//				minSupport  = support;
-//			}
-//		}
-//		return minSupport;
-//	}
-//	
-//	private double calculateMaxSupport(LayoutGraph graph){
-//		maxSupport = 0;
-//		
-//		Vector<AdjacencyEdge> kanten = graph.getEdges();
-//		for (AdjacencyEdge adjacencyEdge : kanten) {
-//			double support = adjacencyEdge.getSupport();
-//			if(support > maxSupport){
-//				maxSupport  = support;
-//			}
-//		}
-//		return maxSupport;
-//	}
-
+	
 	/**
 	 * Create a List of all Nodes(Contigs) of LayoutGraph
 	 */
@@ -252,6 +227,40 @@ public class CagCreator {
 			}
 		}		
 		return minSizeOfContigs;
+	}
+private double calculateMinSupport (LayoutGraph graph){
+		
+		minSupport = graph.getEdges().firstElement().getSupport();
+		
+		Vector<AdjacencyEdge> kanten = graph.getEdges();
+		for (AdjacencyEdge adjacencyEdge : kanten) {
+			double support = adjacencyEdge.getSupport();
+			if(support < minSupport){
+				minSupport  = support;
+			}
+		}
+		return minSupport;
+	}
+	
+	private double calculateMaxSupport(LayoutGraph graph){
+		maxSupport = 0;
+		
+		Vector<AdjacencyEdge> kanten = graph.getEdges();
+		for (AdjacencyEdge adjacencyEdge : kanten) {
+			double support = adjacencyEdge.getSupport();
+			if(support > maxSupport){
+				maxSupport  = support;
+			}
+		}
+		return maxSupport;
+	}
+
+	public double getMinSupport() {
+		return minSupport;
+	}
+
+	public double getMaxSupport() {
+		return maxSupport;
 	}
 
 	

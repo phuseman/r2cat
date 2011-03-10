@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import javax.print.DocFlavor;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -103,6 +104,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	private long maxSizeOfContigs;
 	private long minSizeOfContigs;
 	private JPanel groundPanel;
+	private JScrollPane scrollPane;
+	private double maxSupport;
+	private double minSupport;
 
 	public CAGWindow(CagCreator myModel) {
 		window = this;
@@ -111,6 +115,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		nodes = model.getListData();
 		maxSizeOfContigs = model.getMaxSizeOfContigs();
 		minSizeOfContigs = model.getMinSizeOfContigs();
+		maxSupport = model.getMaxSupport();
+		minSupport = model.getMinSupport();
 
 		myModel.addEventListener(this);
 		setTitle("View of a contig adjacency graph");
@@ -140,8 +146,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		chooseContigPanel = new JPanel();
 		chooseContigPanel.setName("ChooseContigPanel");
 		chooseContigPanel.setMinimumSize(new Dimension(1000, 400));
-		chooseContigPanel.setPreferredSize(new Dimension(1000, 400));
-		chooseContigPanel.setMaximumSize(new Dimension(1000, 400));
+	//	chooseContigPanel.setPreferredSize(new Dimension(1000, 400));
+		chooseContigPanel.setMaximumSize(new Dimension(1000, (int) Toolkit
+				.getDefaultToolkit().getScreenSize().getHeight()));
 
 		chooseContigPanel.setBackground(Color.WHITE);
 
@@ -172,39 +179,44 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		 */
 		leftContainer.setLayout(leftBoxLayout);
 		leftContainer.setBackground(Color.WHITE);
-		leftContainer.setPreferredSize(new Dimension(310, 1000));
-		leftContainer.setMinimumSize(new Dimension(310, 1000));
-		leftContainer.setMaximumSize(new Dimension(310, 1000));
+		leftContainer.setPreferredSize(new Dimension(310, 400));
+		leftContainer.setMinimumSize(new Dimension(310, 400));
+		leftContainer.setMaximumSize(new Dimension(310, (int) Toolkit
+				.getDefaultToolkit().getScreenSize().getHeight()));
 
 		leftRadioButtonContainer.setLayout(leftRadioBoxLayout);
 		leftRadioButtonContainer.setBackground(Color.WHITE);
-		leftRadioButtonContainer.setPreferredSize(new Dimension(20, 1000));
-		leftRadioButtonContainer.setMinimumSize(new Dimension(20, 1000));
-		leftRadioButtonContainer.setMaximumSize(new Dimension(20, 1000));
+		leftRadioButtonContainer.setPreferredSize(new Dimension(20, 400));
+		leftRadioButtonContainer.setMinimumSize(new Dimension(20, 400));
+		leftRadioButtonContainer.setMaximumSize(new Dimension(20, (int) Toolkit
+				.getDefaultToolkit().getScreenSize().getHeight()));
 
 		/*
 		 * Container for central contig
 		 */
 		centerContainer.setLayout(centerBoxLayout);
 		centerContainer.setBackground(Color.WHITE);
-		centerContainer.setPreferredSize(new Dimension(310, 1000));
-		centerContainer.setMinimumSize(new Dimension(310, 1000));
-		centerContainer.setMaximumSize(new Dimension(310, 1000));
+		centerContainer.setPreferredSize(new Dimension(310, 400));
+		centerContainer.setMinimumSize(new Dimension(310, 400));
+		centerContainer.setMaximumSize(new Dimension(310, (int) Toolkit
+				.getDefaultToolkit().getScreenSize().getHeight()));
 
 		/*
 		 * Container for all right neigbors
 		 */
 		rightContainer.setLayout(rightBoxLayout);
 		rightContainer.setBackground(Color.WHITE);
-		rightContainer.setPreferredSize(new Dimension(310, 1000));
-		rightContainer.setMinimumSize(new Dimension(310, 1000));
-		rightContainer.setMaximumSize(new Dimension(310, 1000));
+		rightContainer.setPreferredSize(new Dimension(310, 400));
+		rightContainer.setMinimumSize(new Dimension(310, 400));
+		rightContainer.setMaximumSize(new Dimension(310, (int) Toolkit
+				.getDefaultToolkit().getScreenSize().getHeight()));
 
 		rightRadioButtonContainer.setLayout(rightRadioBoxLayout);
 		rightRadioButtonContainer.setBackground(Color.WHITE);
-		rightRadioButtonContainer.setPreferredSize(new Dimension(20, 1000));
-		rightRadioButtonContainer.setMinimumSize(new Dimension(20, 1000));
-		rightRadioButtonContainer.setMaximumSize(new Dimension(20, 1000));
+		rightRadioButtonContainer.setPreferredSize(new Dimension(20, 400));
+		rightRadioButtonContainer.setMinimumSize(new Dimension(20, 400));
+		rightRadioButtonContainer.setMaximumSize(new Dimension(20, (int) Toolkit
+				.getDefaultToolkit().getScreenSize().getHeight()));
 
 		/*
 		 * Parent Panel for all other the container of all neighbours and
@@ -219,27 +231,41 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		chooseContigPanel.add(rightRadioButtonContainer);
 		chooseContigPanel.add(rightContainer);
 		add(chooseContigPanel);
-//		groundPanel.add(chooseContigPanel);
-//		add(groundPanel, BorderLayout.CENTER);
+		
+		scrollPane = new JScrollPane();
+		scrollPane.setSize(1000, 400);
+		scrollPane.setMinimumSize(new Dimension(1000, 400));
+		//scrollPane.setPreferredSize(new Dimension(1000, 400));
+		scrollPane.setMaximumSize(new Dimension(1000, (int) Toolkit
+				.getDefaultToolkit().getScreenSize().getHeight()));
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		
+		scrollPane.setViewportView(chooseContigPanel);
+		scrollPane.setVisible(true);
+		scrollPane.validate();
+		groundPanel.add(scrollPane);
+		add(groundPanel, BorderLayout.CENTER);
 		/*
 		 * Dieses Panel enthaelt alle Contigs dieses Genoms als Liste
 		 */
 
 		int breite = nodes[1].getId().getBytes().length;
 
-		if (breite * 10 <= 100) {
+		if (breite * 20 <= 100) {
 			breite = 100;
-		} else if (breite * 10 >= 200) {
+		} else if (breite * 20 >= 200) {
 			breite = 200;
 		} else {
-			breite = breite * 10;
+			breite = breite * 20;
 		}
 
-		listContainer = new JPanel();// new GridLayout(1,1)
+		listContainer = new JPanel();
+		
 		listContainer.setMinimumSize(new Dimension(breite, 400));
+		listContainer.setPreferredSize(new Dimension(breite, 400));
 		listContainer.setMaximumSize(new Dimension(breite, (int) Toolkit
 				.getDefaultToolkit().getScreenSize().getHeight()));
-		listContainer.setPreferredSize(new Dimension(breite, 400));
 
 		/*
 		 * In dieser For werden alle Contig ids gesammelt und gespeichert.
@@ -321,6 +347,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		add(inputOption, BorderLayout.SOUTH);
 
 		glassPanel = new GlassPaneWithLines();
+		glassPanel.setMaximumSize(new Dimension(1000, 400));
+		glassPanel.setPreferredSize(new Dimension(1000, 400));
+		glassPanel.setMaximumSize(new Dimension(1000, (int) Toolkit
+				.getDefaultToolkit().getScreenSize().getHeight()));
+		
 		// glassPanel.setMaxSupportOfAllEdges(maxSupport);
 		// glassPanel.setMinSupportOfAllEdges(minSupport);
 		setGlassPane(glassPanel);
@@ -341,27 +372,33 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			glassPanel.setOpaque(false);
 			glassPanel.setPreferredSize(chooseContigPanel.getSize());
 			glassPanel.setLine(leftContainer, rightContainer, centralContig,
-					leftSupport, rightSupport);
+					leftSupport, rightSupport, maxSupport, minSupport);
 			rightContainerFull = false;
 			leftContainerFull = false;
 			getGlassPane().setVisible(true);
 		}
 	}
 
-	private void setScrollPaneForChooseContigPanel() {
+	/*private void setScrollPaneForChooseContigPanel() {
 
 		if (rightContainerFull && leftContainerFull) {
+			
+			scrollPane.setViewportView(chooseContigPanel);
+			scrollPane.setVisible(true);
+			scrollPane.validate();
+			groundPanel.add(scrollPane);
+			add(groundPanel, BorderLayout.CENTER);
+			
 			JScrollPane scroller = new JScrollPane(chooseContigPanel);
 			scroller
 					.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 			scroller
 					.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-//			chooseContigPanel.revalidate();
 			chooseContigPanel.add(scroller, BorderLayout.CENTER);
 			rightContainerFull = false;
 			leftContainerFull = false;
 		}
-	}
+	}*/
 
 	/*
 	 * Fange Events ab
@@ -491,8 +528,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				}
 			}
 			leftContainerFull = true;
-//			setScrollPaneForChooseContigPanel();
-//			setLineInPanel();
+			//setScrollPaneForChooseContigPanel();
+			setLineInPanel();
 		}
 
 		/*
@@ -605,9 +642,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					break;
 				}
 			}
-//			setScrollPaneForChooseContigPanel();
 			rightContainerFull = true;
-//			setLineInPanel();
+		//	setScrollPaneForChooseContigPanel();
+			setLineInPanel();
 		}
 
 	}
