@@ -16,15 +16,17 @@ public class ContigBorder extends AbstractBorder{
 	private boolean isRepeat;
 	private boolean isReverse;
 	private boolean isSelected = false;
+	private boolean woandersAusgewaehlt;
 	
 	public ContigBorder(boolean isRepeat, boolean isReverse) {
 		this.isRepeat = isRepeat;
 		this.isReverse = isReverse;
 	}
-	public ContigBorder(boolean isRepeat, boolean isReverse, boolean flag) {
+	public ContigBorder(boolean isRepeat, boolean isReverse, boolean flag, boolean anderweitigAusgewaehlt) {
 		this.isRepeat = isRepeat;
 		this.isReverse = isReverse;
 		this.isSelected = flag;
+		this.woandersAusgewaehlt = anderweitigAusgewaehlt;
 	}
 
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
@@ -47,8 +49,11 @@ public class ContigBorder extends AbstractBorder{
 		 * wird es mit rotem Rand dargestellt. Ansonsten mit schwarzem.
 		 */
 		if (isSelected) {
+			g2.setColor(Color.GREEN);
+		}else if (woandersAusgewaehlt){
 			g2.setColor(Color.RED);
-		}else{
+		}
+		else{
 			g2.setColor(Color.BLACK);
 		}
 		

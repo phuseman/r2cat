@@ -44,6 +44,8 @@ public class GlassPaneWithLines extends JPanel {
 
 	private double maxSupportOfAllEdges;
 	private double minSupportOfAllEdges;
+	
+	private boolean isZScores;
 
 	public GlassPaneWithLines() {
 		super();
@@ -54,7 +56,7 @@ public class GlassPaneWithLines extends JPanel {
 	 */
 	public void setLine(JPanel neigbourContainerleft, JPanel neigbourContainer,
 			JPanel centralContig, double[] supportOfEachContigleft,
-			double[] supportOfEachContig, double maxSupport, double minSupport) {
+			double[] supportOfEachContig, double maxSupport, double minSupport, boolean isZScore) {
 
 		neighbour = neigbourContainer;
 		neighbourLeft = neigbourContainerleft;
@@ -65,6 +67,8 @@ public class GlassPaneWithLines extends JPanel {
 		
 		maxSupportOfAllEdges = maxSupport;
 		minSupportOfAllEdges = minSupport;
+		
+		isZScores = isZScore;
 		
 		System.out.println("min support in glasspanel "+ minSupport + " maxsupport "+maxSupport);
 		
@@ -159,13 +163,13 @@ public class GlassPaneWithLines extends JPanel {
 					left = false;
 				}
 				if (left) {
-					x2 = (int) cContig.getParent().getX() + (int) cContig.getX() + 5;
+					x2 = (int) cContig.getParent().getX() + (int) cContig.getX();
 					y2 = (int) cContig.getY() + höhe2;
 					centralPosition[0] = new Point(x2, y2);
 				} else {
 					y2 = (int) cContig.getY() + höhe2;
 					x2 = (int) cContig.getParent().getX() + (int) cContig.getX()
-							+ laenge2+5;
+							+ laenge2;
 					centralPosition[1] = new Point(x2, y2);
 				}
 
@@ -179,20 +183,30 @@ public class GlassPaneWithLines extends JPanel {
 					int zaehler = 0;
 
 					for (Component co : neighbourLeft.getComponents()) {
-
 						/*
 						 * Berechnen der Liniendicke, abhängig davon ob der
 						 * Nutzer den relativen oder absoluten Support wählt.
 						 */
-						System.out.println("support "+supportleft[zaehler]+" zaehler "+ zaehler);
+//						System.out.println("support "+supportleft[zaehler]+" zaehler "+ zaehler);
 						
-						
-						float nenner = (float) (supportleft[zaehler] - minSupportOfAllEdges);
-						float counter = (float) (maxSupportOfAllEdges - minSupportOfAllEdges);
-						float xInIntervall = nenner / counter;
-						System.out.println("x in Intervall "+ xInIntervall);
-						lineStrokeLeft = (float) ((xInIntervall * 3.9) + 0.1);
-						System.out.println("lininen dicke "+lineStrokeLeft);
+						if(isZScores){
+							if(supportleft[zaehler] > 0){
+//								if(supportleft[zaehler]>5){
+//									lineStrokeLeft = (float)5;
+//								}else{									
+									lineStrokeLeft = (float) (supportleft[zaehler]);///10.0);
+//								}
+							}else{
+								lineStroke = (float) 0.01;
+							}
+						}else{
+							float nenner = (float) (supportleft[zaehler] - minSupportOfAllEdges);
+							float counter = (float) (maxSupportOfAllEdges - minSupportOfAllEdges);
+							float xInIntervall = nenner / counter;
+	//						System.out.println("x in Intervall "+ xInIntervall);
+							lineStrokeLeft = (float) ((xInIntervall * 3) + 1);
+						}
+//						System.out.println("lininen dicke "+lineStrokeLeft);
 						
 						/*float nenner = (float) (Math.log(supportleft[zaehler]) - Math
 								.log(minSupportOfAllEdges));
@@ -214,7 +228,7 @@ public class GlassPaneWithLines extends JPanel {
 							 * projiziert wird.
 							 */
 							int laenge = (int) co.getSize().getWidth();
-							int x = (int) point.getX()+5;
+							int x = (int) point.getX();
 							int y = (int) point.getY()
 									+ (int) co.getParent().getParent().getY()
 									+ (int) co.getHeight() ;
@@ -241,13 +255,22 @@ public class GlassPaneWithLines extends JPanel {
 
 					for (Component co : neighbour.getComponents()) {
 
-						float nenner = (float) (Math.log(support[c]) - Math
-								.log(minSupportOfAllEdges));
-						float counter = (float) (Math.log(maxSupportOfAllEdges) - Math
-								.log(minSupportOfAllEdges));
-						float xInIntervall = nenner / counter;
-						lineStroke = (float) ((xInIntervall * 3.9) + 0.1);
-
+						if(isZScores){
+							if(support[c] > 0){
+//								if(support[c]>5){
+//									lineStroke = (float)5;
+//								}else{
+									lineStroke = (float) (support[c]);///10.0);
+//								}
+							}else{
+								lineStroke = (float) 0.01;
+							}
+						}else{
+							float nenner = (float) (support[c] - minSupportOfAllEdges);
+							float counter = (float) (maxSupportOfAllEdges - minSupportOfAllEdges);
+							float xInIntervall = nenner / counter;
+							lineStroke = (float) ((xInIntervall * 3) + 1);
+						}
 						z++;
 						if (z % 2 == 0) {
 
@@ -259,7 +282,7 @@ public class GlassPaneWithLines extends JPanel {
 							 * einer subkomponente auf das ursprungspanel
 							 * projiziert wird.
 							 */
-							int x = (int) co.getParent().getX()+5;
+							int x = (int) co.getParent().getX();
 							int y = (int) point.getY()
 									+ (int) co.getParent().getParent().getY()
 									+ (int) co.getHeight() ;
@@ -278,6 +301,7 @@ public class GlassPaneWithLines extends JPanel {
 				}
 			}
 		}
+
 	}
 
 	public void setNumberOfNeighbours(int numberOfNeighbours) {

@@ -32,24 +32,27 @@ public class CagCreator {
 
 	private static CAGWindow window;
 	private static CagCreator model;
-	
+
 	private LayoutGraph graph;
 	private DNASequence[] contigs;
 	private Vector<AdjacencyEdge>[] leftNeighbours;
 	private Vector<AdjacencyEdge>[] rightNeighbours;
-	
+
 	private int currentContigIndex;
 	private boolean currentContigIsReverse = false;
 	private DNASequence currentContigObject;
 	private int neighbourNumber = 5;
-	
+
 	private Vector<AdjacencyEdge> selectedContigs;
 	private ArrayList<CagEventListener> listeners;
 	private long maxSizeOfContigs;
 	private long minSizeOfContigs;
 	private double minSupport;
 	private double maxSupport;
-
+	private double[] meanForLeftNeigbours;
+	private double[] sDeviationsForLeftNeigbours;
+	private double[] meanForRightNeigbours;
+	private double[] sDeviationsForRightNeigbours;
 
 	// private CAGWindow window;
 	public CagCreator(LayoutGraph g) {
@@ -62,7 +65,10 @@ public class CagCreator {
 		calculateMaxSizeOfContigs(contigs);
 		calculateMaxSupport(g);
 		calculateMinSupport(g);
-		System.out.println("min support "+minSupport+" max support "+maxSupport);
+		System.out.println("min support " + minSupport + " max support "
+				+ maxSupport);
+		calculateMeanAndSDeviationForLeftNeigbours(leftNeighbours);
+		calculateMeanAndSDeviationForRightNeigbours(rightNeighbours);
 	}
 
 	/*
@@ -79,7 +85,7 @@ public class CagCreator {
 				boolean projectParsed = project
 						.readProject(new File(
 						// "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
-						//"/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs.tcp"));
+								// "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs.tcp"));
 								"/homes/aseidel/testdaten/perfekt/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
 				if (!projectParsed) {
 					System.err
@@ -184,8 +190,7 @@ public class CagCreator {
 	public LayoutGraph getGraph() {
 		return graph;
 	}
-	
-	
+
 	/**
 	 * Create a List of all Nodes(Contigs) of LayoutGraph
 	 */
@@ -202,54 +207,55 @@ public class CagCreator {
 		}
 		return contigs;
 	}
-	
-	private long calculateMaxSizeOfContigs (DNASequence[] contigList){
-		
+
+	private long calculateMaxSizeOfContigs(DNASequence[] contigList) {
+
 		maxSizeOfContigs = 0;
-		
+
 		for (DNASequence dnaSequence : contigList) {
 			long size = dnaSequence.getSize();
-			if (size > maxSizeOfContigs){
+			if (size > maxSizeOfContigs) {
 				maxSizeOfContigs = size;
 			}
-		}		
+		}
 		return maxSizeOfContigs;
 	}
-	
-	private long calculateMinSizeOfContigs (DNASequence[] contigList){
-		
+
+	private long calculateMinSizeOfContigs(DNASequence[] contigList) {
+
 		minSizeOfContigs = contigList[0].getSize();
-		
+
 		for (DNASequence dnaSequence : contigList) {
 			long size = dnaSequence.getSize();
-			if (size < minSizeOfContigs){
+			if (size < minSizeOfContigs) {
 				minSizeOfContigs = size;
 			}
-		}		
+		}
 		return minSizeOfContigs;
 	}
-private double calculateMinSupport (LayoutGraph graph){
-		
+
+	private double calculateMinSupport(LayoutGraph graph) {
+
 		minSupport = graph.getEdges().firstElement().getSupport();
-		
+
 		Vector<AdjacencyEdge> kanten = graph.getEdges();
 		for (AdjacencyEdge adjacencyEdge : kanten) {
 			double support = adjacencyEdge.getSupport();
-			if(support < minSupport){
-				minSupport  = support;
+			if (support < minSupport) {
+				minSupport = support;
 			}
 		}
 		return minSupport;
 	}
-	
-	private double calculateMaxSupport(LayoutGraph graph){
+
+	private double calculateMaxSupport(LayoutGraph graph) {
 		maxSupport = 0;
-		
+
 		Vector<AdjacencyEdge> kanten = graph.getEdges();
 		for (AdjacencyEdge adjacencyEdge : kanten) {
 			double support = adjacencyEdge.getSupport();
-			if(support > maxSupport){
-				maxSupport  = support;
+			if (maxSupport < support) {
+				maxSupport = support;
 			}
 		}
 		return maxSupport;
@@ -263,19 +269,137 @@ private double calculateMinSupport (LayoutGraph graph){
 		return maxSupport;
 	}
 
-	
 	/*
-	 * TODO 
-	 * Hier auch noch mal schauen ob ich wirklich so viele Variblen als
-	 * Klassenvariblen def muss. Währe glaube ich besser wenn ich das local
-	 * gestallten würde. Auch währe es besser wenn ich hier was basteln würde,
-	 * womit ich indices und neighbours gleichzeitig zurückgeben kann.
+	 * Durchschnitt des Supports aller linken und rechten Nachbarn
 	 */
+	private void calculateMeanAndSDeviationForLeftNeigbours(
+			Vector<AdjacencyEdge>[] neighbours) {
 
-	
+		meanForLeftNeigbours = new double[neighbours.length];
+		sDeviationsForLeftNeigbours = new double[neighbours.length];
+
+		for (int i = 0; i < neighbours.length; i++) {
+			Vector<AdjacencyEdge> neighbour = neighbours[i];
+
+			double wert = 0;
+			for (AdjacencyEdge adjacencyEdge : neighbour) {
+				wert = wert + adjacencyEdge.getSupport();
+			}
+
+			meanForLeftNeigbours[i] = wert / neighbour.size();
+			System.out.println("mean für l nachbarn " + i + "  "
+					+ meanForLeftNeigbours[i]);
+			double zahl = 0;
+			for (AdjacencyEdge adjacencyEdge : neighbour) {
+				zahl = zahl
+						+ Math.pow(adjacencyEdge.getSupport()
+								- meanForLeftNeigbours[i], 2);
+			}
+
+			if (neighbour.size() > 1) {
+
+				sDeviationsForLeftNeigbours[i] = Math
+						.sqrt((1.0 / ((double) neighbour.size() - 1.0)) * zahl);
+				System.out.println("standardabweichung für l nachbarn " + i
+						+ "  " + sDeviationsForLeftNeigbours[i]);
+			}
+		}
+
+	}
+
+	private void calculateMeanAndSDeviationForRightNeigbours(
+			Vector<AdjacencyEdge>[] neighbours) {
+
+		meanForRightNeigbours = new double[neighbours.length];
+		sDeviationsForRightNeigbours = new double[neighbours.length];
+
+		for (int i = 0; i < neighbours.length; i++) {
+			Vector<AdjacencyEdge> neighbour = neighbours[i];
+
+			double wert = 0;
+			for (AdjacencyEdge adjacencyEdge : neighbour) {
+				wert = wert + adjacencyEdge.getSupport();
+			}
+			meanForRightNeigbours[i] = wert / neighbour.size();
+
+			double zahl = 0;
+			for (AdjacencyEdge adjacencyEdge : neighbour) {
+				zahl = zahl
+						+ Math.pow(adjacencyEdge.getSupport()
+								- meanForRightNeigbours[i], 2);
+			}
+			if (neighbour.size() > 1) {
+				sDeviationsForRightNeigbours[i] = Math
+						.sqrt((1.0 / ((double) neighbour.size() - 1.0)) * zahl);
+			}
+		}
+	}
+
+	public double[] getMeanForLeftNeigbours() {
+		return meanForLeftNeigbours;
+	}
+
+	public double[] getMeanForRightNeigbours() {
+		return meanForRightNeigbours;
+	}
+
+	public double[] getsDeviationsForLeftNeigbours() {
+		return sDeviationsForLeftNeigbours;
+	}
+
+	public double[] getsDeviationsForRightNeigbours() {
+		return sDeviationsForRightNeigbours;
+	}
+
+	private AdjacencyEdge calculatePossibleThirdLine() {
+
+		AdjacencyEdge possibleThirdEdge = null;
+
+		Vector<AdjacencyEdge> leftAdjacencies = leftNeighbours[currentContigIndex];
+		Vector<AdjacencyEdge> rightAdjacencies = rightNeighbours[currentContigIndex];
+		int[] leftindex = new int[leftAdjacencies.size()];
+		int[] rightIndex = new int[rightAdjacencies.size()];
+		int c = 0;
+		for (AdjacencyEdge adjacencyEdge : leftAdjacencies) {
+			if (adjacencyEdge.getContigi() == currentContigObject) {
+				leftindex[c] = adjacencyEdge.getj();
+			} else if (adjacencyEdge.getContigj() == currentContigObject) {
+				leftindex[c] = adjacencyEdge.geti();
+			}
+			c++;
+		}
+		int k = 0;
+		for (AdjacencyEdge edge : rightAdjacencies) {
+			if (edge.getContigi() == currentContigObject) {
+				rightIndex[k] = edge.getj();
+			} else if (edge.getContigj() == currentContigObject) {
+				rightIndex[k] = edge.geti();
+			}
+			k++;
+		}
+
+		for (int i = 0; i < leftindex.length; i++) {
+			int index = leftindex[i];
+			int index2 = rightIndex[i];
+			Vector<AdjacencyEdge> test = leftNeighbours[index];
+			for (AdjacencyEdge adjacencyEdge : test) {
+
+			}
+		}
+
+		return possibleThirdEdge;
+	}
 
 	private Vector<AdjacencyEdge> calculateFiveMostLikleyRightNeighbours(
 			int cContigIndex, boolean isReverse) {
+
+		/*
+		 * TODO Hier auch noch mal schauen ob ich wirklich so viele Variblen als
+		 * Klassenvariblen def muss. Währe glaube ich besser wenn ich das local
+		 * gestallten würde. Auch währe es besser wenn ich hier was basteln
+		 * würde, womit ich indices und neighbours gleichzeitig zurückgeben
+		 * kann.
+		 */
 
 		/*
 		 * hier muss unterschieden werden, ob das zentrale Contig reverse
@@ -291,46 +415,29 @@ private double calculateMinSupport (LayoutGraph graph){
 		DNASequence neighbourContigObject;
 
 		double support;
-		
-		int counter = 0;
-		int terminator = 0;
-
-		if (neighbourNumber < test.size()) {
-			terminator = neighbourNumber;
-		} else if (neighbourNumber > test.size()) {
-			terminator = test.size();
-		}
 
 		for (AdjacencyEdge edge : test) {
 
-			if(counter<terminator){
-
-				if (edge.geti() == cContigIndex) {// j ist der Nachbar
-					neighbourContigObject = edge.getContigj();
-					support = edge.getRelativeSupportj();
-				} else {// i ist der Nachbar
-					neighbourContigObject = edge.getContigi();
-					support = edge.getRelativeSupportj();
-				}
-
-				neighbourContigObject
-						.setSupportComparativeToCentralContig(support);
-
-				fiveMostLikleyRightNeighbours.add(edge);
-				counter++;
+			if (edge.geti() == cContigIndex) {// j ist der Nachbar
+				neighbourContigObject = edge.getContigj();
+				support = edge.getRelativeSupportj();
+			} else {// i ist der Nachbar
+				neighbourContigObject = edge.getContigi();
+				support = edge.getRelativeSupportj();
 			}
-			if(counter == terminator){
 
-				break;
-			}
+			neighbourContigObject.setSupportComparativeToCentralContig(support);
+
+			fiveMostLikleyRightNeighbours.add(edge);
 		}
+
 		return fiveMostLikleyRightNeighbours;
 
 	}
 
 	private Vector<AdjacencyEdge> calculateFiveMostLikleyLeftNeighbours(
 			int centralContigIndex, boolean currentContigIsReverse) {
-		
+
 		System.out.println("Berechne linke Nachbarn");
 		/*
 		 * hier muss unterschieden werden, ob das zentrale Contig reverse
@@ -347,39 +454,22 @@ private double calculateMinSupport (LayoutGraph graph){
 
 		double support;
 
-		int counter = 0;
-		int terminator = 0;
-		if (neighbourNumber < test.size()) {
-			terminator = neighbourNumber;
-		} else if (neighbourNumber > test.size()) {
-			terminator = test.size();
-		}
-
 		for (AdjacencyEdge edge : test) {
-			if(counter<terminator){
-				if (edge.geti() == centralContigIndex) {// j ist der Nachbar
-					neighbourContigObject = edge.getContigj();
-					support = edge.getRelativeSupportj();
-				} else {// i ist der Nachbar
-					neighbourContigObject = edge.getContigi();
-					support = edge.getRelativeSupportj();
-				}
-
-				neighbourContigObject
-						.setSupportComparativeToCentralContig(support);
-
-				fiveMostLikleyLeftNeighbours.add(edge);
-				counter ++;
-				
+			if (edge.geti() == centralContigIndex) {// j ist der Nachbar
+				neighbourContigObject = edge.getContigj();
+				support = edge.getRelativeSupportj();
+			} else {// i ist der Nachbar
+				neighbourContigObject = edge.getContigi();
+				support = edge.getRelativeSupportj();
 			}
-			if(counter == terminator){
-				break;
-			}
+
+			neighbourContigObject.setSupportComparativeToCentralContig(support);
+
+			fiveMostLikleyLeftNeighbours.add(edge);
 		}
 		return fiveMostLikleyLeftNeighbours;
 
 	}
-
 
 	public Vector<AdjacencyEdge> addSelectedContig(AdjacencyEdge selectedEdge) {
 		System.out.println("Vor dem hinzufügen der Kante "
@@ -508,6 +598,7 @@ private double calculateMinSupport (LayoutGraph graph){
 	public void setNeighbourNumber(int number) {
 		this.neighbourNumber = number;
 	}
+
 	public long getMaxSizeOfContigs() {
 		return maxSizeOfContigs;
 	}

@@ -27,6 +27,11 @@ public class ContigAppearance extends JPanel {
 	private double relativeSup;
 	private int numberOfNeighbours = 5;
 	private boolean isReverse;
+	private boolean anderweitigAusgewaehlt;
+
+	public boolean isAnderweitigAusgewaehlt() {
+		return anderweitigAusgewaehlt;
+	}
 
 	public ContigAppearance() {
 		super();
@@ -40,7 +45,7 @@ public class ContigAppearance extends JPanel {
 	 * Konstruktor, fuer das zentrale Contig, wenn es zum Beispiel aus der Liste
 	 * ausgewaehlt wird.
 	 */
-	public ContigAppearance(DNASequence node, int indexOfCentralContig,
+	public ContigAppearance(DNASequence node, int indexOfCentralContig,boolean isCurrentContigSelected,
 			boolean isCurrentContigReverse, long maxSize, long minSize) {
 		this.i = indexOfCentralContig;
 		boolean cIsReverse = isCurrentContigReverse;
@@ -50,7 +55,7 @@ public class ContigAppearance extends JPanel {
 		this.add(contigLabel);
 		this.setName(node.getId());
 		setContigAppearance(node.getId(), node.getSize(), new ContigBorder(node
-				.isRepetitive(), cIsReverse, false));
+				.isRepetitive(), cIsReverse, isCurrentContigSelected, false));
 		setSizeOfContig(node.getSize(), maxSize, minSize);
 	}
 
@@ -58,7 +63,7 @@ public class ContigAppearance extends JPanel {
 	 * Konstruktor fuer die Nachbarn, hier ist die Kante relevant
 	 */
 	public ContigAppearance(LayoutGraph graph, AdjacencyEdge includingEdge,
-			int indexOfNeighbour, boolean sideIsLeft, long maxSize, long minSize) {
+			int indexOfNeighbour, boolean sideIsLeft, long maxSize, long minSize, boolean anderweitigAusgewaehlt) {
 		super();
 
 		this.lGraph = graph;
@@ -87,14 +92,18 @@ public class ContigAppearance extends JPanel {
 
 		this.setBackground(Color.WHITE);
 		this.add(contigLabel);
-		this.setName(contig.getId());
+		this.setName("contig "+contig.getId());
 
 		if (includingEdge.isSelected()) {
 			selected = true;
 		}
+		boolean flag = false;
+		if(!selected && anderweitigAusgewaehlt){
+			flag = true;
+		}
 
 		setContigAppearance(contig.getId(), contig.getSize(), new ContigBorder(
-				contig.isRepetitive(), neighbourIsReverse, selected));
+				contig.isRepetitive(), neighbourIsReverse, selected, flag));
 		setSizeOfContig(contig.getSize(), maxSize, minSize);
 	}
 
@@ -107,7 +116,7 @@ public class ContigAppearance extends JPanel {
 		String contigNameAusChar = "";
 		char[] dst = new char[numberOfNeighbours + (numberOfNeighbours - 1)];
 
-		contigLabel.setName(contigId);
+		contigLabel.setName("contigLabel "+contigId);
 		if (contigId.length() > 10) {
 			contigId.getChars(0, 3, dst, 0);
 
