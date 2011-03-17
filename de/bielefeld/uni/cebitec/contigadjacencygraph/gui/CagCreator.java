@@ -287,8 +287,7 @@ public class CagCreator {
 			}
 
 			meanForLeftNeigbours[i] = wert / neighbour.size();
-			System.out.println("mean für l nachbarn " + i + "  "
-					+ meanForLeftNeigbours[i]);
+			
 			double zahl = 0;
 			for (AdjacencyEdge adjacencyEdge : neighbour) {
 				zahl = zahl
@@ -300,8 +299,6 @@ public class CagCreator {
 
 				sDeviationsForLeftNeigbours[i] = Math
 						.sqrt((1.0 / ((double) neighbour.size() - 1.0)) * zahl);
-				System.out.println("standardabweichung für l nachbarn " + i
-						+ "  " + sDeviationsForLeftNeigbours[i]);
 			}
 		}
 

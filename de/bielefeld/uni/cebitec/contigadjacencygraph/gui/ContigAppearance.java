@@ -28,6 +28,7 @@ public class ContigAppearance extends JPanel {
 	private int numberOfNeighbours = 5;
 	private boolean isReverse;
 	private boolean anderweitigAusgewaehlt;
+	private boolean selected;
 
 	public boolean isAnderweitigAusgewaehlt() {
 		return anderweitigAusgewaehlt;
@@ -70,7 +71,7 @@ public class ContigAppearance extends JPanel {
 		this.i = indexOfNeighbour;
 
 		boolean neighbourIsReverse;
-		boolean selected = false;
+		selected = false;
 		if (sideIsLeft) {
 
 			if (includingEdge.geti() == indexOfNeighbour) {
@@ -105,6 +106,10 @@ public class ContigAppearance extends JPanel {
 		setContigAppearance(contig.getId(), contig.getSize(), new ContigBorder(
 				contig.isRepetitive(), neighbourIsReverse, selected, flag));
 		setSizeOfContig(contig.getSize(), maxSize, minSize);
+	}
+
+	public boolean isSelected() {
+		return selected;
 	}
 
 	/*

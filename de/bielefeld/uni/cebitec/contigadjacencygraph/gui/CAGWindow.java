@@ -1,10 +1,15 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -76,12 +81,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	private double[] leftSupport;
 	private double[] rightSupport;
 
-	private GlassPaneWithLines glassPanel;
-
-	private JPanel centralContig;
-
-	private boolean rightContainerFull = false;
-	private boolean leftContainerFull = false;
+	private ContigAppearance centralContig;
 
 	private ContigButtonGroup leftGroup = new ContigButtonGroup();
 	private ContigButtonGroup rightGroup = new ContigButtonGroup();
@@ -111,10 +111,18 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	private double[] meanForLeftNeighbours;
 	private double[] sDeviationForLeftNeighbours;
 	private double[] sDeviationForRightNeighbours;
-	
+
 	private Vector<DNASequence> ausgewaehlteContigs = new Vector<DNASequence>();
+	private Vector<AdjacencyEdge> ausgewaehlteLinkeKanten = new Vector<AdjacencyEdge>();
+	private Vector<AdjacencyEdge> ausgewaehlteRechteKanten = new Vector<AdjacencyEdge>();
+	
+	private Point[] leftComponentPositions;
+	private Point[] rightComponentPositions;
+	private Point[] centralPosition;
+	private boolean flag;
 
 	public CAGWindow(CagCreator myModel) {
+		
 		window = this;
 		this.model = myModel;
 		layoutGraph = model.getGraph();
@@ -128,6 +136,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		meanForLeftNeighbours = model.getMeanForLeftNeigbours();
 		sDeviationForRightNeighbours = model.getsDeviationsForRightNeigbours();
 		sDeviationForLeftNeighbours = model.getsDeviationsForLeftNeigbours();
+		
+		ausgewaehlteLinkeKanten.setSize(layoutGraph.getNodes().size());
+		ausgewaehlteRechteKanten.setSize(layoutGraph.getNodes().size());
 
 		myModel.addEventListener(this);
 		setTitle("View of a contig adjacency graph");
@@ -157,8 +168,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		chooseContigPanel.setName("ChooseContigPanel");
 		chooseContigPanel.setMinimumSize(new Dimension(1000, 400));
 		chooseContigPanel.setPreferredSize(new Dimension(1000, 400));
-//		chooseContigPanel.setMaximumSize(new Dimension(1000, (int) Toolkit
-//				.getDefaultToolkit().getScreenSize().getHeight()));
+		chooseContigPanel.setMaximumSize(new Dimension(1000, 400));
 
 		chooseContigPanel.setBackground(Color.WHITE);
 
@@ -188,34 +198,36 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		 * Container for all left neighbors
 		 */
 		leftContainer.setLayout(leftBoxLayout);
-		leftContainer.setBackground(Color.WHITE);
+		leftContainer.setOpaque(false);
 		leftContainer.setPreferredSize(new Dimension(310, 400));
 		leftContainer.setMinimumSize(new Dimension(310, 400));
 
 		leftRadioButtonContainer.setLayout(leftRadioBoxLayout);
-		leftRadioButtonContainer.setBackground(Color.WHITE);
+		leftRadioButtonContainer.setOpaque(false);
 		leftRadioButtonContainer.setPreferredSize(new Dimension(20, 400));
-		leftRadioButtonContainer.setMinimumSize(new Dimension(20, 400));;
+		leftRadioButtonContainer.setMinimumSize(new Dimension(20, 400));
+		;
 
 		/*
 		 * Container for central contig
 		 */
 		centerContainer.setLayout(centerBoxLayout);
-		centerContainer.setBackground(Color.WHITE);
-//		centerContainer.setAlignmentX(TOP_ALIGNMENT);
-		centerContainer.setPreferredSize(new Dimension(310, 400));
+		centerContainer.setOpaque(false);
 		centerContainer.setMinimumSize(new Dimension(310, 400));
+		centerContainer.setPreferredSize(new Dimension(310, 400));
+		centerContainer.setMaximumSize(new Dimension(310, 400));
 
 		/*
 		 * Container for all right neigbors
 		 */
 		rightContainer.setLayout(rightBoxLayout);
-		rightContainer.setBackground(Color.WHITE);
+		rightContainer.setOpaque(false);
 		rightContainer.setPreferredSize(new Dimension(310, 400));
-		rightContainer.setMinimumSize(new Dimension(310, 400));;
+		rightContainer.setMinimumSize(new Dimension(310, 400));
+		;
 
 		rightRadioButtonContainer.setLayout(rightRadioBoxLayout);
-		rightRadioButtonContainer.setBackground(Color.WHITE);
+		rightRadioButtonContainer.setOpaque(false);
 		rightRadioButtonContainer.setPreferredSize(new Dimension(20, 400));
 		rightRadioButtonContainer.setMinimumSize(new Dimension(20, 400));
 
@@ -296,7 +308,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		inputOption = new JPanel();
 		inputOption.setLayout(inputOptionLayout);
 
-		JLabel chooseNumberOfNeighbours = new JLabel("Anzahl Nachbarn");
+		JLabel chooseNumberOfNeighbours = new JLabel("number of neighbors");
 		NumberFormat nformat = NumberFormat.getNumberInstance();
 
 		JFormattedTextField inputOptionForNumberOfNeighbours = new JFormattedTextField(
@@ -336,14 +348,14 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		add(inputOption, BorderLayout.SOUTH);
 
-		glassPanel = new GlassPaneWithLines();
-		glassPanel.setName("glass pane ");
-//		glassPanel.setMaximumSize(new Dimension(1000, 400));
-		glassPanel.setPreferredSize(new Dimension(1000, 400));
-//		glassPanel.setMaximumSize(new Dimension(600, (int) Toolkit
-//				.getDefaultToolkit().getScreenSize().getHeight()));
+		// glassPanel = new GlassPaneWithLines();
+		// glassPanel.setName("glass pane ");
+		// // glassPanel.setMaximumSize(new Dimension(1000, 400));
+		// glassPanel.setPreferredSize(new Dimension(1000, 400));
+		// glassPanel.setMaximumSize(new Dimension(600, (int) Toolkit
+		// .getDefaultToolkit().getScreenSize().getHeight()));
 
-		setGlassPane(glassPanel);
+		// setGlassPane(glassPanel);
 
 		setSize(1000, 500);
 		setVisible(true);
@@ -354,15 +366,167 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	/*
 	 * create lines between the central contig and its neighbours
 	 */
-	private void setLineInPanel() {
+	@Override
+	public void paint(Graphics gr) {
 
-		if (rightContainerFull && leftContainerFull) {
-			glassPanel.setOpaque(false);
-			glassPanel.setLine(leftContainer, rightContainer, centralContig,
-					leftSupport, rightSupport, maxSupport, minSupport, isZScore);
-			rightContainerFull = false;
-			leftContainerFull = false;
-			getGlassPane().setVisible(true);
+		super.paint(gr);
+		Graphics2D g = (Graphics2D) gr;
+
+		/*
+		 * Sicherung der Positionen der Punkte, damit es keine Probleme beim
+		 * Zeichnen der Linien gibt.
+		 */
+		leftComponentPositions = new Point[numberOfNeighbours];
+		rightComponentPositions = new Point[numberOfNeighbours];
+
+		/*
+		 * Damit die Kanten "weich" gezeichnet werden.
+		 */
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+
+		/*
+		 * Dieser Teil wird nur dann nicht ausgeführt, wenn die neuen Nachbarn
+		 * berechnet werden.
+		 */
+		if (flag) {
+			int laenge2 = (int) centralContig.getSize().getWidth();
+			int höhe2 = (int) centralContig.getHeight();
+
+			/*
+			 * For wird hier eingesetzt um die beiden Container nacheinander zu
+			 * beladen; zuerst wird diese Methode mit den rechten nachbarn und
+			 * dann mit den linken nachbarn gefüttert.
+			 */
+			boolean left = false;
+			for (int s = 0; s < 2; s++) {
+				if (s == 1) {
+					left = true;
+				} else if (s == 0) {
+					left = false;
+				}
+
+				int x2;
+				int y2;
+				centralPosition = new Point[2];
+				if (left) {
+					x2 = (int) centralContig.getX()
+							+ (int) centralContig.getParent().getX();
+					y2 = (int) centralContig.getY() + höhe2 + höhe2 / 2;
+					centralPosition[0] = new Point(x2, y2);
+				} else {
+					y2 = (int) centralContig.getY() + höhe2 + höhe2 / 2;
+					x2 = (int) centralContig.getX() + laenge2
+							+ (int) centralContig.getParent().getX();
+					centralPosition[1] = new Point(x2, y2);
+				}
+
+				/*
+				 * Berechnen der Linien zwischen den linken Nachbarn und dem
+				 * zentralem Contig
+				 */
+				if (left) {
+
+					int z = 1;
+					int zaehler = 0;
+
+					for (Component co : leftContainer.getComponents()) {
+						/*
+						 * Berechnen der Liniendicke, abhängig davon ob der
+						 * Nutzer den relativen oder absoluten Support wählt.
+						 */
+						float lineStrokeLeft;
+						if (isZScore) {
+							if (leftSupport[zaehler] > 0) {
+								lineStrokeLeft = (float) (leftSupport[zaehler]);// /10.0);
+							} else {
+								lineStrokeLeft = (float) 0.01;
+							}
+						} else {
+							float nenner = (float) (leftSupport[zaehler] - minSupport);
+							float counter = (float) (maxSupport - minSupport);
+							float xInIntervall = nenner / counter;
+
+							lineStrokeLeft = (float) ((xInIntervall * 3) + 1);
+						}
+						z++;
+						if (z % 2 == 0) {
+
+							Point point = co.getLocation();
+							/*
+							 * Arbeite hier mit verschiedenen Panel. Es ist
+							 * nötig sich die richtigen Positionen der Contig
+							 * Panel zu berechnen, da sonst die koordinaten in
+							 * einer subkomponente auf das ursprungspanel
+							 * projiziert wird.
+							 */
+							int laenge = (int) co.getSize().getWidth();
+							int x = (int) point.getX();
+							int y = (int) point.getY()
+									+ (int) (co.getHeight() * 1.5);
+							Point currentPoint = new Point(x, y);
+
+							leftComponentPositions[zaehler] = currentPoint;
+							
+							g.setColor(Color.DARK_GRAY);
+							g.setStroke(new BasicStroke(lineStrokeLeft));
+							g.drawLine(x + laenge, y, x2, y2);
+
+							zaehler++;
+						}
+					}
+
+				} else {
+					/*
+					 * äquivalent zu oben, nur das dies hier für die rechten
+					 * Nachbarn ist.
+					 */
+					int z = 1;
+					int c = 0;
+
+					for (Component co : rightContainer.getComponents()) {
+
+						float lineStroke;
+						if (isZScore) {
+							if (rightSupport[c] > 0) {
+								lineStroke = (float) (rightSupport[c]);// /10.0);
+							} else {
+								lineStroke = (float) 0.01;
+							}
+						} else {
+							float nenner = (float) (rightSupport[c] - minSupport);
+							float counter = (float) (maxSupport - minSupport);
+							float xInIntervall = nenner / counter;
+							lineStroke = (float) ((xInIntervall * 3) + 1);
+						}
+						z++;
+						if (z % 2 == 0) {
+
+							Point point = co.getLocation();
+							/*
+							 * Arbeite hier mit verschiedenen Panel. Es ist
+							 * nötig sich die richtigen Positionen der Contig
+							 * Panel zu berechnen, da sonst die koordinaten in
+							 * einer subkomponente auf das ursprungspanel
+							 * projiziert wird.
+							 */
+							int x = (int) co.getParent().getX();
+							int y = (int) point.getY()
+									+ (int) (1.5 * co.getHeight());
+							Point currentPoint = new Point(x, y);
+
+							rightComponentPositions[c] = currentPoint;
+							
+							g.setColor(Color.DARK_GRAY);
+							g.setStroke(new BasicStroke(lineStroke));
+							g.drawLine(x, y, x2, y2);
+							c++;
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -400,7 +564,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			if (centerContainer.getComponentCount() > 0) {
 				centerContainer.removeAll();
 			}
-			centerContainer.setAlignmentY(TOP_ALIGNMENT);
+			// centerContainer.setAlignmentY(TOP_ALIGNMENT);
 			centerContainer.add(centralContig);
 			centerContainer.updateUI();
 		}
@@ -409,7 +573,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		 */
 		if (event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBOURS)) {
 
-			leftContainerFull = false;
 			leftNeighbourEdges = event.getEdges();
 			ContigAppearance contigPanel = null;
 
@@ -437,12 +600,12 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 			isALeftNeighourSelected = false;
 
-			for(AdjacencyEdge e : leftNeighbourEdges){
-				if(e.isSelected()){
+			for (AdjacencyEdge e : leftNeighbourEdges) {
+				if (e.isSelected()) {
 					isALeftNeighourSelected = true;
 				}
 			}
-			
+
 			for (AdjacencyEdge edge : leftNeighbourEdges) {
 
 				if (t < terminator) {
@@ -450,9 +613,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					DNASequence dnaSequence;
 					int indexOfContig;
 					if (edge.geti() == centralContigIndex) {
+						System.out.println("linker nachbar: cen is i");
 						dnaSequence = edge.getContigj();
 						indexOfContig = edge.getj();
 					} else {
+						System.out.println("linker nachbar: cen is j");
 						dnaSequence = edge.getContigi();
 						indexOfContig = edge.geti();
 					}
@@ -469,11 +634,12 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					}
 
 					boolean anderweitigAusgewaehlt = false;
-					if(ausgewaehlteContigs.contains(dnaSequence) && !dnaSequence.isRepetitive() 
-							&& !selectedRadioButtons.contains(edge)){
+					if (ausgewaehlteLinkeKanten.indexOf(edge)==indexOfContig
+							&& !dnaSequence.isRepetitive()
+							&& !selectedRadioButtons.contains(edge)) {
 						anderweitigAusgewaehlt = true;
 					}
-					
+
 					contigPanel = new ContigAppearance(layoutGraph, edge,
 							indexOfContig, true, maxSizeOfContigs,
 							minSizeOfContigs, anderweitigAusgewaehlt);
@@ -486,14 +652,14 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					contigPanel.setVisible(true);
 
 					radioButton = new ContigRadioButton(edge);
-					if (anderweitigAusgewaehlt){
+					if (anderweitigAusgewaehlt) {
 						radioButton.setActionCommand("anderweitigAusgewaehlt");
 					}
 					radioButton.setLeft(true);
 					radioButton.setBackground(Color.WHITE);
 					radioButton
 							.addActionListener(new RadioButtonActionListener());
-					
+
 					// add here Contigs and RadioButton with automatical space
 					leftContainer.add(contigPanel);
 
@@ -512,8 +678,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					break;
 				}
 			}
-			leftContainerFull = true;
-			setLineInPanel();
 		}
 
 		/*
@@ -523,7 +687,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 			int s = 0;
 
-			rightContainerFull = false;
 			rightNeighbourEdges = event.getEdges();
 			ContigAppearance contigPanel = null;
 
@@ -555,12 +718,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			// worden sein.
 			isARightNeighourSelected = false;
 			/*
-			 * Setzten des Flags, falls einer der Nachbarn schon
-			 * ausgewählt ist er das so wird damit kein anderer rechter
-			 * Nachbarn auswählbar.
+			 * Setzten des Flags, falls einer der Nachbarn schon ausgewählt ist
+			 * er das so wird damit kein anderer rechter Nachbarn auswählbar.
 			 */
 			for (AdjacencyEdge e : rightNeighbourEdges) {
-				if(e.isSelected()){
+				if (e.isSelected()) {
 					isARightNeighourSelected = true;
 				}
 			}
@@ -571,9 +733,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					int indexOfContig;
 
 					if (edge.geti() == centralContigIndex) {
+						System.out.println("rechter nachbar: cen is i");
 						dnaSequence = edge.getContigj();
 						indexOfContig = edge.getj();
 					} else {
+						System.out.println("rechter nachbar: cen is j");
 						dnaSequence = edge.getContigi();
 						indexOfContig = edge.geti();
 					}
@@ -584,8 +748,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					 * und die Liniendicke berechnet.
 					 */
 					if (isZScore) {
-						rightSupport[s] = ((edge.getSupport() - meanForRightNeighbours[indexOfContig])
-								/ sDeviationForRightNeighbours[indexOfContig]);
+						rightSupport[s] = ((edge.getSupport() - meanForRightNeighbours[indexOfContig]) / sDeviationForRightNeighbours[indexOfContig]);
 					} else {
 						rightSupport[s] = edge.getSupport();
 					}
@@ -593,8 +756,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					 * Hier wird für jeden Nachbarn sein Aussehen erstellt.
 					 */
 					boolean anderweitigAusgewaehlt = false;
-					if(ausgewaehlteContigs.contains(dnaSequence) && !dnaSequence.isRepetitive()
-							&& !selectedRadioButtons.contains(edge)){
+					if (ausgewaehlteRechteKanten.indexOf(edge)== indexOfContig
+							&& !dnaSequence.isRepetitive()
+							&& !selectedRadioButtons.contains(edge)) {
 						anderweitigAusgewaehlt = true;
 					}
 					contigPanel = new ContigAppearance(layoutGraph, edge,
@@ -611,13 +775,13 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					 * Index des zentralen Contigs übergeben
 					 */
 					radioButton = new ContigRadioButton(edge);
-					if (anderweitigAusgewaehlt){
+					if (anderweitigAusgewaehlt) {
 						radioButton.setActionCommand("anderweitigAusgewaehlt");
 					}
 					radioButton.setLeft(false);
 					radioButton.setBackground(Color.WHITE);
 					radioButton
-						.addActionListener(new RadioButtonActionListener());						
+							.addActionListener(new RadioButtonActionListener());
 
 					rightGroup.add(radioButton);
 					rightContainer.add(contigPanel);
@@ -635,8 +799,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					break;
 				}
 			}
-			rightContainerFull = true;
-			setLineInPanel();
+			flag = true;
 		}
 
 	}
@@ -655,6 +818,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		@Override
 		protected void done() {
 			super.done();
+			window.repaint();
 		}
 	}
 
@@ -672,6 +836,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		@Override
 		protected void done() {
 			super.done();
+			window.repaint();
 		}
 	}
 
@@ -697,8 +862,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				}
 
 				model.changeContigs(index, false);
-				getGlassPane().setVisible(false);
-				glassPanel.setFlag(false);
+				flag = false;
 
 				ThreadClassForRightNeighours threadForRightNeighbours = new ThreadClassForRightNeighours();
 				threadForRightNeighbours.execute();
@@ -738,23 +902,77 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					model.sendLeftNeighbours();
 					model.sendRightNeighbours();
 				}
-			} else if (e.getActionCommand().equals("anderweitigAusgewaehlt")){
-				
+			} else if (e.getActionCommand().equals("anderweitigAusgewaehlt")) {
+
 				javax.swing.JOptionPane
-				.showMessageDialog(
-						window,
-						"Sorry.\n"
-								+ "You already selected this neighbour for an another contig.\n");
-				
-			}else {
+						.showMessageDialog(
+								window,
+								"Sorry.\n"
+										+ "You already selected this neighbour for an another contig.\n");
+
+			} else {
 
 				Vector<AdjacencyEdge> copyOfSelectedContigs = (Vector<AdjacencyEdge>) selectedRadioButtons
 						.clone();
 
-				ContigRadioButton radioButton = (ContigRadioButton) e
-						.getSource();
+				ContigRadioButton radioButton = (ContigRadioButton) e.getSource();
 				AdjacencyEdge selectedEdge = radioButton.getEdge();
-
+				System.out.println("edge "+ selectedEdge + " i "+selectedEdge.geti()+" "+selectedEdge.getContigi().getId()
+						+" j "+selectedEdge.getj()+" "+selectedEdge.getContigj().getId());
+				
+				Vector<AdjacencyEdge> selectedLeftEdges;
+				Vector<AdjacencyEdge> selectedRightEdges;
+				int indexLeft;
+				int indexRight;
+				
+				if(radioButton.isLeft()){
+					if(centralContig.isReverse()){
+						selectedLeftEdges = ausgewaehlteRechteKanten;
+						selectedRightEdges = ausgewaehlteLinkeKanten;
+						
+						if(centralContigIndex == selectedEdge.geti()){
+							indexLeft = selectedEdge.geti();
+							indexRight = selectedEdge.getj();
+						}else{
+							indexLeft = selectedEdge.getj();
+							indexRight = selectedEdge.geti();
+						}
+					}else{
+						selectedLeftEdges = ausgewaehlteLinkeKanten;
+						selectedRightEdges = ausgewaehlteRechteKanten;
+						if(centralContigIndex  == selectedEdge.geti()){
+							indexLeft = selectedEdge.getj();
+							indexRight = selectedEdge.geti();							
+						}else{
+							indexLeft = selectedEdge.geti();
+							indexRight = selectedEdge.getj();		
+						}
+					}
+				}else{
+					if(centralContig.isReverse()){
+						selectedLeftEdges = ausgewaehlteLinkeKanten;
+						selectedRightEdges = ausgewaehlteRechteKanten;
+						if(centralContigIndex == selectedEdge.geti()){
+							indexLeft = selectedEdge.geti();
+							indexRight = selectedEdge.getj();
+						}else{
+							indexLeft = selectedEdge.getj();
+							indexRight = selectedEdge.geti();
+						}
+					}else{
+						selectedLeftEdges = ausgewaehlteRechteKanten;
+						selectedRightEdges = ausgewaehlteLinkeKanten;
+						if(centralContigIndex == selectedEdge.geti()){
+							indexLeft = selectedEdge.getj();
+							indexRight = selectedEdge.geti();
+						}else{
+							indexLeft = selectedEdge.geti();
+							indexRight = selectedEdge.getj();
+						}
+					}
+//					selectedLeftEdges = centralContig.isReverse() ? ausgewaehlteLinkeKanten : ausgewaehlteRechteKanten;
+//					selectedRightEdges = centralContig.isReverse() ? ausgewaehlteRechteKanten : ausgewaehlteLinkeKanten;
+				}
 				/*
 				 * Mein Initialfall: wurden bisher keine Contigs ausgewählt oder
 				 * alle bisher ausgewählten Contigs gelöscht, wird dieser Teil
@@ -764,14 +982,19 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					System.out.println("Contig wird hinzugefügt");
 					selectedEdge.select();
 					selectedRadioButtons.add(selectedEdge);
-
-						ausgewaehlteContigs.add(selectedEdge.getContigi());						
-						ausgewaehlteContigs.add(selectedEdge.getContigj());
+					
+					selectedLeftEdges.add(indexLeft, selectedEdge);
+					selectedRightEdges.add(indexRight, selectedEdge);					
+					System.out.println("linke ausgewählte nachbarn kante an index "+ausgewaehlteLinkeKanten.indexOf(selectedEdge));
+					System.out.println("rechte ausgewählte nachbarn kante an index "+ausgewaehlteRechteKanten.indexOf(selectedEdge));
+//					ausgewaehlteContigs.add(selectedEdge.getContigi());
+//					ausgewaehlteContigs.add(selectedEdge.getContigj());
+					
 					model.addSelectedContig(selectedEdge);
 					model.sendCurrentContig();
 					model.sendLeftNeighbours();
 					model.sendRightNeighbours();
-
+					repaint();
 				}
 				/*
 				 * Vllt ist die Seite noch relevant dann in der
@@ -829,37 +1052,53 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						selectedEdge.deselect();
 						selectedRadioButtons.remove(selectedEdge);
 						model.removeSelectedEdge(selectedEdge);
+						repaint();
 					}
 				}
-				
+
 				/*
 				 * Oder füge die Kante zu den Ausgewählten Contigs hinzu
 				 */
 				else if (rechteKante) {
-					System.out.println("füge rechte kante ein und ein rechter nachbar ist ausgewählt "+ isARightNeighourSelected);
+					System.out
+							.println("füge rechte kante ein und ein rechter nachbar ist ausgewählt "
+									+ isARightNeighourSelected);
 					selectedEdge.select();
 					selectedRadioButtons.add(selectedEdge);
 					model.addSelectedContig(selectedEdge);
-
-						ausgewaehlteContigs.add(selectedEdge.getContigi());						
-						ausgewaehlteContigs.add(selectedEdge.getContigj());
 					
+					selectedLeftEdges.add(indexLeft, selectedEdge);
+					selectedRightEdges.add(indexRight, selectedEdge);
+					System.out.println("linke ausgewählte nachbarn kante an index "+ausgewaehlteLinkeKanten.indexOf(selectedEdge));
+					System.out.println("rechte ausgewählte nachbarn kante an index "+ausgewaehlteRechteKanten.indexOf(selectedEdge));
+//					ausgewaehlteContigs.add(selectedEdge.getContigi());
+//					ausgewaehlteContigs.add(selectedEdge.getContigj());
+
 					model.sendCurrentContig();
 					model.sendLeftNeighbours();
 					model.sendRightNeighbours();
+					repaint();
 				}
 
 				else if (linkeKante) {
-					System.out.println("füge linke kante ein und ein linken nachbar ist ausgewählt "+ isALeftNeighourSelected);
+					System.out
+							.println("füge linke kante ein und ein linken nachbar ist ausgewählt "
+									+ isALeftNeighourSelected);
 					selectedEdge.select();
 					selectedRadioButtons.add(selectedEdge);
 					model.addSelectedContig(selectedEdge);
-						ausgewaehlteContigs.add(selectedEdge.getContigi());						
-						ausgewaehlteContigs.add(selectedEdge.getContigj());
 					
+					selectedLeftEdges.add(indexLeft, selectedEdge);
+					selectedRightEdges.add(indexRight, selectedEdge);
+					System.out.println("linke ausgewählte nachbarn kante an index "+ausgewaehlteLinkeKanten.indexOf(selectedEdge));
+					System.out.println("rechte ausgewählte nachbarn kante an index "+ausgewaehlteRechteKanten.indexOf(selectedEdge));
+//					ausgewaehlteContigs.add(selectedEdge.getContigi());
+//					ausgewaehlteContigs.add(selectedEdge.getContigj());
+
 					model.sendCurrentContig();
 					model.sendLeftNeighbours();
 					model.sendRightNeighbours();
+					repaint();
 				}
 				/*
 				 * Oder aber ich sage dem Benutzer, dass er das angeklickte
@@ -893,8 +1132,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			boolean currentContigIsReverse = contigPanel.isReverse();
 
 			model.changeContigs(index, currentContigIsReverse);
-			getGlassPane().setVisible(false);
-			glassPanel.setFlag(false);
+			flag = false;
 
 			ThreadClassForRightNeighours threadForRightNeighbours = new ThreadClassForRightNeighours();
 			threadForRightNeighbours.execute();
@@ -949,22 +1187,20 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			System.out.println("neue anzahl an nachbarn " + neighboursNumber);
 
 			if (neighboursNumber <= 10 && neighboursNumber > 0) {
-				
-				if(neighboursNumber < numberOfNeighbours){
-					chooseContigPanel.setPreferredSize(new Dimension(1000, 400));
-					scrollPane.revalidate();
+
+				if (neighboursNumber < numberOfNeighbours) {
+					chooseContigPanel
+							.setPreferredSize(new Dimension(1000, 400));
 				}
-				
+
 				numberOfNeighbours = neighboursNumber;
-				System.out.println("im if");
-				glassPanel.setNumberOfNeighbours(numberOfNeighbours);
 				model.setNeighbourNumber(numberOfNeighbours);
 
-				if(neighboursNumber > 8){
-					chooseContigPanel.setPreferredSize(new Dimension(1000, 600));
-					scrollPane.revalidate();
+				if (neighboursNumber > 8) {
+					chooseContigPanel
+							.setPreferredSize(new Dimension(1000, 600));
 				}
-				
+
 				if (rightContainer.getComponentCount() != 0
 						|| leftContainer.getComponentCount() != 0) {
 					model.sendLeftNeighbours();
@@ -980,12 +1216,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						+ " Neighbours.\n" + "Please choose between 1 and 10.");
 
 				numberOfNeighbours = 10;
-				glassPanel.setNumberOfNeighbours(numberOfNeighbours);
 				chooseContigPanel.setPreferredSize(new Dimension(1000, 600));
 				model.setNeighbourNumber(numberOfNeighbours);
 				model.sendLeftNeighbours();
 				model.sendRightNeighbours();
-				scrollPane.revalidate();
+
 			}
 
 		}

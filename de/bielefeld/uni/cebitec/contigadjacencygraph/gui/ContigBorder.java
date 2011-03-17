@@ -1,10 +1,12 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
+import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.geom.GeneralPath;
 
 import javax.swing.border.AbstractBorder;
@@ -17,6 +19,8 @@ public class ContigBorder extends AbstractBorder{
 	private boolean isReverse;
 	private boolean isSelected = false;
 	private boolean woandersAusgewaehlt;
+	private float[] dash = {2,2};
+	private float[] dash2 = {15,2};
 	
 	public ContigBorder(boolean isRepeat, boolean isReverse) {
 		this.isRepeat = isRepeat;
@@ -49,32 +53,30 @@ public class ContigBorder extends AbstractBorder{
 		 * wird es mit rotem Rand dargestellt. Ansonsten mit schwarzem.
 		 */
 		if (isSelected) {
-			g2.setColor(Color.GREEN);
+			g2.setColor(Color.BLACK);
 		}else if (woandersAusgewaehlt){
-			g2.setColor(Color.RED);
+			g2.setColor(Color.DARK_GRAY);
+			g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, dash2 , 0));
 		}
 		else{
 			g2.setColor(Color.BLACK);
+			g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1 , dash, 0));
 		}
 		
 		if(isRepeat ==false && isReverse == false){
 			p = makeContig(0,0, c.getWidth(),c.getHeight());
-			//g2.setColor(Color.BLUE);
 			g2.draw(p);
 		}
 		if(isRepeat == true && isReverse == false){
 			p = makeRepeatContig(0,0, c.getWidth(),c.getHeight());
-//			g2.setColor(Color.RED);
 			g2.draw(p);
 		}
 		if(isRepeat == false && isReverse == true){
 			p = makeReverseContig(0,0, c.getWidth(),c.getHeight());
-//			g2.setColor(Color.GREEN);
 			g2.draw(p);
 		}
 		if(isRepeat == true && isReverse == true){
 			p = makeReverseRepeatContig(0,0, c.getWidth(),c.getHeight());
-//			g2.setColor(Color.ORANGE);
 			g2.draw(p);
 		}
 		

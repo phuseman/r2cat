@@ -1,5 +1,7 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
+import java.awt.Graphics;
+
 public interface CagEventListener {
 
 	/**

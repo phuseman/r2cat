@@ -92,27 +92,6 @@ public class GlassPaneWithLines extends JPanel {
 		repaint();
 	}
 
-	private double calculateMax(double[] support) {
-		double max = 0;
-
-		for (double d : support) {
-			if (d > max) {
-				max = d;
-			}
-		}
-		return max;
-	}
-
-	private double calculateMin(double[] support) {
-		double min = support[0];
-
-		for (double d : support) {
-			if (d < min) {
-				min = d;
-			}
-		}
-		return min;
-	}
 
 	public void setFlag(boolean b) {
 		flag = b;
@@ -191,11 +170,7 @@ public class GlassPaneWithLines extends JPanel {
 						
 						if(isZScores){
 							if(supportleft[zaehler] > 0){
-//								if(supportleft[zaehler]>5){
-//									lineStrokeLeft = (float)5;
-//								}else{									
 									lineStrokeLeft = (float) (supportleft[zaehler]);///10.0);
-//								}
 							}else{
 								lineStroke = (float) 0.01;
 							}
@@ -257,11 +232,7 @@ public class GlassPaneWithLines extends JPanel {
 
 						if(isZScores){
 							if(support[c] > 0){
-//								if(support[c]>5){
-//									lineStroke = (float)5;
-//								}else{
 									lineStroke = (float) (support[c]);///10.0);
-//								}
 							}else{
 								lineStroke = (float) 0.01;
 							}
@@ -315,5 +286,28 @@ public class GlassPaneWithLines extends JPanel {
 	public double getMinSupportOfAllEdges() {
 		return minSupportOfAllEdges;
 	}
+
+	
+//	private double calculateMax(double[] support) {
+//		double max = 0;
+//
+//		for (double d : support) {
+//			if (d > max) {
+//				max = d;
+//			}
+//		}
+//		return max;
+//	}
+//
+//	private double calculateMin(double[] support) {
+//		double min = support[0];
+//
+//		for (double d : support) {
+//			if (d < min) {
+//				min = d;
+//			}
+//		}
+//		return min;
+//	}
 
 }
