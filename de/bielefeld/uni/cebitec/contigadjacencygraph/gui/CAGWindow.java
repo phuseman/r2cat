@@ -613,11 +613,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					DNASequence dnaSequence;
 					int indexOfContig;
 					if (edge.geti() == centralContigIndex) {
-						System.out.println("linker nachbar: cen is i");
 						dnaSequence = edge.getContigj();
 						indexOfContig = edge.getj();
 					} else {
-						System.out.println("linker nachbar: cen is j");
 						dnaSequence = edge.getContigi();
 						indexOfContig = edge.geti();
 					}
@@ -733,11 +731,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					int indexOfContig;
 
 					if (edge.geti() == centralContigIndex) {
-						System.out.println("rechter nachbar: cen is i");
 						dnaSequence = edge.getContigj();
 						indexOfContig = edge.getj();
 					} else {
-						System.out.println("rechter nachbar: cen is j");
 						dnaSequence = edge.getContigi();
 						indexOfContig = edge.geti();
 					}
@@ -920,38 +916,33 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				System.out.println("edge "+ selectedEdge + " i "+selectedEdge.geti()+" "+selectedEdge.getContigi().getId()
 						+" j "+selectedEdge.getj()+" "+selectedEdge.getContigj().getId());
 				
-				Vector<AdjacencyEdge> selectedLeftEdges;
-				Vector<AdjacencyEdge> selectedRightEdges;
-				int indexLeft;
-				int indexRight;
-				
-				if(radioButton.isLeft()){
-					if(centralContig.isReverse()){
-						selectedLeftEdges = ausgewaehlteRechteKanten;
-						selectedRightEdges = ausgewaehlteLinkeKanten;
+				Vector<AdjacencyEdge> selectedLeftEdges = new Vector<AdjacencyEdge>();
+				Vector<AdjacencyEdge> selectedRightEdges = new Vector<AdjacencyEdge>();
+				int indexLeft= -1;
+				int indexRight= -1;
+	
+				if((radioButton.isLeft() && !centralContig.isReverse())
+						|| 
+						(!radioButton.isLeft() && centralContig.isReverse())){
+					
+					selectedLeftEdges  = centralContig.isReverse() ? ausgewaehlteRechteKanten : ausgewaehlteLinkeKanten;
+					selectedRightEdges  = centralContig.isReverse() ? ausgewaehlteLinkeKanten : ausgewaehlteRechteKanten;
 						
 						if(centralContigIndex == selectedEdge.geti()){
-							indexLeft = selectedEdge.geti();
-							indexRight = selectedEdge.getj();
-						}else{
 							indexLeft = selectedEdge.getj();
 							indexRight = selectedEdge.geti();
-						}
-					}else{
-						selectedLeftEdges = ausgewaehlteLinkeKanten;
-						selectedRightEdges = ausgewaehlteRechteKanten;
-						if(centralContigIndex  == selectedEdge.geti()){
-							indexLeft = selectedEdge.getj();
-							indexRight = selectedEdge.geti();							
 						}else{
 							indexLeft = selectedEdge.geti();
-							indexRight = selectedEdge.getj();		
+							indexRight = selectedEdge.getj();
 						}
-					}
-				}else{
-					if(centralContig.isReverse()){
-						selectedLeftEdges = ausgewaehlteLinkeKanten;
-						selectedRightEdges = ausgewaehlteRechteKanten;
+					
+			}else if(!radioButton.isLeft() && !centralContig.isReverse()
+					||
+						(radioButton.isLeft() && centralContig.isReverse())){
+				
+				selectedLeftEdges  = centralContig.isReverse() ? ausgewaehlteRechteKanten : ausgewaehlteLinkeKanten;
+				selectedRightEdges  = centralContig.isReverse() ? ausgewaehlteRechteKanten : ausgewaehlteLinkeKanten;
+					
 						if(centralContigIndex == selectedEdge.geti()){
 							indexLeft = selectedEdge.geti();
 							indexRight = selectedEdge.getj();
@@ -959,20 +950,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 							indexLeft = selectedEdge.getj();
 							indexRight = selectedEdge.geti();
 						}
-					}else{
-						selectedLeftEdges = ausgewaehlteRechteKanten;
-						selectedRightEdges = ausgewaehlteLinkeKanten;
-						if(centralContigIndex == selectedEdge.geti()){
-							indexLeft = selectedEdge.getj();
-							indexRight = selectedEdge.geti();
-						}else{
-							indexLeft = selectedEdge.geti();
-							indexRight = selectedEdge.getj();
-						}
-					}
-//					selectedLeftEdges = centralContig.isReverse() ? ausgewaehlteLinkeKanten : ausgewaehlteRechteKanten;
-//					selectedRightEdges = centralContig.isReverse() ? ausgewaehlteRechteKanten : ausgewaehlteLinkeKanten;
-				}
+			}
+
 				/*
 				 * Mein Initialfall: wurden bisher keine Contigs ausgewählt oder
 				 * alle bisher ausgewählten Contigs gelöscht, wird dieser Teil
