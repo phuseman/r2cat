@@ -272,10 +272,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		/*
 		 * In dieser For werden alle Contig ids gesammelt und gespeichert.
 		 */
-
-		/*
-		 * TODO länge der Liste sollte sich an die größe des Fensters anpassen
-		 */
 		dataForList = new String[nodes.length];
 		for (int i = 0; i < nodes.length; i++) {
 			String id = nodes[i].getId();
@@ -627,14 +623,15 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					if (isZScore) {
 						leftSupport[t] = ((edge.getSupport() - meanForLeftNeighbours[indexOfContig]) 
 								/ sDeviationForLeftNeighbours[indexOfContig]);
+						System.out.println("linker support "+leftSupport[t]);
 					} else {
 						leftSupport[t] = edge.getSupport();
 					}
-
+					
 					boolean anderweitigAusgewaehlt = false;
-					if (ausgewaehlteLinkeKanten.indexOf(edge)==indexOfContig
-							&& !dnaSequence.isRepetitive()
-							&& !selectedRadioButtons.contains(edge)) {
+					AdjacencyEdge test = ausgewaehlteLinkeKanten.get(indexOfContig);
+					
+					if (test!=null	&& !dnaSequence.isRepetitive()) {
 						anderweitigAusgewaehlt = true;
 					}
 
@@ -750,11 +747,16 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					}
 					/*
 					 * Hier wird für jeden Nachbarn sein Aussehen erstellt.
+					 * 
+					 * Test, ob der Nachbar schon für einen anderen Knoten im Graphen
+					 * ausgewählt wurde. Ist dies der Fall bekommt dieses Contig ein
+					 * anderes Aussehen und kann auch nicht mehr für dieses
+					 * ausgewählt werden. 
 					 */
 					boolean anderweitigAusgewaehlt = false;
-					if (ausgewaehlteRechteKanten.indexOf(edge)== indexOfContig
-							&& !dnaSequence.isRepetitive()
-							&& !selectedRadioButtons.contains(edge)) {
+					AdjacencyEdge test = ausgewaehlteLinkeKanten.get(indexOfContig);
+
+					if (test!=null	&& !dnaSequence.isRepetitive()) {
 						anderweitigAusgewaehlt = true;
 					}
 					contigPanel = new ContigAppearance(layoutGraph, edge,
@@ -904,8 +906,43 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						.showMessageDialog(
 								window,
 								"Sorry.\n"
-										+ "You already selected this neighbour for an another contig.\n");
+										+ "You already selected this neighbour for an another contig.\n" 
+										+ "If you want to delete this selection, you have to click" +
+												"on this contig and delete that selection.\n" +
+												"Then you are able to select this selection");
 
+				/* TODO Löschoption
+				 * Hier kann erweitert werden, dass die andere Kante gelöscht wird.
+				 * Dazu muss erst im linken und rechten Nachbarvektor ermittelt werden,
+				 * in welchem der Index des Nachbarn belegt ist.
+				 * Darüber kann dann die Kante erhalten werden und damit der Index des 
+				 * anderen contig im anderen Vektor.
+				 * Dann muss aus beiden Vektoren der Index frei gemacht werden.
+				 * 
+				 * 
+				 * Bem für Repeats: Hier muss ich noch einen nachschauen, ob im Vektor an einem index mehrere
+				 * kanten gespeichert werden können. und dann muss hier beim löschen auch darauf geachtet 
+				 * werden, dass auch die richtige kante gelöscht wird.
+				 */
+//				Object[] options = { "Yes", "No" };
+//		
+//				int n = javax.swing.JOptionPane.showOptionDialog(window,
+//						"You already selected this neighbour for an another contig..\n"
+//								+ " Do you want to delete that selection?",
+//						"", JOptionPane.YES_NO_OPTION,
+//						JOptionPane.QUESTION_MESSAGE, null, options,
+//						options[0]);
+//
+//				if (n == JOptionPane.YES_OPTION) {
+//
+//					ausgewaehlteLinkeKanten.remove(andereselectedEdge);
+//					ausgewaehlteRechteKanten.remove(andereselectedEdge);
+//					selectedEdge.deselect();
+//					selectedRadioButtons.remove(andereselectedEdge);
+//					model.removeSelectedEdge(andereselectedEdge);
+//					repaint();
+//				}
+				
 			} else {
 
 				Vector<AdjacencyEdge> copyOfSelectedContigs = (Vector<AdjacencyEdge>) selectedRadioButtons
@@ -913,21 +950,17 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 				ContigRadioButton radioButton = (ContigRadioButton) e.getSource();
 				AdjacencyEdge selectedEdge = radioButton.getEdge();
+				
 				System.out.println("edge "+ selectedEdge + " i "+selectedEdge.geti()+" "+selectedEdge.getContigi().getId()
 						+" j "+selectedEdge.getj()+" "+selectedEdge.getContigj().getId());
 				
-				Vector<AdjacencyEdge> selectedLeftEdges = new Vector<AdjacencyEdge>();
-				Vector<AdjacencyEdge> selectedRightEdges = new Vector<AdjacencyEdge>();
 				int indexLeft= -1;
 				int indexRight= -1;
 	
 				if((radioButton.isLeft() && !centralContig.isReverse())
 						|| 
 						(!radioButton.isLeft() && centralContig.isReverse())){
-					
-					selectedLeftEdges  = centralContig.isReverse() ? ausgewaehlteRechteKanten : ausgewaehlteLinkeKanten;
-					selectedRightEdges  = centralContig.isReverse() ? ausgewaehlteLinkeKanten : ausgewaehlteRechteKanten;
-						
+
 						if(centralContigIndex == selectedEdge.geti()){
 							indexLeft = selectedEdge.getj();
 							indexRight = selectedEdge.geti();
@@ -939,10 +972,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			}else if(!radioButton.isLeft() && !centralContig.isReverse()
 					||
 						(radioButton.isLeft() && centralContig.isReverse())){
-				
-				selectedLeftEdges  = centralContig.isReverse() ? ausgewaehlteRechteKanten : ausgewaehlteLinkeKanten;
-				selectedRightEdges  = centralContig.isReverse() ? ausgewaehlteRechteKanten : ausgewaehlteLinkeKanten;
-					
+
 						if(centralContigIndex == selectedEdge.geti()){
 							indexLeft = selectedEdge.geti();
 							indexRight = selectedEdge.getj();
@@ -958,17 +988,13 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				 * aufgerufen. Danach ist eine Differenzierung notwenig.
 				 */
 				if (selectedRadioButtons.size() == 0) {
-					System.out.println("Contig wird hinzugefügt");
+//					System.out.println("Contig wird hinzugefügt");
 					selectedEdge.select();
 					selectedRadioButtons.add(selectedEdge);
 					
-					selectedLeftEdges.add(indexLeft, selectedEdge);
-					selectedRightEdges.add(indexRight, selectedEdge);					
-					System.out.println("linke ausgewählte nachbarn kante an index "+ausgewaehlteLinkeKanten.indexOf(selectedEdge));
-					System.out.println("rechte ausgewählte nachbarn kante an index "+ausgewaehlteRechteKanten.indexOf(selectedEdge));
-//					ausgewaehlteContigs.add(selectedEdge.getContigi());
-//					ausgewaehlteContigs.add(selectedEdge.getContigj());
-					
+					ausgewaehlteLinkeKanten.add(indexLeft, selectedEdge);
+					ausgewaehlteRechteKanten.add(indexRight, selectedEdge);
+
 					model.addSelectedContig(selectedEdge);
 					model.sendCurrentContig();
 					model.sendLeftNeighbours();
@@ -1026,8 +1052,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 							options[0]);
 
 					if (n == JOptionPane.YES_OPTION) {
-						ausgewaehlteContigs.remove(selectedEdge.getContigi());
-						ausgewaehlteContigs.remove(selectedEdge.getContigj());
+
+						ausgewaehlteLinkeKanten.remove(selectedEdge);
+						ausgewaehlteRechteKanten.remove(selectedEdge);
 						selectedEdge.deselect();
 						selectedRadioButtons.remove(selectedEdge);
 						model.removeSelectedEdge(selectedEdge);
@@ -1046,8 +1073,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					selectedRadioButtons.add(selectedEdge);
 					model.addSelectedContig(selectedEdge);
 					
-					selectedLeftEdges.add(indexLeft, selectedEdge);
-					selectedRightEdges.add(indexRight, selectedEdge);
+					ausgewaehlteLinkeKanten.add(indexLeft, selectedEdge);
+					ausgewaehlteRechteKanten.add(indexRight, selectedEdge);
 					System.out.println("linke ausgewählte nachbarn kante an index "+ausgewaehlteLinkeKanten.indexOf(selectedEdge));
 					System.out.println("rechte ausgewählte nachbarn kante an index "+ausgewaehlteRechteKanten.indexOf(selectedEdge));
 //					ausgewaehlteContigs.add(selectedEdge.getContigi());
@@ -1067,8 +1094,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					selectedRadioButtons.add(selectedEdge);
 					model.addSelectedContig(selectedEdge);
 					
-					selectedLeftEdges.add(indexLeft, selectedEdge);
-					selectedRightEdges.add(indexRight, selectedEdge);
+					ausgewaehlteLinkeKanten.add(indexLeft, selectedEdge);
+					ausgewaehlteRechteKanten.add(indexRight, selectedEdge);
 					System.out.println("linke ausgewählte nachbarn kante an index "+ausgewaehlteLinkeKanten.indexOf(selectedEdge));
 					System.out.println("rechte ausgewählte nachbarn kante an index "+ausgewaehlteRechteKanten.indexOf(selectedEdge));
 //					ausgewaehlteContigs.add(selectedEdge.getContigi());

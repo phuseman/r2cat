@@ -24,7 +24,7 @@ public class ContigAppearance extends JPanel {
 	private AdjacencyEdge edge;
 	private int i;
 	private String contigName;
-	private double relativeSup;
+	private double support;
 	private int numberOfNeighbours = 5;
 	private boolean isReverse;
 	private boolean anderweitigAusgewaehlt;
@@ -49,14 +49,14 @@ public class ContigAppearance extends JPanel {
 	public ContigAppearance(DNASequence node, int indexOfCentralContig,boolean isCurrentContigSelected,
 			boolean isCurrentContigReverse, long maxSize, long minSize) {
 		this.i = indexOfCentralContig;
-		boolean cIsReverse = isCurrentContigReverse;
+		isReverse = isCurrentContigReverse;
 
 		contigLabel = new JLabel();
 		this.setBackground(Color.WHITE);
 		this.add(contigLabel);
 		this.setName(node.getId());
 		setContigAppearance(node.getId(), node.getSize(), new ContigBorder(node
-				.isRepetitive(), cIsReverse, isCurrentContigSelected, false));
+				.isRepetitive(), isReverse, isCurrentContigSelected, false));
 		setSizeOfContig(node.getSize(), maxSize, minSize);
 	}
 
@@ -102,6 +102,8 @@ public class ContigAppearance extends JPanel {
 		if(!selected && anderweitigAusgewaehlt){
 			flag = true;
 		}
+		
+		support = includingEdge.getSupport();
 
 		setContigAppearance(contig.getId(), contig.getSize(), new ContigBorder(
 				contig.isRepetitive(), neighbourIsReverse, selected, flag));
@@ -142,7 +144,7 @@ public class ContigAppearance extends JPanel {
 		 * TODO erweitern so viele Informationen wie moeglich in dieses ToolTip
 		 * stecken.
 		 */
-		if (relativeSup <= 0) {
+		if (support <= 0) {
 			this.setToolTipText("<html><font size = -2><u>" + contigId + "</u>"
 					+ "<br>length:" + size + " b <br>"
 					+ "support: is not available for this contig <br>"
@@ -150,7 +152,7 @@ public class ContigAppearance extends JPanel {
 		} else {
 			this.setToolTipText("<html><font size = -2><u>" + contigId + "</u>"
 					+ "<br>length:" + size + " b <br>" + "support: "
-					+ Math.ceil(relativeSup * 10000) / 100 + " <br>"
+					+ Math.ceil(support) + " <br>"
 					+ "</html>");
 		}
 

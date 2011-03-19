@@ -277,31 +277,37 @@ public class CagCreator {
 
 		meanForLeftNeigbours = new double[neighbours.length];
 		sDeviationsForLeftNeigbours = new double[neighbours.length];
-
+		double nZahl = graph.getEdges().size();
+		System.out.println(nZahl);
 		for (int i = 0; i < neighbours.length; i++) {
 			Vector<AdjacencyEdge> neighbour = neighbours[i];
 
-			double wert = 0;
+			double summe = 0;
 			for (AdjacencyEdge adjacencyEdge : neighbour) {
-				wert = wert + adjacencyEdge.getSupport();
+				summe = summe + adjacencyEdge.getSupport();
 			}
 
-			meanForLeftNeigbours[i] = wert / neighbour.size();
+//			meanForLeftNeigbours[i] = summe / neighbour.size();
+			meanForLeftNeigbours[i] = summe / nZahl;
+			System.out.println(" m "+meanForLeftNeigbours[i] +" "+neighbour.size());
 			
-			double zahl = 0;
+			double summe1 = 0;
 			for (AdjacencyEdge adjacencyEdge : neighbour) {
-				zahl = zahl
+				summe1 = summe1
 						+ Math.pow(adjacencyEdge.getSupport()
-								- meanForLeftNeigbours[i], 2);
+								- meanForLeftNeigbours[i],2);
 			}
-
+			System.out.println("zwischensumme "+summe1);
 			if (neighbour.size() > 1) {
 
-				sDeviationsForLeftNeigbours[i] = Math
-						.sqrt((1.0 / ((double) neighbour.size() - 1.0)) * zahl);
+				sDeviationsForLeftNeigbours[i] = 					
+					Math
+//						.sqrt((1.0 / ((double) neighbour.size() - 1.0)) * summe1);
+					.sqrt((1.0 / (nZahl - 1.0)) * summe1);
 			}
+			System.out.println("s "+sDeviationsForLeftNeigbours[i]);
+			System.out.println(" ");
 		}
-
 	}
 
 	private void calculateMeanAndSDeviationForRightNeigbours(
@@ -313,21 +319,21 @@ public class CagCreator {
 		for (int i = 0; i < neighbours.length; i++) {
 			Vector<AdjacencyEdge> neighbour = neighbours[i];
 
-			double wert = 0;
+			double summe1 = 0;
 			for (AdjacencyEdge adjacencyEdge : neighbour) {
-				wert = wert + adjacencyEdge.getSupport();
+				summe1 = summe1 + adjacencyEdge.getSupport();
 			}
-			meanForRightNeigbours[i] = wert / neighbour.size();
+			meanForRightNeigbours[i] = summe1 / neighbour.size();
 
-			double zahl = 0;
+			double summe2 = 0;
 			for (AdjacencyEdge adjacencyEdge : neighbour) {
-				zahl = zahl
+				summe2 = summe2
 						+ Math.pow(adjacencyEdge.getSupport()
-								- meanForRightNeigbours[i], 2);
+								- meanForRightNeigbours[i],2);
 			}
 			if (neighbour.size() > 1) {
 				sDeviationsForRightNeigbours[i] = Math
-						.sqrt((1.0 / ((double) neighbour.size() - 1.0)) * zahl);
+						.sqrt((1.0 / ((double) neighbour.size() - 1.0)) * summe2);
 			}
 		}
 	}
@@ -435,7 +441,7 @@ public class CagCreator {
 	private Vector<AdjacencyEdge> calculateFiveMostLikleyLeftNeighbours(
 			int centralContigIndex, boolean currentContigIsReverse) {
 
-		System.out.println("Berechne linke Nachbarn");
+//		System.out.println("Berechne linke Nachbarn");
 		/*
 		 * hier muss unterschieden werden, ob das zentrale Contig reverse
 		 * dargestellt wird dann muss ich den nachbarnvektor entsprechend
@@ -469,8 +475,8 @@ public class CagCreator {
 	}
 
 	public Vector<AdjacencyEdge> addSelectedContig(AdjacencyEdge selectedEdge) {
-		System.out.println("Vor dem hinzufügen der Kante "
-				+ selectedContigs.size());
+//		System.out.println("Vor dem hinzufügen der Kante "
+//				+ selectedContigs.size());
 		for (Iterator<AdjacencyEdge> iterator = selectedContigs.iterator(); iterator
 				.hasNext();) {
 			AdjacencyEdge edge = iterator.next();
@@ -483,16 +489,16 @@ public class CagCreator {
 		if (selectedContigs.size() == 0) {
 			selectedContigs.add(selectedEdge);
 		}
-		System.out.println("nach dem hinzufügen der Kante "
-				+ selectedContigs.size());
+//		System.out.println("nach dem hinzufügen der Kante "
+//				+ selectedContigs.size());
 		return selectedContigs;
 	}
 
 	public Vector<AdjacencyEdge> removeSelectedEdge(AdjacencyEdge selectedEdge) {
 
 		boolean flag = false;
-		System.out.println("Vor dem Löschen der Kante "
-				+ selectedContigs.size());
+//		System.out.println("Vor dem Löschen der Kante "
+//				+ selectedContigs.size());
 		for (AdjacencyEdge edge : selectedContigs) {
 			if (edge.equals(selectedEdge)) {
 
@@ -505,8 +511,8 @@ public class CagCreator {
 				break;
 			}
 		}
-		System.out.println("Nach dem Löschen der Kante "
-				+ selectedContigs.size());
+//		System.out.println("Nach dem Löschen der Kante "
+//				+ selectedContigs.size());
 		if (!flag) {
 			javax.swing.JOptionPane.showMessageDialog(window, "Sorry.\n"
 					+ "Can't remove this neighbour\n"
@@ -519,7 +525,7 @@ public class CagCreator {
 	 * Send an event, if the user selected a contig
 	 */
 	public void sendCurrentContig() {
-		System.out.println("sende aktuelles contig");
+//		System.out.println("sende aktuelles contig");
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
 				currentContigObject, currentContigIndex, currentContigIsReverse);
 		fireEvent(event);
@@ -531,7 +537,7 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendLeftNeighbours() {
-		System.out.println("sende linke nachbarn");
+//		System.out.println("sende linke nachbarn");
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_LEFT_NEIGHBOURS,
 				calculateFiveMostLikleyLeftNeighbours(currentContigIndex,
 						currentContigIsReverse));
@@ -544,7 +550,7 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendRightNeighbours() {
-		System.out.println("sende rechte nachbarn");
+//		System.out.println("sende rechte nachbarn");
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_RIGHT_NEIGHBOURS,
 				calculateFiveMostLikleyRightNeighbours(currentContigIndex,
 						currentContigIsReverse));
