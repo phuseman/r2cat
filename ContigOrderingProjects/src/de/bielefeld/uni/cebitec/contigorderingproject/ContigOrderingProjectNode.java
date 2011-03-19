@@ -73,12 +73,13 @@ final class ContigOrderingProjectNode extends FilterNode {
   public Action[] getActions(boolean arg0) {
     Action[] nodeActions = new Action[4];
     nodeActions[0] = new NewReferenceAction();
+    //TODO find out, why rename is always disabled
+//    nodeActions[1] = CommonProjectActions.renameProjectAction();
 //    nodeActions[0] = CommonProjectActions.newFileAction();
     //null value results in a separator
     nodeActions[2] = CommonProjectActions.deleteProjectAction();
     nodeActions[3] = CommonProjectActions.closeProjectAction();
     //nodeActions[5] = CommonProjectActions.setAsMainProjectAction();
-//    nodeActions[1] = CommonProjectActions.copyProjectAction();
     return nodeActions;
   }
 

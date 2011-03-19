@@ -27,8 +27,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.AbstractQueue;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Queue;
@@ -38,10 +36,8 @@ import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import org.netbeans.api.project.ProjectUtils;
-import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
-import org.openide.NotifyDescriptor.Confirmation;
 import org.openide.awt.DynamicMenuContent;
 import org.openide.filesystems.FileChooserBuilder;
 import org.openide.filesystems.FileObject;
@@ -115,8 +111,8 @@ public final class NewReferenceAction extends AbstractAction implements ContextA
           FileObject existingMatches = p.getProjectDirectory().getFileObject(referenceString, "r2c");
           if (existingMatches != null) {
             NotifyDescriptor.Confirmation confirm = new NotifyDescriptor.Confirmation("Already existing matchfile", "Overwrite file?");
-            DialogDisplayer.getDefault().notify(confirm);
-            if (confirm.getValue().equals(NotifyDescriptor.Confirmation.YES_OPTION)) {
+            Object returnvalue = DialogDisplayer.getDefault().notify(confirm);
+            if (returnvalue == NotifyDescriptor.Confirmation.YES_OPTION) {
               try {
                 existingMatches.delete();
               } catch (IOException ex) {
