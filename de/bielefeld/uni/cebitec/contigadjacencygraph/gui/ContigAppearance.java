@@ -30,10 +30,6 @@ public class ContigAppearance extends JPanel {
 	private boolean anderweitigAusgewaehlt;
 	private boolean selected;
 
-	public boolean isAnderweitigAusgewaehlt() {
-		return anderweitigAusgewaehlt;
-	}
-
 	public ContigAppearance() {
 		super();
 		this.setBackground(Color.WHITE);
@@ -64,7 +60,7 @@ public class ContigAppearance extends JPanel {
 	 * Konstruktor fuer die Nachbarn, hier ist die Kante relevant
 	 */
 	public ContigAppearance(LayoutGraph graph, AdjacencyEdge includingEdge,
-			int indexOfNeighbour, boolean sideIsLeft, long maxSize, long minSize, boolean anderweitigAusgewaehlt) {
+			int indexOfNeighbour, boolean sideIsLeft, long maxSize, long minSize, boolean woandersAusgewaehlt) {
 		super();
 
 		this.lGraph = graph;
@@ -98,20 +94,16 @@ public class ContigAppearance extends JPanel {
 		if (includingEdge.isSelected()) {
 			selected = true;
 		}
-		boolean flag = false;
-		if(!selected && anderweitigAusgewaehlt){
-			flag = true;
+		anderweitigAusgewaehlt = false;
+		if(!selected && woandersAusgewaehlt){
+			anderweitigAusgewaehlt = true;
 		}
 		
 		support = includingEdge.getSupport();
 
 		setContigAppearance(contig.getId(), contig.getSize(), new ContigBorder(
-				contig.isRepetitive(), neighbourIsReverse, selected, flag));
+				contig.isRepetitive(), neighbourIsReverse, selected, anderweitigAusgewaehlt));
 		setSizeOfContig(contig.getSize(), maxSize, minSize);
-	}
-
-	public boolean isSelected() {
-		return selected;
 	}
 
 	/*
@@ -203,6 +195,14 @@ public class ContigAppearance extends JPanel {
 
 	public synchronized boolean isReverse() {
 		return isReverse;
+	}
+	
+	public boolean isAnderweitigAusgewaehlt() {
+		return anderweitigAusgewaehlt;
+	}
+	
+	public boolean isSelected() {
+		return selected;
 	}
 
 }

@@ -59,7 +59,7 @@ public class ContigBorder extends AbstractBorder{
 			g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, dash2 , 0));
 		}
 		else{
-			g2.setColor(Color.BLACK);
+			g2.setColor(Color.GRAY);
 			g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1 , dash, 0));
 		}
 		

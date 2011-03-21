@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.Map.Entry;
@@ -44,6 +45,7 @@ public class CagCreator {
 	private int neighbourNumber = 5;
 
 	private Vector<AdjacencyEdge> selectedContigs;
+	private LinkedList<AdjacencyEdge> sContigs;
 	private ArrayList<CagEventListener> listeners;
 	private long maxSizeOfContigs;
 	private long minSizeOfContigs;
@@ -77,7 +79,7 @@ public class CagCreator {
 	public static void main(String[] args) {
 
 		TreebasedContigSorterProject project = new TreebasedContigSorterProject();
-
+		
 		project.register(new SimpleProgressReporter());
 		try {
 			try {
@@ -85,8 +87,9 @@ public class CagCreator {
 				boolean projectParsed = project
 						.readProject(new File(
 						// "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
-								// "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs.tcp"));
+//								 "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs.tcp"));
 								"/homes/aseidel/testdaten/perfekt/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
+				
 				if (!projectParsed) {
 					System.err
 							.println("The given project file was not sucessfully parsed");
@@ -117,8 +120,13 @@ public class CagCreator {
 					NeatoOutputType.ONENODE);
 
 			cag = project.getContigAdjacencyGraph();
+//			try {
+//				cag.writeWeightMatrix(new File("/home/annica/cag_matrix.csv"));
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 			completeGraph = cag.getCompleteGraph();
-
 			// model = new CagCreator(layoutGraph);
 			model = new CagCreator(completeGraph);
 
@@ -161,8 +169,8 @@ public class CagCreator {
 		// fuer alle Kanten im layout Graphen
 		for (AdjacencyEdge e : graph.getEdges()) {
 
-			// hole fuer die aktuelle Kante den Knoten i und j
-			int i = e.geti();// ist das der Index?
+			// hole fuer die aktuelle Kante die Indices für Knoten i und j
+			int i = e.geti();
 			int j = e.getj();
 
 			// wenn die aktuelle Kante der linke konnektor von i
@@ -272,24 +280,20 @@ public class CagCreator {
 	/*
 	 * Durchschnitt des Supports aller linken und rechten Nachbarn
 	 */
-	private void calculateMeanAndSDeviationForLeftNeigbours(
-			Vector<AdjacencyEdge>[] neighbours) {
+	private void calculateMeanAndSDeviationForLeftNeigbours(Vector<AdjacencyEdge>[] neighbours) {
 
-		meanForLeftNeigbours = new double[neighbours.length];
-		sDeviationsForLeftNeigbours = new double[neighbours.length];
-		double nZahl = graph.getEdges().size();
-		System.out.println(nZahl);
-		for (int i = 0; i < neighbours.length; i++) {
+		meanForLeftNeigbours = new double[graph.getNodes().size()];
+		sDeviationsForLeftNeigbours = new double[graph.getNodes().size()];
+		
+		for (int i = 0; i < graph.getNodes().size(); i++) {
 			Vector<AdjacencyEdge> neighbour = neighbours[i];
 
 			double summe = 0;
 			for (AdjacencyEdge adjacencyEdge : neighbour) {
 				summe = summe + adjacencyEdge.getSupport();
 			}
-
-//			meanForLeftNeigbours[i] = summe / neighbour.size();
-			meanForLeftNeigbours[i] = summe / nZahl;
-			System.out.println(" m "+meanForLeftNeigbours[i] +" "+neighbour.size());
+		
+			meanForLeftNeigbours[i] = summe / (graph.getNodes().size()*2);
 			
 			double summe1 = 0;
 			for (AdjacencyEdge adjacencyEdge : neighbour) {
@@ -297,43 +301,42 @@ public class CagCreator {
 						+ Math.pow(adjacencyEdge.getSupport()
 								- meanForLeftNeigbours[i],2);
 			}
-			System.out.println("zwischensumme "+summe1);
-			if (neighbour.size() > 1) {
 
-				sDeviationsForLeftNeigbours[i] = 					
-					Math
-//						.sqrt((1.0 / ((double) neighbour.size() - 1.0)) * summe1);
-					.sqrt((1.0 / (nZahl - 1.0)) * summe1);
+			if (neighbour.size() > 1) {
+				sDeviationsForLeftNeigbours[i] = Math
+				.sqrt((1.0 / ((double)(graph.getNodes().size()*2)- 1.0 ) * (summe1)));
 			}
-			System.out.println("s "+sDeviationsForLeftNeigbours[i]);
-			System.out.println(" ");
+			
 		}
 	}
 
 	private void calculateMeanAndSDeviationForRightNeigbours(
-			Vector<AdjacencyEdge>[] neighbours) {
+			Vector<AdjacencyEdge>[] rightNeighbours) {
 
-		meanForRightNeigbours = new double[neighbours.length];
-		sDeviationsForRightNeigbours = new double[neighbours.length];
+		meanForRightNeigbours = new double[graph.getNodes().size()];
+		sDeviationsForRightNeigbours = new double[graph.getNodes().size()];
 
-		for (int i = 0; i < neighbours.length; i++) {
-			Vector<AdjacencyEdge> neighbour = neighbours[i];
+		for (int i = 0; i < graph.getNodes().size(); i++) {
+			Vector<AdjacencyEdge> neighbourR = rightNeighbours[i];
 
-			double summe1 = 0;
-			for (AdjacencyEdge adjacencyEdge : neighbour) {
-				summe1 = summe1 + adjacencyEdge.getSupport();
+			double summe = 0;
+
+			for (AdjacencyEdge adjacencyEdge : neighbourR) {
+				summe = summe + adjacencyEdge.getSupport();
 			}
-			meanForRightNeigbours[i] = summe1 / neighbour.size();
 
+			meanForRightNeigbours[i] = summe / (graph.getNodes().size()*2);
+			
 			double summe2 = 0;
-			for (AdjacencyEdge adjacencyEdge : neighbour) {
+			for (AdjacencyEdge adjacencyEdge : neighbourR) {
 				summe2 = summe2
 						+ Math.pow(adjacencyEdge.getSupport()
 								- meanForRightNeigbours[i],2);
 			}
-			if (neighbour.size() > 1) {
+			
+			if (neighbourR.size() > 1) {
 				sDeviationsForRightNeigbours[i] = Math
-						.sqrt((1.0 / ((double) neighbour.size() - 1.0)) * summe2);
+						.sqrt((1.0 / ((double)(graph.getNodes().size()*2)- 1.0 ) * (summe2)));
 			}
 		}
 	}
@@ -475,8 +478,8 @@ public class CagCreator {
 	}
 
 	public Vector<AdjacencyEdge> addSelectedContig(AdjacencyEdge selectedEdge) {
-//		System.out.println("Vor dem hinzufügen der Kante "
-//				+ selectedContigs.size());
+		System.out.println("Vor dem hinzufügen der Kante "
+				+ selectedContigs.size());
 		for (Iterator<AdjacencyEdge> iterator = selectedContigs.iterator(); iterator
 				.hasNext();) {
 			AdjacencyEdge edge = iterator.next();
@@ -489,6 +492,18 @@ public class CagCreator {
 		if (selectedContigs.size() == 0) {
 			selectedContigs.add(selectedEdge);
 		}
+		
+//		public Vector<AdjacencyEdge> addSelectedContig(AdjacencyEdge selectedEdge, int index) {
+//		for (Iterator<AdjacencyEdge> iterator = sContigs.iterator(); iterator.hasNext();) {
+//			AdjacencyEdge edge = iterator.next();
+//			
+//			if(!edge.equals(selectedEdge)){
+//				sContigs.add(index, selectedEdge);
+//				break;
+//			}
+//			
+//		}
+		
 //		System.out.println("nach dem hinzufügen der Kante "
 //				+ selectedContigs.size());
 		return selectedContigs;
@@ -503,6 +518,7 @@ public class CagCreator {
 			if (edge.equals(selectedEdge)) {
 
 				selectedContigs.removeElement(selectedEdge);
+//				sContigs.remove(selectedEdge);
 
 				sendCurrentContig();
 				sendLeftNeighbours();
