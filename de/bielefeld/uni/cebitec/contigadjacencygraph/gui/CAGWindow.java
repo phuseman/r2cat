@@ -173,17 +173,17 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		}
 		this.setMinimumSize(new Dimension((int) Toolkit.getDefaultToolkit()
 				.getScreenSize().getWidth()
-				- breite, 400));
+				- breite, 500));
 		this.setPreferredSize(new Dimension((int) Toolkit.getDefaultToolkit()
 				.getScreenSize().getWidth()
-				- breite, 400));
+				- breite, 500));
 		this.setMaximumSize(new Dimension((int) Toolkit.getDefaultToolkit()
 				.getScreenSize().getWidth()
-				- breite, 400));
+				- breite, 500));
 		scrollPane = new JScrollPane(chooseContigPanel);
 		scrollPane.setPreferredSize(new Dimension((int) Toolkit
 				.getDefaultToolkit().getScreenSize().getWidth()
-				- breite, 400));
+				- breite, 500));
 		scrollPane
 				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane
@@ -273,7 +273,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		add(inputOption, BorderLayout.SOUTH);
 
 		setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth()
-				- breite, 500);
+				- breite, 600);
 		setVisible(true);
 
 		pack();
