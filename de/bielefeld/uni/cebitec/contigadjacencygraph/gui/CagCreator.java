@@ -42,9 +42,9 @@ public class CagCreator {
 	private int currentContigIndex;
 	private boolean currentContigIsReverse = false;
 	private DNASequence currentContigObject;
-	private int neighbourNumber = 5;
+	//private int neighbourNumber = 5;
 
-	private Vector<AdjacencyEdge> selectedContigs;
+	private Vector<Vector<AdjacencyEdge>> selectedContigs;
 	private LinkedList<AdjacencyEdge> sContigs;
 	private ArrayList<CagEventListener> listeners;
 	private long maxSizeOfContigs;
@@ -60,7 +60,7 @@ public class CagCreator {
 	public CagCreator(LayoutGraph g) {
 		this.graph = g;
 		listeners = new ArrayList<CagEventListener>();
-		selectedContigs = new Vector<AdjacencyEdge>();
+		selectedContigs = new Vector<Vector<AdjacencyEdge>>();
 		leftAndRightNeighbour();
 		createContigList();
 		calculateMinSizeOfContigs(contigs);
@@ -477,39 +477,26 @@ public class CagCreator {
 
 	}
 
-	public Vector<AdjacencyEdge> addSelectedContig(AdjacencyEdge selectedEdge) {
-		System.out.println("Vor dem hinzufügen der Kante "
-				+ selectedContigs.size());
-		for (Iterator<AdjacencyEdge> iterator = selectedContigs.iterator(); iterator
-				.hasNext();) {
-			AdjacencyEdge edge = iterator.next();
-
-			if (!edge.equals(selectedEdge)) {
-				selectedContigs.add(selectedEdge);
-				break;
-			}
-		}
-		if (selectedContigs.size() == 0) {
-			selectedContigs.add(selectedEdge);
-		}
-		
-//		public Vector<AdjacencyEdge> addSelectedContig(AdjacencyEdge selectedEdge, int index) {
-//		for (Iterator<AdjacencyEdge> iterator = sContigs.iterator(); iterator.hasNext();) {
+//	public Vector<AdjacencyEdge> addSelectedContig(AdjacencyEdge selectedEdge) {
+//		System.out.println("Vor dem hinzufügen der Kante "
+//				+ selectedContigs.size());
+//		for (Iterator<AdjacencyEdge> iterator = selectedContigs.iterator(); iterator
+//				.hasNext();) {
 //			AdjacencyEdge edge = iterator.next();
-//			
-//			if(!edge.equals(selectedEdge)){
-//				sContigs.add(index, selectedEdge);
+//
+//			if (!edge.equals(selectedEdge)) {
+//				selectedContigs.add(selectedEdge);
 //				break;
 //			}
-//			
 //		}
-		
-//		System.out.println("nach dem hinzufügen der Kante "
-//				+ selectedContigs.size());
-		return selectedContigs;
-	}
+//		if (selectedContigs.size() == 0) {
+//			selectedContigs.add(selectedEdge);
+//		}
+//		
+//		return selectedContigs;
+//	}
 
-	public Vector<AdjacencyEdge> removeSelectedEdge(AdjacencyEdge selectedEdge) {
+	/*public Vector<AdjacencyEdge> removeSelectedEdge(AdjacencyEdge selectedEdge) {
 
 		boolean flag = false;
 //		System.out.println("Vor dem Löschen der Kante "
@@ -526,17 +513,17 @@ public class CagCreator {
 				flag = true;
 				break;
 			}
-		}
+		}*/
 //		System.out.println("Nach dem Löschen der Kante "
 //				+ selectedContigs.size());
-		if (!flag) {
+	/*	if (!flag) {
 			javax.swing.JOptionPane.showMessageDialog(window, "Sorry.\n"
 					+ "Can't remove this neighbour\n"
 					+ "Probably you didn't selected this neighbour.");
 		}
 		return selectedContigs;
 	}
-
+*/
 	/*
 	 * Send an event, if the user selected a contig
 	 */
@@ -614,10 +601,10 @@ public class CagCreator {
 		return contigs;
 	}
 
-	public void setNeighbourNumber(int number) {
+	/*public void setNeighbourNumber(int number) {
 		this.neighbourNumber = number;
 	}
-
+*/
 	public long getMaxSizeOfContigs() {
 		return maxSizeOfContigs;
 	}

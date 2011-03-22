@@ -54,6 +54,7 @@ public class ContigBorder extends AbstractBorder{
 		 */
 		if (isSelected) {
 			g2.setColor(Color.BLACK);
+			g2.setStroke(new BasicStroke(1));
 		}else if (woandersAusgewaehlt){
 			g2.setColor(Color.DARK_GRAY);
 			g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, dash2 , 0));

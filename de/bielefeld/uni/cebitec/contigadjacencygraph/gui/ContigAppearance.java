@@ -29,6 +29,7 @@ public class ContigAppearance extends JPanel {
 	private boolean isReverse;
 	private boolean anderweitigAusgewaehlt;
 	private boolean selected;
+	private boolean isRepetitiv;
 
 	public ContigAppearance() {
 		super();
@@ -46,15 +47,16 @@ public class ContigAppearance extends JPanel {
 			boolean isCurrentContigReverse, long maxSize, long minSize) {
 		this.i = indexOfCentralContig;
 		isReverse = isCurrentContigReverse;
-
+		isRepetitiv= node.isRepetitive();
 		contigLabel = new JLabel();
 		this.setBackground(Color.WHITE);
 		this.add(contigLabel);
 		this.setName(node.getId());
-		setContigAppearance(node.getId(), node.getSize(), new ContigBorder(node
-				.isRepetitive(), isReverse, isCurrentContigSelected, false));
+		setContigAppearance(node.getId(), node.getSize(), new ContigBorder(isRepetitiv,
+				isReverse, isCurrentContigSelected, false));
 		setSizeOfContig(node.getSize(), maxSize, minSize);
 	}
+
 
 	/*
 	 * Konstruktor fuer die Nachbarn, hier ist die Kante relevant
@@ -92,6 +94,7 @@ public class ContigAppearance extends JPanel {
 		this.setName("contig "+contig.getId());
 
 		if (includingEdge.isSelected()) {
+			System.out.println("kante ist ausgewaehlt");
 			selected = true;
 		}
 		anderweitigAusgewaehlt = false;
@@ -101,8 +104,10 @@ public class ContigAppearance extends JPanel {
 		
 		support = includingEdge.getSupport();
 
+		isRepetitiv = contig.isRepetitive();
+		
 		setContigAppearance(contig.getId(), contig.getSize(), new ContigBorder(
-				contig.isRepetitive(), neighbourIsReverse, selected, anderweitigAusgewaehlt));
+				isRepetitiv, neighbourIsReverse, selected, anderweitigAusgewaehlt));
 		setSizeOfContig(contig.getSize(), maxSize, minSize);
 	}
 
@@ -203,6 +208,10 @@ public class ContigAppearance extends JPanel {
 	
 	public boolean isSelected() {
 		return selected;
+	}
+
+	public boolean isRepetitiv() {
+		return isRepetitiv;
 	}
 
 }
