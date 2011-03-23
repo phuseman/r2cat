@@ -54,6 +54,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.NumberFormatter;
 
+import com.sun.xml.internal.bind.v2.model.core.Adapter;
+
 //import sun.org.mozilla.javascript.IdScriptableObject;
 
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
@@ -298,12 +300,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			centralContigIndex = event.getIndex();
 			boolean isReverse = event.isReverse();
 			boolean isSelected = false;
-			for (AdjacencyEdge edge : selectedRadioButtons) {
-				if (edge.geti() == centralContigIndex
-						|| edge.getj() == centralContigIndex) {
-					isSelected = true;
-					break;
-				}
+
+			if (ausgewaehlteLinkeKanten.elementAt(centralContigIndex) != null
+					|| ausgewaehlteRechteKanten.elementAt(centralContigIndex) != null) {
+				isSelected = true;
 			}
 
 			centralContig = new ContigAppearance(currentContig,
@@ -336,29 +336,22 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			JPanel leftRadioButtonContainer = chooseContigPanel
 					.getLeftRadioButtonContainer();
 
-			if (leftContainer.getComponentCount() > 0
-					|| leftRadioButtonContainer.getComponentCount() > 0) {
-				leftContainer.removeAll();
-				leftRadioButtonContainer.removeAll();
-			}
+			clearComponets(leftContainer, leftRadioButtonContainer);
 
 			/*
 			 * Der Terminator muss entweder nach der Anzahl der Nachbarn zum
 			 * Abbruch führen oder aber, wenn weniger Nachbarn auswählbar sind,
 			 * nach dieser geringeren Anzahl einen Abbruch herbei führen.
 			 */
-			int terminator = leftNeighbourEdges.size();
-			if (numberOfNeighbours <= leftNeighbourEdges.size()) {
-				terminator = numberOfNeighbours;
-			} else if (numberOfNeighbours > leftNeighbourEdges.size()) {
-				terminator = leftNeighbourEdges.size();
-			}
+			int terminator = setTerminator(leftNeighbourEdges);
 
 			isALeftNeighourSelected = false;
+			AdjacencyEdge whichNeighbourIsSelected = null;
 
 			for (AdjacencyEdge e : leftNeighbourEdges) {
 				if (e.isSelected()) {
 					isALeftNeighourSelected = true;
+					whichNeighbourIsSelected = e;
 				}
 			}
 
@@ -366,56 +359,46 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 				if (t < terminator) {
 
-					DNASequence dnaSequence;
-					int indexOfContig;
-					if (edge.geti() == centralContigIndex) {
-						dnaSequence = edge.getContigj();
-						indexOfContig = edge.getj();
-					} else {
-						dnaSequence = edge.getContigi();
-						indexOfContig = edge.geti();
-					}
+					int indexOfContig = indexOfNeighbourContig(edge);
+					
 
 					if (isZScore) {
-						leftSupport[t] = Math.log((edge.getSupport() - meanForLeftNeighbours[centralContigIndex]) / sDeviationForLeftNeighbours[centralContigIndex]);
+						leftSupport[t] = calculateZScore(edge,
+								centralContigIndex, meanForLeftNeighbours,
+								sDeviationForLeftNeighbours);
 					} else {
 						leftSupport[t] = edge.getSupport();
 					}
 
-					boolean anderweitigAusgewaehlt = false;
-					Vector<AdjacencyEdge> test = ausgewaehlteLinkeKanten
-							.get(indexOfContig);
-
-					if (test != null && test.size() != 0
-							&& !dnaSequence.isRepetitive()) {
-						anderweitigAusgewaehlt = true;
-					}
+					boolean anderweitigAusgewaehlt = ulteriorSelected(true, indexOfContig);
 
 					contigPanel = new ContigAppearance(layoutGraph, edge,
 							indexOfContig, true, maxSizeOfContigs,
 							minSizeOfContigs, anderweitigAusgewaehlt);
-					/*
-					 * Help that the user is only able to select one neighbour
-					 * for each side.
-					 */
-					contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
-					contigPanel.setVisible(true);
+					contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
 
 					radioButton = new ContigRadioButton(edge, contigPanel);
 
-					if (anderweitigAusgewaehlt) {
-						radioButton.setActionCommand("anderweitigAusgewaehlt");
-					}
 					if (isALeftNeighourSelected) {
 						radioButton.setActionCommand("nachbarAusgewaehlt");
+						radioButton
+						.setSelectedNeighbourOfButtonGroup(whichNeighbourIsSelected);
+					}else if (anderweitigAusgewaehlt) {
+						radioButton.setActionCommand("anderweitigAusgewaehlt");
+						AdjacencyEdge otherEdgeForThisNeighbour = ausgewaehlteLinkeKanten.get(indexOfContig).firstElement();
+						radioButton
+								.setNeighboursForTheThisNeighbour(otherEdgeForThisNeighbour);
+					}else if (!isALeftNeighourSelected) {
+						radioButton
+						.setActionCommand("noch kein nachbar ausgewaehlt");
 					}
-
-					/*
-					 * if(edge.isSelected()){ radioButton.setSelected(true); }
-					 */
+					if (edge.isSelected()) {
+						radioButton.setSelected(true);
+					}
+					System.out.println("l "+radioButton.getActionCommand());
 					radioButton.setLeft(true);
-					radioButton.setBackground(Color.WHITE);
+					radioButton.setOpaque(false);
 					radioButton
 							.addActionListener(new RadioButtonActionListener());
 
@@ -455,12 +438,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			 * Abbruch führen oder aber, wenn weniger Nachbarn auswählbar sind,
 			 * nach dieser geringeren Anzahl einen Abbruch herbei führen.
 			 */
-			int terminator = rightNeighbourEdges.size();
-			if (numberOfNeighbours < rightNeighbourEdges.size()) {
-				terminator = numberOfNeighbours;
-			} else if (numberOfNeighbours > rightNeighbourEdges.size()) {
-				terminator = rightNeighbourEdges.size();
-			}
+			int terminator = setTerminator(rightNeighbourEdges);
 
 			ContigRadioButton radioButton;
 			rightSupport = new double[numberOfNeighbours];
@@ -471,15 +449,12 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			JPanel rightContainer = chooseContigPanel.getRightContainer();
 			JPanel rightRadioButtonContainer = chooseContigPanel
 					.getRightRadioButtonContainer();
-			if (rightContainer.getComponentCount() > 0
-					|| rightRadioButtonContainer.getComponentCount() > 0) {
-				rightContainer.removeAll();
-				rightRadioButtonContainer.removeAll();
-			}
+			clearComponets(rightContainer, rightRadioButtonContainer);
 
 			// Flag das gesetzt wird sollte einer der Nachbarn schon ausgewählt
 			// worden sein.
 			isARightNeighourSelected = false;
+			AdjacencyEdge neighbourForThisGroup = null;
 			/*
 			 * Setzten des Flags, falls einer der Nachbarn schon ausgewählt ist
 			 * er das so wird damit kein anderer rechter Nachbarn auswählbar.
@@ -487,29 +462,26 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			for (AdjacencyEdge e : rightNeighbourEdges) {
 				if (e.isSelected()) {
 					isARightNeighourSelected = true;
+					neighbourForThisGroup = e;
 				}
 			}
 
+			/*
+			 * For each adjacency edge here is going to be a contig Panel
+			 */
 			for (AdjacencyEdge edge : rightNeighbourEdges) {
 				if (s < terminator) {
-					DNASequence dnaSequence;
-					int indexOfContig;
 
-					if (edge.geti() == centralContigIndex) {
-						dnaSequence = edge.getContigj();
-						indexOfContig = edge.getj();
-					} else {
-						dnaSequence = edge.getContigi();
-						indexOfContig = edge.geti();
-					}
-
+					int indexOfContig = indexOfNeighbourContig(edge);
 					/*
 					 * Speichern des relativen oder absoluten Support in einem
 					 * Array, dieses Array wird später dem GlasPanel übergeben
 					 * und die Liniendicke berechnet.
 					 */
 					if (isZScore) {
-						rightSupport[s] = Math.log((edge.getSupport() - meanForRightNeighbours[centralContigIndex]) / sDeviationForRightNeighbours[centralContigIndex]);
+						rightSupport[s] = calculateZScore(edge,
+								centralContigIndex, meanForLeftNeighbours,
+								sDeviationForRightNeighbours);
 					} else {
 						rightSupport[s] = edge.getSupport();
 					}
@@ -521,20 +493,13 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					 * dieses Contig ein anderes Aussehen und kann auch nicht
 					 * mehr für dieses ausgewählt werden.
 					 */
-					boolean anderweitigAusgewaehlt = false;
-					Vector<AdjacencyEdge> test = ausgewaehlteLinkeKanten
-							.get(indexOfContig);
-
-					if (test != null && test.size() != 0
-							&& !dnaSequence.isRepetitive()) {
-						anderweitigAusgewaehlt = true;
-					}
+					boolean anderweitigAusgewaehlt = ulteriorSelected(false, indexOfContig);
+					
 					contigPanel = new ContigAppearance(layoutGraph, edge,
 							indexOfContig, false, maxSizeOfContigs,
 							minSizeOfContigs, anderweitigAusgewaehlt);
 					contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
-					contigPanel.setVisible(true);
 
 					/*
 					 * Zu jedem Nachbarn wird auch ein RadioButton erstellt mit
@@ -544,17 +509,28 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					 */
 					radioButton = new ContigRadioButton(edge, contigPanel);
 
-					/*
-					 * if(edge.isSelected()){ radioButton.setSelected(true); }
-					 */
-					if (anderweitigAusgewaehlt) {
-						radioButton.setActionCommand("anderweitigAusgewaehlt");
+					if (edge.isSelected()) {
+						radioButton.setSelected(true);
 					}
+
 					if (isARightNeighourSelected) {
 						radioButton.setActionCommand("nachbarAusgewaehlt");
+						radioButton
+						.setSelectedNeighbourOfButtonGroup(neighbourForThisGroup);
+				
+					}else	if (anderweitigAusgewaehlt) {
+						radioButton.setActionCommand("anderweitigAusgewaehlt");
+						AdjacencyEdge otherEdge = ausgewaehlteRechteKanten.get(indexOfContig).firstElement();
+						radioButton.setNeighboursForTheThisNeighbour(otherEdge);
+					}	else  if (!isARightNeighourSelected) {
+						radioButton
+						.setActionCommand("noch kein nachbar ausgewaehlt");
 					}
+					System.out.println("r "+radioButton.getActionCommand());
+					radioButton.setNachbarIndex(indexOfContig);
+					radioButton.setCentralIndex(centralContigIndex);
 					radioButton.setLeft(false);
-					radioButton.setBackground(Color.WHITE);
+					radioButton.setOpaque(false);
 					radioButton
 							.addActionListener(new RadioButtonActionListener());
 
@@ -578,6 +554,72 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			chooseContigPanel.setFlag(true);
 		}
 
+	}
+
+	private int setTerminator(Vector<AdjacencyEdge> neighbourVector) {
+
+		int value = neighbourVector.size();
+		if (numberOfNeighbours < neighbourVector.size()) {
+			value = numberOfNeighbours;
+		} else if (numberOfNeighbours > neighbourVector.size()) {
+			value = neighbourVector.size();
+		}
+
+		return value;
+	}
+
+	private double calculateZScore(AdjacencyEdge edge, int centralContigIndex,
+			double[] meanForNeighbours, double[] sDeviationForNeighbours) {
+
+		double zScore = 0;
+
+		zScore = (edge.getSupport() - meanForNeighbours[centralContigIndex])
+				/ sDeviationForNeighbours[centralContigIndex];
+
+		return zScore;
+
+	}
+
+	private int indexOfNeighbourContig(AdjacencyEdge edge) {
+
+		int index;
+
+		if (edge.geti() == centralContigIndex) {
+			index = edge.getj();
+		} else {
+			index = edge.geti();
+		}
+
+		return index;
+	}
+
+
+	private boolean ulteriorSelected(boolean isLeft, int indexOfNeighbour) {
+		boolean isSelected = false;
+		if(isLeft){
+			if(ausgewaehlteLinkeKanten.get(indexOfNeighbour)!=null 
+					&& !layoutGraph.getNodes().get(indexOfNeighbour).isRepetitive()){
+				System.out.println("setze auf anderweitig ausgewaehlt ");
+				isSelected = true;
+			}
+		}else{
+			if(ausgewaehlteRechteKanten.get(indexOfNeighbour)!=null
+					&& !layoutGraph.getNodes().get(indexOfNeighbour).isRepetitive()){
+				System.out.println("setze auf anderweitig ausgewaehlt ");
+
+				isSelected = true;
+			}
+		}
+
+		return isSelected;
+	}
+	
+	private void clearComponets(JPanel contigContainer, JPanel radioButtonContainer){
+		if (contigContainer.getComponentCount() > 0
+				|| radioButtonContainer.getComponentCount() > 0) {
+			contigContainer.removeAll();
+			radioButtonContainer.removeAll();
+		}
 	}
 
 	/*
@@ -664,293 +706,206 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			 */
 			if (e.getActionCommand().equals("absolute")) {
 				isZScore = false;
+				chooseContigPanel.setZScore(isZScore);
 				absoluteSupport.setSelected(true);
 				relativeSupport.setSelected(false);
-				chooseContigPanel.setZScore(isZScore);
-				JPanel rightContainer = chooseContigPanel.getRightContainer();
-				JPanel leftContainer = chooseContigPanel.getLeftContainer();
-				if (rightContainer.getComponentCount() != 0
-						|| leftContainer.getComponentCount() != 0) {
-					model.sendCurrentContig();
-					model.sendLeftNeighbours();
-					model.sendRightNeighbours();
-					repaint();
-				}
+
+				updateModelAndGui();
+
 			} else if (e.getActionCommand().equals("zScore")) {
 				isZScore = true;
 				chooseContigPanel.setZScore(isZScore);
 				absoluteSupport.setSelected(false);
 				relativeSupport.setSelected(true);
-				JPanel rightContainer = chooseContigPanel.getRightContainer();
-				JPanel leftContainer = chooseContigPanel.getLeftContainer();
-				if (rightContainer.getComponentCount() != 0
-						|| leftContainer.getComponentCount() != 0) {
-					model.sendCurrentContig();
-					model.sendLeftNeighbours();
-					model.sendRightNeighbours();
-					repaint();
-				}
-				// } if(e.getActionCommand().equals("nachbarAusgewaehlt")) {
-			} else {
-				Vector<AdjacencyEdge> copyOfSelectedContigs = (Vector<AdjacencyEdge>) selectedRadioButtons
-						.clone();
 
+				updateModelAndGui();
+
+			} else if (e.getActionCommand().equals(
+					"noch kein nachbar ausgewaehlt")) {
+			
 				ContigRadioButton radioButton = (ContigRadioButton) e
 						.getSource();
-				radioButton.setSelected(true);
 				AdjacencyEdge selectedEdge = radioButton.getEdge();
 
-				System.out.println("edge " + selectedEdge + " i "
-						+ selectedEdge.geti() + " "
-						+ selectedEdge.getContigi().getId() + " j "
-						+ selectedEdge.getj() + " "
-						+ selectedEdge.getContigj().getId());
+				int[] indices = leftAndRightIndex(radioButton, selectedEdge);
 
-				int indexLeft = -1;
-				int indexRight = -1;
+				selectEdge(selectedEdge, indices);
 
-				if ((radioButton.isLeft() && !centralContig.isReverse())
-						|| (!radioButton.isLeft() && centralContig.isReverse())) {
+			} else if (e.getActionCommand().equals("nachbarAusgewaehlt")) {
+				
+				ContigRadioButton radioButton = (ContigRadioButton) e.getSource();
+				AdjacencyEdge selectedEdge = radioButton.getEdge();
 
-					if (centralContigIndex == selectedEdge.geti()) {
-						indexLeft = selectedEdge.getj();
-						indexRight = selectedEdge.geti();
-					} else {
-						indexLeft = selectedEdge.geti();
-						indexRight = selectedEdge.getj();
-					}
+				int[] indices = leftAndRightIndex(radioButton, selectedEdge);
+				AdjacencyEdge oldEdge = radioButton
+						.getSelectedNeighbourOfButtonGroup();
+				int[] oldIndices = leftAndRightIndex(radioButton, oldEdge);
 
-				} else if (!radioButton.isLeft() && !centralContig.isReverse()
-						|| (radioButton.isLeft() && centralContig.isReverse())) {
-
-					if (centralContigIndex == selectedEdge.geti()) {
-						indexLeft = selectedEdge.geti();
-						indexRight = selectedEdge.getj();
-					} else {
-						indexLeft = selectedEdge.getj();
-						indexRight = selectedEdge.geti();
-					}
+				deleteEdge(oldEdge, oldIndices);
+				if(!oldEdge.equals(selectedEdge)){
+					selectEdge(selectedEdge, indices);
 				}
+			} else if (e.getActionCommand().equals("anderweitigAusgewaehlt")) {
+				System.out.println("anderweitig ausgewaehlt");
+				ContigRadioButton radioButton = (ContigRadioButton) e
+						.getSource();
+				AdjacencyEdge selectedEdge = radioButton.getEdge();
 
-				/*
-				 * Mein Initialfall: wurden bisher keine Contigs ausgewählt oder
-				 * alle bisher ausgewählten Contigs gelöscht, wird dieser Teil
-				 * aufgerufen. Danach ist eine Differenzierung notwenig.
-				 */
-				if (selectedRadioButtons.size() == 0) {
-					// System.out.println("Contig wird hinzugefügt");
-					selectedEdge.select();
-
-					selectedRadioButtons.add(selectedEdge);
-
-					Vector<AdjacencyEdge> verknuepfterVektor = new Vector<AdjacencyEdge>();
-					verknuepfterVektor.add(selectedEdge);
-					ausgewaehlteLinkeKanten.add(indexLeft, verknuepfterVektor);
-					ausgewaehlteRechteKanten
-							.add(indexRight, verknuepfterVektor);
-
-					// model.addSelectedContig(selectedEdge);
-
-					model.sendCurrentContig();
-					model.sendLeftNeighbours();
-					model.sendRightNeighbours();
-					repaint();
-				}
-				/*
-				 * Vllt ist die Seite noch relevant dann in der
-				 * radionButtonClass hinzufügen
-				 */
-				// für jede bisher ausgewählte Kante
-				boolean repetitiveKante = false;
-				boolean selbeKante = false;
-				boolean linkeKante = false;
-				boolean rechteKante = false;
-				boolean nichtMöglich = false;
-				/*
-				 * Zunächst wird für alle bisher gespeicherten Contigs
-				 * festgestellt ob
-				 */
-				for (AdjacencyEdge savedEdge : copyOfSelectedContigs) {
-					/*
-					 * repetitive kanten duerfen oeffter ausgewaehlt werden
-					 */
-					/*
-					 * if(radioButton.getContigObject().isRepetitiv() &&
-					 * !isALeftNeighourSelected && !isARightNeighourSelected){
-					 * repetitiveKante = true; } // schon dieselbe Kante
-					 * ausgewählt wurde else
-					 */if (selectedEdge.equals(savedEdge)) {
-						selbeKante = true;
-						// oder ob auf der rechten Seite des zentralen Contigs
-						// ein Nachbar eingefügt werden kann
-					} else if (!isARightNeighourSelected
-							&& !radioButton.isLeft()) {
-						rechteKante = true;
-						// oder ob auf der rechten Seite des zentralen Contigs
-						// ein Nachbar eingefügt werden kann
-					} else if (!isALeftNeighourSelected && radioButton.isLeft()) {
-						linkeKante = true;
-						// oder ob ein anderer Nachbar schon ausgewählt wurde
-					} else if (isALeftNeighourSelected
-							|| isARightNeighourSelected) {
-						nichtMöglich = true;
-					}
-				}
-				/*
-				 * if(repetitiveKante){ selectedEdge.select();
-				 * 
-				 * selectedRadioButtons.add(selectedEdge);
-				 * 
-				 * DNASequence i = selectedEdge.getContigi(); int index =
-				 * i.isRepetitive() ? selectedEdge.getj() : selectedEdge.geti();
-				 * 
-				 * if(ausgewaehlteLinkeKanten.elementAt(index) == null){
-				 * Vector<AdjacencyEdge> verknuepfterVektor = new
-				 * Vector<AdjacencyEdge>();
-				 * verknuepfterVektor.add(selectedEdge);
-				 * ausgewaehlteLinkeKanten.add(indexLeft, verknuepfterVektor);
-				 * ausgewaehlteRechteKanten .add(indexRight,
-				 * verknuepfterVektor); }
-				 * 
-				 * // model.addSelectedContig(selectedEdge);
-				 * model.sendCurrentContig(); model.sendLeftNeighbours();
-				 * model.sendRightNeighbours(); repaint(); }
-				 */
-				/*
-				 * Nun weiß ich als ich die jetzt ausgwählte Kante behandeln
-				 * muss und kann entsprechend reagieren. Ist es dieselbe Kante:
-				 * Gebe ich dem Benutzer die Möglichkeit die Kante zu löschen,
-				 * wenn er dies wünsch.
-				 */
-				if (selbeKante) {
+				int[] indices = leftAndRightIndex(radioButton, selectedEdge);
+				AdjacencyEdge otherEdge = radioButton
+						.getNeighboursForTheThisNeighbour();
+				int[] oldIndices = leftAndRightIndex(radioButton, otherEdge);
+				
+				
 					Object[] options = { "Yes", "No" };
 
 					int n = javax.swing.JOptionPane.showOptionDialog(window,
-							"You already selected this neighbour.\n"
-									+ " Do you want to delete this selection?",
+							"You already selected this neighbour for an another selection.\n"
+									+ " Do you want to delete that selection and want to select this selection?",
 							"", JOptionPane.YES_NO_OPTION,
 							JOptionPane.QUESTION_MESSAGE, null, options,
 							options[0]);
 
 					if (n == JOptionPane.YES_OPTION) {
-						/*
-						 * System.out.println(ausgewaehlteLinkeKanten.elementAt(selectedEdge
-						 * .geti()));
-						 * System.out.println(ausgewaehlteLinkeKanten.
-						 * elementAt(selectedEdge.getj()));
-						 * System.out.println(ausgewaehlteRechteKanten
-						 * .elementAt(selectedEdge.geti()));
-						 * System.out.println(ausgewaehlteRechteKanten
-						 * .elementAt(selectedEdge.getj()));
-						 */
-						ausgewaehlteLinkeKanten.remove(selectedEdge);
-						ausgewaehlteRechteKanten.remove(selectedEdge);
-						selectedEdge.deselect();
-						selectedRadioButtons.remove(selectedEdge);
-						// model.removeSelectedEdge(selectedEdge);
-						repaint();
+						deleteEdge(otherEdge, oldIndices);
+						selectEdge(selectedEdge, indices);
+						updateModelAndGui();
 					}
-				}
-
-				/*
-				 * Oder füge die Kante zu den Ausgewählten Contigs hinzu
-				 */
-				else if (rechteKante) {
-
-					selectedEdge.select();
-					selectedRadioButtons.add(selectedEdge);
-					// model.addSelectedContig(selectedEdge);
-
-					Vector<AdjacencyEdge> verknuepfterVektor = new Vector<AdjacencyEdge>();
-					verknuepfterVektor.add(selectedEdge);
-					ausgewaehlteLinkeKanten.add(indexLeft, verknuepfterVektor);
-					ausgewaehlteRechteKanten
-							.add(indexRight, verknuepfterVektor);
-
-					model.sendCurrentContig();
-					model.sendLeftNeighbours();
-					model.sendRightNeighbours();
-					repaint();
-				}
-
-				else if (linkeKante) {
-					System.out
-							.println("füge linke kante ein und ein linken nachbar ist ausgewählt "
-									+ isALeftNeighourSelected);
-					selectedEdge.select();
-					selectedRadioButtons.add(selectedEdge);
-					// model.addSelectedContig(selectedEdge);
-
-					Vector<AdjacencyEdge> verknuepfterVektor = new Vector<AdjacencyEdge>();
-					verknuepfterVektor.add(selectedEdge);
-					ausgewaehlteLinkeKanten.add(indexLeft, verknuepfterVektor);
-					ausgewaehlteRechteKanten
-							.add(indexRight, verknuepfterVektor);
-
-					model.sendCurrentContig();
-					model.sendLeftNeighbours();
-					model.sendRightNeighbours();
-					repaint();
-				}
-				/*
-				 * Oder aber ich sage dem Benutzer, dass er das angeklickte
-				 * Contig nicht auswählen kann, weil er bereits einen Nachbar
-				 * erwählt hat.
-				 */
-				else if (nichtMöglich && !selbeKante) {
-					javax.swing.JOptionPane
-							.showMessageDialog(
-									window,
-									"Sorry.\n"
-											+ "You already selected a neighbour for this contig.\n");
-				}
-
-			}
-			if (e.getActionCommand().equals("anderweitigAusgewaehlt")) {
-
-				javax.swing.JOptionPane
-						.showMessageDialog(
-								window,
-								"Sorry.\n"
-										+ "You already selected this neighbour for an another contig.\n"
-										+ "If you want to delete this selection, you have to click"
-										+ "on this contig and delete that selection.\n"
-										+ "Then you are able to select this selection");
-
-				/*
-				 * TODO Löschoption Hier kann erweitert werden, dass die andere
-				 * Kante gelöscht wird. Dazu muss erst im linken und rechten
-				 * Nachbarvektor ermittelt werden, in welchem der Index des
-				 * Nachbarn belegt ist. Darüber kann dann die Kante erhalten
-				 * werden und damit der Index des anderen contig im anderen
-				 * Vektor. Dann muss aus beiden Vektoren der Index frei gemacht
-				 * werden.
-				 * 
-				 * 
-				 * Bem für Repeats: Hier muss ich noch einen nachschauen, ob im
-				 * Vektor an einem index mehrere kanten gespeichert werden
-				 * können. und dann muss hier beim löschen auch darauf geachtet
-				 * werden, dass auch die richtige kante gelöscht wird.
-				 */
-				// Object[] options = { "Yes", "No" };
-				//		
-				// int n = javax.swing.JOptionPane.showOptionDialog(window,
-				// "You already selected this neighbour for an another contig..\n"
-				// + " Do you want to delete that selection?",
-				// "", JOptionPane.YES_NO_OPTION,
-				// JOptionPane.QUESTION_MESSAGE, null, options,
-				// options[0]);
-				//
-				// if (n == JOptionPane.YES_OPTION) {
-				//
-				// ausgewaehlteLinkeKanten.remove(andereselectedEdge);
-				// ausgewaehlteRechteKanten.remove(andereselectedEdge);
-				// selectedEdge.deselect();
-				// selectedRadioButtons.remove(andereselectedEdge);
-				// model.removeSelectedEdge(andereselectedEdge);
-				// repaint();
+				
 			}
 
+		}
+
+		private int[] leftAndRightIndex(ContigRadioButton radioButton,
+				AdjacencyEdge selectedEdge) {
+
+			System.out.println("edge " + selectedEdge + " i "
+					+ selectedEdge.geti() + " "
+					+ selectedEdge.getContigi().getId() + " j "
+					+ selectedEdge.getj() + " "
+					+ selectedEdge.getContigj().getId());
+
+			/*
+			 * at pos 0 left index at pos 1 right index
+			 */
+			int[] indices = new int[2];
+
+			int indexLeft = -1;
+			int indexRight = -1;
+
+			if ((radioButton.isLeft() && !centralContig.isReverse())
+					|| (!radioButton.isLeft() && centralContig.isReverse())) {
+
+				if (centralContigIndex == selectedEdge.geti()) {
+					indexLeft = selectedEdge.getj();
+					indexRight = selectedEdge.geti();
+				} else {
+					indexLeft = selectedEdge.geti();
+					indexRight = selectedEdge.getj();
+				}
+
+			} else if (!radioButton.isLeft() && !centralContig.isReverse()
+					|| (radioButton.isLeft() && centralContig.isReverse())) {
+
+				if (centralContigIndex == selectedEdge.geti()) {
+					indexLeft = selectedEdge.geti();
+					indexRight = selectedEdge.getj();
+				} else {
+					indexLeft = selectedEdge.getj();
+					indexRight = selectedEdge.geti();
+				}
+			}
+
+			indices[0] = indexLeft;
+			indices[1] = indexRight;
+
+			return indices;
+
+		}
+
+		private void deleteEdge(AdjacencyEdge oldEdge, int[] indices) {
+
+			Vector<AdjacencyEdge> neighbour;
+
+			int leftIndex = indices[0];
+			int rightIndex = indices[1];
+
+			boolean isLeftRepetitiv = layoutGraph.getNodes().get(leftIndex)
+					.isRepetitive();
+			boolean isRightRepetitiv = layoutGraph.getNodes().get(rightIndex)
+					.isRepetitive();
+			/*
+			 * if one of the contigs is repetitiv only the selected edge has to
+			 * be deleted; not the hole vektor It can happen that both contigs
+			 * are repeats there in both vectors the edge has to be deleted
+			 * otherwise the not repeated contig the vector can be deleted.
+			 */
+			if (isLeftRepetitiv) {
+				neighbour = ausgewaehlteLinkeKanten.get(leftIndex);
+				neighbour.remove(oldEdge);
+			} else if (isRightRepetitiv) {
+				neighbour = ausgewaehlteRechteKanten.get(rightIndex);
+				neighbour.remove(oldEdge);
+			} else {
+				if (!isLeftRepetitiv) {
+					ausgewaehlteLinkeKanten.remove(leftIndex);
+				}
+				if (!isRightRepetitiv) {
+					ausgewaehlteRechteKanten.remove(rightIndex);
+				}
+			}
+
+			oldEdge.deselect();
+			updateModelAndGui();
+
+		}
+
+		private void selectEdge(AdjacencyEdge selectedEdge, int[] indices) {
+
+			Vector<AdjacencyEdge> contigCollection = new Vector<AdjacencyEdge>();
+
+			int leftIndex = indices[0];
+			int rightIndex = indices[1];
+
+			boolean isLeftRepeated = layoutGraph.getNodes().get(leftIndex)
+					.isRepetitive();
+			boolean isRightRepeated = layoutGraph.getNodes().get(rightIndex)
+					.isRepetitive();
+
+			if (isLeftRepeated) {
+				if (ausgewaehlteLinkeKanten.get(leftIndex) != null) {
+					contigCollection = ausgewaehlteLinkeKanten.get(leftIndex);
+				}
+				contigCollection.add(selectedEdge);
+			} else if (isRightRepeated) {
+				if (ausgewaehlteRechteKanten.get(rightIndex) != null) {
+					contigCollection = ausgewaehlteRechteKanten.get(rightIndex);
+				}
+				contigCollection.add(selectedEdge);
+			} else {
+				contigCollection.add(selectedEdge);
+			}
+			/*
+			 * set Edge as selected and save edge as left and right neighbour
+			 */
+			selectedEdge.select();
+			ausgewaehlteLinkeKanten.add(leftIndex, contigCollection);
+			ausgewaehlteRechteKanten.add(rightIndex, contigCollection);
+
+			updateModelAndGui();
+
+		}
+
+		private void updateModelAndGui() {
+			JPanel rightContainer = chooseContigPanel.getRightContainer();
+			JPanel leftContainer = chooseContigPanel.getLeftContainer();
+			if (rightContainer.getComponentCount() != 0
+					|| leftContainer.getComponentCount() != 0) {
+				model.sendCurrentContig();
+				model.sendLeftNeighbours();
+				model.sendRightNeighbours();
+				repaint();
+			}
 		}
 	}
 
@@ -1026,19 +981,19 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			if (neighboursNumber <= 10 && neighboursNumber > 0) {
 
 				if (neighboursNumber < numberOfNeighbours) {
-					int breite = (int)chooseContigPanel.getSize().getWidth();
+					int breite = (int) chooseContigPanel.getSize().getWidth();
 					chooseContigPanel.getCenterContainer().setMaximumSize(
 							new Dimension(breite, 400));
-					chooseContigPanel
-							.setPreferredSize(new Dimension(breite, 400));
+					chooseContigPanel.setPreferredSize(new Dimension(breite,
+							400));
 				}
 
 				if (neighboursNumber > 8) {
-					int breite = (int)chooseContigPanel.getSize().getWidth();
+					int breite = (int) chooseContigPanel.getSize().getWidth();
 					chooseContigPanel.getCenterContainer().setMaximumSize(
 							new Dimension(breite, 600));
-					chooseContigPanel.setPreferredSize(new Dimension(
-							breite, 600));
+					chooseContigPanel.setPreferredSize(new Dimension(breite,
+							600));
 				}
 
 				numberOfNeighbours = neighboursNumber;
@@ -1084,11 +1039,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				numberOfNeighbours = 10;
 				inputOptionForNumberOfNeighbours.setValue(new Integer(
 						numberOfNeighbours));
-				int breite = (int)chooseContigPanel.getSize().getWidth();
+				int breite = (int) chooseContigPanel.getSize().getWidth();
 				chooseContigPanel.getCenterContainer().setMaximumSize(
 						new Dimension(breite, 600));
-				chooseContigPanel.setPreferredSize(new Dimension( breite, 600));
-				
+				chooseContigPanel.setPreferredSize(new Dimension(breite, 600));
+
 				chooseContigPanel.setNumberOfNeighbours(numberOfNeighbours);
 
 				JPanel rightContainer = chooseContigPanel.getRightContainer();

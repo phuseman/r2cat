@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
+import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CAGWindow.ContigMouseListener;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
 /**
@@ -164,6 +165,7 @@ public class ContigAppearance extends JPanel {
 			this.setBorder(border);
 			this.setName(contigId);
 		}
+		setVisible(true);
 	}
 
 	private synchronized void setSizeOfContig(long size, long maxSize,
