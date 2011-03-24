@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+    <folder name="Actions">
+        <folder name="Window">
+            <file name="de-bielefeld-uni-cebitec-contigadjacencyvisualization-ContigAdjacencyPropertiesAction.instance">
+                <attr name="component" methodvalue="de.bielefeld.uni.cebitec.contigadjacencyvisualization.ContigAdjacencyPropertiesTopComponent.findInstance"/>
+                <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.contigadjacencyvisualization.Bundle#CTL_ContigAdjacencyPropertiesAction"/>
+                <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Menu">
+        <folder name="Window">
+            <file name="ContigAdjacencyPropertiesAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/Window/de-bielefeld-uni-cebitec-contigadjacencyvisualization-ContigAdjacencyPropertiesAction.instance"/>
+            </file>
+        </folder>
+    </folder>
+    <folder name="Windows2">
+        <folder name="Components">
+            <file name="ContigAdjacencyPropertiesTopComponent.settings" url="ContigAdjacencyPropertiesTopComponentSettings.xml"/>
+        </folder>
+        <folder name="Modes">
+            <folder name="properties">
+                <file name="ContigAdjacencyPropertiesTopComponent.wstcref" url="ContigAdjacencyPropertiesTopComponentWstcref.xml"/>
+            </folder>
+        </folder>
+    </folder>
+</filesystem>
