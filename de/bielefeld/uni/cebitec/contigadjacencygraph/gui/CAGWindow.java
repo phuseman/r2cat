@@ -133,6 +133,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		ausgewaehlteLinkeKanten.setSize(layoutGraph.getNodes().size());
 		ausgewaehlteRechteKanten.setSize(layoutGraph.getNodes().size());
+		System.out.println(ausgewaehlteLinkeKanten.size());
+		System.out.println(ausgewaehlteRechteKanten.size());
 
 		myModel.addEventListener(this);
 		setTitle("View of a contig adjacency graph");
@@ -300,7 +302,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			centralContigIndex = event.getIndex();
 			boolean isReverse = event.isReverse();
 			boolean isSelected = false;
-
+			System.out.println(ausgewaehlteLinkeKanten.elementAt(centralContigIndex));
 			if (ausgewaehlteLinkeKanten.elementAt(centralContigIndex) != null
 					|| ausgewaehlteRechteKanten.elementAt(centralContigIndex) != null) {
 				isSelected = true;
@@ -370,11 +372,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						leftSupport[t] = edge.getSupport();
 					}
 
-					boolean anderweitigAusgewaehlt = ulteriorSelected(true, indexOfContig);
+//					boolean anderweitigAusgewaehlt = ulteriorSelected(true, indexOfContig);
 
 					contigPanel = new ContigAppearance(layoutGraph, edge,
 							indexOfContig, true, maxSizeOfContigs,
-							minSizeOfContigs, anderweitigAusgewaehlt);
+							minSizeOfContigs,false);// anderweitigAusgewaehlt);
 					contigPanel.addMouseListener(new ContigMouseListener());
 					contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
 
@@ -384,11 +386,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						radioButton.setActionCommand("nachbarAusgewaehlt");
 						radioButton
 						.setSelectedNeighbourOfButtonGroup(whichNeighbourIsSelected);
-					}else if (anderweitigAusgewaehlt) {
-						radioButton.setActionCommand("anderweitigAusgewaehlt");
-						AdjacencyEdge otherEdgeForThisNeighbour = ausgewaehlteLinkeKanten.get(indexOfContig).firstElement();
-						radioButton
-								.setNeighboursForTheThisNeighbour(otherEdgeForThisNeighbour);
+//					}else if (anderweitigAusgewaehlt) {
+//						radioButton.setActionCommand("anderweitigAusgewaehlt");
+//						AdjacencyEdge otherEdgeForThisNeighbour = ausgewaehlteLinkeKanten.get(indexOfContig).firstElement();
+//						radioButton
+//								.setNeighboursForTheThisNeighbour(otherEdgeForThisNeighbour);
 					}else if (!isALeftNeighourSelected) {
 						radioButton
 						.setActionCommand("noch kein nachbar ausgewaehlt");
@@ -396,7 +398,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					if (edge.isSelected()) {
 						radioButton.setSelected(true);
 					}
-					System.out.println("l "+radioButton.getActionCommand());
+//					System.out.println("l "+radioButton.getActionCommand());
 					radioButton.setLeft(true);
 					radioButton.setOpaque(false);
 					radioButton
@@ -493,11 +495,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					 * dieses Contig ein anderes Aussehen und kann auch nicht
 					 * mehr für dieses ausgewählt werden.
 					 */
-					boolean anderweitigAusgewaehlt = ulteriorSelected(false, indexOfContig);
+//					boolean anderweitigAusgewaehlt = ulteriorSelected(false, indexOfContig);
 					
 					contigPanel = new ContigAppearance(layoutGraph, edge,
 							indexOfContig, false, maxSizeOfContigs,
-							minSizeOfContigs, anderweitigAusgewaehlt);
+							minSizeOfContigs, false);//anderweitigAusgewaehlt);
 					contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
 
@@ -518,15 +520,15 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						radioButton
 						.setSelectedNeighbourOfButtonGroup(neighbourForThisGroup);
 				
-					}else	if (anderweitigAusgewaehlt) {
-						radioButton.setActionCommand("anderweitigAusgewaehlt");
-						AdjacencyEdge otherEdge = ausgewaehlteRechteKanten.get(indexOfContig).firstElement();
-						radioButton.setNeighboursForTheThisNeighbour(otherEdge);
+//					}else	if (anderweitigAusgewaehlt) {
+//						radioButton.setActionCommand("anderweitigAusgewaehlt");
+//						AdjacencyEdge otherEdge = ausgewaehlteRechteKanten.get(indexOfContig).firstElement();
+//						radioButton.setNeighboursForTheThisNeighbour(otherEdge);
 					}	else  if (!isARightNeighourSelected) {
 						radioButton
 						.setActionCommand("noch kein nachbar ausgewaehlt");
 					}
-					System.out.println("r "+radioButton.getActionCommand());
+//					System.out.println("r "+radioButton.getActionCommand());
 					radioButton.setNachbarIndex(indexOfContig);
 					radioButton.setCentralIndex(centralContigIndex);
 					radioButton.setLeft(false);
@@ -825,36 +827,51 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		private void deleteEdge(AdjacencyEdge oldEdge, int[] indices) {
 
-			Vector<AdjacencyEdge> neighbour;
+			Vector<AdjacencyEdge> neighbourl;
+			Vector<AdjacencyEdge> neighbourR;
 
 			int leftIndex = indices[0];
 			int rightIndex = indices[1];
-
+			System.out.println(ausgewaehlteLinkeKanten.size()+" r "+ausgewaehlteRechteKanten.size());
+			System.out.println("Lösche Kante "+ oldEdge+ " an index "+ leftIndex+ " righ "+ rightIndex);
 			boolean isLeftRepetitiv = layoutGraph.getNodes().get(leftIndex)
 					.isRepetitive();
 			boolean isRightRepetitiv = layoutGraph.getNodes().get(rightIndex)
 					.isRepetitive();
+			
+			/*
+			 * Durch das Löschen wird die Größe der Vektoren verändert.
+			 * Daher muss die Größe angepasst werden, wenn nötig.
+			 */
+			if(ausgewaehlteLinkeKanten.size()< leftIndex){
+				ausgewaehlteLinkeKanten.setSize(leftIndex);
+			}
+			if(ausgewaehlteRechteKanten.size()<rightIndex){
+				ausgewaehlteRechteKanten.setSize(rightIndex);
+			}
+			
+			
 			/*
 			 * if one of the contigs is repetitiv only the selected edge has to
 			 * be deleted; not the hole vektor It can happen that both contigs
 			 * are repeats there in both vectors the edge has to be deleted
 			 * otherwise the not repeated contig the vector can be deleted.
 			 */
-			if (isLeftRepetitiv) {
-				neighbour = ausgewaehlteLinkeKanten.get(leftIndex);
-				neighbour.remove(oldEdge);
-			} else if (isRightRepetitiv) {
-				neighbour = ausgewaehlteRechteKanten.get(rightIndex);
-				neighbour.remove(oldEdge);
-			} else {
-				if (!isLeftRepetitiv) {
-					ausgewaehlteLinkeKanten.remove(leftIndex);
-				}
-				if (!isRightRepetitiv) {
-					ausgewaehlteRechteKanten.remove(rightIndex);
-				}
-			}
-
+//			if (isLeftRepetitiv) {
+				neighbourl = ausgewaehlteLinkeKanten.get(leftIndex);
+				neighbourl.remove(oldEdge);
+//			}
+//			if (isRightRepetitiv) {
+				neighbourR = ausgewaehlteRechteKanten.get(rightIndex);
+				neighbourR.remove(oldEdge);
+//			} 
+//			if (!isLeftRepetitiv) {
+//					ausgewaehlteLinkeKanten.remove(leftIndex);
+//			} 
+//			if (!isRightRepetitiv) {
+//					ausgewaehlteRechteKanten.remove(rightIndex);
+//			}
+//			System.out.println(ausgewaehlteLinkeKanten.elementAt(leftIndex)+" r "+ausgewaehlteRechteKanten.elementAt(rightIndex));
 			oldEdge.deselect();
 			updateModelAndGui();
 
@@ -871,18 +888,22 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					.isRepetitive();
 			boolean isRightRepeated = layoutGraph.getNodes().get(rightIndex)
 					.isRepetitive();
-
 			if (isLeftRepeated) {
 				if (ausgewaehlteLinkeKanten.get(leftIndex) != null) {
+					System.out.println("An index "+  leftIndex);
 					contigCollection = ausgewaehlteLinkeKanten.get(leftIndex);
 				}
 				contigCollection.add(selectedEdge);
 			} else if (isRightRepeated) {
 				if (ausgewaehlteRechteKanten.get(rightIndex) != null) {
+					System.out.println(" An index "+ rightIndex);
 					contigCollection = ausgewaehlteRechteKanten.get(rightIndex);
 				}
 				contigCollection.add(selectedEdge);
 			} else {
+				System.out.println("füge Kante hinzu "+ selectedEdge);
+				System.out.println("r An index "+ rightIndex);
+				System.out.println("l An index "+  leftIndex);
 				contigCollection.add(selectedEdge);
 			}
 			/*

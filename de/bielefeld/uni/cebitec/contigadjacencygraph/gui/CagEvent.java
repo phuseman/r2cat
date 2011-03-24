@@ -24,25 +24,10 @@ public class CagEvent {
 	private  Vector<AdjacencyEdge>  edges;
 	private  Vector<Integer>  indices;
 	private  DNASequence  contigNode;
-	private boolean currentContigIsReverse;
 	
-//	public CagEvent(EventType event, String data) {
-//		this.event_type = event;
-//		this.data = data;
-//	}
-//	public CagEvent(EventType event, LayoutGraph layoutGraph, int currentContigIndex){
-//		this.event_type = event;
-//		this.graph = layoutGraph;
-//		this.index = currentContigIndex;
-//	}
-//	
-//	public CagEvent(EventType event, AdjacencyEdge includingEdge, int currentContigIndex) {
-//		this.event_type = event;
-//		this.edge = includingEdge;
-//		this.index = currentContigIndex;
-//	}
+
 	/*
-	 * Zum Senden des aktuellem zentralen Contigs
+	 * For sending the current contig
 	 */
 	public CagEvent(EventType event, DNASequence contig,int currentContigIndex, boolean isCurrentContigReverse) {
 		this.event_type = event;
@@ -50,11 +35,9 @@ public class CagEvent {
 		this.index = currentContigIndex;
 		this.reverse = isCurrentContigReverse;
 	}
-	
-	
 
 	/*
-	 * Zum Senden der Nachbarn
+	 * For sending neighbours
 	 */
 	public CagEvent(EventType event, Vector<AdjacencyEdge> neighbourEdges) {
 		this.event_type = event;

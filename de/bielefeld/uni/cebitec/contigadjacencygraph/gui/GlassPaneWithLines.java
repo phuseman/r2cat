@@ -38,7 +38,7 @@ public class GlassPaneWithLines extends JPanel {
 	private Point[] rightComponentPositions;
 	private Point[] centralPosition = new Point[2];
 
-	private boolean flag;
+	private boolean flag = false;
 	private float[] leftSupport;
 	private float[] rightSupport;
 
@@ -54,43 +54,43 @@ public class GlassPaneWithLines extends JPanel {
 	/*
 	 * TODO diese Klasse muss noch variabler gestaltet und umstukturiert werden.
 	 */
-	public void setLine(JPanel neigbourContainerleft, JPanel neigbourContainer,
-			JPanel centralContig, double[] supportOfEachContigleft,
-			double[] supportOfEachContig, double maxSupport, double minSupport, boolean isZScore) {
-
-		neighbour = neigbourContainer;
-		neighbourLeft = neigbourContainerleft;
-		cContig = centralContig;
-
-		supportleft = supportOfEachContigleft;
-		support = supportOfEachContig;
-		
-		maxSupportOfAllEdges = maxSupport;
-		minSupportOfAllEdges = minSupport;
-		
-		isZScores = isZScore;
-		
-		System.out.println("min support in glasspanel "+ minSupport + " maxsupport "+maxSupport);
-		
-		/*double maxLeftSupport = calculateMax(supportOfEachContigleft);
-		double maxRightSupport = calculateMax(supportOfEachContig);
-		if (maxLeftSupport > maxRightSupport) {
-			maxSupportOfAllEdges = maxLeftSupport;
-		} else {
-			maxSupportOfAllEdges = maxRightSupport;
-		}
-
-		double minLeftSupport = calculateMin(supportOfEachContigleft);
-		double minRightSupport = calculateMin(supportOfEachContig);
-		if (minLeftSupport < minRightSupport) {
-			minSupportOfAllEdges = minLeftSupport;
-		} else {
-			minSupportOfAllEdges = minRightSupport;
-		}*/
-
-		flag = true;
-		repaint();
-	}
+//	public void setLine(JPanel neigbourContainerleft, JPanel neigbourContainer,
+//			JPanel centralContig, double[] supportOfEachContigleft,
+//			double[] supportOfEachContig, double maxSupport, double minSupport, boolean isZScore) {
+//
+//		neighbour = neigbourContainer;
+//		neighbourLeft = neigbourContainerleft;
+//		cContig = centralContig;
+//
+//		supportleft = supportOfEachContigleft;
+//		support = supportOfEachContig;
+//		
+//		maxSupportOfAllEdges = maxSupport;
+//		minSupportOfAllEdges = minSupport;
+//		
+//		isZScores = isZScore;
+//		
+//		System.out.println("min support in glasspanel "+ minSupport + " maxsupport "+maxSupport);
+//		
+//		/*double maxLeftSupport = calculateMax(supportOfEachContigleft);
+//		double maxRightSupport = calculateMax(supportOfEachContig);
+//		if (maxLeftSupport > maxRightSupport) {
+//			maxSupportOfAllEdges = maxLeftSupport;
+//		} else {
+//			maxSupportOfAllEdges = maxRightSupport;
+//		}
+//
+//		double minLeftSupport = calculateMin(supportOfEachContigleft);
+//		double minRightSupport = calculateMin(supportOfEachContig);
+//		if (minLeftSupport < minRightSupport) {
+//			minSupportOfAllEdges = minLeftSupport;
+//		} else {
+//			minSupportOfAllEdges = minRightSupport;
+//		}*/
+//
+//		flag = true;
+//		repaint();
+//	}
 
 
 	public void setFlag(boolean b) {
