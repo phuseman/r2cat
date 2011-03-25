@@ -71,23 +71,23 @@ public class TreecatGraphFrame implements ActionListener
 	public TreecatGraphFrame(Graph g)
 	{ 
 	    JButton fdlbtn = new JButton("Force - Directed - Layout");
-	    fdlbtn.setBackground(new Color(60,60,60));
-	    fdlbtn.setForeground(new Color(204,204,153));
+	    //fdlbtn.setBackground(new Color(60,60,60));
+	    //fdlbtn.setForeground(new Color(204,204,153));
 	    fdlbtn.setBorder(BorderFactory.createLineBorder(Color.black));
 	    
 	    JButton rlbtn = new JButton("Radial - Layout");
-	    rlbtn.setBackground(new Color(60,60,60));
-	    rlbtn.setForeground(new Color(204,204,153));
+	    //rlbtn.setBackground(new Color(60,60,60));
+	    //rlbtn.setForeground(new Color(204,204,153));
 	    rlbtn.setBorder(BorderFactory.createLineBorder(Color.black));
 	    
 	    JButton frbtn = new JButton("Fruchterman - Reingold - Layout");
-	    frbtn.setBackground(new Color(60,60,60));
-	    frbtn.setForeground(new Color(204,204,153));
+	    //frbtn.setBackground(new Color(60,60,60));
+	    //frbtn.setForeground(new Color(204,204,153));
 	    frbtn.setBorder(BorderFactory.createLineBorder(Color.black));
 	    
 	    JButton exportbtn = new JButton("Export Graph");
-	    exportbtn.setBackground(new Color(60,60,60));
-	    exportbtn.setForeground(new Color(204,204,153));
+	    //exportbtn.setBackground(new Color(60,60,60));
+	    //exportbtn.setForeground(new Color(204,204,153));
 	    exportbtn.setBorder(BorderFactory.createLineBorder(Color.black));
 	    
 	    fdlbtn.setActionCommand("fdl");
@@ -108,11 +108,11 @@ public class TreecatGraphFrame implements ActionListener
 	    this.window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    this.window.setSize(Toolkit.getDefaultToolkit().getScreenSize());
 	
-	    this.controlPanel.setBackground(new Color(84,84,84));
+	    this.controlPanel.setBackground(new Color(255,255,255));
 	    this.controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 	    this.window.add(controlPanel, BorderLayout.NORTH);
 	    
-	    this.displayPanel.setBackground(new Color(84,84,84));
+	    this.displayPanel.setBackground(new Color(255,255,255));
 	
 	    this.window.add(displayPanel);
 	    this.window.setVisible(true);

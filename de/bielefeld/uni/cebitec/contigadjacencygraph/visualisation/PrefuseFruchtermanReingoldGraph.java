@@ -181,10 +181,6 @@ public class PrefuseFruchtermanReingoldGraph
 	    this.display.addControlListener(new NeighborHighlightControl());
 	    this.display.setHighQuality(true);
 	    this.display.setSize(d);
-	    
-	    // set background - color
-	    Color col = new Color(84,84,84);
-	    this.display.setBackground(col);
 	   
 	    // run ActionLists
 	    this.vis.run("filter");
@@ -203,7 +199,7 @@ public class PrefuseFruchtermanReingoldGraph
 		this.searchPanel.setMaximumSize(new Dimension(400, 20));
 		this.searchPanel.setFont(FontLib.getFont("Tahoma", Font.PLAIN, 11));
 		this.searchPanel.setVisible(true);
-		this.searchPanel.setBackground(new Color(204,204,153));
+		//this.searchPanel.setBackground(new Color(204,204,153));
 		this.searchPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		this.searchPanel.setShowCancel(false);
 		this.searchPanel.setShowResultCount(false);

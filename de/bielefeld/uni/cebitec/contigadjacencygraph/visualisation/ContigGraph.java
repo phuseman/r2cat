@@ -121,6 +121,7 @@ public class ContigGraph extends Graph
 			{
 				leftConnector = this.lg.getEdges().get(edgeCounter).getj();
 			}	
+			
 			double drawableEdgesupport = Math.log(this.lg.getEdges().get(edgeCounter).getSupport())/10;
 			//double realEdgeSupport = this.lg.getEdges().get(edgeCounter).getSupport();
 			//String stringRealEdgeSupport = String.valueOf(realEdgeSupport);
