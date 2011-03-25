@@ -95,7 +95,6 @@ public class ContigAppearance extends JPanel {
 		this.setName("contig "+contig.getId());
 
 		if (includingEdge.isSelected()) {
-			System.out.println("kante ist ausgewaehlt");
 			selected = true;
 		}
 		anderweitigAusgewaehlt = false;

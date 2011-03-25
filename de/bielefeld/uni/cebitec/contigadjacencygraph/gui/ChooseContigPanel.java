@@ -95,7 +95,7 @@ public class ChooseContigPanel extends JPanel{
 		centerContainer.setOpaque(false);
 		centerContainer.setMinimumSize(new Dimension(310, 400));
 		centerContainer.setPreferredSize(new Dimension(310, 400));
-		centerContainer.setMaximumSize(new Dimension(310, 400));
+		centerContainer.setMaximumSize(new Dimension(310, 900));
 
 		/*
 		 * Container for all right neigbors
