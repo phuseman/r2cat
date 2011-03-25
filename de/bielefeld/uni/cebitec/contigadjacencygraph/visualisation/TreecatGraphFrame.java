@@ -28,17 +28,15 @@ import java.awt.event.ActionListener;
 import java.awt.Color;
 
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JButton;
-
-import org.freehep.util.export.ExportDialog;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 
 import prefuse.Display;
 import prefuse.data.Graph;
@@ -71,24 +69,16 @@ public class TreecatGraphFrame implements ActionListener
 	public TreecatGraphFrame(Graph g)
 	{ 
 	    JButton fdlbtn = new JButton("Force - Directed - Layout");
-	    //fdlbtn.setBackground(new Color(60,60,60));
-	    //fdlbtn.setForeground(new Color(204,204,153));
-	    fdlbtn.setBorder(BorderFactory.createLineBorder(Color.black));
-	    
+	    fdlbtn.setBackground(new Color(255,255,255));
+	  
 	    JButton rlbtn = new JButton("Radial - Layout");
-	    //rlbtn.setBackground(new Color(60,60,60));
-	    //rlbtn.setForeground(new Color(204,204,153));
-	    rlbtn.setBorder(BorderFactory.createLineBorder(Color.black));
+	    rlbtn.setBackground(new Color(255,255,255));
 	    
 	    JButton frbtn = new JButton("Fruchterman - Reingold - Layout");
-	    //frbtn.setBackground(new Color(60,60,60));
-	    //frbtn.setForeground(new Color(204,204,153));
-	    frbtn.setBorder(BorderFactory.createLineBorder(Color.black));
+	    frbtn.setBackground(new Color(255,255,255));
 	    
 	    JButton exportbtn = new JButton("Export Graph");
-	    //exportbtn.setBackground(new Color(60,60,60));
-	    //exportbtn.setForeground(new Color(204,204,153));
-	    exportbtn.setBorder(BorderFactory.createLineBorder(Color.black));
+	    exportbtn.setBackground(new Color(255,255,255));
 	    
 	    fdlbtn.setActionCommand("fdl");
 	    rlbtn.setActionCommand("rl");
@@ -224,10 +214,25 @@ public class TreecatGraphFrame implements ActionListener
 	{	
 		try
 		{
-			OutputStream fout = new FileOutputStream("/home/chrm/ActualGraph.png");
+			JFileChooser fc = new JFileChooser();
+			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);   
+			fc.setMultiSelectionEnabled(false);  
+			fc.setFileFilter( new FileFilter() 
+			{
+				public boolean accept(File f) 
+			    {
+					return f.isDirectory() || f.getName().toLowerCase().endsWith(".png");
+			    }
+				
+			    public String getDescription() 
+			    {
+			        return "portable network graphics (*.png)";
+			    }
+			});
+			fc.showSaveDialog(null);  
+			FileOutputStream fout = new FileOutputStream(fc.getSelectedFile());
 			this.disp.saveImage(fout, "PNG", 2.0);
 		}
-		
 		catch(IOException e)
 		{
 			System.out.println(e + "file not found");

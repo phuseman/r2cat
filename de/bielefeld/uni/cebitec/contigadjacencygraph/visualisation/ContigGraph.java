@@ -96,7 +96,7 @@ public class ContigGraph extends Graph
 			LayoutGraph.AdjacencyEdge e = this.lg.getEdges().get(edgeCounter);
 			//System.out.println(String.format((Locale)null,"Support: %.2f\n(%.2f%%) %s (%.2f%%)", e.getSupport(), e.getRelativeSupporti()*100, e.showContigConnectionAsciiString(), e.getRelativeSupportj()*100 ));
 			String asciSupport = String.format((Locale)null,"Support: %.2f\n(%.2f%%) %s (%.2f%%)", e.getSupport(), e.getRelativeSupporti()*100, e.showContigConnectionAsciiString(), e.getRelativeSupportj()*100 );
-			System.out.println(asciSupport);
+			//System.out.println(asciSupport);
 			asciSupport = asciSupport.replaceAll("<", " &lt ");
 			asciSupport = asciSupport.replaceAll(">", " &gt ");
 			asciSupport = asciSupport.replaceAll("\n", "<br>");
