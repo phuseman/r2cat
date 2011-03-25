@@ -229,9 +229,18 @@ public class TreecatGraphFrame implements ActionListener
 			        return "portable network graphics (*.png)";
 			    }
 			});
-			fc.showSaveDialog(null);  
-			FileOutputStream fout = new FileOutputStream(fc.getSelectedFile());
-			this.disp.saveImage(fout, "PNG", 2.0);
+			int selection = fc.showSaveDialog(null);  
+			
+			if (selection == fc.APPROVE_OPTION)
+			{
+				FileOutputStream fout = new FileOutputStream(fc.getSelectedFile());
+				this.disp.saveImage(fout, "PNG", 2.0);
+			}
+			
+			else if (selection == fc.CANCEL_OPTION)
+			{
+				System.out.println("cancel selected");
+			}
 		}
 		catch(IOException e)
 		{
