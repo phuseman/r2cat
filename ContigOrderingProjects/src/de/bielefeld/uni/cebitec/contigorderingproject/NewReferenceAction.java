@@ -159,16 +159,30 @@ public final class NewReferenceAction extends AbstractAction implements ContextA
           try {
             MatchingTask matcher = ((MatchingTask) evt.getSource());
 
+
+
+
             String referenceString = matcher.getReferenceFilenameWithoutExtension();
 
             MatchList matches = matcher.get();
 
+            //write the matches to file
             if (matches != null && !matches.isEmpty()) {
               FileObject matchFile = p.getProjectDirectory().createData(referenceString + ".r2c");
               matches.writeToFile(FileUtil.toFile(matchFile));
-//              FileObject logfile = p.getProjectDirectory().createData(referenceString + ".log");
-//              progress.writeCommentsToFile(FileUtil.toFile(logfile));
             }
+
+            //write the log to file
+            if (matcher.getProgressReporter() != null
+                    && matcher.getProgressReporter() instanceof CombinedNetbeansProgressReporter) {
+              CombinedNetbeansProgressReporter progress = (CombinedNetbeansProgressReporter) matcher.getProgressReporter();
+              FileObject logfile = p.getProjectDirectory().createData(referenceString + ".log");
+              progress.writeCommentsToFile(FileUtil.toFile(logfile));
+
+            }
+
+
+
           } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
           } catch (InterruptedException ex) {

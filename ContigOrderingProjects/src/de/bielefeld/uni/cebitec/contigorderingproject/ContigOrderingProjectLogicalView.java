@@ -19,9 +19,7 @@ package de.bielefeld.uni.cebitec.contigorderingproject;
 
 import org.netbeans.spi.project.ui.LogicalViewProvider;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataFilter;
 import org.openide.loaders.DataFolder;
-import org.openide.loaders.DataObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;

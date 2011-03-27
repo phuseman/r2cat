@@ -15,24 +15,16 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
 package de.bielefeld.uni.cebitec.contigorderingproject;
 
 import java.awt.Image;
-import java.util.Enumeration;
-import java.util.Vector;
 import javax.swing.Action;
 import org.netbeans.spi.project.ui.support.CommonProjectActions;
-import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataFilter;
 import org.openide.loaders.DataFolder;
-import org.openide.loaders.DataLoaderPool;
-import org.openide.loaders.DataNode;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
-import org.openide.nodes.AbstractNode;
 import org.openide.nodes.FilterNode;
-import org.openide.nodes.Node;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
@@ -41,7 +33,7 @@ import org.openide.util.lookup.ProxyLookup;
 /**
  * This is the node you actually see in the project tab for the project
  */
-final class ContigOrderingProjectNode extends FilterNode {
+public final class ContigOrderingProjectNode extends FilterNode {
 
   final ContigOrderingProject project;
 
