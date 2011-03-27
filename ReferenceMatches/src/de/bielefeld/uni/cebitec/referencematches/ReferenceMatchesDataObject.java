@@ -36,7 +36,7 @@ import org.openide.util.lookup.ProxyLookup;
 
 public class ReferenceMatchesDataObject extends MultiDataObject {
 
-  private MatchList referenceMatches = null;
+  private MatchListNBApiObject referenceMatches = null;
 
   public ReferenceMatchesDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException, IOException {
     super(pf, loader);
@@ -46,7 +46,7 @@ public class ReferenceMatchesDataObject extends MultiDataObject {
 
   @Override
   protected Node createNodeDelegate() {
-    return new DataNode(this,
+    return new ReferenceNode(this,
             Children.create(new ReferenceNodeChildFactory(this), true),
             getLookup());
   }
@@ -68,10 +68,10 @@ public class ReferenceMatchesDataObject extends MultiDataObject {
     return false;
   }
 
-  public MatchList getReferenceMatches() {
+  public MatchListNBApiObject getReferenceMatches() {
     if (referenceMatches == null) {
 
-      referenceMatches = new MatchList();
+      referenceMatches = new MatchListNBApiObject();
       try {
         referenceMatches.readFromFile(FileUtil.toFile(this.getPrimaryFile()));
       } catch (IOException ex) {
