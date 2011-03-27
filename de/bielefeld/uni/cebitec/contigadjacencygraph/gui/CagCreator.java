@@ -418,24 +418,8 @@ public class CagCreator {
 				: rightNeighbours[cContigIndex];
 
 		Vector<AdjacencyEdge> fiveMostLikleyRightNeighbours = new Vector<AdjacencyEdge>();
-		DNASequence neighbourContigObject;
-
-		double support;
-
-		for (AdjacencyEdge edge : test) {
-
-			if (edge.geti() == cContigIndex) {// j ist der Nachbar
-				neighbourContigObject = edge.getContigj();
-				support = edge.getRelativeSupportj();
-			} else {// i ist der Nachbar
-				neighbourContigObject = edge.getContigi();
-				support = edge.getRelativeSupportj();
-			}
-
-			neighbourContigObject.setSupportComparativeToCentralContig(support);
-
-			fiveMostLikleyRightNeighbours.add(edge);
-		}
+		
+		fiveMostLikleyRightNeighbours = test;
 
 		return fiveMostLikleyRightNeighbours;
 
@@ -456,74 +440,13 @@ public class CagCreator {
 				: leftNeighbours[centralContigIndex];
 
 		Vector<AdjacencyEdge> fiveMostLikleyLeftNeighbours = new Vector<AdjacencyEdge>();
-		DNASequence neighbourContigObject;
-
-		double support;
-
-		for (AdjacencyEdge edge : test) {
-			if (edge.geti() == centralContigIndex) {// j ist der Nachbar
-				neighbourContigObject = edge.getContigj();
-				support = edge.getRelativeSupportj();
-			} else {// i ist der Nachbar
-				neighbourContigObject = edge.getContigi();
-				support = edge.getRelativeSupportj();
-			}
-
-			neighbourContigObject.setSupportComparativeToCentralContig(support);
-
-			fiveMostLikleyLeftNeighbours.add(edge);
-		}
+		
+		fiveMostLikleyLeftNeighbours = test;
+		
 		return fiveMostLikleyLeftNeighbours;
 
 	}
 
-//	public Vector<AdjacencyEdge> addSelectedContig(AdjacencyEdge selectedEdge) {
-//		System.out.println("Vor dem hinzufügen der Kante "
-//				+ selectedContigs.size());
-//		for (Iterator<AdjacencyEdge> iterator = selectedContigs.iterator(); iterator
-//				.hasNext();) {
-//			AdjacencyEdge edge = iterator.next();
-//
-//			if (!edge.equals(selectedEdge)) {
-//				selectedContigs.add(selectedEdge);
-//				break;
-//			}
-//		}
-//		if (selectedContigs.size() == 0) {
-//			selectedContigs.add(selectedEdge);
-//		}
-//		
-//		return selectedContigs;
-//	}
-
-	/*public Vector<AdjacencyEdge> removeSelectedEdge(AdjacencyEdge selectedEdge) {
-
-		boolean flag = false;
-//		System.out.println("Vor dem Löschen der Kante "
-//				+ selectedContigs.size());
-		for (AdjacencyEdge edge : selectedContigs) {
-			if (edge.equals(selectedEdge)) {
-
-				selectedContigs.removeElement(selectedEdge);
-//				sContigs.remove(selectedEdge);
-
-				sendCurrentContig();
-				sendLeftNeighbours();
-				sendRightNeighbours();
-				flag = true;
-				break;
-			}
-		}*/
-//		System.out.println("Nach dem Löschen der Kante "
-//				+ selectedContigs.size());
-	/*	if (!flag) {
-			javax.swing.JOptionPane.showMessageDialog(window, "Sorry.\n"
-					+ "Can't remove this neighbour\n"
-					+ "Probably you didn't selected this neighbour.");
-		}
-		return selectedContigs;
-	}
-*/
 	/*
 	 * Send an event, if the user selected a contig
 	 */

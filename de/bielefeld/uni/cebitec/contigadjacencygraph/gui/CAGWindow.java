@@ -251,6 +251,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		inputOption.setLayout(inputOptionLayout);
 
 		JLabel chooseNumberOfNeighbours = new JLabel("number of neighbors");
+		chooseNumberOfNeighbours.setToolTipText("<html>"
+				+ "Here you are able to choose the number of neighbours."
+				+ "Please type an number between 1 and 10 in the textfield"
+				+ "and press ENTER."
+				+ "</html>");
 		NumberFormat nformat = NumberFormat.getNumberInstance();
 
 		inputOptionForNumberOfNeighbours = new JFormattedTextField(nformat);
@@ -259,7 +264,12 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		inputOptionForNumberOfNeighbours.setColumns(2);
 		inputOptionForNumberOfNeighbours.addPropertyChangeListener("value",
 				new NumberOfNeighboursListener());
-
+		inputOptionForNumberOfNeighbours.setToolTipText("<html>"
+				+ "Here you are able to choose the number of neighbours."
+				+ "Please type an number between 1 and 10 in the textfield"
+				+ "and press ENTER."
+				+ "</html>");
+		
 		JLabel toggelBwAbsolutAndRelativeSupport = new JLabel("Support");
 		JPanel toggelOption = new JPanel();
 
@@ -267,12 +277,14 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		absoluteSupport = new JRadioButton("absolute");
 		absoluteSupport.setSelected(true);
-		absoluteSupport.setToolTipText("  ");
+		absoluteSupport.setToolTipText(" If you choose this option you see at each line " +
+				"the normalized likelyhood score over the hole range. ");
 		absoluteSupport.setActionCommand("absolute");
 		absoluteSupport.addActionListener(new RadioButtonActionListener());
 
 		relativeSupport = new JRadioButton("z-Score");
-		relativeSupport.setToolTipText("  ");
+		relativeSupport.setToolTipText(" If you choose this option you see at each line "
+				+" ");
 		relativeSupport.setActionCommand("zScore");
 		relativeSupport.addActionListener(new RadioButtonActionListener());
 
@@ -439,6 +451,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					break;
 				}
 			}
+			chooseContigPanel.setFlag(true);
 			chooseContigPanel.setLeftSupport(leftSupport);
 		}
 
@@ -572,7 +585,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				}
 			}
 			chooseContigPanel.setRightSupport(rightSupport);
-			chooseContigPanel.setFlag(true);
 		}
 
 	}

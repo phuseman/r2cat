@@ -68,32 +68,16 @@ public class ContigAppearance extends JPanel {
 
 		this.lGraph = graph;
 		this.i = indexOfNeighbour;
+		this.isReverse = isContigReverse(sideIsLeft, includingEdge, indexOfNeighbour);
 
-		boolean neighbourIsReverse;
-		selected = false;
-		if (sideIsLeft) {
-
-			if (includingEdge.geti() == indexOfNeighbour) {
-				neighbourIsReverse = includingEdge.isLeftConnectori();
-			} else {
-				neighbourIsReverse = includingEdge.isLeftConnectorj();
-			}
-		} else {
-			if (includingEdge.geti() == indexOfNeighbour) {
-				neighbourIsReverse = includingEdge.isRightConnectori();
-			} else {
-				neighbourIsReverse = includingEdge.isRightConnectorj();
-			}
-		}
-		this.isReverse = neighbourIsReverse;
 		DNASequence contig = lGraph.getNodes().get(i);
-
 		contigLabel = new JLabel();
 
 		this.setBackground(Color.WHITE);
 		this.add(contigLabel);
 		this.setName("contig "+contig.getId());
 
+		selected = false;
 		if (includingEdge.isSelected()) {
 			selected = true;
 		}
@@ -107,8 +91,30 @@ public class ContigAppearance extends JPanel {
 		isRepetitiv = contig.isRepetitive();
 		
 		setContigAppearance(contig.getId(), contig.getSize(), new ContigBorder(
-				isRepetitiv, neighbourIsReverse, selected, anderweitigAusgewaehlt));
+				isRepetitiv, isReverse, selected, anderweitigAusgewaehlt));
 		setSizeOfContig(contig.getSize(), maxSize, minSize);
+	}
+	
+	private boolean isContigReverse( boolean isLeftContig, AdjacencyEdge edge, int indexOfContig ){
+		
+		boolean isContigReverse = false;
+		
+		if (isLeftContig) {
+
+			if (edge.geti() == indexOfContig) {
+				isContigReverse = edge.isLeftConnectori();
+			} else {
+				isContigReverse = edge.isLeftConnectorj();
+			}
+		} else {
+			if (edge.geti() == indexOfContig) {
+				isContigReverse = edge.isRightConnectori();
+			} else {
+				isContigReverse = edge.isRightConnectorj();
+			}
+		}
+		
+		return isContigReverse;
 	}
 
 	/*
