@@ -34,6 +34,7 @@ import org.openide.util.Lookup;
 import org.openide.util.LookupListener;
 import org.openide.util.Utilities;
 import javax.swing.table.TableColumn;
+import org.openide.windows.TopComponentGroup;
 
 /**
  * Top component which displays something.
@@ -76,12 +77,12 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
     //the first column contains the nodes; switch them such that the selection is the first column
     outlineView.getOutline().moveColumn(0, 1);
     // after this set the width of the selection column
-  TableColumn selectionColumn = outlineView.getOutline().getColumnModel().getColumn(0);
-  selectionColumn.setMaxWidth(30);
-  selectionColumn.setMinWidth(15);
-  selectionColumn.setMaxWidth(25);
+    TableColumn selectionColumn = outlineView.getOutline().getColumnModel().getColumn(0);
+    selectionColumn.setMaxWidth(30);
+    selectionColumn.setMinWidth(15);
+    selectionColumn.setMaxWidth(25);
 
-    matchLists.getViewport().add(outlineView);
+    references.getViewport().add(outlineView);
 
   }
 
@@ -94,7 +95,7 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
   private void initComponents() {
 
     run = new javax.swing.JButton();
-    matchLists = new javax.swing.JScrollPane();
+    references = new javax.swing.JScrollPane();
 
     org.openide.awt.Mnemonics.setLocalizedText(run, org.openide.util.NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "ContigAdjacencyPropertiesTopComponent.run.text")); // NOI18N
 
@@ -106,21 +107,21 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(run, javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(matchLists, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE))
+          .addComponent(references, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE))
         .addContainerGap())
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(matchLists, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addComponent(references, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
         .addComponent(run)
         .addContainerGap())
     );
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JScrollPane matchLists;
+  private javax.swing.JScrollPane references;
   private javax.swing.JButton run;
   // End of variables declaration//GEN-END:variables
 
@@ -170,6 +171,12 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
   public void componentClosed() {
     result.removeLookupListener(this);
     result = null;
+
+    TopComponentGroup group = WindowManager.getDefault().findTopComponentGroup("ContigAdjacencyGraphGroup");
+    if (group != null) {
+      group.close();
+    }
+
   }
 
   void writeProperties(java.util.Properties p) {
