@@ -61,6 +61,7 @@ public class ContigNode extends AbstractNode {
     return getData().getId();
   }
 
+  @Override
   protected Sheet createSheet() {
 
     Sheet sheet = Sheet.createDefault();

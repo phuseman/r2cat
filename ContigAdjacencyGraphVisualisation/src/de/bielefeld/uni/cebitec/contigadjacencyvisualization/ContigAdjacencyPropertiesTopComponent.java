@@ -19,7 +19,6 @@ package de.bielefeld.uni.cebitec.contigadjacencyvisualization;
 
 import de.bielefeld.uni.cebitec.contigorderingproject.ContigOrderingProject;
 import de.bielefeld.uni.cebitec.contigorderingproject.ContigOrderingProjectLogicalView;
-import de.bielefeld.uni.cebitec.contigorderingproject.ContigOrderingProjectNode;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Logger;
@@ -30,11 +29,11 @@ import org.openide.windows.WindowManager;
 //import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.explorer.ExplorerManager;
-import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.OutlineView;
 import org.openide.util.Lookup;
 import org.openide.util.LookupListener;
 import org.openide.util.Utilities;
+import javax.swing.table.TableColumn;
 
 /**
  * Top component which displays something.
@@ -67,13 +66,22 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
     outlineView.getOutline().setRootVisible(false);
 
     outlineView.setPropertyColumns(
-            "selected", "Use",
-            "displayName", "Reference"
-            );
+            "cagCreation", "Use");
 
+
+    //remove the first columnt that contains the node itself
+//    TableColumn nodeColumn = outlineView.getOutline().getColumnModel().getColumn(0);
+//    outlineView.getOutline().removeColumn(nodeColumn);
+
+    //the first column contains the nodes; switch them such that the selection is the first column
+    outlineView.getOutline().moveColumn(0, 1);
+    // after this set the width of the selection column
+  TableColumn selectionColumn = outlineView.getOutline().getColumnModel().getColumn(0);
+  selectionColumn.setMaxWidth(30);
+  selectionColumn.setMinWidth(15);
+  selectionColumn.setMaxWidth(25);
 
     matchLists.getViewport().add(outlineView);
-
 
   }
 

@@ -41,9 +41,6 @@ public class MatchingTask extends SwingWorker<MatchList, String> implements Abst
 
   private AbstractProgressReporter progress = null;
   final private File reference;
-
-
-  
   final private File contigs;
   private MatchList result = null;
 
@@ -63,6 +60,10 @@ public class MatchingTask extends SwingWorker<MatchList, String> implements Abst
     this.progress = progress;
   }
 
+  public AbstractProgressReporter getProgressReporter() {
+    return progress;
+  }
+
   @Override
   public void reportProgress(double percentDone, String comment) {
     if (percentDone >= 0 && percentDone <= 1) {
@@ -73,7 +74,7 @@ public class MatchingTask extends SwingWorker<MatchList, String> implements Abst
     }
   }
 
-    public File getContigs() {
+  public File getContigs() {
     return contigs;
   }
 
@@ -84,7 +85,7 @@ public class MatchingTask extends SwingWorker<MatchList, String> implements Abst
   public String getReferenceFilenameWithoutExtension() {
     return MiscFileUtils.getFileNameWithoutExtension(reference);
   }
-  
+
   @Override
   protected MatchList doInBackground() {
     try { // catches OutOfMemoryError s
