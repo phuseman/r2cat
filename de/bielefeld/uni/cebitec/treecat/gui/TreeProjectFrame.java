@@ -46,13 +46,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+import javax.swing.UIManager;
 
 import de.bielefeld.uni.cebitec.common.AbstractProgressReporter;
 import de.bielefeld.uni.cebitec.common.CustomFileFilter;
 import de.bielefeld.uni.cebitec.common.MiscFileUtils;
 import de.bielefeld.uni.cebitec.common.ProgressMonitorReporter;
 import de.bielefeld.uni.cebitec.common.Timer;
+import de.bielefeld.uni.cebitec.contigadjacencygraph.ContigAdjacencyGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
+import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CAGWindow;
+import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CagCreator;
 import de.bielefeld.uni.cebitec.treecat.MultifurcatedTree;
 import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
 import de.bielefeld.uni.cebitec.treecat.MultifurcatedTree.UnproperTreeException;
@@ -301,6 +305,30 @@ public class TreeProjectFrame extends javax.swing.JFrame implements
 				result = new File(tcsp.suggestOutputFile());
 				layout.writeLayoutAsNeato(result,
 						LayoutGraph.NeatoOutputType.ONENODE);
+				
+				
+				ContigAdjacencyGraph cag = tcsp.getContigAdjacencyGraph();
+				LayoutGraph completeGraph = cag.getCompleteGraph();
+				// model = new CagCreator(layoutGraph);
+				final CagCreator model = new CagCreator(completeGraph);
+
+				java.awt.EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							UIManager
+									.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+							// "com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+							// UIManager.getCrossPlatformLookAndFeelClassName());
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+						CAGWindow window = new CAGWindow(model);
+					}
+				});
+				
+				
+				
+				
 				publish(t.stopTimer());
 				publish("Total time: " + t.stopTimer());
 
