@@ -228,8 +228,12 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		// list.setVisibleRowCount(10);
 		list.addListSelectionListener(new ContigChangedListener());
+		list.setToolTipText("<html>Choose a contig<br>"+
+				" by a click on a name.</html>");
 
 		listScroller = new JScrollPane(list);
+		listScroller.setToolTipText("<html>Choose a contig<br>"+
+				" by a click on a name.</html>");
 		listScroller.setBorder(BorderFactory.createTitledBorder("Contig List"));
 		listScroller.setPreferredSize(new Dimension(breite, 400));
 		listScroller
@@ -252,8 +256,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		JLabel chooseNumberOfNeighbours = new JLabel("number of neighbors");
 		chooseNumberOfNeighbours.setToolTipText("<html>"
-				+ "Here you are able to choose the number of neighbours."
-				+ "Please type an number between 1 and 10 in the textfield"
+				+ "Here you are able to choose the number of neighbours.<br>"
+				+ "Please type a number between 1 and 10 in the textfield<br>"
 				+ "and press ENTER."
 				+ "</html>");
 		NumberFormat nformat = NumberFormat.getNumberInstance();
@@ -265,26 +269,27 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		inputOptionForNumberOfNeighbours.addPropertyChangeListener("value",
 				new NumberOfNeighboursListener());
 		inputOptionForNumberOfNeighbours.setToolTipText("<html>"
-				+ "Here you are able to choose the number of neighbours."
-				+ "Please type an number between 1 and 10 in the textfield"
+				+ "Please type a number <br>" +
+						"between 1 and 10<br>"
 				+ "and press ENTER."
 				+ "</html>");
 		
 		JLabel toggelBwAbsolutAndRelativeSupport = new JLabel("Support");
+		toggelBwAbsolutAndRelativeSupport.setToolTipText("Choose a support option.");
 		JPanel toggelOption = new JPanel();
 
 		ButtonGroup supportGroup = new ButtonGroup();
 
 		absoluteSupport = new JRadioButton("absolute");
 		absoluteSupport.setSelected(true);
-		absoluteSupport.setToolTipText(" If you choose this option you see at each line " +
-				"the normalized likelyhood score over the hole range. ");
+		absoluteSupport.setToolTipText(" If you choose this option you see at each line <br>" +
+				"the likelyhood score. ");
 		absoluteSupport.setActionCommand("absolute");
 		absoluteSupport.addActionListener(new RadioButtonActionListener());
 
 		relativeSupport = new JRadioButton("z-Score");
-		relativeSupport.setToolTipText(" If you choose this option you see at each line "
-				+" ");
+		relativeSupport.setToolTipText(" If you choose this option you see at each line <br> "
+				+" a normalized score.");
 		relativeSupport.setActionCommand("zScore");
 		relativeSupport.addActionListener(new RadioButtonActionListener());
 
