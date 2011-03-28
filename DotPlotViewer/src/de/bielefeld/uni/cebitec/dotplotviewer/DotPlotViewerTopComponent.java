@@ -23,6 +23,9 @@ import de.bielefeld.uni.cebitec.r2cat.gui.DotPlotMatchViewerActionListener;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Logger;
+import java.util.prefs.PreferenceChangeEvent;
+import java.util.prefs.PreferenceChangeListener;
+import java.util.prefs.Preferences;
 import org.openide.util.LookupEvent;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
@@ -31,6 +34,7 @@ import org.openide.windows.WindowManager;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.Lookup;
 import org.openide.util.LookupListener;
+import org.openide.util.NbPreferences;
 import org.openide.util.Utilities;
 
 /**
@@ -38,29 +42,39 @@ import org.openide.util.Utilities;
  */
 @ConvertAsProperties(dtd = "-//de.bielefeld.uni.cebitec.dotplotviewer//DotPlotViewer//EN",
 autostore = false)
-public final class DotPlotViewerTopComponent extends TopComponent implements LookupListener {
+public final class DotPlotViewerTopComponent extends TopComponent implements LookupListener, PreferenceChangeListener {
 
   private static DotPlotViewerTopComponent instance;
   /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
   private static final String PREFERRED_ID = "DotPlotViewerTopComponent";
   private DotPlotMatchViewer dotplotMatchViewer;
+  Preferences pref;
+  private boolean grid;
+  private boolean reversed;
+  private boolean stacked;
 
   public DotPlotViewerTopComponent() {
     initComponents();
+
+    pref = NbPreferences.forModule(DotPlotViewerPanel.class);
+    pref.addPreferenceChangeListener(this);
+
+    grid = pref.getBoolean(DotPlotViewerPanel.PROP_GRID, true);
+    reversed = pref.getBoolean(DotPlotViewerPanel.PROP_REVERSE, true);
+    stacked = pref.getBoolean(DotPlotViewerPanel.PROP_STACK, true);
+
     dotplotMatchViewer = new DotPlotMatchViewer();
-    		DotPlotMatchViewerActionListener dotPlotVisualisationListener = new DotPlotMatchViewerActionListener(
-				null, dotplotMatchViewer);
+    DotPlotMatchViewerActionListener dotPlotVisualisationListener = new DotPlotMatchViewerActionListener(
+            null, dotplotMatchViewer);
 
-		dotplotMatchViewer
-				.addMouseMotionListener(dotPlotVisualisationListener);
-		dotplotMatchViewer.addMouseListener(dotPlotVisualisationListener);
-		dotplotMatchViewer
-				.addMouseWheelListener(dotPlotVisualisationListener);
-		dotplotMatchViewer.addKeyListener(dotPlotVisualisationListener);
+    dotplotMatchViewer.addMouseMotionListener(dotPlotVisualisationListener);
+    dotplotMatchViewer.addMouseListener(dotPlotVisualisationListener);
+    dotplotMatchViewer.addMouseWheelListener(dotPlotVisualisationListener);
+    dotplotMatchViewer.addKeyListener(dotPlotVisualisationListener);
 
-		// load the previous state from prefs
-		dotplotMatchViewer.drawGrid(true);
+    // load the previous state from prefs
+    dotplotMatchViewer.drawGrid(grid);
 
     //this way, the visualisation can react to window size changes
     this.addComponentListener(dotplotMatchViewer);
@@ -192,13 +206,10 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
   public void setMatchList(MatchList ml) {
     if (ml != null && !ml.isEmpty()) {
       this.dotplotMatchViewer.setAlignmentsPositionsList(ml);
-//TODO: remember and set this properly
-      		dotplotMatchViewer.getMatchDisplayerList()
-				.showReversedComplements(true);
 
-          //TODO: remember and set this properly
-		dotplotMatchViewer.getMatchDisplayerList()
-				.setDisplayOffsets(true);
+      dotplotMatchViewer.getMatchDisplayerList().showReversedComplements(reversed);
+      dotplotMatchViewer.getMatchDisplayerList().setDisplayOffsets(stacked);
+      dotplotMatchViewer.drawGrid(grid);
 
       dotplotMatchViewer.getMatchDisplayerList().setNeedsRegeneration(true);
       this.jScrollPane1.setViewportView(dotplotMatchViewer);
@@ -210,5 +221,46 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 
     this.invalidate();
     this.repaint();
+  }
+
+  @Override
+  public void preferenceChange(PreferenceChangeEvent evt) {
+    String key = evt.getKey();
+    boolean newvalue;
+    boolean changed = false;
+    if (key.equals(DotPlotViewerPanel.PROP_GRID)) {
+      newvalue = pref.getBoolean(DotPlotViewerPanel.PROP_GRID, true);
+      if (grid != newvalue) {
+        changed = true;
+        grid = newvalue;
+        dotplotMatchViewer.drawGrid(grid);
+      }
+    } else if (key.equals(DotPlotViewerPanel.PROP_REVERSE)) {
+      newvalue = pref.getBoolean(DotPlotViewerPanel.PROP_REVERSE, true);
+      if (reversed != newvalue) {
+        changed = true;
+        reversed = newvalue;
+        if (dotplotMatchViewer.getMatchDisplayerList() != null) {
+          dotplotMatchViewer.getMatchDisplayerList().showReversedComplements(reversed);
+        }
+      }
+    } else if (key.equals(DotPlotViewerPanel.PROP_STACK)) {
+      newvalue = pref.getBoolean(DotPlotViewerPanel.PROP_STACK, true);
+      if (stacked != newvalue) {
+        changed = true;
+        stacked = newvalue;
+        if (dotplotMatchViewer.getMatchDisplayerList() != null) {
+          dotplotMatchViewer.getMatchDisplayerList().setDisplayOffsets(stacked);
+        }
+      }
+    }
+    
+    
+    if (changed && dotplotMatchViewer.getMatchDisplayerList() != null) {
+      dotplotMatchViewer.getMatchDisplayerList().setNeedsRegeneration(true);
+      this.invalidate();
+      this.repaint();
+    }
+
   }
 }

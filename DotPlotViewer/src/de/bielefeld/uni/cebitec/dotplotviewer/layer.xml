@@ -28,4 +28,16 @@
       </folder>
     </folder>
   </folder>
+  <folder name="OptionsDialog">
+     <folder name="Advanced">
+         <file name="DotPlotViewerPanel.instance">
+             <attr name="instanceCreate" methodvalue="org.netbeans.spi.options.AdvancedOption.createSubCategory"/>
+             <attr name="controller" newvalue="de.bielefeld.uni.cebitec.dotplotviewer.DotPlotViewerOptionsPanelController"/>
+             <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#AdvancedOption_DisplayName_DotPlotViewer"/>
+             <attr name="toolTip" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle"/>
+             <attr name="keywords" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#AdvancedOption_Keywords_DotPlotViewer"/>
+             <attr name="keywordsCategory" stringvalue="Advanced/DotPlotViewer"/>
+         </file>
+     </folder>
+ </folder>
 </filesystem>
