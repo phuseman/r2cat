@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class MatchListNBApiObject extends MatchList {
 
-  private List listeners = Collections.synchronizedList(new LinkedList());
+  private List<PropertyChangeListener> listeners = Collections.synchronizedList(new LinkedList<PropertyChangeListener>());
   boolean selectedForContigAdjacencyGraphCreation = false;
 
   public Boolean isSelectedForContigAdjacencyGraphCreation() {

@@ -57,6 +57,7 @@ public final class ContigOrderingProjectNode extends FilterNode {
             new ProxyLookup(new Lookup[]{Lookups.singleton(project),
               dataFolder.getNodeDelegate().getLookup()
             }));
+    //todo: Is there a way to include the project into the lookup of the children?
 
     this.project = project;
   }

@@ -103,23 +103,32 @@ public final class NewReferenceAction extends AbstractAction implements ContextA
 
 
       if (references != null) {
-        for (int i = 0; i < references.length; i++) {
+        nextreference:for (int i = 0; i < references.length; i++) {
 
           File reference = references[i];
           String referenceString = MiscFileUtils.getFileNameWithoutExtension(reference);
 
           FileObject existingMatches = p.getProjectDirectory().getFileObject(referenceString, "r2c");
           if (existingMatches != null) {
-            NotifyDescriptor.Confirmation confirm = new NotifyDescriptor.Confirmation("Already existing matchfile", "Overwrite file?");
+            NotifyDescriptor.Confirmation confirm = new NotifyDescriptor.Confirmation(
+                    existingMatches.getNameExt() + " already exists\nDo you want to overwrite this file?",
+                    "Already existing matchfile");
             Object returnvalue = DialogDisplayer.getDefault().notify(confirm);
             if (returnvalue == NotifyDescriptor.Confirmation.YES_OPTION) {
               try {
+                //check if a logfile exists and delete it
+                FileObject logfile = FileUtil.findBrother(existingMatches, "log");
+                if (logfile != null) {
+                  logfile.delete();
+                }
+
                 existingMatches.delete();
+
               } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
               }
             } else {
-              continue;
+              continue nextreference;
             }
           }
 
@@ -168,7 +177,7 @@ public final class NewReferenceAction extends AbstractAction implements ContextA
 
             //write the matches to file
             if (matches != null && !matches.isEmpty()) {
-              FileObject matchFile = p.getProjectDirectory().createData(referenceString + ".r2c");
+              FileObject matchFile = p.getProjectDirectory().createData(referenceString, "r2c");
               matches.writeToFile(FileUtil.toFile(matchFile));
             }
 
@@ -176,7 +185,7 @@ public final class NewReferenceAction extends AbstractAction implements ContextA
             if (matcher.getProgressReporter() != null
                     && matcher.getProgressReporter() instanceof CombinedNetbeansProgressReporter) {
               CombinedNetbeansProgressReporter progress = (CombinedNetbeansProgressReporter) matcher.getProgressReporter();
-              FileObject logfile = p.getProjectDirectory().createData(referenceString + ".log");
+              FileObject logfile = p.getProjectDirectory().createData(referenceString, "log");
               progress.writeCommentsToFile(FileUtil.toFile(logfile));
 
             }

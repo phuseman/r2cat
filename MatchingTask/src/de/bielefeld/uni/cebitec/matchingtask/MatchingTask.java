@@ -206,6 +206,9 @@ public class MatchingTask extends SwingWorker<MatchList, String> implements Abst
       }
 
 
+      if (!result.isEmpty()) {
+        result.setInitialQueryOrientation();
+      }
 
       return result;
 

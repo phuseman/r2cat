@@ -104,14 +104,14 @@ public class Contig implements DNASequence {
     }
 
 
-    private List listeners = Collections.synchronizedList(new LinkedList());
+    private List<PropertyChangeListener> listeners = Collections.synchronizedList(new LinkedList<PropertyChangeListener>());
 
 public void addPropertyChangeListener (PropertyChangeListener pcl) {
-    listeners.add (pcl);
+    listeners.add(pcl);
 }
 
 public void removePropertyChangeListener (PropertyChangeListener pcl) {
-    listeners.remove (pcl);
+    listeners.remove(pcl);
 }
 
 private void fire (String propertyName, Object old, Object nue) {
