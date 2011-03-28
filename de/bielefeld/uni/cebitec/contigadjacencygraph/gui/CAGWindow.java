@@ -271,7 +271,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		inputOptionForNumberOfNeighbours.setToolTipText("<html>"
 				+ "Please type a number <br>" +
 						"between 1 and 10<br>"
-				+ "and press ENTER."
+				+ "and press ENTER/Return."
 				+ "</html>");
 		
 		JLabel toggelBwAbsolutAndRelativeSupport = new JLabel("Support");
@@ -282,14 +282,14 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		absoluteSupport = new JRadioButton("absolute");
 		absoluteSupport.setSelected(true);
-		absoluteSupport.setToolTipText(" If you choose this option you see at each line <br>" +
-				"the likelyhood score. ");
+		absoluteSupport.setToolTipText("<html>If you choose this option<br> you see at each line <br>" +
+				"the likelyhood score.</html> ");
 		absoluteSupport.setActionCommand("absolute");
 		absoluteSupport.addActionListener(new RadioButtonActionListener());
 
 		relativeSupport = new JRadioButton("z-Score");
-		relativeSupport.setToolTipText(" If you choose this option you see at each line <br> "
-				+" a normalized score.");
+		relativeSupport.setToolTipText("<html> If you choose this option <br>you see at each line <br> "
+				+" a normalized score.</html>");
 		relativeSupport.setActionCommand("zScore");
 		relativeSupport.addActionListener(new RadioButtonActionListener());
 
