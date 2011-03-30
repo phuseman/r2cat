@@ -52,8 +52,11 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.plaf.basic.BasicTreeUI.SelectionModelPropertyChangeHandler;
 import javax.swing.text.NumberFormatter;
 
+import com.sun.media.sound.RIFFWriter;
+import com.sun.rowset.providers.RIOptimisticProvider;
 import com.sun.xml.internal.bind.v2.model.core.Adapter;
 
 //import sun.org.mozilla.javascript.IdScriptableObject;
@@ -405,7 +408,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						leftSupport[t] = edge.getSupport();
 					}
 
-					boolean anderweitigAusgewaehlt = ulteriorSelected(true, indexOfContig, edge);
+					Vector<Vector<AdjacencyEdge>> linkeKanten = centralContig.isReverse() ? ausgewaehlteRechteKanten : ausgewaehlteLinkeKanten;
+					boolean anderweitigAusgewaehlt = ulteriorSelected(true, indexOfContig, edge, linkeKanten);
 
 					contigPanel = new ContigAppearance(layoutGraph, edge,
 							indexOfContig, true, maxSizeOfContigs,
@@ -423,9 +427,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						radioButton
 						.setActionCommand("noch kein nachbar ausgewaehlt");
 					}
+					
+					
 					if (anderweitigAusgewaehlt) {
 						radioButton.setActionCommand("anderweitigAusgewaehlt");
-						AdjacencyEdge otherEdgeForThisNeighbour = ausgewaehlteLinkeKanten.get(indexOfContig).firstElement();
+						AdjacencyEdge otherEdgeForThisNeighbour = linkeKanten.get(indexOfContig).firstElement();
 						radioButton
 								.setNeighboursForTheThisNeighbour(otherEdgeForThisNeighbour);
 					}
@@ -531,7 +537,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					 * dieses Contig ein anderes Aussehen und kann auch nicht
 					 * mehr für dieses ausgewählt werden.
 					 */
-					boolean anderweitigAusgewaehlt = ulteriorSelected(false, indexOfContig, edge);
+					Vector<Vector<AdjacencyEdge>> rechteKanten = centralContig.isReverse() ? ausgewaehlteLinkeKanten : ausgewaehlteRechteKanten;
+					boolean anderweitigAusgewaehlt = ulteriorSelected(false, indexOfContig, edge, rechteKanten);
 					
 					contigPanel = new ContigAppearance(layoutGraph, edge,
 							indexOfContig, false, maxSizeOfContigs,
@@ -562,10 +569,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					}
 					if (anderweitigAusgewaehlt) {
 						radioButton.setActionCommand("anderweitigAusgewaehlt");
-						AdjacencyEdge otherEdge = ausgewaehlteRechteKanten.get(indexOfContig).firstElement();
+						AdjacencyEdge otherEdge = rechteKanten.get(indexOfContig).firstElement();
 						radioButton.setNeighboursForTheThisNeighbour(otherEdge);
+						
 					}
-//					System.out.println("r "+radioButton.getActionCommand());
+
 					radioButton.setNachbarIndex(indexOfContig);
 					radioButton.setCentralIndex(centralContigIndex);
 					radioButton.setLeft(false);
@@ -648,13 +656,14 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	 * If a not repetitiv contig is used in an another adjacency, the flag will be
 	 * set on true. 
 	 */
-	private boolean ulteriorSelected(boolean isLeft, int indexOfNeighbour, AdjacencyEdge edge) {
+	private boolean ulteriorSelected(boolean isLeft, int indexOfNeighbour, AdjacencyEdge edge, Vector<Vector<AdjacencyEdge>> selectedEdges){//, boolean isCentralContigReverse) {
 		boolean isSelected = false;
+		
 		if(isLeft){
-			if(!ausgewaehlteLinkeKanten.get(indexOfNeighbour).isEmpty() 
+			if(!selectedEdges.get(indexOfNeighbour).isEmpty() 
 					&& !layoutGraph.getNodes().get(indexOfNeighbour).isRepetitive()){
 
-				AdjacencyEdge other = ausgewaehlteLinkeKanten.get(indexOfNeighbour).firstElement();
+				AdjacencyEdge other = selectedEdges.get(indexOfNeighbour).firstElement();
 
 				int i =indexOfCentralContig(other); 
 				isSelected = true;
@@ -664,10 +673,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				
 			}
 		}else{
-			if(!ausgewaehlteRechteKanten.get(indexOfNeighbour).isEmpty()
+			if(!selectedEdges.get(indexOfNeighbour).isEmpty()
 					&& !layoutGraph.getNodes().get(indexOfNeighbour).isRepetitive()){
 				
-				AdjacencyEdge other = ausgewaehlteRechteKanten.get(indexOfNeighbour).firstElement();
+				AdjacencyEdge other = selectedEdges.get(indexOfNeighbour).firstElement();
+
 				int i =indexOfCentralContig(other);
 				isSelected = true;
 				
@@ -839,10 +849,15 @@ public class CAGWindow extends JFrame implements CagEventListener {
 							options[0]);
 
 					if (n == JOptionPane.YES_OPTION) {
+						System.out.println("vor dem löschen");
+						System.out.println("1 ");
 						deleteEdge(otherEdge, oldIndices);
+
 						if(neighbourEdge != null){
+							System.out.println("2");
 							deleteEdge(neighbourEdge, neighbourIndices);
 						}
+						System.out.println(" ");
 						selectEdge(selectedEdge, indices);
 						updateModelAndGui();
 					}
@@ -892,6 +907,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		}
 
+		/*
+		 * This method delete an edge from the neighbour vectors
+		 * and set the edge as deselected
+		 */
 		private void deleteEdge(AdjacencyEdge oldEdge, int[] indices) {
 
 			Vector<AdjacencyEdge> neighbourl;
@@ -907,14 +926,33 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 			neighbourl = ausgewaehlteLinkeKanten.get(leftIndex);
 			neighbourl.remove(oldEdge);
-
+			
 			neighbourR = ausgewaehlteRechteKanten.get(rightIndex);
 			neighbourR.remove(oldEdge);
 			
+			/*
+			 * Sometimes it is possible that I do not calculate the indices right
+			 * (when the an ulterior selected edge an neighbour of the right side
+			 * but currently the radio button is not right) 
+			 * TODO have to change this!
+			 * if this is happen the edge can't remove from the vectors
+			 * just have to change the side of the contigs.
+			 */
+			 if (!neighbourl.remove(oldEdge)&& !neighbourR.remove(oldEdge)){
+				 neighbourl = ausgewaehlteLinkeKanten.get(rightIndex);
+				 neighbourl.remove(oldEdge);
+				 neighbourR = ausgewaehlteRechteKanten.get(leftIndex);
+				 neighbourR.remove(oldEdge);
+			 }
+
 			updateModelAndGui();
 
 		}
 
+		/*
+		 * This method add the selected edge in the both neighbour vectors
+		 * at the right indices and set the edge as selected
+		 */
 		private void selectEdge(AdjacencyEdge selectedEdge, int[] indices) {
 
 			Vector<AdjacencyEdge> contigCollectionL;

@@ -269,13 +269,6 @@ public class CagCreator {
 		return maxSupport;
 	}
 
-	public double getMinSupport() {
-		return minSupport;
-	}
-
-	public double getMaxSupport() {
-		return maxSupport;
-	}
 
 	/*
 	 * Durchschnitt des Supports aller linken und rechten Nachbarn
@@ -341,22 +334,7 @@ public class CagCreator {
 		}
 	}
 
-	public double[] getMeanForLeftNeigbours() {
-		return meanForLeftNeigbours;
-	}
-
-	public double[] getMeanForRightNeigbours() {
-		return meanForRightNeigbours;
-	}
-
-	public double[] getsDeviationsForLeftNeigbours() {
-		return sDeviationsForLeftNeigbours;
-	}
-
-	public double[] getsDeviationsForRightNeigbours() {
-		return sDeviationsForRightNeigbours;
-	}
-
+	
 	private AdjacencyEdge calculatePossibleThirdLine() {
 
 		AdjacencyEdge possibleThirdEdge = null;
@@ -528,13 +506,6 @@ public class CagCreator {
 		this.neighbourNumber = number;
 	}
 */
-	public long getMaxSizeOfContigs() {
-		return maxSizeOfContigs;
-	}
-
-	public long getMinSizeOfContigs() {
-		return minSizeOfContigs;
-	}
 
 	public void changeContigs(int index, boolean isReverse) {
 
@@ -544,4 +515,34 @@ public class CagCreator {
 		sendCurrentContig();
 	}
 
+	public long getMaxSizeOfContigs() {
+		return maxSizeOfContigs;
+	}
+
+	public long getMinSizeOfContigs() {
+		return minSizeOfContigs;
+	}
+	public double[] getMeanForLeftNeigbours() {
+		return meanForLeftNeigbours;
+	}
+
+	public double[] getMeanForRightNeigbours() {
+		return meanForRightNeigbours;
+	}
+
+	public double[] getsDeviationsForLeftNeigbours() {
+		return sDeviationsForLeftNeigbours;
+	}
+
+	public double[] getsDeviationsForRightNeigbours() {
+		return sDeviationsForRightNeigbours;
+	}
+
+	public double getMinSupport() {
+		return minSupport;
+	}
+
+	public double getMaxSupport() {
+		return maxSupport;
+	}
 }
