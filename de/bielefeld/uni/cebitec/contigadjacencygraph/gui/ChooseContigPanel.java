@@ -201,10 +201,12 @@ public class ChooseContigPanel extends JPanel{
 						 */
 						float lineStrokeLeft;
 						if (isZScore) {
-							if (leftSupport[zaehler] > 0) {
+							if (leftSupport[zaehler] > 0 && leftSupport[zaehler]>5) {
 								lineStrokeLeft = (float) (leftSupport[zaehler]);// /10.0);
-							} else {
-								lineStrokeLeft = (float) 0.01;
+							} else if(leftSupport[zaehler]>5){
+								lineStrokeLeft = 5.0f;
+							}else {
+								lineStrokeLeft = 0.01f;
 							}
 						} else {
 							float nenner = (float) (leftSupport[zaehler] - minSupport);
@@ -263,10 +265,13 @@ public class ChooseContigPanel extends JPanel{
 
 						float lineStroke;
 						if (isZScore) {
-							if (rightSupport[c] > 0) {
+							if (rightSupport[c] > 0 && rightSupport[c]>5) {
 								lineStroke = (float) (rightSupport[c]);// /10.0);
-							} else {
-								lineStroke = (float) 0.01;
+							}else if(rightSupport[c]>5){
+								lineStroke = 5.0f;
+							}
+							else {
+								lineStroke = 0.01f;
 							}
 						} else {
 							float nenner = (float) (rightSupport[c] - minSupport);

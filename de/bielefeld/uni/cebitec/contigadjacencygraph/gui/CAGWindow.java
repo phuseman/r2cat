@@ -462,7 +462,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					break;
 				}
 			}
-			chooseContigPanel.setFlag(true);
 			chooseContigPanel.setLeftSupport(leftSupport);
 		}
 
@@ -712,6 +711,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		@Override
 		protected void done() {
 			super.done();
+			chooseContigPanel.setFlag(true);
 			window.repaint();
 		}
 	}
