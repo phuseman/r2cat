@@ -1,17 +1,13 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
-import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CAGWindow.ContigMouseListener;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
 /**
@@ -37,12 +33,11 @@ public class ContigAppearance extends JPanel {
 		this.setBackground(Color.WHITE);
 		contigLabel = new JLabel();
 		this.add(contigLabel);
-		// this.setName(contigName);
 	}
 
 	/*
-	 * Konstruktor, fuer das zentrale Contig, wenn es zum Beispiel aus der Liste
-	 * ausgewaehlt wird.
+	 * This should be used for the central contig 
+	 * where we don't need the edge
 	 */
 	public ContigAppearance(DNASequence node, int indexOfCentralContig,boolean isCurrentContigSelected,
 			boolean isCurrentContigReverse, long maxSize, long minSize) {
@@ -60,7 +55,8 @@ public class ContigAppearance extends JPanel {
 
 
 	/*
-	 * Konstruktor fuer die Nachbarn, hier ist die Kante relevant
+	 * This is should be used for the neighbours.
+	 * The edge is needed.
 	 */
 	public ContigAppearance(LayoutGraph graph, AdjacencyEdge includingEdge,
 			int indexOfNeighbour, boolean sideIsLeft, long maxSize, long minSize, boolean woandersAusgewaehlt) {
@@ -94,7 +90,9 @@ public class ContigAppearance extends JPanel {
 				isRepetitiv, isReverse, selected, anderweitigAusgewaehlt));
 		setSizeOfContig(contig.getSize(), maxSize, minSize);
 	}
-	
+	/*
+	 * Figure out, if the contig have to be displayed as reverse or not
+	 */
 	private boolean isContigReverse( boolean isLeftContig, AdjacencyEdge edge, int indexOfContig ){
 		
 		boolean isContigReverse = false;
@@ -117,16 +115,17 @@ public class ContigAppearance extends JPanel {
 		return isContigReverse;
 	}
 
-	/*
-	 * TODO Koennte ich hier nicht auch die attribute weglassen? Habe da ja fast
-	 * nur klassenvariblen und damit sind die auch in dieser Methode zugaenglich
-	 */
+
 	private synchronized void setContigAppearance(String contigId, long size,
 			ContigBorder border) {
 		String contigNameAusChar = "";
 		char[] dst = new char[numberOfNeighbours + (numberOfNeighbours - 1)];
 
 		contigLabel.setName("contigLabel "+contigId);
+		/*
+		 * If the name of a contig is to big
+		 * this is going to handle that.
+		 */
 		if (contigId.length() > 10) {
 			contigId.getChars(0, 3, dst, 0);
 
@@ -144,8 +143,7 @@ public class ContigAppearance extends JPanel {
 		}
 
 		/*
-		 * TODO erweitern so viele Informationen wie moeglich in dieses ToolTip
-		 * stecken.
+		 * Tooltips for displaying some further informations
 		 */
 		if (support <= 0) {
 			this.setToolTipText("<html><font size = -2><u>" + contigId + "</u>"
@@ -189,23 +187,23 @@ public class ContigAppearance extends JPanel {
 
 	}
 
-	public synchronized LayoutGraph getlGraph() {
+	public LayoutGraph getlGraph() {
 		return lGraph;
 	}
 
-	public synchronized AdjacencyEdge getEdge() {
+	public AdjacencyEdge getEdge() {
 		return edge;
 	}
 
-	public synchronized int getI() {
+	public int getI() {
 		return i;
 	}
 
-	public synchronized String getContigName() {
+	public String getContigName() {
 		return contigName;
 	}
 
-	public synchronized boolean isReverse() {
+	public boolean isReverse() {
 		return isReverse;
 	}
 	

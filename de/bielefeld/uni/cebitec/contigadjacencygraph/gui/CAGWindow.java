@@ -55,7 +55,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.basic.BasicTreeUI.SelectionModelPropertyChangeHandler;
 import javax.swing.text.NumberFormatter;
 
-import com.sun.media.sound.RIFFWriter;
 import com.sun.rowset.providers.RIOptimisticProvider;
 import com.sun.xml.internal.bind.v2.model.core.Adapter;
 
@@ -87,8 +86,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	private ContigButtonGroup leftGroup = new ContigButtonGroup();
 	private ContigButtonGroup rightGroup = new ContigButtonGroup();
 
-	private Vector<AdjacencyEdge> selectedRadioButtons;
-
 	private int numberOfNeighbours = 5;
 
 	private LayoutGraph layoutGraph;
@@ -112,8 +109,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	private double[] sDeviationForLeftNeighbours;
 	private double[] sDeviationForRightNeighbours;
 
-	private Vector<Vector<AdjacencyEdge>> ausgewaehlteLinkeKanten = new Vector<Vector<AdjacencyEdge>>();
-	private Vector<Vector<AdjacencyEdge>> ausgewaehlteRechteKanten = new Vector<Vector<AdjacencyEdge>>();
+	private Vector<Vector<AdjacencyEdge>> selectedLeftEdges = new Vector<Vector<AdjacencyEdge>>();
+	private Vector<Vector<AdjacencyEdge>> selectedRightEdges = new Vector<Vector<AdjacencyEdge>>();
 
 	private JRadioButton relativeSupport;
 	private JRadioButton absoluteSupport;
@@ -134,22 +131,25 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		sDeviationForRightNeighbours = model.getsDeviationsForRightNeigbours();
 		sDeviationForLeftNeighbours = model.getsDeviationsForLeftNeigbours();
 
-		ausgewaehlteLinkeKanten.setSize(layoutGraph.getNodes().size());
-		ausgewaehlteRechteKanten.setSize(layoutGraph.getNodes().size());
-		int term = ausgewaehlteLinkeKanten.size();
-		int term2 = ausgewaehlteRechteKanten.size();
+		selectedLeftEdges.setSize(layoutGraph.getNodes().size());
+		selectedRightEdges.setSize(layoutGraph.getNodes().size());
+		int term = selectedLeftEdges.size();
+		int term2 = selectedRightEdges.size();
 
-		for (int i = 0; i < ausgewaehlteLinkeKanten.size(); i++) {
+		/*
+		 * initialization of the vectors in the vector 
+		 */
+		for (int i = 0; i < selectedLeftEdges.size(); i++) {
 			Vector<AdjacencyEdge> contigVector = new Vector<AdjacencyEdge>();
-			ausgewaehlteLinkeKanten.add(i,contigVector);
+			selectedLeftEdges.add(i,contigVector);
 			if(i == term-1){
 				break;
 			}
 		}		
 
-		for (int i = 0; i < ausgewaehlteRechteKanten.size(); i++) {
+		for (int i = 0; i < selectedRightEdges.size(); i++) {
 			Vector<AdjacencyEdge> contigVector = new Vector<AdjacencyEdge>();
-			ausgewaehlteRechteKanten.add(i,contigVector);
+			selectedRightEdges.add(i,contigVector);
 			if(i == term2-1){
 				break;
 			}
@@ -158,55 +158,56 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		myModel.addEventListener(this);
 		setTitle("View of a contig adjacency graph");
 		setName("fenster");
-		selectedRadioButtons = new Vector<AdjacencyEdge>();
+		
 		/*
-		 * Menu TODO Was fuer Funktionen sollte das Menu haben??
+		 * Menu with only one function: To finish the program
 		 */
 		menuBar = new JMenuBar();
 		menu = new JMenu("Menu");
 		menuItem = new JMenuItem("Exit");
 		menuItem.addActionListener(new ExitItemListener());
-
-		/*
-		 * a group of JMenuItems Hier werden die Menupunkte hinzugefuegt TODO
-		 * menupunkte hinzufuegen
-		 */
 		menu.add(menuItem);
 		menuBar.add(menu);
 		add(menuBar, BorderLayout.NORTH);
 
+		/*
+		 * This panel contains all illustrations of the contigs
+		 * central contig in the middle and neighbours on the right and left side
+		 */
 		chooseContigPanel = new ChooseContigPanel(numberOfNeighbours, isZScore,
 				maxSupport, minSupport);
 		chooseContigPanel.setNumberOfNeighbours(numberOfNeighbours);
 		chooseContigPanel.setZScore(isZScore);
 		chooseContigPanel.setMaxSupport(maxSupport);
 		chooseContigPanel.setMinSupport(minSupport);
-		/*
-		 * Dieses Panel enthaelt alle Contigs dieses Genoms als Liste
-		 */
 
-		int breite = nodes[1].getId().getBytes().length;
+		int width = nodes[1].getId().getBytes().length;
 
-		if (breite * 20 <= 100) {
-			breite = 100;
-		} else if (breite * 20 >= 200) {
-			breite = 200;
+		if (width * 20 <= 100) {
+			width = 100;
+		} else if (width * 20 >= 200) {
+			width = 200;
 		} else {
-			breite = breite * 20;
+			width = width * 20;
 		}
 		this.setMinimumSize(new Dimension((int) Toolkit.getDefaultToolkit()
 				.getScreenSize().getWidth()
-				- breite, 500));
+				- width, 500));
 		this.setPreferredSize(new Dimension((int) Toolkit.getDefaultToolkit()
 				.getScreenSize().getWidth()
-				- breite, 500));
+				- width, 500));
 		this.setMaximumSize(new Dimension((int) Toolkit.getDefaultToolkit()
 				.getScreenSize().getWidth()
-				- breite, 500));
+				- width, 500));
+		/*
+		 * This scrollpane is going to be used, when the user choose 
+		 * more than 8 neighbours or just when the size of the chooseContigPanel
+		 * is to big.
+		 */
 		scrollPane = new JScrollPane(chooseContigPanel);
 		scrollPane.setPreferredSize(new Dimension((int) Toolkit
 				.getDefaultToolkit().getScreenSize().getWidth()
-				- breite, 500));
+				- width, 500));
 		scrollPane
 				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane
@@ -219,7 +220,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		add(scrollPane, BorderLayout.CENTER);
 
 		/*
-		 * In dieser For werden alle Contig ids gesammelt und gespeichert.
+		 * This list save all names of contigs
 		 */
 		dataForList = new String[nodes.length];
 		for (int i = 0; i < nodes.length; i++) {
@@ -229,7 +230,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		list = new JList(dataForList);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		// list.setVisibleRowCount(10);
 		list.addListSelectionListener(new ContigChangedListener());
 		list.setToolTipText("<html>Choose a contig<br>"+
 				" by a click on a name.</html>");
@@ -238,7 +238,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		listScroller.setToolTipText("<html>Choose a contig<br>"+
 				" by a click on a name.</html>");
 		listScroller.setBorder(BorderFactory.createTitledBorder("Contig List"));
-		listScroller.setPreferredSize(new Dimension(breite, 400));
+		listScroller.setPreferredSize(new Dimension(width, 400));
 		listScroller
 				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		listScroller
@@ -248,10 +248,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		listScroller.validate();
 		add(listScroller, BorderLayout.EAST);
 
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		// setSize(Toolkit.getDefaultToolkit().getScreenSize());
-		// hier wird das Fenster auf die Größe des Bildschirmes angepasst.
-
+		/*
+		 * This panel contains the textfield for entering the number of neighbours
+		 * and also the options to choose  absolute support or z-scores 
+		 */
 		FlowLayout inputOptionLayout = new FlowLayout();
 
 		inputOption = new JPanel();
@@ -311,25 +311,27 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		inputOption.add(toggelOption);
 
 		add(inputOption, BorderLayout.SOUTH);
-
+		
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		// setSize(Toolkit.getDefaultToolkit().getScreenSize());
+		// hier wird das Fenster auf die Größe des Bildschirmes angepasst.
 		setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth()
-				- breite, 600);
+				- width, 600);
 		setVisible(true);
 
 		pack();
 	}
 
 	/*
-	 * Fange Events ab
+	 * Get Events
 	 */
 	@Override
 	public void event_fired(CagEvent event) {
 
 		/*
-		 * Wenn ein Contig aus der Liste oder aus dem Panel ausgewählt wurde ist
-		 * es das Contig das nun im Mittelpunkt der Betrachtung steht- das
-		 * aktuelle Contig. Dies muss auch in der Ansicht angezeigt werden. Wozu
-		 * das abgefange Event dienlich ist.
+		 * If a contig is choosed from the list or the panel, the neighbours are going to be 
+		 * calculated and events fired the neighbours.
+		 * The choosed contig is then the central contig.  
 		 */
 		if (event.getEvent_type().equals(EventType.EVENT_CHOOSED_CONTIG)) {
 
@@ -339,8 +341,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			boolean isReverse = event.isReverse();
 			boolean isSelected = false;
 
-			if (!ausgewaehlteLinkeKanten.elementAt(centralContigIndex).isEmpty()
-					|| !ausgewaehlteRechteKanten.elementAt(centralContigIndex).isEmpty()) {
+			if (!selectedLeftEdges.elementAt(centralContigIndex).isEmpty()
+					|| !selectedRightEdges.elementAt(centralContigIndex).isEmpty()) {
 				isSelected = true;
 			}
 
@@ -359,7 +361,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			centerContainer.updateUI();
 		}
 		/*
-		 * Auch die Nachbarn ändern sich, wenn das Contig sich ändert.
+		 * Also the neighbours going to be changed, if the central contig changed.
 		 */
 		if (event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBOURS)) {
 
@@ -377,29 +379,41 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			clearComponets(leftContainer, leftRadioButtonContainer);
 
 			/*
-			 * Der Terminator muss entweder nach der Anzahl der Nachbarn zum
-			 * Abbruch führen oder aber, wenn weniger Nachbarn auswählbar sind,
-			 * nach dieser geringeren Anzahl einen Abbruch herbei führen.
+			 * The terminator finish the creation of the layout. 
+			 * it has either to be the number of neighbours 
+			 * or if the number of neighbours, which is choosed from 
+			 * user is bigger than there are neighbours, it should
+			 * finish earlier.
 			 */
 			int terminator = setTerminator(leftNeighbourEdges);
 
 			isALeftNeighourSelected = false;
 			AdjacencyEdge whichNeighbourIsSelected = null;
 
+			/*
+			 * Figure out, if there is a neighbour already selected
+			 */
 			for (AdjacencyEdge e : leftNeighbourEdges) {
 				if (e.isSelected()) {
 					isALeftNeighourSelected = true;
 					whichNeighbourIsSelected = e;
 				}
 			}
-
+			/*
+			 * This is necessary to set the layout of the choosed ContigPanel
+			 * or rather for the leftcontainer 
+			 */
 			for (AdjacencyEdge edge : leftNeighbourEdges) {
 
 				if (t < terminator) {
 
 					int indexOfContig = indexOfNeighbourContig(edge);
 					
-
+					/*
+					 * Save the support or z-scores here in an array
+					 * to commit them to the choose contig panel
+					 * for setting the linestroke 
+					 */
 					if (isZScore) {
 						leftSupport[t] = calculateZScore(edge,
 								centralContigIndex, meanForLeftNeighbours,
@@ -407,16 +421,24 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					} else {
 						leftSupport[t] = edge.getSupport();
 					}
+					
+					Vector<Vector<AdjacencyEdge>> leftEdges = centralContig.isReverse() ? selectedRightEdges : selectedLeftEdges;
+					boolean anderweitigAusgewaehlt = ulteriorSelected(true, indexOfContig, edge, leftEdges);
 
-					Vector<Vector<AdjacencyEdge>> linkeKanten = centralContig.isReverse() ? ausgewaehlteRechteKanten : ausgewaehlteLinkeKanten;
-					boolean anderweitigAusgewaehlt = ulteriorSelected(true, indexOfContig, edge, linkeKanten);
-
+					/*
+					 * Set the appearance for each contig
+					 */
 					contigPanel = new ContigAppearance(layoutGraph, edge,
 							indexOfContig, true, maxSizeOfContigs,
 							minSizeOfContigs, anderweitigAusgewaehlt);
 					contigPanel.addMouseListener(new ContigMouseListener());
 					contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
 
+					/*
+					 * The radio Button get commands to differentiate between 
+					 * adjacencies which are already selected, or selected somewhere
+					 * else or not selected
+					 */
 					radioButton = new ContigRadioButton(edge, contigPanel);
 
 					if (isALeftNeighourSelected) {
@@ -426,12 +448,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					}else 	if (!isALeftNeighourSelected) {
 						radioButton
 						.setActionCommand("noch kein nachbar ausgewaehlt");
-					}
-					
+					}					
 					
 					if (anderweitigAusgewaehlt) {
 						radioButton.setActionCommand("anderweitigAusgewaehlt");
-						AdjacencyEdge otherEdgeForThisNeighbour = linkeKanten.get(indexOfContig).firstElement();
+						AdjacencyEdge otherEdgeForThisNeighbour = leftEdges.get(indexOfContig).firstElement();
 						radioButton
 								.setNeighboursForTheThisNeighbour(otherEdgeForThisNeighbour);
 					}
@@ -444,12 +465,15 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					radioButton
 							.addActionListener(new RadioButtonActionListener());
 
-					// add here Contigs and RadioButton with automatical space
+					// add here Contigs and RadioButton with 	dynamic space 
 					leftContainer.add(contigPanel);
 
 					leftGroup.add(radioButton);
 					leftRadioButtonContainer.add(radioButton);
 
+					/*
+					 * There will be added some 	dynamic space
+					 */
 					if (t < (numberOfNeighbours - 1)) {
 						leftContainer.add(Box.createVerticalGlue());
 						leftRadioButtonContainer.add(Box.createVerticalGlue());
@@ -466,7 +490,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		}
 
 		/*
-		 * Hier kommen die rechten Nachbarn an:
+		 * Also right neigbours
 		 */
 		if (event.getEvent_type().equals(EventType.EVENT_SEND_RIGHT_NEIGHBOURS)) {
 
@@ -536,7 +560,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					 * dieses Contig ein anderes Aussehen und kann auch nicht
 					 * mehr für dieses ausgewählt werden.
 					 */
-					Vector<Vector<AdjacencyEdge>> rechteKanten = centralContig.isReverse() ? ausgewaehlteLinkeKanten : ausgewaehlteRechteKanten;
+					Vector<Vector<AdjacencyEdge>> rechteKanten = centralContig.isReverse() ? selectedLeftEdges : selectedRightEdges;
 					boolean anderweitigAusgewaehlt = ulteriorSelected(false, indexOfContig, edge, rechteKanten);
 					
 					contigPanel = new ContigAppearance(layoutGraph, edge,
@@ -690,6 +714,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	}
 	
 	private void clearComponets(JPanel contigContainer, JPanel radioButtonContainer){
+		
 		if (contigContainer.getComponentCount() > 0
 				|| radioButtonContainer.getComponentCount() > 0) {
 			contigContainer.removeAll();
@@ -735,9 +760,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	}
 
 	/*
-	 * Listener für die Elemente der Contig Liste. D.h. wenn auf ein Element in
-	 * der Contig Liste geklickt wird, dann wird dieses Element als das
-	 * zentrales Contig dargestellt und die dazugehörigen Nachbarn berechnet.
+	 * Listener for the elements of the List
+	 * If the user click on a contig Name this is going to be triggered.
+	 * The choosed contig is then displayed in the middle as 
+	 * central contig with it's neighbours on each side.
 	 */
 	public class ContigChangedListener implements ListSelectionListener {
 
@@ -775,10 +801,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			//System.out.println("Neu löse radio button event aus ");
 			/*
-			 * Hier wird auf den Toggel zwischem relativem und absolutem Support
-			 * reagiert.
+			 * This react on the toggle of absolute support of z-score
 			 */
 			if (e.getActionCommand().equals("absolute")) {
 				isZScore = false;
@@ -795,7 +819,12 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				relativeSupport.setSelected(true);
 
 				updateModelAndGui();
-
+			/*
+			 * Here are the options to react on a selection of a radion Button
+			 * next to the contigs
+			 * 
+			 *  If there is not a neighbour selected 
+			 */
 			} else if (e.getActionCommand().equals(
 					"noch kein nachbar ausgewaehlt")) {
 			
@@ -804,9 +833,14 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				AdjacencyEdge selectedEdge = radioButton.getEdge();
 
 				int[] indices = leftAndRightIndex(radioButton, selectedEdge);
-
+				/*
+				 * the adjacency will be set as selected
+				 */
 				selectEdge(selectedEdge, indices);
 
+				/*
+				 * if there is a neighbour already selected
+				 */
 			} else if (e.getActionCommand().equals("nachbarAusgewaehlt")) {
 
 				ContigRadioButton radioButton = (ContigRadioButton) e.getSource();
@@ -816,13 +850,23 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				AdjacencyEdge oldEdge = radioButton
 						.getSelectedNeighbourOfButtonGroup();
 				int[] oldIndices = leftAndRightIndex(radioButton, oldEdge);
-
+				
+				/*
+				 * the old selected adjacency will be deleted
+				 * and the new set as selected
+				 */
 				deleteEdge(oldEdge, oldIndices);
 				if(!oldEdge.equals(selectedEdge)){
 					selectEdge(selectedEdge, indices);
 				}
+				
+				/*
+				 * It is also possible that there will be contig which is already selected
+				 *  in an another adjacency. 
+				 *  This will treat that possibility.
+				 */
 			} else if (e.getActionCommand().equals("anderweitigAusgewaehlt")) {
-		//		System.out.println("anderweitig ausgewaehlt");
+
 				ContigRadioButton radioButton = (ContigRadioButton) e
 						.getSource();
 				AdjacencyEdge selectedEdge = radioButton.getEdge();
@@ -838,7 +882,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					neighbourIndices = leftAndRightIndex(radioButton, neighbourEdge);
 				}
 				
-				
+				/*
+				 * The user will be asked, if he would like to deleted the old adjacency 
+				 */
 					Object[] options = { "Yes", "No" };
 
 					int n = javax.swing.JOptionPane.showOptionDialog(window,
@@ -849,15 +895,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 							options[0]);
 
 					if (n == JOptionPane.YES_OPTION) {
-						System.out.println("vor dem löschen");
-						System.out.println("1 ");
 						deleteEdge(otherEdge, oldIndices);
 
 						if(neighbourEdge != null){
-							System.out.println("2");
 							deleteEdge(neighbourEdge, neighbourIndices);
 						}
-						System.out.println(" ");
 						selectEdge(selectedEdge, indices);
 						updateModelAndGui();
 					}
@@ -866,6 +908,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		}
 
+		/*
+		 * This method identifies the indices of the neighbours
+		 */
 		private int[] leftAndRightIndex(ContigRadioButton radioButton,
 				AdjacencyEdge selectedEdge) {
 
@@ -924,10 +969,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			 */
 			oldEdge.deselect();
 
-			neighbourl = ausgewaehlteLinkeKanten.get(leftIndex);
+			neighbourl = selectedLeftEdges.get(leftIndex);
 			neighbourl.remove(oldEdge);
 			
-			neighbourR = ausgewaehlteRechteKanten.get(rightIndex);
+			neighbourR = selectedRightEdges.get(rightIndex);
 			neighbourR.remove(oldEdge);
 			
 			/*
@@ -939,9 +984,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			 * just have to change the side of the contigs.
 			 */
 			 if (!neighbourl.remove(oldEdge)&& !neighbourR.remove(oldEdge)){
-				 neighbourl = ausgewaehlteLinkeKanten.get(rightIndex);
+				 neighbourl = selectedLeftEdges.get(rightIndex);
 				 neighbourl.remove(oldEdge);
-				 neighbourR = ausgewaehlteRechteKanten.get(leftIndex);
+				 neighbourR = selectedRightEdges.get(leftIndex);
 				 neighbourR.remove(oldEdge);
 			 }
 
@@ -966,10 +1011,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			 */
 			selectedEdge.select();
 			
-			contigCollectionL = ausgewaehlteLinkeKanten.get(leftIndex);
+			contigCollectionL = selectedLeftEdges.get(leftIndex);
 			contigCollectionL.add(selectedEdge);
 			
-			contigCollectionR = ausgewaehlteRechteKanten.get(rightIndex);		
+			contigCollectionR = selectedRightEdges.get(rightIndex);		
 			contigCollectionR.add(selectedEdge);
 
 			updateModelAndGui();
@@ -977,6 +1022,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		}
 
 		private void updateModelAndGui() {
+			
 			JPanel rightContainer = chooseContigPanel.getRightContainer();
 			JPanel leftContainer = chooseContigPanel.getLeftContainer();
 			if (rightContainer.getComponentCount() != 0
@@ -994,9 +1040,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			/*
-			 * Dieses Event wird ausgelöst, wenn auf ein Contig geklickt wird.
-			 * Das angeklickte Contig wird zu dem zentralem Contig und die neuen
-			 * Nachbarn werden berechnet.
+			 * If this will be activated the choosed contig will be displayed 
+			 * as central contig with its neighbours.
 			 */
 			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
 
@@ -1051,12 +1096,14 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			/*
-			 * Dieses Event wird ausgelöst, wenn der Benutzer eine andere Anzahl
-			 * an Nachbarn sehen möchte. Allerdings habe ich diese Anzahl auf 10
-			 * beschränkt.
+			 * This is going to be activated, if the user set a new number of
+			 * neighbours.
+			 * But only between 1 and 10
 			 */
 			int neighboursNumber = ((Number) evt.getNewValue()).intValue();
-		//	System.out.println("neue anzahl an nachbarn " + neighboursNumber);
+
+			JPanel rightContainer = chooseContigPanel.getRightContainer();
+			JPanel leftContainer = chooseContigPanel.getLeftContainer();
 
 			if (neighboursNumber <= 10 && neighboursNumber > 0) {
 
@@ -1078,14 +1125,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 				chooseContigPanel.setNumberOfNeighbours(numberOfNeighbours);
 
-				JPanel rightContainer = chooseContigPanel.getRightContainer();
-				JPanel leftContainer = chooseContigPanel.getLeftContainer();
+				
 				if (rightContainer.getComponentCount() != 0
 						|| leftContainer.getComponentCount() != 0) {
-					model.sendLeftNeighbours();
-					model.sendRightNeighbours();
+					updateModelAndGui();
 				}
-				chooseContigPanel.repaint();
 
 			} else if (neighboursNumber == 0) {
 				javax.swing.JOptionPane.showMessageDialog(window, "Sorry.\n"
@@ -1098,14 +1142,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 				chooseContigPanel.setNumberOfNeighbours(numberOfNeighbours);
 
-				JPanel rightContainer = chooseContigPanel.getRightContainer();
-				JPanel leftContainer = chooseContigPanel.getLeftContainer();
-
 				if (rightContainer.getComponentCount() != 0
 						|| leftContainer.getComponentCount() != 0) {
-					model.sendLeftNeighbours();
-					model.sendRightNeighbours();
-					chooseContigPanel.repaint();
+					updateModelAndGui();
 				}
 			} else {
 				javax.swing.JOptionPane.showMessageDialog(window, "Sorry.\n"
@@ -1121,17 +1160,18 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 				chooseContigPanel.setNumberOfNeighbours(numberOfNeighbours);
 
-				JPanel rightContainer = chooseContigPanel.getRightContainer();
-				JPanel leftContainer = chooseContigPanel.getLeftContainer();
-
 				if (rightContainer.getComponentCount() != 0
 						|| leftContainer.getComponentCount() != 0) {
-					model.sendLeftNeighbours();
-					model.sendRightNeighbours();
-					chooseContigPanel.repaint();
+					updateModelAndGui();
 				}
 			}
 
+		}
+		
+		private void updateModelAndGui(){
+			model.sendLeftNeighbours();
+			model.sendRightNeighbours();
+			chooseContigPanel.repaint();
 		}
 
 	}

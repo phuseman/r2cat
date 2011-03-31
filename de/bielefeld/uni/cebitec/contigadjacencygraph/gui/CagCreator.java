@@ -73,9 +73,7 @@ public class CagCreator {
 		calculateMeanAndSDeviationForRightNeigbours(rightNeighbours);
 	}
 
-	/*
-	 * Diese Main methode verschwindet zum Schluss!
-	 */
+
 	public static void main(String[] args) {
 
 		TreebasedContigSorterProject project = new TreebasedContigSorterProject();
