@@ -211,7 +211,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		scrollPane
 				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scrollPane.setName("scroll pane");
 		scrollPane.setAlignmentX(TOP_ALIGNMENT);
 		scrollPane.setVisible(true);

@@ -118,12 +118,6 @@ public class CagCreator {
 					NeatoOutputType.ONENODE);
 
 			cag = project.getContigAdjacencyGraph();
-//			try {
-//				cag.writeWeightMatrix(new File("/home/annica/cag_matrix.csv"));
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
 			completeGraph = cag.getCompleteGraph();
 			// model = new CagCreator(layoutGraph);
 			model = new CagCreator(completeGraph);
@@ -152,7 +146,8 @@ public class CagCreator {
 	}
 
 	/*
-	 * Diese Hashmaps speichern die linken und rechten Nachbarn aller Contigs
+	 * Separate edges of the graph in left and right edges of 
+	 * each contig
 	 */
 	private void leftAndRightNeighbour() {
 
@@ -164,40 +159,39 @@ public class CagCreator {
 			rightNeighbours[i] = new Vector<AdjacencyEdge>();
 		}
 
-		// fuer alle Kanten im layout Graphen
+		// for all edges in the graph
 		for (AdjacencyEdge e : graph.getEdges()) {
 
-			// hole fuer die aktuelle Kante die Indices für Knoten i und j
+			// get indices for current edge
 			int i = e.geti();
 			int j = e.getj();
 
-			// wenn die aktuelle Kante der linke konnektor von i
+			// if current edge is the left connector of i
 			if (e.isLeftConnectori()) {
-				// dann gehört der Knoten zu den linken Nachbarn
+				// then the node belong to the left neighbours
 				leftNeighbours[i].add(e);
-				// wenn nicht dann ist sie die verbindung zum rechten Knoten i
+				// if not, then it belongs to the right neighbours
 			} else {
 				rightNeighbours[i].add(e);
 			}
 
-			// wenn diese Kante der linke konnektor von j ist
+			// same with j
 			if (e.isLeftConnectorj()) {
 				leftNeighbours[j].add(e);
 			} else {
 				rightNeighbours[j].add(e);
 			}
 		}
+		/*
+		 * In the end each vector will be sort by its support
+		 */
 		for (int x = 0; x < graph.getNodes().size(); x++) {
 			Collections.sort(leftNeighbours[x]);
 			Collections.sort(rightNeighbours[x]);
 		}
 	}
 
-	public LayoutGraph getGraph() {
-		return graph;
-	}
-
-	/**
+	/*
 	 * Create a List of all Nodes(Contigs) of LayoutGraph
 	 */
 	private DNASequence[] createContigList() {
@@ -214,6 +208,9 @@ public class CagCreator {
 		return contigs;
 	}
 
+	/*
+	 * Calculate the max size of a given list of contigs
+	 */
 	private long calculateMaxSizeOfContigs(DNASequence[] contigList) {
 
 		maxSizeOfContigs = 0;
@@ -227,6 +224,9 @@ public class CagCreator {
 		return maxSizeOfContigs;
 	}
 
+	/*
+	 * Calculate the min size of a given list of contigs
+	 */
 	private long calculateMinSizeOfContigs(DNASequence[] contigList) {
 
 		minSizeOfContigs = contigList[0].getSize();
@@ -240,6 +240,9 @@ public class CagCreator {
 		return minSizeOfContigs;
 	}
 
+	/*
+	 * Calculate the min support of all edges of the given graph
+	 */
 	private double calculateMinSupport(LayoutGraph graph) {
 
 		minSupport = graph.getEdges().firstElement().getSupport();
@@ -254,6 +257,9 @@ public class CagCreator {
 		return minSupport;
 	}
 
+	/*
+	 * Calculate the max support of all edges of the given graph
+	 */
 	private double calculateMaxSupport(LayoutGraph graph) {
 		maxSupport = 0;
 
@@ -269,7 +275,7 @@ public class CagCreator {
 
 
 	/*
-	 * Durchschnitt des Supports aller linken und rechten Nachbarn
+	 * Calculate Mean and s Deviation for all contigs in a given list
 	 */
 	private void calculateMeanAndSDeviationForLeftNeigbours(Vector<AdjacencyEdge>[] neighbours) {
 
@@ -333,7 +339,7 @@ public class CagCreator {
 	}
 
 	
-	private AdjacencyEdge calculatePossibleThirdLine() {
+	/*private AdjacencyEdge calculatePossibleThirdLine() {
 
 		AdjacencyEdge possibleThirdEdge = null;
 
@@ -370,7 +376,7 @@ public class CagCreator {
 		}
 
 		return possibleThirdEdge;
-	}
+	}*/
 
 	private Vector<AdjacencyEdge> calculateFiveMostLikleyRightNeighbours(
 			int cContigIndex, boolean isReverse) {
@@ -389,6 +395,8 @@ public class CagCreator {
 		 * waehelen die Richtung fuer das Contig bestimmt die sicht auf die
 		 * nachbarn die Spitze(rechter connector) zeigt wenn es reverse ist ja
 		 * in die andere Richtung
+		 * 
+		 * 
 		 */
 		Vector<AdjacencyEdge> test = isReverse ? leftNeighbours[cContigIndex]
 				: rightNeighbours[cContigIndex];
@@ -542,5 +550,8 @@ public class CagCreator {
 
 	public double getMaxSupport() {
 		return maxSupport;
+	}
+	public LayoutGraph getGraph() {
+		return graph;
 	}
 }
