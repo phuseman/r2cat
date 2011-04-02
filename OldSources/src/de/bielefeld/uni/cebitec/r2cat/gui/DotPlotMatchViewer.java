@@ -176,7 +176,7 @@ public class DotPlotMatchViewer extends MatchViewerPlugin {
 	 * Set the lables for contigs and reference to the filenames without extension.
 	 * If these are not available, set fixed names.
 	 */
-	private void setLables() {
+	public void setLables() {
 
 		String refLabel;
 		DNASequence ref = null;
@@ -209,17 +209,27 @@ public class DotPlotMatchViewer extends MatchViewerPlugin {
 		contigsLabel.setText(contigLabel);
 	}
 
+  public void setLables(String contigs, String reference) {
+    referenceLabel.setText(contigs);
+    contigsLabel.setText(reference);
+  }
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see de.bielefeld.uni.cebitec.cav.gui.DataViewPlugin#setAlignmentspositionsList(de.bielefeld.uni.cebitec.cav.datamodel.MatchList)
 	 */
 	public void setAlignmentsPositionsList(MatchList ap) {
-		ap.addObserver(this);
+    if(this.matchList != null) {
+      //remove observer to avoid memory leaks
+      this.matchList.deleteObservers();
+    }
+
 		this.matchList = ap;
-		this.matchDisplayerList = new MatchDisplayerList(
-				ap);
-    this.setLables();
+    this.matchList.addObserver(this);
+		this.matchDisplayerList = new MatchDisplayerList(ap);
+    //reset histogram
+    this.histogram = new double[1];
 	}
 
 	/**

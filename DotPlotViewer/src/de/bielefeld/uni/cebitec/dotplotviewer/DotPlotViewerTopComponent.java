@@ -73,8 +73,8 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
     dotplotMatchViewer.addMouseWheelListener(dotPlotVisualisationListener);
     dotplotMatchViewer.addKeyListener(dotPlotVisualisationListener);
 
-    // load the previous state from prefs
     dotplotMatchViewer.drawGrid(grid);
+    
 
     //this way, the visualisation can react to window size changes
     this.addComponentListener(dotplotMatchViewer);
@@ -206,6 +206,8 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
   public void setMatchList(MatchList ml) {
     if (ml != null && !ml.isEmpty()) {
       this.dotplotMatchViewer.setAlignmentsPositionsList(ml);
+
+      dotplotMatchViewer.setLables();
 
       dotplotMatchViewer.getMatchDisplayerList().showReversedComplements(reversed);
       dotplotMatchViewer.getMatchDisplayerList().setDisplayOffsets(stacked);

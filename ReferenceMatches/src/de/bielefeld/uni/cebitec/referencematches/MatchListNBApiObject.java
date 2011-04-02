@@ -18,11 +18,6 @@
 package de.bielefeld.uni.cebitec.referencematches;
 
 import de.bielefeld.uni.cebitec.qgram.MatchList;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  *
@@ -30,33 +25,96 @@ import java.util.List;
  */
 public class MatchListNBApiObject extends MatchList {
 
-  private List<PropertyChangeListener> listeners = Collections.synchronizedList(new LinkedList<PropertyChangeListener>());
-  boolean selectedForContigAdjacencyGraphCreation = false;
+  private java.beans.PropertyChangeSupport propertyChangeSupport = new java.beans.PropertyChangeSupport(this);
+  private double treeDistance = 1.;
+  public static final String PROP_TREEDISTANCE = "treeDistance";
+  private boolean selectedForContigAdjacencyGraphCreation = true;
+  public static final String PROP_SELECTEDFORCAG = "selectedForContigAdjacencyGraphCreation";
 
-  public Boolean isSelectedForContigAdjacencyGraphCreation() {
+  /**
+   * Get the value of treeDistance
+   *
+   * @return the value of treeDistance
+   */
+  public double getTreeDistance() {
+    return treeDistance;
+  }
+
+  /**
+   * Set the value of treeDistance
+   *
+   * @param treeDistance new value of treeDistance
+   */
+  public void setTreeDistance(Double treeDistance) {
+    double oldTreeDistance = this.treeDistance;
+    this.treeDistance = treeDistance;
+    propertyChangeSupport.firePropertyChange(PROP_TREEDISTANCE, oldTreeDistance, treeDistance);
+  }
+
+  /**
+   * Get the value of selectedForContigAdjacencyGraphCreation
+   *
+   * @return the value of selectedForContigAdjacencyGraphCreation
+   */
+  public boolean getSelectedForContigAdjacencyGraphCreation() {
     return selectedForContigAdjacencyGraphCreation;
   }
 
-  public void setSelectedForContigAdjacencyGraphCreation(Boolean isSelectedForContigAdjacencyGraphCreation) {
-    boolean old = this.selectedForContigAdjacencyGraphCreation;
-    this.selectedForContigAdjacencyGraphCreation = isSelectedForContigAdjacencyGraphCreation;
-    fire("isSelectedForContigAdjacencyGraphCreation", old, isSelectedForContigAdjacencyGraphCreation);
+  /**
+   * Set the value of selectedForContigAdjacencyGraphCreation
+   *
+   * @param selectedForContigAdjacencyGraphCreation new value of selectedForContigAdjacencyGraphCreation
+   */
+  public void setSelectedForContigAdjacencyGraphCreation(Boolean selectedForContigAdjacencyGraphCreation) {
+    boolean oldSelectedForContigAdjacencyGraphCreation = this.selectedForContigAdjacencyGraphCreation;
+    this.selectedForContigAdjacencyGraphCreation = selectedForContigAdjacencyGraphCreation;
+    propertyChangeSupport.firePropertyChange(PROP_SELECTEDFORCAG, oldSelectedForContigAdjacencyGraphCreation, (boolean) selectedForContigAdjacencyGraphCreation);
   }
 
-
-  public void addPropertyChangeListener(PropertyChangeListener pcl) {
-    listeners.add(pcl);
+  /**
+   * Add PropertyChangeListener.
+   *
+   * @param listener
+   */
+  public void addPropertyChangeListener(java.beans.PropertyChangeListener listener) {
+    propertyChangeSupport.addPropertyChangeListener(listener);
   }
 
-  public void removePropertyChangeListener(PropertyChangeListener pcl) {
-    listeners.remove(pcl);
+  /**
+   * Remove PropertyChangeListener.
+   *
+   * @param listener
+   */
+  public void removePropertyChangeListener(java.beans.PropertyChangeListener listener) {
+    propertyChangeSupport.removePropertyChangeListener(listener);
   }
-
-  private void fire(String propertyName, Object old, Object nue) {
-    //Passing 0 below on purpose, so you only synchronize for one atomic call:
-    PropertyChangeListener[] pcls = (PropertyChangeListener[]) listeners.toArray(new PropertyChangeListener[0]);
-    for (int i = 0; i < pcls.length; i++) {
-      pcls[i].propertyChange(new PropertyChangeEvent(this, propertyName, old, nue));
-    }
-  }
+//  private List<PropertyChangeListener> listeners = Collections.synchronizedList(new LinkedList<PropertyChangeListener>());
+//  private boolean selectedForContigAdjacencyGraphCreation = true;
+//
+//  public Boolean isSelectedForContigAdjacencyGraphCreation() {
+//    return selectedForContigAdjacencyGraphCreation;
+//  }
+//
+//  public void setSelectedForContigAdjacencyGraphCreation(Boolean isSelectedForContigAdjacencyGraphCreation) {
+//    boolean old = this.selectedForContigAdjacencyGraphCreation;
+//    this.selectedForContigAdjacencyGraphCreation = isSelectedForContigAdjacencyGraphCreation;
+//    fire("isSelectedForContigAdjacencyGraphCreation", old, isSelectedForContigAdjacencyGraphCreation);
+//  }
+//
+//
+//  public void addPropertyChangeListener(PropertyChangeListener pcl) {
+//    listeners.add(pcl);
+//  }
+//
+//  public void removePropertyChangeListener(PropertyChangeListener pcl) {
+//    listeners.remove(pcl);
+//  }
+//
+//  private void fire(String propertyName, Object old, Object nue) {
+//    //Passing 0 below on purpose, so you only synchronize for one atomic call:
+//    PropertyChangeListener[] pcls = (PropertyChangeListener[]) listeners.toArray(new PropertyChangeListener[0]);
+//    for (int i = 0; i < pcls.length; i++) {
+//      pcls[i].propertyChange(new PropertyChangeEvent(this, propertyName, old, nue));
+//    }
+//  }
 }

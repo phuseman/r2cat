@@ -55,7 +55,7 @@ private final ReferenceMatchesDataObject referenceMatchesDataObject;
 
     @Override
     protected Node createNodeForKey(String key) {
-        Node childNode = new AbstractNode(Children.LEAF);
+        Node childNode = new AbstractNode(Children.LEAF,referenceMatchesDataObject.getLookup());
         childNode.setDisplayName(key);
         return childNode;
     }

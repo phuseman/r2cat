@@ -581,8 +581,7 @@ public class ContigAdjacencyGraph {
 						adjacencyWeightMatrix[i][j] += (projectedContigsScorer.score(first, second)
 								* (double) first.qhits * (double) second.qhits);
 			
-						employedPairs++;
-						assert (adjacencyWeightMatrix[i][j] < 0);
+						assert (adjacencyWeightMatrix[i][j] >= 0);
 						
 			
 					} // all pairs of projected contigs

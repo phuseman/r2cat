@@ -15,7 +15,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
 package de.bielefeld.uni.cebitec.referencematches;
 
 import org.openide.ErrorManager;
@@ -30,7 +29,7 @@ import org.openide.util.Lookup;
  *
  * @author phuseman
  */
-public class ReferenceNode extends DataNode{
+public class ReferenceNode extends DataNode {
 
   public ReferenceNode(DataObject obj, Children ch, Lookup lookup) {
     super(obj, ch, lookup);
@@ -44,20 +43,29 @@ public class ReferenceNode extends DataNode{
 
     try {
 
-        Property cagCreation = new PropertySupport.Reflection(obj, Boolean.class, "isSelectedForContigAdjacencyGraphCreation","setSelectedForContigAdjacencyGraphCreation");
+      Property cagCreation = new PropertySupport.Reflection(obj, Boolean.class, MatchListNBApiObject.PROP_SELECTEDFORCAG);
 
-        cagCreation.setName("cagCreation");
-        cagCreation.setDisplayName("Use this reference to build a contig adjacency graph");
+      cagCreation.setName(MatchListNBApiObject.PROP_SELECTEDFORCAG);
+      cagCreation.setDisplayName("Use this reference to build a contig adjacency graph");
 
-        set.put(cagCreation);
+      set.put(cagCreation);
+
+
+      Property treeDist = new PropertySupport.Reflection(obj, Double.class, MatchListNBApiObject.PROP_TREEDISTANCE);
+
+      treeDist.setName(MatchListNBApiObject.PROP_TREEDISTANCE);
+      treeDist.setDisplayName("Phylogenetic distance of this reference genome to the contigs genome");
+
+      set.put(treeDist);
+
+
 
     } catch (NoSuchMethodException ex) {
-        ErrorManager.getDefault().notify(ex);
+      ErrorManager.getDefault().notify(ex);
     }
 
     sheet.put(set);
     return sheet;
 
-}
-
+  }
 }

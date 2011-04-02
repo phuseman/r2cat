@@ -6,13 +6,50 @@
       <file name="de-bielefeld-uni-cebitec-contigorderingproject-NewReferenceAction.instance">
       </file>
     </folder>
+    <folder name="ContigProject">
+      <file name="de-bielefeld-uni-cebitec-contigorderingproject-NewReferenceAction.shadow">
+        <attr name="position" intvalue="100"/>
+        <attr name="originalFile" stringvalue="Actions/File/de-bielefeld-uni-cebitec-contigorderingproject-NewReferenceAction.instance"/>
+      </file>
+      <file name="SeparatorBeforeProjects.instance">
+        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+        <attr name="position" intvalue="150"/>
+      </file>
+      <file name="org-netbeans-modules-project-ui-NewProject.shadow">
+        <attr name="position" intvalue="200"/>
+        <attr name="originalFile" stringvalue="Actions/Project/org-netbeans-modules-project-ui-NewProject.instance"/>
+      </file>
+      <file name="org-netbeans-modules-project-ui-OpenProject.shadow">
+        <attr name="position" intvalue="300"/>
+        <attr name="originalFile" stringvalue="Actions/Project/org-netbeans-modules-project-ui-OpenProject.instance"/>
+      </file>
+      <file name="org-netbeans-modules-project-ui-RecentProjects.shadow">
+        <attr name="position" intvalue="400"/>
+        <attr name="originalFile" stringvalue="Actions/Project/org-netbeans-modules-project-ui-RecentProjects.instance"/>
+      </file>
+      <file name="org-netbeans-modules-project-ui-RenameProject.shadow">
+        <attr name="position" intvalue="500"/>
+        <attr name="originalFile" stringvalue="Actions/Project/org-netbeans-modules-project-ui-RenameProject.instance"/>
+      </file>
+      <file name="org-netbeans-modules-project-ui-DeleteProject.shadow">
+        <attr name="position" intvalue="600"/>
+        <attr name="originalFile" stringvalue="Actions/Project/org-netbeans-modules-project-ui-DeleteProject.instance"/>
+      </file>
+      <file name="org-netbeans-modules-project-ui-CloseProject.shadow">
+        <attr name="position" intvalue="700"/>
+        <attr name="originalFile" stringvalue="Actions/Project/org-netbeans-modules-project-ui-CloseProject.instance"/>
+      </file>
+      <file name="org-netbeans-modules-project-ui-SetMainProject.shadow">
+        <attr name="position" intvalue="800"/>
+        <attr name="originalFile" stringvalue="Actions/Project/org-netbeans-modules-project-ui-SetMainProject.instance"/>
+      </file>
+    </folder>
   </folder>
 
   <folder name="Projects">
     <folder name="Actions">
       <file name="de-bielefeld-uni-cebitec-contigorderingproject-NewReferenceAction.shadow">
-        <attr name="originalFile"
-stringvalue="Actions/File/de-bielefeld-uni-cebitec-contigorderingproject-NewReferenceAction.instance"/>
+        <attr name="originalFile" stringvalue="Actions/File/de-bielefeld-uni-cebitec-contigorderingproject-NewReferenceAction.instance"/>
       </file>
     </folder>
   </folder>

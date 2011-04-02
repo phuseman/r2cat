@@ -18,8 +18,8 @@
 package de.bielefeld.uni.cebitec.contigorderingproject;
 
 import java.awt.Image;
+import java.util.List;
 import javax.swing.Action;
-import org.netbeans.spi.project.ui.support.CommonProjectActions;
 import org.openide.loaders.DataFilter;
 import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObject;
@@ -27,6 +27,7 @@ import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.nodes.FilterNode;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
+import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 
@@ -58,22 +59,15 @@ public final class ContigOrderingProjectNode extends FilterNode {
               dataFolder.getNodeDelegate().getLookup()
             }));
     //todo: Is there a way to include the project into the lookup of the children?
-
     this.project = project;
   }
 
   @Override
-  public Action[] getActions(boolean arg0) {
-    Action[] nodeActions = new Action[4];
-    nodeActions[0] = new NewReferenceAction();
-    //TODO find out, why rename is always disabled
-//    nodeActions[1] = CommonProjectActions.renameProjectAction();
-//    nodeActions[0] = CommonProjectActions.newFileAction();
-    //null value results in a separator
-    nodeActions[2] = CommonProjectActions.deleteProjectAction();
-    nodeActions[3] = CommonProjectActions.closeProjectAction();
-    //nodeActions[5] = CommonProjectActions.setAsMainProjectAction();
-    return nodeActions;
+  public Action[] getActions(boolean context) {
+    //load all actions that are registered in layer.xml in this path
+    List<? extends Action> contigOrderingProjectActions =
+            Utilities.actionsForPath("Actions/ContigProject");
+    return contigOrderingProjectActions.toArray(new Action[contigOrderingProjectActions.size()]);
   }
 
   @Override
@@ -88,6 +82,6 @@ public final class ContigOrderingProjectNode extends FilterNode {
 
   @Override
   public String getDisplayName() {
-    return project.getProjectDirectory().getName();
+    return project.getProjectDirectory().getNameExt();
   }
 }

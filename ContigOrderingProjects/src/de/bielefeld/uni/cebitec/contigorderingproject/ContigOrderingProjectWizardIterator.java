@@ -204,12 +204,12 @@ public final class ContigOrderingProjectWizardIterator implements WizardDescript
 
             //write matches to file
             if (matches != null && !matches.isEmpty()) {
-              FileObject matchFile = newProject.createData(referenceString + ".r2c");
+              FileObject matchFile = newProject.createData(referenceString, "r2c");
               matches.writeToFile(FileUtil.toFile(matchFile));
             }
 
             //write log to file
-            FileObject logfile = newProject.createData(referenceString + ".log");
+            FileObject logfile = newProject.createData(referenceString, "log");
             progress.writeCommentsToFile(FileUtil.toFile(logfile));
 
           } catch (InterruptedException ex) {

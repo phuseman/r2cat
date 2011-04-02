@@ -17,11 +17,11 @@
  */
 package de.bielefeld.uni.cebitec.referencematches;
 
-import de.bielefeld.uni.cebitec.qgram.MatchList;
 import java.io.IOException;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.loaders.DataNode;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
@@ -53,9 +53,20 @@ public class ReferenceMatchesDataObject extends MultiDataObject {
 
   @Override
   public Lookup getLookup() {
+            Project p = FileOwnerQuery.getOwner(this.getPrimaryFile());
+            if(p!=null){
+              return  new ProxyLookup(
+                      new Lookup[]{
+                Lookups.singleton(getReferenceMatches()),
+              getCookieSet().getLookup(),
+                //include the project into the lookup. I found no better way..
+              Lookups.singleton(p)
+            });
+            } else {
               return  new ProxyLookup(new Lookup[]{Lookups.singleton(getReferenceMatches()),
               getCookieSet().getLookup()
             });
+    }
   }
 
   @Override

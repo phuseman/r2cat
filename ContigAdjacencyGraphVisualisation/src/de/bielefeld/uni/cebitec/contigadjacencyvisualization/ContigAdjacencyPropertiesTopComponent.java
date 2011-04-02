@@ -17,16 +17,27 @@
  */
 package de.bielefeld.uni.cebitec.contigadjacencyvisualization;
 
+import de.bielefeld.uni.cebitec.contigadjacencygraph.ContigAdjacencyGraph;
+import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
+import de.bielefeld.uni.cebitec.contigadjacencygraph.layouter.GreedyTreebasedLayouter;
 import de.bielefeld.uni.cebitec.contigorderingproject.ContigOrderingProject;
 import de.bielefeld.uni.cebitec.contigorderingproject.ContigOrderingProjectLogicalView;
+import de.bielefeld.uni.cebitec.qgram.MatchList;
+import de.bielefeld.uni.cebitec.referencematches.MatchListNBApiObject;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Vector;
 import java.util.logging.Logger;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import org.netbeans.swing.outline.OutlineModel;
+import org.openide.util.Exceptions;
 import org.openide.util.LookupEvent;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
-//import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.view.OutlineView;
@@ -34,6 +45,11 @@ import org.openide.util.Lookup;
 import org.openide.util.LookupListener;
 import org.openide.util.Utilities;
 import javax.swing.table.TableColumn;
+import org.netbeans.swing.outline.Outline;
+import org.openide.explorer.ExplorerUtils;
+import org.openide.explorer.view.Visualizer;
+import org.openide.nodes.Node;
+import org.openide.nodes.PropertySupport;
 import org.openide.windows.TopComponentGroup;
 
 /**
@@ -47,9 +63,10 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
   /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
   private static final String PREFERRED_ID = "ContigAdjacencyPropertiesTopComponent";
-  private Lookup.Result result = null;
+  private Lookup.Result<ContigOrderingProject> result = null;
   private final ExplorerManager explorerManager = new ExplorerManager();
   OutlineView outlineView = new OutlineView();
+  private ContigOrderingProject project;
 
   @Override
   public ExplorerManager getExplorerManager() {
@@ -66,8 +83,8 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
 
     outlineView.getOutline().setRootVisible(false);
 
-    outlineView.setPropertyColumns(
-            "cagCreation", "Use");
+    outlineView.setPropertyColumns(MatchListNBApiObject.PROP_SELECTEDFORCAG, "",
+            MatchListNBApiObject.PROP_TREEDISTANCE, "Tree Distance");
 
 
     //remove the first columnt that contains the node itself
@@ -84,6 +101,11 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
 
     references.getViewport().add(outlineView);
 
+    //Put the Nodes into the Lookup of the TopComponent,
+    //so that the Properties window will be synchronized:
+    associateLookup(ExplorerUtils.createLookup(explorerManager, getActionMap()));
+
+
   }
 
   /** This method is called from within the constructor to
@@ -97,7 +119,14 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
     run = new javax.swing.JButton();
     references = new javax.swing.JScrollPane();
 
+    setPreferredSize(new java.awt.Dimension(160, 400));
+
     org.openide.awt.Mnemonics.setLocalizedText(run, org.openide.util.NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "ContigAdjacencyPropertiesTopComponent.run.text")); // NOI18N
+    run.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        runActionPerformed(evt);
+      }
+    });
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
@@ -107,7 +136,7 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addComponent(run, javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(references, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE))
+          .addComponent(references, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE))
         .addContainerGap())
     );
     layout.setVerticalGroup(
@@ -115,11 +144,50 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
         .addContainerGap()
         .addComponent(references, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         .addComponent(run)
         .addContainerGap())
     );
   }// </editor-fold>//GEN-END:initComponents
+
+  private void runActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runActionPerformed
+    OutlineModel tablemodel = outlineView.getOutline().getOutlineModel();
+
+    //todo: do this in a swing worker
+    Vector<MatchList> contigsToReferencesMatchesList = new Vector<MatchList>();
+
+    for (int i = 0; i < tablemodel.getRowCount(); i++) {
+      if (isRowSelected(i)) {
+        Node node = getNode(i);
+        contigsToReferencesMatchesList.add(node.getLookup().lookup(MatchListNBApiObject.class));
+      }
+    }
+
+ContigAdjacencyGraph cag=null;
+		LayoutGraph layoutGraph=null;
+
+		if (!contigsToReferencesMatchesList.isEmpty()) {
+			cag = new ContigAdjacencyGraph(contigsToReferencesMatchesList);
+
+			//set the tree weights. if these are not given, all distances are set to 1.
+//			cag.setTreeWeights(contigsToReferencesTreeDistanceList);
+
+			//fill the weight matrix with the projected contigs, based on the matches
+					cag.fillWeightMatrix();
+
+			//this method computes a path, or a Layout Graph
+			layoutGraph = cag.findPath(new GreedyTreebasedLayouter());
+    }
+
+        JOptionPane.showMessageDialog(this,layoutGraph );
+    ContigAdjacencyGraphTopComponent viewer = (ContigAdjacencyGraphTopComponent) WindowManager.getDefault().findTopComponent("ContigAdjacencyGraphTopComponent");
+    viewer.setLayoutGraph(layoutGraph);
+          viewer.open();
+      viewer.requestActive();
+
+
+
+  }//GEN-LAST:event_runActionPerformed
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JScrollPane references;
   private javax.swing.JButton run;
@@ -206,30 +274,77 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
 
   @Override
   public void resultChanged(LookupEvent ev) {
-    Lookup.Result r = (Lookup.Result) ev.getSource();
-    //jTextArea1.setText("");
-    Collection c = r.allInstances();
+//    Lookup.Result r = (Lookup.Result) ev.getSource();
+
+    ArrayList<ContigOrderingProject> projects = new ArrayList<ContigOrderingProject>(result.allInstances());
 
 
-    if (c.size() < 1) {
-      //no match object in lookup; do nothing
+    if (projects.isEmpty()) {
+      //no project in lookup; do nothing
       return;
     }
-    if (c.size() == 1) {
-      for (Iterator it = c.iterator(); it.hasNext();) {
-        ContigOrderingProject prj = (ContigOrderingProject) it.next();
-        this.setProject(prj);
-      }
-    } else if (c.size() > 1) {
-      this.setProject(null);
+
+
+    ContigOrderingProject prj = null;
+    if (projects.size() == 1) {
+      prj = projects.get(0);
+    } else if (projects.size() > 1) {
+      //check if all projects in selection are the same.
+       prj = projects.get(0);
+      for (int i = 1; i < projects.size(); i++) {
+        if (!prj.equals(projects.get(i))) {
+          //if not, set no project
+          this.setProject(null);
+          return;
+        }
+      } // if all projects are the same, take it
+    } // more than one projec tin lookup
+
+    //if no project set, or the new project is distinct from the current one:  set it
+    if(this.project == null || !this.project.equals(prj)) {
+            this.setProject(prj);
+    }
+  }
+
+  private void setProject(ContigOrderingProject prj) {
+    this.project = prj;
+    if (prj != null) {
+      ContigOrderingProjectLogicalView view = new ContigOrderingProjectLogicalView(prj);
+      explorerManager.setRootContext(view.createLogicalView());
+    } else {
+      explorerManager.setRootContext(Node.EMPTY);
     }
 
   }
 
-  private void setProject(ContigOrderingProject prj) {
-    if (prj != null) {
-      ContigOrderingProjectLogicalView view = new ContigOrderingProjectLogicalView(prj);
-      explorerManager.setRootContext(view.createLogicalView());
+  private Boolean isRowSelected(int row) {
+
+    OutlineModel tablemodel = outlineView.getOutline().getOutlineModel();
+
+    Boolean out = null;
+    //the selection column is in the model in column 1
+    Object tableCell = tablemodel.getValueAt(row, 1);
+
+    if (tableCell != null && tableCell instanceof PropertySupport.Reflection) {
+      PropertySupport.Reflection reflection = (PropertySupport.Reflection) tableCell;
+      try {
+        out = (Boolean) reflection.getValue();
+      } catch (IllegalAccessException ex) {
+        Exceptions.printStackTrace(ex);
+      } catch (IllegalArgumentException ex) {
+        Exceptions.printStackTrace(ex);
+      } catch (InvocationTargetException ex) {
+        Exceptions.printStackTrace(ex);
+      }
     }
+    return out;
+  }
+
+  private Node getNode(int row) {
+    OutlineModel tablemodel = outlineView.getOutline().getOutlineModel();
+
+    //the node is in column 0
+    Object tableCell = tablemodel.getValueAt(row, 0);
+    return Visualizer.findNode(tableCell);
   }
 }
