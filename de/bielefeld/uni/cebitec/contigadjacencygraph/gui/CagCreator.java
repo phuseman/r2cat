@@ -44,8 +44,6 @@ public class CagCreator {
 	private DNASequence currentContigObject;
 	//private int neighbourNumber = 5;
 
-	private Vector<Vector<AdjacencyEdge>> selectedContigs;
-	private LinkedList<AdjacencyEdge> sContigs;
 	private ArrayList<CagEventListener> listeners;
 	private long maxSizeOfContigs;
 	private long minSizeOfContigs;
@@ -60,15 +58,16 @@ public class CagCreator {
 	public CagCreator(LayoutGraph g) {
 		this.graph = g;
 		listeners = new ArrayList<CagEventListener>();
-		selectedContigs = new Vector<Vector<AdjacencyEdge>>();
+
 		leftAndRightNeighbour();
 		createContigList();
+		
 		calculateMinSizeOfContigs(contigs);
 		calculateMaxSizeOfContigs(contigs);
+		
 		calculateMaxSupport(g);
 		calculateMinSupport(g);
-		System.out.println("min support " + minSupport + " max support "
-				+ maxSupport);
+
 		calculateMeanAndSDeviationForLeftNeigbours(leftNeighbours);
 		calculateMeanAndSDeviationForRightNeigbours(rightNeighbours);
 	}

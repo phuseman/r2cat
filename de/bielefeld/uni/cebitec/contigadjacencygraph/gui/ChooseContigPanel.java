@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 
 import java.awt.Toolkit;
 
-public class ChooseContigPanel extends JPanel{
+public class ChooseContigPanel extends JPanel {
 
 	private BoxLayout layout;
 	private JPanel leftContainer;
@@ -35,14 +35,14 @@ public class ChooseContigPanel extends JPanel{
 	private double maxSupport;
 	private double[] rightSupport;
 
-	public ChooseContigPanel(int neighboursNumber,
-			 boolean zScore, double max, double min){
-		
+	public ChooseContigPanel(int neighboursNumber, boolean zScore, double max,
+			double min) {
+
 		this.numberOfNeighbours = neighboursNumber;
 		this.isZScore = zScore;
 		this.maxSupport = max;
 		this.minSupport = min;
-		
+
 		/*
 		 * Dieses Panel enhaelt das Contig das Ausgewaehlt wurde und deren
 		 * moegliche Nachbarn
@@ -80,13 +80,13 @@ public class ChooseContigPanel extends JPanel{
 		leftContainer.setOpaque(false);
 		leftContainer.setPreferredSize(new Dimension(310, 400));
 		leftContainer.setMinimumSize(new Dimension(310, 400));
-//		leftContainer.setMaximumSize(new Dimension(310, 400));
+		// leftContainer.setMaximumSize(new Dimension(310, 400));
 
 		leftRadioButtonContainer.setLayout(leftRadioBoxLayout);
 		leftRadioButtonContainer.setOpaque(false);
 		leftRadioButtonContainer.setPreferredSize(new Dimension(20, 400));
 		leftRadioButtonContainer.setMinimumSize(new Dimension(20, 400));
-//		leftRadioButtonContainer.setMaximumSize(new Dimension(20, 400));
+		// leftRadioButtonContainer.setMaximumSize(new Dimension(20, 400));
 
 		/*
 		 * Container for central contig
@@ -104,13 +104,13 @@ public class ChooseContigPanel extends JPanel{
 		rightContainer.setOpaque(false);
 		rightContainer.setPreferredSize(new Dimension(310, 400));
 		rightContainer.setMinimumSize(new Dimension(310, 400));
-//		rightContainer.setMaximumSize(new Dimension(310, 400));
+		// rightContainer.setMaximumSize(new Dimension(310, 400));
 
 		rightRadioButtonContainer.setLayout(rightRadioBoxLayout);
 		rightRadioButtonContainer.setOpaque(false);
 		rightRadioButtonContainer.setPreferredSize(new Dimension(20, 400));
 		rightRadioButtonContainer.setMinimumSize(new Dimension(20, 400));
-//		rightRadioButtonContainer.setMaximumSize(new Dimension(20, 400));
+		// rightRadioButtonContainer.setMaximumSize(new Dimension(20, 400));
 
 		/*
 		 * Parent Panel for all other the container of all neighbours and
@@ -126,12 +126,11 @@ public class ChooseContigPanel extends JPanel{
 		this.add(rightContainer);
 		updateUI();
 	}
-	
+
 	@Override
-	public void paintComponent(Graphics g){
+	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		
-		
+
 		Graphics2D g2 = (Graphics2D) g;
 
 		/*
@@ -176,7 +175,8 @@ public class ChooseContigPanel extends JPanel{
 				if (left) {
 					x2 = (int) centralContig.getX()
 							+ (int) centralContig.getParent().getX();
-					y2 = (int) centralContig.getY()+ höhe2 / 2;// + höhe2 + höhe2 / 2;
+					y2 = (int) centralContig.getY() + höhe2 / 2;// + höhe2 +
+																// höhe2 / 2;
 					centralPosition[0] = new Point(x2, y2);
 				} else {
 					y2 = (int) centralContig.getY() + höhe2 / 2;
@@ -193,66 +193,84 @@ public class ChooseContigPanel extends JPanel{
 
 					int z = 1;
 					int zaehler = 0;
+					int zaehlerFuerSupport = 0;
 
 					for (Component co : leftContainer.getComponents()) {
+//					for (Component co : leftRadioButtonContainer.getComponents()){
 						/*
 						 * Berechnen der Liniendicke, abhängig davon ob der
 						 * Nutzer den relativen oder absoluten Support wählt.
 						 */
-						float lineStrokeLeft;
-						if (isZScore) {
-							if (leftSupport[zaehler] > 0 && leftSupport[zaehler]<5) {
-								lineStrokeLeft = (float) (leftSupport[zaehler]);// /10.0);
-							} else if(leftSupport[zaehler]>5){
-								lineStrokeLeft = 5.0f;
-							}else {
-								lineStrokeLeft = 0.01f;
+						
+						if (zaehler != 0) { // First component is just a gap
+							
+							z++;
+							if (z % 2 == 0) {
+								
+								float lineStrokeLeft;
+								if (isZScore) {
+									if (leftSupport[zaehlerFuerSupport] > 0
+											&& leftSupport[zaehlerFuerSupport] < 5) {
+										lineStrokeLeft = (float) (leftSupport[zaehlerFuerSupport]);
+									} else if (leftSupport[zaehlerFuerSupport] > 5) {
+										lineStrokeLeft = 5.0f;
+									} else {
+										lineStrokeLeft = 0.01f;
+									}
+								} else {
+									float nenner = (float) (leftSupport[zaehlerFuerSupport] - minSupport);
+									float counter = (float) (maxSupport - minSupport);
+									float xInIntervall = nenner / counter;
+
+									lineStrokeLeft = (float) ((xInIntervall * 3) + 1);
+								}
+
+								Point point = co.getLocation();
+								ContigAppearance test2 = (ContigAppearance) co;
+								/*
+								 * Arbeite hier mit verschiedenen Panel. Es ist
+								 * nötig sich die richtigen Positionen der
+								 * Contig Panel zu berechnen, da sonst die
+								 * koordinaten in einer subkomponente auf das
+								 * ursprungspanel projiziert wird.
+								 */
+								int laenge = (int) co.getSize().getWidth();
+								int x = (int) point.getX();
+								int y = (int) point.getY()
+										+ (int) (co.getHeight() * 0.5);
+								Point currentPoint = new Point(x, y);
+
+								leftComponentPositions[zaehlerFuerSupport] = currentPoint;
+
+								if (test2.isAnderweitigAusgewaehlt()) {
+									float[] dash2 = { 30, 10 };
+									g2.setColor(Color.DARK_GRAY);
+									g2
+											.setStroke(new BasicStroke(
+													lineStrokeLeft,
+													BasicStroke.CAP_BUTT,
+													BasicStroke.JOIN_MITER, 1,
+													dash2, 0));
+								} else if (test2.isSelected()) {
+									g2.setColor(Color.BLACK);
+									g2
+											.setStroke(new BasicStroke(
+													lineStrokeLeft));
+								} else {
+									float[] dash = { 2, 2 };
+									g2.setColor(Color.GRAY);
+									g2
+											.setStroke(new BasicStroke(
+													lineStrokeLeft,
+													BasicStroke.CAP_BUTT,
+													BasicStroke.JOIN_MITER, 1,
+													dash, 0));
+								}
+								g2.drawLine(x + laenge, y, x2, y2);	
 							}
-						} else {
-							float nenner = (float) (leftSupport[zaehler] - minSupport);
-							float counter = (float) (maxSupport - minSupport);
-							float xInIntervall = nenner / counter;
-
-							lineStrokeLeft = (float) ((xInIntervall * 3) + 1);
 						}
-						z++;
-						if (z % 2 == 0) {
-
-							Point point = co.getLocation();
-							ContigAppearance test2 = (ContigAppearance)co;
-							/*
-							 * Arbeite hier mit verschiedenen Panel. Es ist
-							 * nötig sich die richtigen Positionen der Contig
-							 * Panel zu berechnen, da sonst die koordinaten in
-							 * einer subkomponente auf das ursprungspanel
-							 * projiziert wird.
-							 */
-							int laenge = (int) co.getSize().getWidth();
-							int x = (int) point.getX();
-							int y = (int) point.getY()
-									+ (int) (co.getHeight() * 0.5);
-							Point currentPoint = new Point(x, y);
-
-							leftComponentPositions[zaehler] = currentPoint;
-
-							if(test2.isAnderweitigAusgewaehlt()){
-								float[] dash2 = {30,10};
-								g2.setColor(Color.DARK_GRAY);
-								g2.setStroke(new BasicStroke(lineStrokeLeft, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, dash2 , 0));
-							}else if(test2.isSelected()){
-								g2.setColor(Color.BLACK);
-								g2.setStroke(new BasicStroke(lineStrokeLeft));
-							}else{
-								float[] dash = {2,2};
-								g2.setColor(Color.GRAY);
-								g2.setStroke(new BasicStroke(lineStrokeLeft, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1 , dash, 0));
-							}
-							g2.drawLine(x + laenge, y, x2, y2);
-
-							zaehler++;
-						}
+						zaehler++;
 					}
-
 				} else {
 					/*
 					 * äquivalent zu oben, nur das dies hier für die rechten
@@ -260,60 +278,74 @@ public class ChooseContigPanel extends JPanel{
 					 */
 					int z = 1;
 					int c = 0;
-
+					int zaehlerFuerSupport = 0;
+					
 					for (Component co : rightContainer.getComponents()) {
+//					for(Component co: rightRadioButtonContainer.getComponents()){
+						if (c != 0) {
+							z++;
+							if (z % 2 == 0) {
+						
+								float lineStroke;
+								if (isZScore) {
+									if (rightSupport[zaehlerFuerSupport] > 0 && rightSupport[zaehlerFuerSupport] < 5) {
+										lineStroke = (float) (rightSupport[zaehlerFuerSupport]);
+									} else if (rightSupport[zaehlerFuerSupport] > 5) {
+										lineStroke = 5.0f;
+									} else {
+										lineStroke = 0.01f;
+									}
+								} else {
+									float nenner = (float) (rightSupport[zaehlerFuerSupport] - minSupport);
+									float counter = (float) (maxSupport - minSupport);
+									float xInIntervall = nenner / counter;
+									lineStroke = (float) ((xInIntervall * 3) + 1);
+								}
+								
+								Point point = co.getLocation();
+								ContigAppearance test = (ContigAppearance) co;
 
-						float lineStroke;
-						if (isZScore) {
-							if (rightSupport[c] > 0 && rightSupport[c]<5) {
-								lineStroke = (float) (rightSupport[c]);// /10.0);
-							}else if(rightSupport[c]>5){
-								lineStroke = 5.0f;
+								/*
+								 * Arbeite hier mit verschiedenen Panel. Es ist
+								 * nötig sich die richtigen Positionen der
+								 * Contig Panel zu berechnen, da sonst die
+								 * koordinaten in einer subkomponente auf das
+								 * ursprungspanel projiziert wird.
+								 */
+								int x = (int) co.getParent().getX();
+								int y = (int) point.getY()
+										+ (int) (0.5 * co.getHeight());
+								Point currentPoint = new Point(x, y);
+
+								rightComponentPositions[zaehlerFuerSupport] = currentPoint;
+
+								if (test.isAnderweitigAusgewaehlt()) {
+									float[] dash2 = { 30, 10 };
+									g2.setColor(Color.DARK_GRAY);
+									g2
+											.setStroke(new BasicStroke(
+													lineStroke,
+													BasicStroke.CAP_BUTT,
+													BasicStroke.JOIN_MITER, 1,
+													dash2, 0));
+								} else if (test.isSelected()) {
+									g2.setColor(Color.BLACK);
+									g2.setStroke(new BasicStroke(lineStroke));
+								} else {
+									float[] dash = { 2, 2 };
+									g2.setColor(Color.GRAY);
+									g2
+											.setStroke(new BasicStroke(
+													lineStroke,
+													BasicStroke.CAP_BUTT,
+													BasicStroke.JOIN_MITER, 1,
+													dash, 0));
+								}
+								g2.drawLine(x, y, x2, y2);
+								zaehlerFuerSupport++;
 							}
-							else {
-								lineStroke = 0.01f;
-							}
-						} else {
-							float nenner = (float) (rightSupport[c] - minSupport);
-							float counter = (float) (maxSupport - minSupport);
-							float xInIntervall = nenner / counter;
-							lineStroke = (float) ((xInIntervall * 3) + 1);
 						}
-						z++;
-						if (z % 2 == 0) {
-
-							Point point = co.getLocation();
-							ContigAppearance test = (ContigAppearance)co;
-							
-							/*
-							 * Arbeite hier mit verschiedenen Panel. Es ist
-							 * nötig sich die richtigen Positionen der Contig
-							 * Panel zu berechnen, da sonst die koordinaten in
-							 * einer subkomponente auf das ursprungspanel
-							 * projiziert wird.
-							 */
-							int x = (int) co.getParent().getX();
-							int y = (int) point.getY()
-									+ (int) (0.5 * co.getHeight());
-							Point currentPoint = new Point(x, y);
-
-							rightComponentPositions[c] = currentPoint;
-
-							if(test.isAnderweitigAusgewaehlt()){
-								float[] dash2 = {30,10};
-								g2.setColor(Color.DARK_GRAY);
-								g2.setStroke(new BasicStroke(lineStroke, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, dash2 , 0));
-							}else if(test.isSelected()){
-								g2.setColor(Color.BLACK);
-								g2.setStroke(new BasicStroke(lineStroke));
-							}else{
-								float[] dash = {2,2};
-								g2.setColor(Color.GRAY);
-								g2.setStroke(new BasicStroke(lineStroke, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1 , dash, 0));
-							}
-							g2.drawLine(x, y, x2, y2);
-							c++;
-						}
+						c++;
 					}
 				}
 			}
@@ -407,6 +439,7 @@ public class ChooseContigPanel extends JPanel{
 	public void setRightSupport(double[] rightSupport) {
 		this.rightSupport = rightSupport;
 	}
+
 	public ContigAppearance getCentralContig() {
 		return centralContig;
 	}

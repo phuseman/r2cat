@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.print.DocFlavor;
+import javax.sound.sampled.DataLine;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -356,8 +357,20 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				centerContainer.removeAll();
 			}
 			// centerContainer.setAlignmentY(TOP_ALIGNMENT);
+			int indexInList = 0;
+			for (int i = 0; i < dataForList.length; i++) {
+				String contigName = dataForList[i];
+				if(contigName.equals(currentContig.getId())){
+					indexInList = i;
+					break;
+				}
+			}
+			list.indexToLocation(indexInList);
+//			list.setSelectedIndex(indexInList);
 			chooseContigPanel.setCentralContig(centralContig);
+//			centerContainer.add(Box.createVerticalGlue());
 			centerContainer.add(centralContig);
+//			centerContainer.add(Box.createVerticalGlue());
 			centerContainer.updateUI();
 		}
 		/*
@@ -403,6 +416,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			 * This is necessary to set the layout of the choosed ContigPanel
 			 * or rather for the leftcontainer 
 			 */
+			leftContainer.add(Box.createVerticalGlue());
+			leftRadioButtonContainer.add(Box.createVerticalGlue());
 			for (AdjacencyEdge edge : leftNeighbourEdges) {
 
 				if (t < terminator) {
@@ -422,8 +437,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						leftSupport[t] = edge.getSupport();
 					}
 					
-					Vector<Vector<AdjacencyEdge>> leftEdges = centralContig.isReverse() ? selectedRightEdges : selectedLeftEdges;
-					boolean anderweitigAusgewaehlt = ulteriorSelected(true, indexOfContig, edge, leftEdges);
+					//Vector<Vector<AdjacencyEdge>> leftEdges = centralContig.isReverse() ? selectedRightEdges : selectedLeftEdges;
+					boolean anderweitigAusgewaehlt = ulteriorSelected(true, indexOfContig, edge);//, leftEdges);
 
 					/*
 					 * Set the appearance for each contig
@@ -452,7 +467,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					
 					if (anderweitigAusgewaehlt) {
 						radioButton.setActionCommand("anderweitigAusgewaehlt");
-						AdjacencyEdge otherEdgeForThisNeighbour = leftEdges.get(indexOfContig).firstElement();
+						AdjacencyEdge otherEdgeForThisNeighbour = selectedLeftEdges.get(indexOfContig).firstElement();
 						radioButton
 								.setNeighboursForTheThisNeighbour(otherEdgeForThisNeighbour);
 					}
@@ -486,6 +501,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					break;
 				}
 			}
+			leftContainer.add(Box.createVerticalGlue());
+			leftRadioButtonContainer.add(Box.createVerticalGlue());
 			chooseContigPanel.setLeftSupport(leftSupport);
 		}
 
@@ -535,6 +552,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			/*
 			 * For each adjacency edge here is going to be a contig Panel
 			 */
+			rightContainer.add(Box.createVerticalGlue());
+			rightRadioButtonContainer.add(Box.createVerticalGlue());
 			for (AdjacencyEdge edge : rightNeighbourEdges) {
 				if (s < terminator) {
 
@@ -560,14 +579,15 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					 * dieses Contig ein anderes Aussehen und kann auch nicht
 					 * mehr für dieses ausgewählt werden.
 					 */
-					Vector<Vector<AdjacencyEdge>> rechteKanten = centralContig.isReverse() ? selectedLeftEdges : selectedRightEdges;
-					boolean anderweitigAusgewaehlt = ulteriorSelected(false, indexOfContig, edge, rechteKanten);
+					//Vector<Vector<AdjacencyEdge>> rechteKanten = centralContig.isReverse() ? selectedLeftEdges : selectedRightEdges;
+					boolean anderweitigAusgewaehlt = ulteriorSelected(false, indexOfContig, edge);//, rechteKanten);
 					
 					contigPanel = new ContigAppearance(layoutGraph, edge,
 							indexOfContig, false, maxSizeOfContigs,
 							minSizeOfContigs, anderweitigAusgewaehlt);
 					contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 					contigPanel.addMouseListener(new ContigMouseListener());
+					contigPanel.setName("contig Panel");
 
 					/*
 					 * Zu jedem Nachbarn wird auch ein RadioButton erstellt mit
@@ -592,7 +612,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					}
 					if (anderweitigAusgewaehlt) {
 						radioButton.setActionCommand("anderweitigAusgewaehlt");
-						AdjacencyEdge otherEdge = rechteKanten.get(indexOfContig).firstElement();
+						AdjacencyEdge otherEdge = selectedRightEdges.get(indexOfContig).firstElement();
 						radioButton.setNeighboursForTheThisNeighbour(otherEdge);
 						
 					}
@@ -620,6 +640,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 					break;
 				}
 			}
+			rightContainer.add(Box.createVerticalGlue());
+			rightRadioButtonContainer.add(Box.createVerticalGlue());
 			chooseContigPanel.setRightSupport(rightSupport);
 		}
 
@@ -679,14 +701,14 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	 * If a not repetitiv contig is used in an another adjacency, the flag will be
 	 * set on true. 
 	 */
-	private boolean ulteriorSelected(boolean isLeft, int indexOfNeighbour, AdjacencyEdge edge, Vector<Vector<AdjacencyEdge>> selectedEdges){//, boolean isCentralContigReverse) {
+	private boolean ulteriorSelected(boolean isLeft, int indexOfNeighbour, AdjacencyEdge edge){//, Vector<Vector<AdjacencyEdge>> selectedEdges){//, boolean isCentralContigReverse) {
 		boolean isSelected = false;
 		
 		if(isLeft){
-			if(!selectedEdges.get(indexOfNeighbour).isEmpty() 
+			if(!selectedLeftEdges.get(indexOfNeighbour).isEmpty() 
 					&& !layoutGraph.getNodes().get(indexOfNeighbour).isRepetitive()){
 
-				AdjacencyEdge other = selectedEdges.get(indexOfNeighbour).firstElement();
+				AdjacencyEdge other = selectedLeftEdges.get(indexOfNeighbour).firstElement();
 
 				int i =indexOfCentralContig(other); 
 				isSelected = true;
@@ -696,10 +718,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				
 			}
 		}else{
-			if(!selectedEdges.get(indexOfNeighbour).isEmpty()
+			if(!selectedRightEdges.get(indexOfNeighbour).isEmpty()
 					&& !layoutGraph.getNodes().get(indexOfNeighbour).isRepetitive()){
 				
-				AdjacencyEdge other = selectedEdges.get(indexOfNeighbour).firstElement();
+				AdjacencyEdge other = selectedRightEdges.get(indexOfNeighbour).firstElement();
 
 				int i =indexOfCentralContig(other);
 				isSelected = true;
@@ -1041,7 +1063,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		public void mouseClicked(MouseEvent e) {
 			/*
 			 * If this will be activated the choosed contig will be displayed 
-			 * as central contig with its neighbours.
+			 * as central contig with its neighbours.			
 			 */
 			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
 
@@ -1050,7 +1072,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 			model.changeContigs(index, currentContigIsReverse);
 			chooseContigPanel.setFlag(false);
-
+			
 			ThreadClassForRightNeighours threadForRightNeighbours = new ThreadClassForRightNeighours();
 			threadForRightNeighbours.execute();
 
@@ -1061,12 +1083,14 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		@Override
 		public void mouseEntered(MouseEvent e) {
-			// Auto-generated method stub
+			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+			contigPanel.setBackground(Color.LIGHT_GRAY);
 		}
 
 		@Override
 		public void mouseExited(MouseEvent e) {
-			// Auto-generated method stub
+			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+			contigPanel.setBackground(Color.WHITE);
 		}
 
 		@Override

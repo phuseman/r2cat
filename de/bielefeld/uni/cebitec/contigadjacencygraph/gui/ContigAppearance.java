@@ -85,9 +85,9 @@ public class ContigAppearance extends JPanel {
 		support = includingEdge.getSupport();
 
 		isRepetitiv = contig.isRepetitive();
-		
-		setContigAppearance(contig.getId(), contig.getSize(), new ContigBorder(
-				isRepetitiv, isReverse, selected, anderweitigAusgewaehlt));
+		ContigBorder border = new ContigBorder(
+				isRepetitiv, isReverse, selected, anderweitigAusgewaehlt);
+		setContigAppearance(contig.getId(), contig.getSize(), border);
 		setSizeOfContig(contig.getSize(), maxSize, minSize);
 	}
 	/*
