@@ -27,6 +27,7 @@ public class ContigAppearance extends JPanel {
 	private boolean anderweitigAusgewaehlt;
 	private boolean selected;
 	private boolean isRepetitiv;
+	private ContigBorder border;
 
 	public ContigAppearance() {
 		super();
@@ -71,7 +72,7 @@ public class ContigAppearance extends JPanel {
 
 		this.setBackground(Color.WHITE);
 		this.add(contigLabel);
-		this.setName("contig "+contig.getId());
+		this.setName(contig.getId());
 
 		selected = false;
 		if (includingEdge.isSelected()) {
@@ -85,11 +86,19 @@ public class ContigAppearance extends JPanel {
 		support = includingEdge.getSupport();
 
 		isRepetitiv = contig.isRepetitive();
-		ContigBorder border = new ContigBorder(
+		border = new ContigBorder(
 				isRepetitiv, isReverse, selected, anderweitigAusgewaehlt);
 		setContigAppearance(contig.getId(), contig.getSize(), border);
 		setSizeOfContig(contig.getSize(), maxSize, minSize);
 	}
+	public ContigBorder getBorder() {
+		return border;
+	}
+
+	public void setBorder(ContigBorder border) {
+		this.border = border;
+	}
+
 	/*
 	 * Figure out, if the contig have to be displayed as reverse or not
 	 */

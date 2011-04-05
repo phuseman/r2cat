@@ -1,5 +1,6 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 import java.awt.BasicStroke;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -21,6 +22,8 @@ public class ContigBorder extends AbstractBorder{
 	private boolean woandersAusgewaehlt;
 	private float[] dash = {2,2};
 	private float[] dash2 = {15,2};
+	private Graphics2D g2;
+	private GeneralPath p;
 	
 	public ContigBorder(boolean isRepeat, boolean isReverse) {
 		this.isRepeat = isRepeat;
@@ -36,7 +39,7 @@ public class ContigBorder extends AbstractBorder{
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
 	        
 	    Color oldColor = g.getColor();     
-		Graphics2D g2 = (Graphics2D) g;
+		g2 = (Graphics2D) g;
 		
 		/*
 		 * Hiermit werden die Ränder "weich" gezeichnet.
@@ -45,8 +48,7 @@ public class ContigBorder extends AbstractBorder{
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
 				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-		
-		GeneralPath p;
+	
 		
 		/*
 		 * Wenn das entsprechende Contig ein Ausgewähltes Contig ist, 
@@ -84,6 +86,15 @@ public class ContigBorder extends AbstractBorder{
 		g.setColor(oldColor);
 	}
 
+	public GeneralPath getP() {
+		return p;
+	}
+	public Graphics2D getG2() {
+		return g2;
+	}
+	public void setG2(Graphics2D g2) {
+		this.g2 = g2;
+	}
 	/*
 	 * (x, y + height)------------(x + width, y + height) (x + width + 10, y +
 	 * height/2) Startpunkt *(x, y)-------------(x + width, y)
@@ -100,7 +111,7 @@ public class ContigBorder extends AbstractBorder{
 		p.lineTo(x + width -10, y + height -1); // 3
 		p.lineTo(x, y + height -1); // 4
 		p.closePath();
-
+		
 		return p;
 	}
 	

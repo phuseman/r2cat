@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -16,6 +17,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.GeneralPath;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.text.NumberFormat;
@@ -357,16 +359,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 				centerContainer.removeAll();
 			}
 			// centerContainer.setAlignmentY(TOP_ALIGNMENT);
-			int indexInList = 0;
-			for (int i = 0; i < dataForList.length; i++) {
-				String contigName = dataForList[i];
-				if(contigName.equals(currentContig.getId())){
-					indexInList = i;
-					break;
-				}
-			}
-			list.indexToLocation(indexInList);
-//			list.setSelectedIndex(indexInList);
+
 			chooseContigPanel.setCentralContig(centralContig);
 //			centerContainer.add(Box.createVerticalGlue());
 			centerContainer.add(centralContig);
@@ -1069,7 +1062,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 			int index = contigPanel.getI();
 			boolean currentContigIsReverse = contigPanel.isReverse();
-
+			
 			model.changeContigs(index, currentContigIsReverse);
 			chooseContigPanel.setFlag(false);
 			
@@ -1084,13 +1077,25 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		@Override
 		public void mouseEntered(MouseEvent e) {
 			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-			contigPanel.setBackground(Color.LIGHT_GRAY);
+			GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
+			
+			
+			 Graphics2D g = contigPanel.getBorder().getG2();
+			 GeneralPath p = contigPanel.getBorder().getP();
+		
+				g.setPaint(redtowhite);
+				g.fill(p);
+				contigPanel.update(g);
+			
 		}
 
 		@Override
 		public void mouseExited(MouseEvent e) {
-			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-			contigPanel.setBackground(Color.WHITE);
+			/*ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+			 Graphics2D g = contigPanel.getBorder().getG2();
+			 GeneralPath p = contigPanel.getBorder().getP();
+			 g.draw(p);*/
+			 
 		}
 
 		@Override
