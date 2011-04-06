@@ -9,6 +9,9 @@ import java.awt.FlowLayout;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
@@ -36,6 +39,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
@@ -254,20 +258,27 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		/*
 		 * This panel contains the textfield for entering the number of neighbours
 		 * and also the options to choose  absolute support or z-scores 
+		 * and a legend
 		 */
-		FlowLayout inputOptionLayout = new FlowLayout();
-
+		GridBagLayout inputOptionLayout = new GridBagLayout();
+		GridBagConstraints c = new GridBagConstraints();
 		inputOption = new JPanel();
 		inputOption.setLayout(inputOptionLayout);
 
-		JLabel chooseNumberOfNeighbours = new JLabel("number of neighbors");
+		JLabel chooseNumberOfNeighbours = new JLabel("number of neighbors ");
+		c.gridx = 0;
+		c.gridy = 0;
 		chooseNumberOfNeighbours.setToolTipText("<html>"
 				+ "Here you are able to choose the number of neighbours.<br>"
 				+ "Please type a number between 1 and 10 in the textfield<br>"
 				+ "and press ENTER."
 				+ "</html>");
-		NumberFormat nformat = NumberFormat.getNumberInstance();
+		inputOption.add(chooseNumberOfNeighbours,c);
 
+		NumberFormat nformat = NumberFormat.getNumberInstance();
+		c.gridx = 1;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.LINE_START;
 		inputOptionForNumberOfNeighbours = new JFormattedTextField(nformat);
 		inputOptionForNumberOfNeighbours.setValue(new Integer(
 				numberOfNeighbours));
@@ -279,39 +290,74 @@ public class CAGWindow extends JFrame implements CagEventListener {
 						"between 1 and 10<br>"
 				+ "and press ENTER/Return."
 				+ "</html>");
-		
-		JLabel toggelBwAbsolutAndRelativeSupport = new JLabel("Support");
-		toggelBwAbsolutAndRelativeSupport.setToolTipText("Choose a support option.");
-		JPanel toggelOption = new JPanel();
+		inputOption.add(inputOptionForNumberOfNeighbours,c);
 
 		ButtonGroup supportGroup = new ButtonGroup();
 
-		absoluteSupport = new JRadioButton("absolute");
+		absoluteSupport = new JRadioButton("absolute Support");
 		absoluteSupport.setSelected(true);
 		absoluteSupport.setToolTipText("<html>If you choose this option<br> you see at each line <br>" +
 				"the likelyhood score.</html> ");
 		absoluteSupport.setActionCommand("absolute");
 		absoluteSupport.addActionListener(new RadioButtonActionListener());
+		
+		c.gridx = 2;
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.LINE_START;
+		inputOption.add(absoluteSupport, c);
 
 		relativeSupport = new JRadioButton("z-Score");
 		relativeSupport.setToolTipText("<html> If you choose this option <br>you see at each line <br> "
 				+" a normalized score.</html>");
 		relativeSupport.setActionCommand("zScore");
 		relativeSupport.addActionListener(new RadioButtonActionListener());
-
+		c.anchor = GridBagConstraints.LINE_START;
 		supportGroup.add(absoluteSupport);
 		supportGroup.add(relativeSupport);
+		
+		c.gridx = 2;
+		c.gridy = 1;
+		c.anchor = GridBagConstraints.LINE_START;
+		inputOption.add(relativeSupport, c);
+		
+		JLabel legendLabel = new JLabel("legend: ");
+		c.gridx = 0;
+		c.gridy = 2;
+		inputOption.add(legendLabel, c);
+		
+		ImageIcon nsIcon = new ImageIcon("pictures/nsLine.png");
+		c.gridx = 0;
+		c.gridy = 3;
+		inputOption.add(new JLabel(nsIcon),c);
+		
+		JLabel notSelectedLabel = new JLabel("not selected adjacency");
+		c.gridx = 1;
+		c.gridy = 3;
+		c.anchor = GridBagConstraints.LINE_START;
+		inputOption.add(notSelectedLabel, c);	
+		
+		ImageIcon swsIcon = new ImageIcon("pictures/swsLine.png");
+		c.gridx = 0;
+		c.gridy = 4;
+		inputOption.add(new JLabel(swsIcon),c);
+		
+		JLabel somewhereElseSelectedLabel = new JLabel("somewhere else selected adjacency");
+		c.gridx = 1;
+		c.gridy = 4;
+		c.anchor = GridBagConstraints.LINE_START;
+		inputOption.add(somewhereElseSelectedLabel, c);
+		
+		ImageIcon sIcon = new ImageIcon("pictures/sLine.png");
+		c.gridx = 0;
+		c.gridy = 5;
+		inputOption.add(new JLabel(sIcon),c);
+		
+		JLabel selectedLabel = new JLabel("selected adjacency");
+		c.gridx = 1;
+		c.gridy = 5;
+		c.anchor = GridBagConstraints.LINE_START;
+		inputOption.add(selectedLabel, c);		
 
-		toggelOption.add(absoluteSupport);
-		toggelOption.add(relativeSupport);
-
-		inputOption.add(chooseNumberOfNeighbours);
-		inputOption.add(inputOptionForNumberOfNeighbours);
-
-		inputOption.add(Box.createHorizontalGlue());
-
-		inputOption.add(toggelBwAbsolutAndRelativeSupport);
-		inputOption.add(toggelOption);
 
 		add(inputOption, BorderLayout.SOUTH);
 		
@@ -1076,16 +1122,16 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		@Override
 		public void mouseEntered(MouseEvent e) {
-			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-			GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
-			
-			
-			 Graphics2D g = contigPanel.getBorder().getG2();
-			 GeneralPath p = contigPanel.getBorder().getP();
-		
-				g.setPaint(redtowhite);
-				g.fill(p);
-				contigPanel.update(g);
+//			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+//			GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
+//			
+//			
+//			 Graphics2D g = contigPanel.getBorder().getG2();
+//			 GeneralPath p = contigPanel.getBorder().getP();
+//		
+//				g.setPaint(redtowhite);
+//				g.fill(p);
+//				contigPanel.update(g);
 			
 		}
 

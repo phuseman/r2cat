@@ -223,7 +223,18 @@ public class ChooseContigPanel extends JPanel {
 									float xInIntervall = nenner / counter;
 
 									lineStrokeLeft = (float) ((xInIntervall * 3) + 1);
+//									System.out.println(leftSupport[zaehlerFuerSupport / 1000]);
+//									if ((leftSupport[zaehlerFuerSupport]/1000)<5){
+//										
+//										lineStrokeLeft = (float) leftSupport[zaehlerFuerSupport]/1000;
+//									}else if((leftSupport[zaehlerFuerSupport]/100)<0.01){
+//										lineStrokeLeft = 0.01f;
+//									}
+//									else{
+//										lineStrokeLeft = 5.0f;
+//									}
 								}
+								
 
 								Point point = co.getLocation();
 								ContigAppearance test2 = (ContigAppearance) co;
@@ -267,6 +278,7 @@ public class ChooseContigPanel extends JPanel {
 													dash, 0));
 								}
 								g2.drawLine(x + laenge, y, x2, y2);	
+								zaehlerFuerSupport++;
 							}
 						}
 						zaehler++;
@@ -300,6 +312,15 @@ public class ChooseContigPanel extends JPanel {
 									float counter = (float) (maxSupport - minSupport);
 									float xInIntervall = nenner / counter;
 									lineStroke = (float) ((xInIntervall * 3) + 1);
+//									System.out.println(rightSupport[zaehlerFuerSupport]/1000);
+//									if ((rightSupport[zaehlerFuerSupport]/1000)<5){
+//									lineStroke =(float) rightSupport[zaehlerFuerSupport]/1000;
+//									}else if((rightSupport[zaehlerFuerSupport]/1000)<0.01){
+//										lineStroke = 0.01f;
+//									}
+//									else{
+//										lineStroke = 5.0f;
+//									}
 								}
 								
 								Point point = co.getLocation();
