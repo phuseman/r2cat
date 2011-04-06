@@ -110,10 +110,6 @@ public final class ContigAdjacencyGraphLocalExplorerTopComponent extends TopComp
 
   @Override
   public void componentClosed() {
-        TopComponentGroup group = WindowManager.getDefault().findTopComponentGroup("ContigAdjacencyGraphGroup");
-    if (group != null) {
-      group.close();
-    }
 
   }
 

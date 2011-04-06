@@ -19,6 +19,8 @@ package de.bielefeld.uni.cebitec.contigadjacencyvisualization;
 
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import java.util.logging.Logger;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
@@ -31,7 +33,7 @@ import org.openide.windows.TopComponentGroup;
  */
 @ConvertAsProperties(dtd = "-//de.bielefeld.uni.cebitec.contigadjacencyvisualization//ContigAdjacencyGraph//EN",
 autostore = false)
-public final class ContigAdjacencyGraphTopComponent extends TopComponent {
+public final class ContigAdjacencyGraphTopComponent extends TopComponent implements ChangeListener{
 
   private static ContigAdjacencyGraphTopComponent instance;
   /** path to the icon used by the component and its open action */
@@ -123,16 +125,13 @@ public final class ContigAdjacencyGraphTopComponent extends TopComponent {
   @Override
   public void componentOpened() {
     // TODO add custom code on component opening
+        TopComponent cagprop = WindowManager.getDefault().findTopComponent("ContigAdjacencyPropertiesTopComponent");
+        
   }
 
   @Override
   public void componentClosed() {
     // TODO add custom code on component closing
-    TopComponentGroup group = WindowManager.getDefault().findTopComponentGroup("ContigAdjacencyGraphGroup");
-    if (group != null) {
-      group.close();
-    }
-
   }
 
   void writeProperties(java.util.Properties p) {
@@ -163,5 +162,10 @@ public final class ContigAdjacencyGraphTopComponent extends TopComponent {
   void setLayoutGraph(LayoutGraph layoutGraph) {
     this.layoutGraph = layoutGraph;
     jTextArea1.setText(this.layoutGraph.toString());
+  }
+
+  @Override
+  public void stateChanged(ChangeEvent e) {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 }

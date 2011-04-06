@@ -20,6 +20,7 @@ package de.bielefeld.uni.cebitec.contigadjacencyvisualization;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import org.netbeans.api.project.Project;
+import org.openide.windows.TopComponent;
 import org.openide.windows.TopComponentGroup;
 import org.openide.windows.WindowManager;
 
@@ -33,9 +34,22 @@ public final class OpenCAGGroupAction implements ActionListener {
 
   //see http://blogs.sun.com/geertjan/entry/creating_a_window_group
   public void actionPerformed(ActionEvent ev) {
+
+
     TopComponentGroup group = WindowManager.getDefault().findTopComponentGroup("ContigAdjacencyGraphGroup");
     if (group != null) {
       group.open();
     }
+
+    //the topcomponent group remembers which windows were closed.
+    // make sure that at least the properties window is opened
+    TopComponent cagprop = WindowManager.getDefault().findTopComponent("ContigAdjacencyPropertiesTopComponent");
+    if (cagprop != null) {
+      cagprop.open();
+      cagprop.requestActive();
+    }
+
+
+
   }
 }

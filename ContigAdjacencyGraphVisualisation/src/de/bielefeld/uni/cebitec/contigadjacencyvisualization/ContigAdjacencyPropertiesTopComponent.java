@@ -27,11 +27,13 @@ import de.bielefeld.uni.cebitec.referencematches.MatchListNBApiObject;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Logger;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.event.ChangeListener;
 import org.netbeans.swing.outline.OutlineModel;
 import org.openide.util.Exceptions;
 import org.openide.util.LookupEvent;
@@ -50,6 +52,8 @@ import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.Visualizer;
 import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
+import org.openide.util.ChangeSupport;
+import org.openide.util.WeakListeners;
 import org.openide.windows.TopComponentGroup;
 
 /**
@@ -66,7 +70,10 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
   private Lookup.Result<ContigOrderingProject> result = null;
   private final ExplorerManager explorerManager = new ExplorerManager();
   OutlineView outlineView = new OutlineView();
-  private ContigOrderingProject project;
+  private ProjectDependantCAGInformation projectAndSettings;
+  //remember for each project its settings and an already computed layout
+  private HashMap<ContigOrderingProject, ProjectDependantCAGInformation> projectDependantSettings = new HashMap<ContigOrderingProject, ProjectDependantCAGInformation>();
+  private ChangeSupport changeSupport;
 
   @Override
   public ExplorerManager getExplorerManager() {
@@ -75,6 +82,9 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
 
   public ContigAdjacencyPropertiesTopComponent() {
     initComponents();
+
+    changeSupport = new ChangeSupport(this);
+
     setName(NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "CTL_ContigAdjacencyPropertiesTopComponent"));
     setToolTipText(NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "HINT_ContigAdjacencyPropertiesTopComponent"));
 //        setIcon(ImageUtilities.loadImage(ICON_PATH, true));
@@ -106,6 +116,20 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
     associateLookup(ExplorerUtils.createLookup(explorerManager, getActionMap()));
 
 
+  }
+
+
+  //add support to notify ChangeListeners
+  void addChangeListener(ChangeListener listener) {
+    changeSupport.addChangeListener(listener);
+  }
+
+  void fireChange() {
+    changeSupport.fireChange();
+  }
+
+  void removeChangeListener(ChangeListener listener) {
+    changeSupport.removeChangeListener(listener);
   }
 
   /** This method is called from within the constructor to
@@ -153,7 +177,7 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
   private void runActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runActionPerformed
     OutlineModel tablemodel = outlineView.getOutline().getOutlineModel();
 
-    //todo: do this in a swing worker
+    //todo: do this in a swing worker thread
     Vector<MatchList> contigsToReferencesMatchesList = new Vector<MatchList>();
 
     for (int i = 0; i < tablemodel.getRowCount(); i++) {
@@ -163,27 +187,27 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
       }
     }
 
-ContigAdjacencyGraph cag=null;
-		LayoutGraph layoutGraph=null;
+    ContigAdjacencyGraph cag = null;
+    LayoutGraph layoutGraph = null;
 
-		if (!contigsToReferencesMatchesList.isEmpty()) {
-			cag = new ContigAdjacencyGraph(contigsToReferencesMatchesList);
+    if (!contigsToReferencesMatchesList.isEmpty()) {
+      cag = new ContigAdjacencyGraph(contigsToReferencesMatchesList);
 
-			//set the tree weights. if these are not given, all distances are set to 1.
+      //set the tree weights. if these are not given, all distances are set to 1.
 //			cag.setTreeWeights(contigsToReferencesTreeDistanceList);
 
-			//fill the weight matrix with the projected contigs, based on the matches
-					cag.fillWeightMatrix();
+      //fill the weight matrix with the projected contigs, based on the matches
+      cag.fillWeightMatrix();
 
-			//this method computes a path, or a Layout Graph
-			layoutGraph = cag.findPath(new GreedyTreebasedLayouter());
+      //this method computes a path, or a Layout Graph
+      layoutGraph = cag.findPath(new GreedyTreebasedLayouter());
     }
 
-        JOptionPane.showMessageDialog(this,layoutGraph );
+
     ContigAdjacencyGraphTopComponent viewer = (ContigAdjacencyGraphTopComponent) WindowManager.getDefault().findTopComponent("ContigAdjacencyGraphTopComponent");
     viewer.setLayoutGraph(layoutGraph);
-          viewer.open();
-      viewer.requestActive();
+    viewer.open();
+    viewer.requestActive();
 
 
 
@@ -290,7 +314,7 @@ ContigAdjacencyGraph cag=null;
       prj = projects.get(0);
     } else if (projects.size() > 1) {
       //check if all projects in selection are the same.
-       prj = projects.get(0);
+      prj = projects.get(0);
       for (int i = 1; i < projects.size(); i++) {
         if (!prj.equals(projects.get(i))) {
           //if not, set no project
@@ -301,20 +325,36 @@ ContigAdjacencyGraph cag=null;
     } // more than one projec tin lookup
 
     //if no project set, or the new project is distinct from the current one:  set it
-    if(this.project == null || !this.project.equals(prj)) {
-            this.setProject(prj);
+    if (projectAndSettings.getProject() == null || !projectAndSettings.getProject().equals(prj)) {
+      this.setProject(prj);
     }
   }
 
   private void setProject(ContigOrderingProject prj) {
-    this.project = prj;
-    if (prj != null) {
-      ContigOrderingProjectLogicalView view = new ContigOrderingProjectLogicalView(prj);
-      explorerManager.setRootContext(view.createLogicalView());
-    } else {
+    if (prj == null) {
+      //empty the outline view
       explorerManager.setRootContext(Node.EMPTY);
-    }
+      projectAndSettings = null;
+    } else {
+      projectAndSettings = projectDependantSettings.get(prj);
+      if (projectAndSettings == null) {
+        //create new one if not existant
+        projectAndSettings = new ProjectDependantCAGInformation(prj);
+        projectDependantSettings.put(prj, projectAndSettings);
+      }
 
+      //set the root for the outline view
+      ContigOrderingProjectLogicalView view = new ContigOrderingProjectLogicalView(projectAndSettings.getProject());
+      explorerManager.setRootContext(view.createLogicalView());
+    }
+  }
+
+  public LayoutGraph getCurrentLayoutGraph() {
+    if (projectAndSettings == null) {
+      return null;
+    } else {
+      return projectAndSettings.getLayoutGraph();
+    }
   }
 
   private Boolean isRowSelected(int row) {
