@@ -44,8 +44,7 @@ public class ChooseContigPanel extends JPanel {
 		this.minSupport = min;
 
 		/*
-		 * Dieses Panel enhaelt das Contig das Ausgewaehlt wurde und deren
-		 * moegliche Nachbarn
+		 * this panel contains the central contig and its neighbours
 		 */
 
 		this.setName("chooseContigPanel");
@@ -74,7 +73,7 @@ public class ChooseContigPanel extends JPanel {
 				BoxLayout.PAGE_AXIS);
 
 		/*
-		 * Container for all left neighbors
+		 * Container for all left neighbours
 		 */
 		leftContainer.setLayout(leftBoxLayout);
 		leftContainer.setOpaque(false);
@@ -98,7 +97,7 @@ public class ChooseContigPanel extends JPanel {
 		centerContainer.setMaximumSize(new Dimension(310, 900));
 
 		/*
-		 * Container for all right neigbors
+		 * Container for all right neigbours
 		 */
 		rightContainer.setLayout(rightBoxLayout);
 		rightContainer.setOpaque(false);
@@ -134,14 +133,14 @@ public class ChooseContigPanel extends JPanel {
 		Graphics2D g2 = (Graphics2D) g;
 
 		/*
-		 * Sicherung der Positionen der Punkte, damit es keine Probleme beim
-		 * Zeichnen der Linien gibt.
+		 * save point of positions, so that there are no problems to draw 
+		 * the lines
 		 */
 		leftComponentPositions = new Point[numberOfNeighbours];
 		rightComponentPositions = new Point[numberOfNeighbours];
 
 		/*
-		 * Damit die Kanten "weich" gezeichnet werden.
+		 * For drawing the edging soft
 		 */
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
@@ -149,17 +148,15 @@ public class ChooseContigPanel extends JPanel {
 				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
 		/*
-		 * Dieser Teil wird nur dann nicht ausgeführt, wenn die neuen Nachbarn
-		 * berechnet werden.
+		 * This part will to run, during the time we get new central and
+		 * neigbour contigs
 		 */
 		if (flag) {
 			int laenge2 = (int) centralContig.getSize().getWidth();
 			int höhe2 = (int) centralContig.getHeight();
 
 			/*
-			 * For wird hier eingesetzt um die beiden Container nacheinander zu
-			 * beladen; zuerst wird diese Methode mit den rechten nachbarn und
-			 * dann mit den linken nachbarn gefüttert.
+			 * Using for, so that both container (left and right) will be loaded
 			 */
 			boolean left = false;
 			for (int s = 0; s < 2; s++) {
@@ -169,6 +166,9 @@ public class ChooseContigPanel extends JPanel {
 					left = false;
 				}
 
+				/*
+				 * calculate position of central contig
+				 */
 				int x2;
 				int y2;
 				centralPosition = new Point[2];
@@ -186,20 +186,22 @@ public class ChooseContigPanel extends JPanel {
 				}
 
 				/*
-				 * Berechnen der Linien zwischen den linken Nachbarn und dem
-				 * zentralem Contig
+				 * calculate lines between left neigbours and central contig
 				 */
 				if (left) {
 
 					int z = 1;
 					int zaehler = 0;
 					int zaehlerFuerSupport = 0;
-
+					
+					/*
+					 * the components are our contigs
+					 */
 					for (Component co : leftContainer.getComponents()) {
 //					for (Component co : leftRadioButtonContainer.getComponents()){
 						/*
-						 * Berechnen der Liniendicke, abhängig davon ob der
-						 * Nutzer den relativen oder absoluten Support wählt.
+						 * calculation of the line stroke is depend on the user
+						 * if the user use z-scores or absolute support
 						 */
 						
 						if (zaehler != 0) { // First component is just a gap
@@ -218,6 +220,9 @@ public class ChooseContigPanel extends JPanel {
 										lineStrokeLeft = 0.01f;
 									}
 								} else {
+									/*
+									 * normalized absolute support
+									 */
 									float nenner = (float) (leftSupport[zaehlerFuerSupport] - minSupport);
 									float counter = (float) (maxSupport - minSupport);
 									float xInIntervall = nenner / counter;
@@ -239,11 +244,12 @@ public class ChooseContigPanel extends JPanel {
 								Point point = co.getLocation();
 								ContigAppearance test2 = (ContigAppearance) co;
 								/*
-								 * Arbeite hier mit verschiedenen Panel. Es ist
-								 * nötig sich die richtigen Positionen der
-								 * Contig Panel zu berechnen, da sonst die
-								 * koordinaten in einer subkomponente auf das
-								 * ursprungspanel projiziert wird.
+								 * working with different panels
+								 * it is necessary to calculate the right positions
+								 * of the contigs on screen
+								 * if i only would use the getPoint from the contig
+								 * i would get the positions just from a subpanel
+								 * but not the right positions on the chooseContigPanel
 								 */
 								int laenge = (int) co.getSize().getWidth();
 								int x = (int) point.getX();
@@ -253,6 +259,10 @@ public class ChooseContigPanel extends JPanel {
 
 								leftComponentPositions[zaehlerFuerSupport] = currentPoint;
 
+								/*
+								 * if the contig is "some where else" selected the
+								 * line will be dashed with long lines 
+								 */
 								if (test2.isAnderweitigAusgewaehlt()) {
 									float[] dash2 = { 30, 10 };
 									g2.setColor(Color.DARK_GRAY);
@@ -262,11 +272,18 @@ public class ChooseContigPanel extends JPanel {
 													BasicStroke.CAP_BUTT,
 													BasicStroke.JOIN_MITER, 1,
 													dash2, 0));
+									/*
+									 * if the contig is selected the line is continuous
+									 */						
 								} else if (test2.isSelected()) {
 									g2.setColor(Color.BLACK);
 									g2
 											.setStroke(new BasicStroke(
 													lineStrokeLeft));
+									/*
+									 * if the contig is not selected jet the
+									 * line will be dashed with short lines 
+									 */
 								} else {
 									float[] dash = { 2, 2 };
 									g2.setColor(Color.GRAY);
@@ -285,8 +302,7 @@ public class ChooseContigPanel extends JPanel {
 					}
 				} else {
 					/*
-					 * äquivalent zu oben, nur das dies hier für die rechten
-					 * Nachbarn ist.
+					 * equivalent to top, but for right neighbours
 					 */
 					int z = 1;
 					int c = 0;
@@ -326,13 +342,7 @@ public class ChooseContigPanel extends JPanel {
 								Point point = co.getLocation();
 								ContigAppearance test = (ContigAppearance) co;
 
-								/*
-								 * Arbeite hier mit verschiedenen Panel. Es ist
-								 * nötig sich die richtigen Positionen der
-								 * Contig Panel zu berechnen, da sonst die
-								 * koordinaten in einer subkomponente auf das
-								 * ursprungspanel projiziert wird.
-								 */
+								
 								int x = (int) co.getParent().getX();
 								int y = (int) point.getY()
 										+ (int) (0.5 * co.getHeight());

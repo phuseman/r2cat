@@ -180,7 +180,7 @@ public class ContigAppearance extends JPanel {
 		setVisible(true);
 	}
 
-	private synchronized void setSizeOfContig(long size, long maxSize,
+	private  void setSizeOfContig(long size, long maxSize,
 			long minSize) {
 
 		float nenner = (float) (Math.log(size) - Math.log(minSize));

@@ -338,65 +338,13 @@ public class CagCreator {
 	}
 
 	
-	/*private AdjacencyEdge calculatePossibleThirdLine() {
-
-		AdjacencyEdge possibleThirdEdge = null;
-
-		Vector<AdjacencyEdge> leftAdjacencies = leftNeighbours[currentContigIndex];
-		Vector<AdjacencyEdge> rightAdjacencies = rightNeighbours[currentContigIndex];
-		int[] leftindex = new int[leftAdjacencies.size()];
-		int[] rightIndex = new int[rightAdjacencies.size()];
-		int c = 0;
-		for (AdjacencyEdge adjacencyEdge : leftAdjacencies) {
-			if (adjacencyEdge.getContigi() == currentContigObject) {
-				leftindex[c] = adjacencyEdge.getj();
-			} else if (adjacencyEdge.getContigj() == currentContigObject) {
-				leftindex[c] = adjacencyEdge.geti();
-			}
-			c++;
-		}
-		int k = 0;
-		for (AdjacencyEdge edge : rightAdjacencies) {
-			if (edge.getContigi() == currentContigObject) {
-				rightIndex[k] = edge.getj();
-			} else if (edge.getContigj() == currentContigObject) {
-				rightIndex[k] = edge.geti();
-			}
-			k++;
-		}
-
-		for (int i = 0; i < leftindex.length; i++) {
-			int index = leftindex[i];
-			int index2 = rightIndex[i];
-			Vector<AdjacencyEdge> test = leftNeighbours[index];
-			for (AdjacencyEdge adjacencyEdge : test) {
-
-			}
-		}
-
-		return possibleThirdEdge;
-	}*/
-
-	private Vector<AdjacencyEdge> calculateFiveMostLikleyRightNeighbours(
+	/*
+	 * If the central contig is reverse the right neighbours are the 
+	 * left ones
+	 */
+	private Vector<AdjacencyEdge> fiveMostLikleyRightNeighbours(
 			int cContigIndex, boolean isReverse) {
 
-		/*
-		 * TODO Hier auch noch mal schauen ob ich wirklich so viele Variblen als
-		 * Klassenvariblen def muss. Währe glaube ich besser wenn ich das local
-		 * gestallten würde. Auch währe es besser wenn ich hier was basteln
-		 * würde, womit ich indices und neighbours gleichzeitig zurückgeben
-		 * kann.
-		 */
-
-		/*
-		 * hier muss unterschieden werden, ob das zentrale Contig reverse
-		 * dargestellt wird dann muss ich den nachbarnvektor entsprechend
-		 * waehelen die Richtung fuer das Contig bestimmt die sicht auf die
-		 * nachbarn die Spitze(rechter connector) zeigt wenn es reverse ist ja
-		 * in die andere Richtung
-		 * 
-		 * 
-		 */
 		Vector<AdjacencyEdge> test = isReverse ? leftNeighbours[cContigIndex]
 				: rightNeighbours[cContigIndex];
 
@@ -408,17 +356,13 @@ public class CagCreator {
 
 	}
 
-	private Vector<AdjacencyEdge> calculateFiveMostLikleyLeftNeighbours(
+	/*
+	 * If the central contig is reverse the left neighbours are the 
+	 * right ones
+	 */
+	private Vector<AdjacencyEdge> fiveMostLikleyLeftNeighbours(
 			int centralContigIndex, boolean currentContigIsReverse) {
 
-//		System.out.println("Berechne linke Nachbarn");
-		/*
-		 * hier muss unterschieden werden, ob das zentrale Contig reverse
-		 * dargestellt wird dann muss ich den nachbarnvektor entsprechend
-		 * waehelen die Richtung fuer das Contig bestimmt die sicht auf die
-		 * nachbarn die Spitze(rechter connector) zeigt wenn es reverse ist ja
-		 * in die andere Richtung
-		 */
 		Vector<AdjacencyEdge> test = currentContigIsReverse ? rightNeighbours[centralContigIndex]
 				: leftNeighbours[centralContigIndex];
 
@@ -434,59 +378,54 @@ public class CagCreator {
 	 * Send an event, if the user selected a contig
 	 */
 	public void sendCurrentContig() {
-//		System.out.println("sende aktuelles contig");
+
 		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
 				currentContigObject, currentContigIndex, currentContigIsReverse);
 		fireEvent(event);
 	}
 
-	/**
+	/*
 	 * Send an event. If the user selected an node(contig) the neighbours will
 	 * be caculated. This Event carries an Array with the most likely left
 	 * neighbours.
 	 */
 	public void sendLeftNeighbours() {
-//		System.out.println("sende linke nachbarn");
+
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_LEFT_NEIGHBOURS,
-				calculateFiveMostLikleyLeftNeighbours(currentContigIndex,
+				fiveMostLikleyLeftNeighbours(currentContigIndex,
 						currentContigIsReverse));
 		fireEvent(event);
 	}
 
-	/**
+	/*
 	 * Send an event. If the user selected an node(contig) the neighbours will
 	 * be caculated. This Event carries an Array with the most likely right
 	 * neighbours.
 	 */
 	public void sendRightNeighbours() {
-//		System.out.println("sende rechte nachbarn");
+
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_RIGHT_NEIGHBOURS,
-				calculateFiveMostLikleyRightNeighbours(currentContigIndex,
+				fiveMostLikleyRightNeighbours(currentContigIndex,
 						currentContigIsReverse));
 		fireEvent(event);
 	}
 
-	/**
-	 * Hier werden alle Klassen die sich registrieren in der ArrayList
-	 * gespeichert.
+	/*
+	 * Save class (listener) which register itself 
 	 */
 	public void addEventListener(CagEventListener listener) {
 		listeners.add(listener);
 	}
 
-	/**
-	 * Hier werden alle Klasse die sich registriert haben aus der ArrayList
-	 * gelöscht.
+	/*
+	 * Delete class from the list
 	 */
 	public void removeEventListener(CagEventListener listener) {
 		listeners.remove(listener);
 	}
 
-	/**
-	 * "Feuert" die Briefe(Events) mit Inhalt (Daten) an alle Listener.
-	 * 
-	 * @param event
-	 *            (Das Event, das gefeuert wird muss angegben werden.)
+	/*
+	 * Send events with data and eventtype
 	 */
 	private void fireEvent(CagEvent event) {
 
@@ -507,11 +446,11 @@ public class CagCreator {
 		return contigs;
 	}
 
-	/*public void setNeighbourNumber(int number) {
-		this.neighbourNumber = number;
-	}
-*/
 
+	/*
+	 * necessary to change the current contig and also the
+	 * to get the neighbours of these contig 
+	 */
 	public void changeContigs(int index, boolean isReverse) {
 
 		this.currentContigIndex = index;

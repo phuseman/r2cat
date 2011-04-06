@@ -90,8 +90,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 	private ContigAppearance centralContig;
 
-	private ContigButtonGroup leftGroup = new ContigButtonGroup();
-	private ContigButtonGroup rightGroup = new ContigButtonGroup();
+	private ButtonGroup leftGroup = new ButtonGroup();
+	private ButtonGroup rightGroup = new ButtonGroup();
 
 	private int numberOfNeighbours = 5;
 

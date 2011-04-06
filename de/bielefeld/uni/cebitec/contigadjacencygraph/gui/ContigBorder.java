@@ -42,7 +42,7 @@ public class ContigBorder extends AbstractBorder{
 		g2 = (Graphics2D) g;
 		
 		/*
-		 * Hiermit werden die Ränder "weich" gezeichnet.
+		 * For drawing the edging soft
 		 */
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
@@ -51,8 +51,8 @@ public class ContigBorder extends AbstractBorder{
 	
 		
 		/*
-		 * Wenn das entsprechende Contig ein Ausgewähltes Contig ist, 
-		 * wird es mit rotem Rand dargestellt. Ansonsten mit schwarzem.
+		 * The lines will be dashed or continuous depending on whether 
+		 * the contig is selected or not or selected some where else 
 		 */
 		if (isSelected) {
 			g2.setColor(Color.BLACK);
@@ -99,7 +99,7 @@ public class ContigBorder extends AbstractBorder{
 	 * (x, y + height)------------(x + width, y + height) (x + width + 10, y +
 	 * height/2) Startpunkt *(x, y)-------------(x + width, y)
 	 * 
-	 * Hier wird er Rand es "normalen" Contigs erstellt, der Form | >
+	 * path for the normal contig, this mode: | >
 	 */
 	private  GeneralPath makeContig(int x, int y, int width, int height) {
 
@@ -116,8 +116,7 @@ public class ContigBorder extends AbstractBorder{
 	}
 	
 	/*
-	 * Hier wird der Rand eines Repeats erstellt, d.h. die Kante oben und
-	 * an der rechten Seite werden 3 Fach gemalt.
+	 * For repeat contigs there will be 3 lines on top and the right side
 	 */
 	private GeneralPath makeRepeatContig(int x, int y, int width, int height) {
 		
@@ -145,8 +144,7 @@ public class ContigBorder extends AbstractBorder{
 	}
 	
 	/*
-	 * Hier wird der Rand eines reversen Repeats erstellt, d.h. die Kante oben und
-	 * an der linken Seite werden 3 Fach gemalt. 
+	 * reverse repeat: 3 lines on top an the left side 
 	 */
 	private GeneralPath makeReverseRepeatContig(int x, int y, int width, int height) {
 		
@@ -179,7 +177,7 @@ public class ContigBorder extends AbstractBorder{
 	 * 						1						
 	 * 			Startpunkt *|5-------------4
 	 * 
-	 * Hier wird er Rand es reversen Contigs erstellt, der Form: < |
+	 * reverse contig, mode: < |
 	 */
 	private GeneralPath makeReverseContig(int x, int y, int width, int height) {
 		
