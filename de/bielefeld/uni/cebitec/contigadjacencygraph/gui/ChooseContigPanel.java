@@ -204,7 +204,7 @@ public class ChooseContigPanel extends JPanel {
 						 * if the user use z-scores or absolute support
 						 */
 						
-						if (zaehler != 0) { // First component is just a gap
+					//	if (zaehler != 0) { // First component is just a gap
 							
 							z++;
 							if (z % 2 == 0) {
@@ -299,7 +299,7 @@ public class ChooseContigPanel extends JPanel {
 							}
 						}
 						zaehler++;
-					}
+		//			}
 				} else {
 					/*
 					 * equivalent to top, but for right neighbours
@@ -310,7 +310,7 @@ public class ChooseContigPanel extends JPanel {
 					
 					for (Component co : rightContainer.getComponents()) {
 //					for(Component co: rightRadioButtonContainer.getComponents()){
-						if (c != 0) {
+//						if (c != 0) {
 							z++;
 							if (z % 2 == 0) {
 						
@@ -380,7 +380,7 @@ public class ChooseContigPanel extends JPanel {
 					}
 				}
 			}
-		}
+	//	}
 	}
 
 	public int getNumberOfNeighbours() {

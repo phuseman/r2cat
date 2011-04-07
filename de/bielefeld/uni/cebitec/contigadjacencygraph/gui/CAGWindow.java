@@ -121,6 +121,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 	private JRadioButton relativeSupport;
 	private JRadioButton absoluteSupport;
+	private boolean selectionByUpdate;
 
 	public CAGWindow(CagCreator myModel) {
 
@@ -383,7 +384,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		 * The choosed contig is then the central contig.  
 		 */
 		if (event.getEvent_type().equals(EventType.EVENT_CHOOSED_CONTIG)) {
-
+			
+			selectionByUpdate = true;
+			
 			DNASequence currentContig = event.getContigNode();
 			LayoutGraph graph = this.layoutGraph;
 			centralContigIndex = event.getIndex();
@@ -404,13 +407,13 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			if (centerContainer.getComponentCount() > 0) {
 				centerContainer.removeAll();
 			}
-			// centerContainer.setAlignmentY(TOP_ALIGNMENT);
 
+			list.setSelectedValue(currentContig.getId(), true);
 			chooseContigPanel.setCentralContig(centralContig);
-//			centerContainer.add(Box.createVerticalGlue());
 			centerContainer.add(centralContig);
-//			centerContainer.add(Box.createVerticalGlue());
 			centerContainer.updateUI();
+			
+			selectionByUpdate = false;
 		}
 		/*
 		 * Also the neighbours going to be changed, if the central contig changed.
@@ -455,8 +458,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			 * This is necessary to set the layout of the choosed ContigPanel
 			 * or rather for the leftcontainer 
 			 */
-			leftContainer.add(Box.createVerticalGlue());
-			leftRadioButtonContainer.add(Box.createVerticalGlue());
+//			leftContainer.add(Box.createVerticalGlue());
+//			leftRadioButtonContainer.add(Box.createVerticalGlue());
 			for (AdjacencyEdge edge : leftNeighbourEdges) {
 
 				if (t < terminator) {
@@ -591,8 +594,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			/*
 			 * For each adjacency edge here is going to be a contig Panel
 			 */
-			rightContainer.add(Box.createVerticalGlue());
-			rightRadioButtonContainer.add(Box.createVerticalGlue());
+	//		rightContainer.add(Box.createVerticalGlue());
+	//		rightRadioButtonContainer.add(Box.createVerticalGlue());
 			for (AdjacencyEdge edge : rightNeighbourEdges) {
 				if (s < terminator) {
 
@@ -831,7 +834,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		@Override
 		public void valueChanged(ListSelectionEvent e) {
 
-			if (e.getValueIsAdjusting() == false) {
+			if (e.getValueIsAdjusting() == false && !selectionByUpdate) {
 
 				int index = 0;
 				String selection = (String) list.getSelectedValue();
@@ -1122,16 +1125,17 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		@Override
 		public void mouseEntered(MouseEvent e) {
-//			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-//			GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
-//			
-//			
-//			 Graphics2D g = contigPanel.getBorder().getG2();
-//			 GeneralPath p = contigPanel.getBorder().getP();
-//		
-//				g.setPaint(redtowhite);
-//				g.fill(p);
-//				contigPanel.update(g);
+			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+			GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
+			
+			
+			 Graphics2D g = contigPanel.getBorder().getG2();
+			 GeneralPath p = contigPanel.getBorder().getP();
+		
+				g.setPaint(redtowhite);
+				g.fill(p);
+				contigPanel.update(g);
+				chooseContigPanel.updateUI();
 			
 		}
 
