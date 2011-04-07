@@ -71,6 +71,7 @@ public class ContigBorder extends AbstractBorder{
 			g2.draw(p);
 		}
 		if(isRepeat == true && isReverse == false){
+			
 			p = makeRepeatContig(0,0, c.getWidth(),c.getHeight());
 			g2.draw(p);
 		}

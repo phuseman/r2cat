@@ -1125,17 +1125,16 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 		@Override
 		public void mouseEntered(MouseEvent e) {
-			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-			GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
-			
+		/*	ContigAppearance contigPanel = (ContigAppearance) e.getSource();
 			
 			 Graphics2D g = contigPanel.getBorder().getG2();
 			 GeneralPath p = contigPanel.getBorder().getP();
 		
+			 GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
 				g.setPaint(redtowhite);
-				g.fill(p);
-				contigPanel.update(g);
-				chooseContigPanel.updateUI();
+				g.fill(p);*/
+				//contigPanel.update(g);
+				//chooseContigPanel.updateUI();
 			
 		}
 
