@@ -13,7 +13,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.text.NumberFormat;
 import java.util.Vector;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -34,10 +33,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-
-//import sun.org.mozilla.javascript.IdScriptableObject;
-
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
@@ -50,10 +45,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	private JMenuBar menuBar;
 	private JMenu menu;
 	private JMenuItem menuItem;
-	private DNASequence[] nodes;
-	private CagCreator model;
+	private Vector<DNASequence> nodes;
+	public CagCreator model;
 
-	private ChooseContigPanel chooseContigPanel;
+	public ChooseContigPanel chooseContigPanel;
 	private JScrollPane scrollPane;
 
 	private double[] leftSupport;
@@ -68,7 +63,6 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 	private LayoutGraph layoutGraph;
 	private int centralContigIndex;
-	private String[] dataForList;
 
 	private JPanel inputOption;
 	private JFormattedTextField inputOptionForNumberOfNeighbours;
@@ -92,10 +86,34 @@ public class CAGWindow extends JFrame implements CagEventListener {
 
 	private JRadioButton relativeSupport;
 	private JRadioButton absoluteSupport;
-	private boolean selectionByUpdate;
+	public boolean selectionByUpdate;
 	
-	private boolean leftNeigboursReady;
-	private boolean rightNeighboursREady;
+	public boolean leftNeigboursReady;
+	public boolean rightNeighboursReady;
+
+	public boolean isSelectionByUpdate() {
+		return selectionByUpdate;
+	}
+
+	public void setSelectionByUpdate(boolean selectionByUpdate) {
+		this.selectionByUpdate = selectionByUpdate;
+	}
+
+	public boolean isLeftNeigboursReady() {
+		return leftNeigboursReady;
+	}
+
+	public void setLeftNeigboursReady(boolean leftNeigboursReady) {
+		this.leftNeigboursReady = leftNeigboursReady;
+	}
+
+	public boolean isRightNeighboursReady() {
+		return rightNeighboursReady;
+	}
+
+	public void setRightNeighboursReady(boolean rightNeighboursReady) {
+		this.rightNeighboursReady = rightNeighboursReady;
+	}
 
 	public CAGWindow(CagCreator myModel) {
 
@@ -163,7 +181,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		chooseContigPanel.setMaxSupport(maxSupport);
 		chooseContigPanel.setMinSupport(minSupport);
 
-		int width = nodes[1].getId().getBytes().length;
+		int width = nodes.firstElement().getId().getBytes().length;
 
 		if (width * 20 <= 100) {
 			width = 100;
@@ -201,33 +219,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		scrollPane.validate();
 		add(scrollPane, BorderLayout.CENTER);
 
-		/*
-		 * This list save all names of contigs
-		 */
-		dataForList = new String[nodes.length];
-		for (int i = 0; i < nodes.length; i++) {
-			String id = nodes[i].getId();
-			dataForList[i] = id;
-		}
-
-		list = new JList(dataForList);
-		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		list.addListSelectionListener(new ContigChangedListener());
-		list.setToolTipText("<html>Choose a contig<br>"+
-				" by a click on a name.</html>");
-
-		listScroller = new JScrollPane(list);
-		listScroller.setToolTipText("<html>Choose a contig<br>"+
-				" by a click on a name.</html>");
-		listScroller.setBorder(BorderFactory.createTitledBorder("Contig List"));
-		listScroller.setPreferredSize(new Dimension(width, 400));
-		listScroller
-				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-		listScroller
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		listScroller.setAlignmentY(RIGHT_ALIGNMENT);
-		listScroller.setVisible(true);
-		listScroller.validate();
+		listScroller = new ContigList(layoutGraph, this);
 		add(listScroller, BorderLayout.EAST);
 
 		/*
@@ -527,7 +519,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		 * Also right neigbours
 		 */
 		if (event.getEvent_type().equals(EventType.EVENT_SEND_RIGHT_NEIGHBOURS)) {
-			rightNeighboursREady = false;
+			rightNeighboursReady = false;
 
 			int s = 0;
 
@@ -762,9 +754,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		}
 	}
 
-	/*
+/*	
 	 * Inner class for starting an thread for calculation of left neighbours
-	 */
+	 
 	class SwingWorkerClass extends SwingWorker<String, String> {
 
 		
@@ -786,9 +778,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		}
 	}
 
-	/*
+	
 	 * Inner class for starting an thread for calculation of left neighbours
-	 */
+	 
 	class ThreadClassForRightNeighours extends SwingWorker<String, String> {
 
 		
@@ -808,41 +800,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			}
 			window.repaint();
 		}
-	}
+	}*/
 
-	/*
-	 * Listener for the elements of the List
-	 * If the user click on a contig Name this is going to be triggered.
-	 * The choosed contig is then displayed in the middle as 
-	 * central contig with it's neighbours on each side.
-	 */
-	public class ContigChangedListener implements ListSelectionListener {
 
-		@Override
-		public void valueChanged(ListSelectionEvent e) {
-
-			if (e.getValueIsAdjusting() == false && !selectionByUpdate) {
-
-				int index = 0;
-				String selection = (String) list.getSelectedValue();
-
-				for (int i = 0; i < dataForList.length; i++) {
-					if (dataForList[i].equals(selection)) {
-						index = i;
-					}
-				}
-
-				model.changeContigs(index, false);
-				chooseContigPanel.setFlag(false);
-
-				ThreadClassForRightNeighours threadForRightNeighbours = new ThreadClassForRightNeighours();
-				threadForRightNeighbours.execute();
-
-				SwingWorkerClass threadForLeftNeighbours = new SwingWorkerClass();
-				threadForLeftNeighbours.execute();
-			}
-		}
-	}
 
 	/*
 	 * Inner class for radion Buttons if the use click an radio Button the
@@ -1102,10 +1062,11 @@ public class CAGWindow extends JFrame implements CagEventListener {
 			model.changeContigs(index, currentContigIsReverse);
 			chooseContigPanel.setFlag(false);
 			
-			ThreadClassForRightNeighours threadForRightNeighbours = new ThreadClassForRightNeighours();
+			
+			ThreadForRightAndLeftNeigbours threadForRightNeighbours = new ThreadForRightAndLeftNeigbours(window, false);
 			threadForRightNeighbours.execute();
 
-			SwingWorkerClass threadForLeftNeighbours = new SwingWorkerClass();
+			ThreadForRightAndLeftNeigbours threadForLeftNeighbours =new ThreadForRightAndLeftNeigbours(window, true);
 			threadForLeftNeighbours.execute();
 
 		}

@@ -35,7 +35,6 @@ public class CagCreator {
 	private static CagCreator model;
 
 	private LayoutGraph graph;
-	private DNASequence[] contigs;
 	private Vector<AdjacencyEdge>[] leftNeighbours;
 	private Vector<AdjacencyEdge>[] rightNeighbours;
 
@@ -53,6 +52,7 @@ public class CagCreator {
 	private double[] sDeviationsForLeftNeigbours;
 	private double[] meanForRightNeigbours;
 	private double[] sDeviationsForRightNeigbours;
+	private Vector<DNASequence> contigs;
 
 	// private CAGWindow window;
 	public CagCreator(LayoutGraph g) {
@@ -60,8 +60,7 @@ public class CagCreator {
 		listeners = new ArrayList<CagEventListener>();
 
 		leftAndRightNeighbour();
-		createContigList();
-		
+		contigs = graph.getNodes();
 		calculateMinSizeOfContigs(contigs);
 		calculateMaxSizeOfContigs(contigs);
 		
@@ -190,20 +189,13 @@ public class CagCreator {
 		}
 	}
 
-	/*
-	 * Create a List of all Nodes(Contigs) of LayoutGraph
-	 */
-	private DNASequence[] createContigList() {
-    contigs = graph.getNodes().toArray(contigs);
-		return contigs;
-	}
 
 	/*
 	 * Calculate the max size of a given list of contigs
 	 */
-	private long calculateMaxSizeOfContigs(DNASequence[] contigList) {
+	private long calculateMaxSizeOfContigs(Vector<DNASequence> contigList) {
 
-		maxSizeOfContigs = 0;
+		maxSizeOfContigs = contigList.firstElement().getSize();
 
 		for (DNASequence dnaSequence : contigList) {
 			long size = dnaSequence.getSize();
@@ -217,9 +209,9 @@ public class CagCreator {
 	/*
 	 * Calculate the min size of a given list of contigs
 	 */
-	private long calculateMinSizeOfContigs(DNASequence[] contigList) {
+	private long calculateMinSizeOfContigs(Vector<DNASequence> contigList) {
 
-		minSizeOfContigs = contigList[0].getSize();
+		minSizeOfContigs = contigList.firstElement().getSize();
 
 		for (DNASequence dnaSequence : contigList) {
 			long size = dnaSequence.getSize();
@@ -433,7 +425,7 @@ public class CagCreator {
 	 * scrollbar / window the user is able to select a contig, such that this
 	 * contig will be display at the central contig
 	 */
-	public DNASequence[] getListData() {
+	public Vector<DNASequence> getListData() {
 		return contigs;
 	}
 
