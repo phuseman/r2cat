@@ -127,7 +127,7 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 					FastaFileReader queryFasta = new FastaFileReader(query);
 					boolean queryIsFasta = queryFasta.isFastaQuickCheck();
 					if (queryIsFasta) {
-						progress.append("Opening query file" + query.getName()
+						progress.append("Opening query file " + query.getName()
 								+ " (" + query.length() + ")");
 						t.startTimer();
 						queryFasta.scanContents(true);

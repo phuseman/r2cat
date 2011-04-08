@@ -88,6 +88,9 @@ public class LayoutGraph {
 		// what is the
 		// copy number of contig i?
 		private int repeatCountj = 0; // same for contig j
+		
+		// is this edge selected as a good candidate
+		private boolean isSelected=false;
 
 		/**
 		 * Constructor of an adjacency edge.
@@ -393,6 +396,36 @@ public class LayoutGraph {
 		 */
 		public int getj() {
 			return j;
+		}
+
+		/**
+		 * Is this edge selected as a good candidate?
+		 * @return
+		 */
+		public boolean isSelected() {
+			return isSelected;
+		}
+
+		/**
+		 * Set "this edge is a good candidate"
+		 * @param isSelected
+		 */
+		public void setSelected(boolean isSelected) {
+			this.isSelected = isSelected;
+		}
+
+		/**
+		 *  Set "this edge is a good candidate"
+		 */
+		public void select() {
+			this.isSelected = true;
+		}
+
+		/**
+		 *  Set "this edge is not a good candidate"
+		 */
+		public void deselect() {
+			this.isSelected = false;
 		}
 	} // adjacency edge sub-class
 
