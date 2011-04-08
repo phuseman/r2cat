@@ -194,16 +194,7 @@ public class CagCreator {
 	 * Create a List of all Nodes(Contigs) of LayoutGraph
 	 */
 	private DNASequence[] createContigList() {
-
-		contigs = new DNASequence[graph.getNodes().size()];
-
-		for (AdjacencyEdge e : graph.getEdges()) {
-
-			int i = e.geti();
-			if (contigs[i] == null) {
-				contigs[i] = e.getContigi();
-			}
-		}
+    contigs = graph.getNodes().toArray(contigs);
 		return contigs;
 	}
 
