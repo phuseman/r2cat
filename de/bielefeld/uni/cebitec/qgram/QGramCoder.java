@@ -27,11 +27,15 @@ package de.bielefeld.uni.cebitec.qgram;
  * 
  */
 public class QGramCoder {
-	private int q;
+	private final int q;
 
 	private int alphabetSize = 4;
 
 	private int[] alphabet;
+	private int[] alphabetLookup;
+	
+	private char[] complement;
+
 	
 	private int currentEncoding = 0;
 
@@ -39,7 +43,7 @@ public class QGramCoder {
 
 	private long currentQLength = 1;
 
-	private int divisor = 0;
+	private int sigmaToThePowerOfQMinusOne = 0;
 
 	private boolean valid = false;
 	
@@ -50,21 +54,37 @@ public class QGramCoder {
 	 * @param q Length of the q-grams
 	 */
 	public QGramCoder(int q) {
+
 		//create alphabet map
 		alphabet = new int[256];
+		alphabetLookup = new int[256];
+		complement = new char[256];
 		for (int i = 0; i < alphabet.length; i++) {
-			alphabet[i]=-1;
+			alphabet[i] = -1;
+			alphabetLookup[i] = -1;
+			complement[i] = 'N';
 		}
+
+		alphabet['a'] = 0;
+		alphabet['A'] = 0;
+		alphabet['c'] = 1;
+		alphabet['C'] = 1;
+		alphabet['g'] = 2;
+		alphabet['G'] = 2;
+		alphabet['t'] = 3;
+		alphabet['T'] = 3;
 		
-		alphabet['a']=0;
-		alphabet['A']=0;
-		alphabet['c']=1;
-		alphabet['C']=1;
-		alphabet['g']=2;
-		alphabet['G']=2;
-		alphabet['t']=3;
-		alphabet['T']=3;
-		
+
+
+		complement['a'] = 't';
+		complement['A'] = 'T';
+		complement['c'] = 'g';
+		complement['C'] = 'G';
+		complement['g'] = 'c';
+		complement['G'] = 'C';
+		complement['t'] = 'a';
+		complement['T'] = 'A';
+
 		
 		//check if values are getting too big
 		this.q = q;
@@ -72,7 +92,6 @@ public class QGramCoder {
 			throw new IllegalArgumentException("q must be >=0");
 		}
 		long power = 1;
-		this.q = q;
 
 		for (int i = 1; i <= q - 1; i++) {
 			power *= alphabetSize;
@@ -81,7 +100,7 @@ public class QGramCoder {
 			}
 		}
 
-		divisor = (int) power; // alphabetsize^(q-1)
+		sigmaToThePowerOfQMinusOne = (int) power; // alphabetsize^(q-1)
 		maxEncoding = power * alphabetSize;
 
 		if (power * alphabetSize < 0
@@ -89,6 +108,19 @@ public class QGramCoder {
 			throw new IllegalArgumentException(
 					"Value alphabetsize^q exceeds maximum integer.");
 		}
+
+		
+//		//this one is used to avoid a steady recomputation of these values
+		//only needed for approach 2) when ranking a qgram
+//		alphabetLookup['a'] = alphabet['a'] * sigmaToThePowerOfQMinusOne;
+//		alphabetLookup['A'] = alphabet['A'] * sigmaToThePowerOfQMinusOne;
+//		alphabetLookup['c'] = alphabet['c'] * sigmaToThePowerOfQMinusOne;
+//		alphabetLookup['C'] = alphabet['C'] * sigmaToThePowerOfQMinusOne;
+//		alphabetLookup['g'] = alphabet['g'] * sigmaToThePowerOfQMinusOne;
+//		alphabetLookup['G'] = alphabet['G'] * sigmaToThePowerOfQMinusOne;
+//		alphabetLookup['t'] = alphabet['t'] * sigmaToThePowerOfQMinusOne;
+//		alphabetLookup['T'] = alphabet['T'] * sigmaToThePowerOfQMinusOne;
+
 		
 		this.reset();
 	}
@@ -109,11 +141,19 @@ public class QGramCoder {
 
 		// if character is A,T,C,G (upper or lowercase) calculate code...
 		if (alphabet[c] != -1) {
-
-			currentEncoding %= divisor;
+			
+			//there are two possibilities to rank a q-gram:
+// 1) treat the lower indices with a higher weight as in our decimal system:
+			currentEncoding %= sigmaToThePowerOfQMinusOne;
 			currentEncoding *= alphabetSize;
 			currentEncoding += alphabet[c];
-
+//// 2) or treat the higher indices with a lower weight which is more natural for texts:
+//			currentEncoding /= alphabetSize;
+//			// alphabet[c]*sigmaToThePowerOfQMinusOne is stored in alphabetLookup[c] to avoid the steady re-computation
+//			currentEncoding += alphabetLookup[c];
+// I would suggest that the second approach is faster, but I measured with the netbeans profiler that 1) needs 156 ms whereas 2 needs 636 ms.			
+			
+			
 			if (currentQLength < q) {
 				currentQLength++;
 			} else {
@@ -141,37 +181,7 @@ public class QGramCoder {
 	 * @return
 	 */
 	public int updateEncodingComplement(char c) {
-		char complement;
-		switch(c){
-			case 'a':
-				complement='t';
-				break;
-			case 'A':
-				complement='T';
-				break;
-			case 't':
-				complement='a';
-				break;
-			case 'T':
-				complement='A';
-				break;
-			case 'c':
-				complement='g';
-				break;
-			case 'C':
-				complement='G';
-				break;
-			case 'g':
-				complement='c';
-				break;
-			case 'G':
-				complement='C';
-				break;
-			default:
-				// do nothing if ther is no reverse complement
-				complement=c;
-		}
-		return this.updateEncoding(complement);
+		return this.updateEncoding(complement[c]);
 	}
 	
 
