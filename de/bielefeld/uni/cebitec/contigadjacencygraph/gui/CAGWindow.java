@@ -122,6 +122,9 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	private JRadioButton relativeSupport;
 	private JRadioButton absoluteSupport;
 	private boolean selectionByUpdate;
+	
+	private boolean leftNeigboursReady;
+	private boolean rightNeighboursREady;
 
 	public CAGWindow(CagCreator myModel) {
 
@@ -419,6 +422,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		 * Also the neighbours going to be changed, if the central contig changed.
 		 */
 		if (event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBOURS)) {
+			leftNeigboursReady = false;
 
 			leftNeighbourEdges = event.getEdges();
 			ContigAppearance contigPanel = null;
@@ -552,6 +556,7 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		 * Also right neigbours
 		 */
 		if (event.getEvent_type().equals(EventType.EVENT_SEND_RIGHT_NEIGHBOURS)) {
+			rightNeighboursREady = false;
 
 			int s = 0;
 
@@ -791,6 +796,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	 */
 	class SwingWorkerClass extends SwingWorker<String, String> {
 
+		
+
 		@Override
 		protected String doInBackground() {
 			model.sendLeftNeighbours();
@@ -800,7 +807,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		@Override
 		protected void done() {
 			super.done();
-			chooseContigPanel.setFlag(true);
+			leftNeigboursReady = true;
+			if(rightNeighboursREady){
+				chooseContigPanel.setFlag(true);
+			}
 			window.repaint();
 		}
 	}
@@ -809,6 +819,8 @@ public class CAGWindow extends JFrame implements CagEventListener {
 	 * Inner class for starting an thread for calculation of left neighbours
 	 */
 	class ThreadClassForRightNeighours extends SwingWorker<String, String> {
+
+		
 
 		@Override
 		protected String doInBackground() {
@@ -819,6 +831,10 @@ public class CAGWindow extends JFrame implements CagEventListener {
 		@Override
 		protected void done() {
 			super.done();
+			rightNeighboursREady = true;
+			if(leftNeigboursReady){
+				chooseContigPanel.setFlag(true);
+			}
 			window.repaint();
 		}
 	}
