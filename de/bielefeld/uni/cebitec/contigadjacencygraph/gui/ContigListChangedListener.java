@@ -7,18 +7,18 @@ import javax.swing.event.ListSelectionListener;
 public class ContigListChangedListener implements ListSelectionListener{
 
 	private JList list;
-	private CAGWindow controller;
+	private CagController con;
 	private String[] data;
 	private boolean selectionByUpdate;
 
-	public ContigListChangedListener(CAGWindow cagw, String[] listData){
-		this.controller = cagw;
+	public ContigListChangedListener(CagController controller, String[] listData){
+		this.con = controller;
 		this.data = listData;
 	}
 	
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		selectionByUpdate = controller.selectionByUpdate;
+		selectionByUpdate = con.isSelectionByUpdate();
 		list =(JList) e.getSource();
 
 		if (e.getValueIsAdjusting() == false&& !selectionByUpdate) {
@@ -32,13 +32,13 @@ public class ContigListChangedListener implements ListSelectionListener{
 				}
 			}
 
-			controller.model.changeContigs(index, false);
-			controller.chooseContigPanel.setFlag(false);
+			con.changeContigs(index, false);
+			con.getChooseContigPanel().setFlag(false);
 
-			ThreadForRightAndLeftNeigbours threadForRightNeighbours = new ThreadForRightAndLeftNeigbours(controller, false);
+			ThreadForRightAndLeftNeigbours threadForRightNeighbours = new ThreadForRightAndLeftNeigbours(con, false);
 			threadForRightNeighbours.execute();
 
-			ThreadForRightAndLeftNeigbours threadForLeftNeighbours =new ThreadForRightAndLeftNeigbours(controller, true);
+			ThreadForRightAndLeftNeigbours threadForLeftNeighbours =new ThreadForRightAndLeftNeigbours(con, true);
 			threadForLeftNeighbours.execute();
 
 		}

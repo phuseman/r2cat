@@ -41,9 +41,9 @@ public class CagCreator {
 	private int currentContigIndex;
 	private boolean currentContigIsReverse = false;
 	private DNASequence currentContigObject;
-	//private int neighbourNumber = 5;
 
 	private ArrayList<CagEventListener> listeners;
+	
 	private long maxSizeOfContigs;
 	private long minSizeOfContigs;
 	private double minSupport;
@@ -53,6 +53,21 @@ public class CagCreator {
 	private double[] meanForRightNeigbours;
 	private double[] sDeviationsForRightNeigbours;
 	private Vector<DNASequence> contigs;
+
+	private int neighbourOfNumbers = 5;
+	private Vector<Vector<AdjacencyEdge>> selectedLeftEdges = new Vector<Vector<AdjacencyEdge>>();
+	private Vector<Vector<AdjacencyEdge>> selectedRightEdges = new Vector<Vector<AdjacencyEdge>>();
+	private boolean isZScore;
+
+	public boolean isZScore() {
+		return isZScore;
+	}
+
+
+	public void setZScore(boolean isZScore) {
+		this.isZScore = isZScore;
+	}
+
 
 	// private CAGWindow window;
 	public CagCreator(LayoutGraph g) {
@@ -121,6 +136,8 @@ public class CagCreator {
 			model = new CagCreator(completeGraph);
 
 			java.awt.EventQueue.invokeLater(new Runnable() {
+				private CagController controller;
+
 				public void run() {
 					try {
 						UIManager
@@ -130,7 +147,7 @@ public class CagCreator {
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
-					window = new CAGWindow(model);
+					controller = new CagController(model);
 				}
 			});
 
@@ -373,7 +390,7 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendLeftNeighbours() {
-
+		System.out.println("sende linke nachbarn");
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_LEFT_NEIGHBOURS,
 				fiveMostLikleyLeftNeighbours(currentContigIndex,
 						currentContigIsReverse));
@@ -386,7 +403,7 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendRightNeighbours() {
-
+		System.out.println("sende rechte nachbarn");
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_RIGHT_NEIGHBOURS,
 				fiveMostLikleyRightNeighbours(currentContigIndex,
 						currentContigIsReverse));
@@ -474,5 +491,46 @@ public class CagCreator {
 	}
 	public LayoutGraph getGraph() {
 		return graph;
+	}
+	
+	
+
+
+	public int getNeighbourOfNumbers() {
+		return neighbourOfNumbers;
+	}
+
+
+	public void setNeighbourOfNumbers(int neighbourOfNumbers) {
+		this.neighbourOfNumbers = neighbourOfNumbers;
+	}
+
+
+	public Vector<Vector<AdjacencyEdge>> getSelectedLeftEdges() {
+		return selectedLeftEdges;
+	}
+
+
+	public void setSelectedLeftEdges(Vector<Vector<AdjacencyEdge>> selectedLeftEdges) {
+		this.selectedLeftEdges = selectedLeftEdges;
+	}
+
+
+	public Vector<Vector<AdjacencyEdge>> getSelectedRightEdges() {
+		return selectedRightEdges;
+	}
+
+
+	public void setSelectedRightEdges(
+			Vector<Vector<AdjacencyEdge>> selectedRightEdges) {
+		this.selectedRightEdges = selectedRightEdges;
+	}
+	public int getCurrentContigIndex() {
+		return currentContigIndex;
+	}
+
+
+	public DNASequence getCurrentContigObject() {
+		return currentContigObject;
 	}
 }

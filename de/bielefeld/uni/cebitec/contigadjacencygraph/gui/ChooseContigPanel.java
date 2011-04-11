@@ -43,16 +43,17 @@ public class ChooseContigPanel extends JPanel {
 		this.maxSupport = max;
 		this.minSupport = min;
 
-		/*
-		 * this panel contains the central contig and its neighbours
-		 */
-
+	}
+	/*
+	 * this panel contains the central contig and its neighbours
+	 */
+	public void createPanel(){
+		
 		this.setName("chooseContigPanel");
 		this.setBackground(Color.WHITE);
-
+		
 		layout = new BoxLayout(this, BoxLayout.LINE_AXIS);
 		this.setLayout(layout);
-
 		leftContainer = new JPanel();
 		leftContainer.setName("leftContainer");
 		leftRadioButtonContainer = new JPanel();

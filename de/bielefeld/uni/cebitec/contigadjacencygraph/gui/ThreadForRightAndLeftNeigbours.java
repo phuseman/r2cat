@@ -6,20 +6,20 @@ import javax.swing.SwingWorker;
 
 public class ThreadForRightAndLeftNeigbours  extends SwingWorker<String, String>{
 
-	private CAGWindow window;
+	private CagController con;
 	private boolean isLeftNeighbour;
 
-	public ThreadForRightAndLeftNeigbours(CAGWindow cagw, boolean isLeft){
-		this.window = cagw;
+	public ThreadForRightAndLeftNeigbours(CagController controller, boolean isLeft){
+		this.con = controller;
 		this.isLeftNeighbour = isLeft;
 	}
 
 	@Override
 	protected String doInBackground() {
 		if (isLeftNeighbour){
-			window.model.sendLeftNeighbours();			
+			con.sendLeftNeighbours();			
 		}else{
-			window.model.sendRightNeighbours();
+			con.sendRightNeighbours();
 		}
 		return null;
 	}
@@ -27,18 +27,22 @@ public class ThreadForRightAndLeftNeigbours  extends SwingWorker<String, String>
 	@Override
 	protected void done() {
 		super.done();
-		if(isLeftNeighbour){			
-			window.leftNeigboursReady = true;
-			if(window.rightNeighboursReady){
-				window.chooseContigPanel.setFlag(true);
+		if(isLeftNeighbour){		
+			/*
+			 * TODO 
+			 * denk daran sie auch wieder auf false zu setzten
+			 */
+			con.setLeftNeigboursReady(true);
+			if(con.isRightNeighboursReady()){
+				con.getChooseContigPanel().setFlag(true);
 			}
 		}else{
-			window.rightNeighboursReady = true;
-			if(window.leftNeigboursReady){
-				window.chooseContigPanel.setFlag(true);
+			con.setRightNeighboursReady(true);
+			if(con.isLeftNeigboursReady()){
+				con.getChooseContigPanel().setFlag(true);
 			}
 		}
-		window.repaint();
+		con.getWindow().repaint();
 	}
 
 }
