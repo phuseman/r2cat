@@ -99,7 +99,7 @@ public class CagController implements CagEventListener  {
 		
 		
 		boolean isZScore = cagModel.isZScore();
-		int numberOfNeighbours = cagModel.getNeighbourOfNumbers();
+		int numberOfNeighbours = cagModel.getNumberOfNeighbours();
 		/*
 		 * This panel contains all illustrations of the contigs
 		 * central contig in the middle and neighbours on the right and left side
@@ -137,6 +137,7 @@ public class CagController implements CagEventListener  {
 		window.add(inputOption, BorderLayout.SOUTH);
 		radioButtonListener = new RadioButtonActionListener(this, cagModel);
 		
+		window.initWindow();
 	}
 		public CAGWindow getWindow() {
 		return window;
@@ -198,13 +199,14 @@ public class CagController implements CagEventListener  {
 			 * Also the neighbours going to be changed, if the central contig changed.
 			 */
 			if (event.getEvent_type().equals(EventType.EVENT_SEND_LEFT_NEIGHBOURS)) {
-				boolean leftNeigboursReady = false;
+				System.out.println("linke nachbarn angekommen");
+				leftNeigboursReady = false;
 
 				Vector<AdjacencyEdge> leftNeighbourEdges = event.getEdges();
 				ContigAppearance contigPanel = null;
 
 				ContigRadioButton radioButton;
-				double[] leftSupport = new double[cagModel.getNeighbourOfNumbers()];
+				double[] leftSupport = new double[cagModel.getNumberOfNeighbours()];
 				int t = 0;
 
 				JPanel leftContainer = chooseContigPanel.getLeftContainer();
@@ -268,6 +270,7 @@ public class CagController implements CagEventListener  {
 						/*
 						 * Set the appearance for each contig
 						 */
+						System.out.println("l erzeuge contig appearance ");
 						contigPanel = new ContigAppearance(cagModel.getGraph(), edge,
 								indexOfContig, true, cagModel.getMaxSizeOfContigs(),
 								cagModel.getMinSizeOfContigs(), anderweitigAusgewaehlt);
@@ -315,7 +318,7 @@ public class CagController implements CagEventListener  {
 						/*
 						 * There will be added some 	dynamic space
 						 */
-						if (t < (cagModel.getNeighbourOfNumbers() - 1)) {
+						if (t < (cagModel.getNumberOfNeighbours() - 1)) {
 							leftContainer.add(Box.createVerticalGlue());
 							leftRadioButtonContainer.add(Box.createVerticalGlue());
 						}
@@ -330,14 +333,16 @@ public class CagController implements CagEventListener  {
 				leftContainer.add(Box.createVerticalGlue());
 				leftRadioButtonContainer.add(Box.createVerticalGlue());
 				chooseContigPanel.setLeftSupport(leftSupport);
+				leftNeigboursReady = true;
+				repaintWindowAndSubcomponents();
 			}
 
 			/*
 			 * Also right neigbours
 			 */
 			if (event.getEvent_type().equals(EventType.EVENT_SEND_RIGHT_NEIGHBOURS)) {
-				boolean rightNeighboursReady = false;
-
+				rightNeighboursReady = false;
+				System.out.println("rechte nachbarn angekommen ");
 				int s = 0;
 
 				Vector<AdjacencyEdge> rightNeighbourEdges = event.getEdges();
@@ -351,7 +356,7 @@ public class CagController implements CagEventListener  {
 				int terminator = setTerminator(rightNeighbourEdges);
 
 				ContigRadioButton radioButton;
-				double[] rightSupport = new double[cagModel.getNeighbourOfNumbers()];
+				double[] rightSupport = new double[cagModel.getNumberOfNeighbours()];
 
 				/*
 				 * Zunächst Löschen aller bisherigen Elemente in der GUI
@@ -412,6 +417,7 @@ public class CagController implements CagEventListener  {
 						contigPanel = new ContigAppearance(cagModel.getGraph(), edge,
 								indexOfContig, false, cagModel.getMaxSizeOfContigs(),
 								cagModel.getMinSizeOfContigs(), anderweitigAusgewaehlt);
+						System.out.println("r erzeuge contig appearance ");
 //						contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 						contigPanel.addMouseListener(new ContigMouseListener());
 						contigPanel.setName("contig Panel");
@@ -456,7 +462,7 @@ public class CagController implements CagEventListener  {
 						rightContainer.add(contigPanel);
 						rightRadioButtonContainer.add(radioButton);
 
-						if (s < (cagModel.getNeighbourOfNumbers() - 1)) {
+						if (s < (cagModel.getNumberOfNeighbours() - 1)) {
 							rightContainer.add(Box.createVerticalGlue());
 							rightRadioButtonContainer.add(Box.createVerticalGlue());
 						}
@@ -471,16 +477,26 @@ public class CagController implements CagEventListener  {
 				rightContainer.add(Box.createVerticalGlue());
 				rightRadioButtonContainer.add(Box.createVerticalGlue());
 				chooseContigPanel.setRightSupport(rightSupport);
+				rightNeighboursReady = true;
+				repaintWindowAndSubcomponents();
 			}
 
+		}
+		
+		private void repaintWindowAndSubcomponents(){
+			if(con.isRightNeighboursReady() && con.isLeftNeigboursReady()){
+				con.getChooseContigPanel().setFlag(true);
+				con.getWindow().repaint();
+				System.out.println("l rufe repaint auf "+con.isLeftNeigboursReady()+" "+con.isRightNeighboursReady());
+			}
 		}
 
 		private int setTerminator(Vector<AdjacencyEdge> neighbourVector) {
 
 			int value = neighbourVector.size();
-			if (cagModel.getNeighbourOfNumbers() < neighbourVector.size()) {
-				value = cagModel.getNeighbourOfNumbers();
-			} else if (cagModel.getNeighbourOfNumbers() > neighbourVector.size()) {
+			if (cagModel.getNumberOfNeighbours() < neighbourVector.size()) {
+				value = cagModel.getNumberOfNeighbours();
+			} else if (cagModel.getNumberOfNeighbours() > neighbourVector.size()) {
 				value = neighbourVector.size();
 			}
 
@@ -588,10 +604,10 @@ public class CagController implements CagEventListener  {
 				chooseContigPanel.setFlag(false);
 				
 				
-				ThreadForRightAndLeftNeigbours threadForRightNeighbours = new ThreadForRightAndLeftNeigbours(con, false);
+				ThreadForRightAndLeftNeigbours threadForRightNeighbours = new ThreadForRightAndLeftNeigbours(con, cagModel, false);
 				threadForRightNeighbours.execute();
 
-				ThreadForRightAndLeftNeigbours threadForLeftNeighbours =new ThreadForRightAndLeftNeigbours(con, true);
+				ThreadForRightAndLeftNeigbours threadForLeftNeighbours =new ThreadForRightAndLeftNeigbours(con, cagModel, true);
 				threadForLeftNeighbours.execute();
 
 			}
@@ -646,29 +662,9 @@ public class CagController implements CagEventListener  {
 			return inputOption;
 		}
 
-		public void sendLeftNeighbours() {
-			// TODO Auto-generated method stub
+		public void updateLines() {
 			
-		}
-
-		public void sendRightNeighbours() {
-			// TODO Auto-generated method stub
 			
-		}
-
-		public void changeContigs(int index, boolean b) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		public void setNumberOfNeighbours(int neighboursNumber) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		public boolean isContigsInChooseContigPanel() {
-			// TODO Auto-generated method stub
-			return false;
 		}
 
 

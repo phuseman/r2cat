@@ -1,5 +1,6 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
@@ -7,6 +8,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
+import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
 public class RadioButtonActionListener implements ActionListener {
 	
@@ -14,77 +16,40 @@ public class RadioButtonActionListener implements ActionListener {
 	private CagCreator cagModel;
 
 	private boolean isZScore = false;
-	private ContigAppearance centralContig;
+	private DNASequence centralContig;
 	private int centralContigIndex;
 	private JRadioButton absoluteSupport;
 	private JRadioButton zScore;
-
+	private Vector<Vector<AdjacencyEdge>> selectedLeftEdges;
+	private Vector<Vector<AdjacencyEdge>> selectedRightEdges;
+	
 
 	
-	public RadioButtonActionListener (CagController controller){
+	public RadioButtonActionListener (CagController controller, CagCreator model){
 
 		this.con = controller;
-//		this.cagModel = model;
+		this.cagModel = model;
 		this.isZScore = cagModel.isZScore();
-		absoluteSupport = new JRadioButton();
-		zScore = new JRadioButton();
-		if (con.isContigsInChooseContigPanel()){
-			this.centralContig = cagModel.getCentralContig();
-			this.centralContigIndex = cagModel.getCentralContigIndex();
-		}
-		selectedLeftEdges.setSize(cagModel.getLayoutGraph().getNodes().size());
-		selectedRightEdges.setSize(cagModel.getLayoutGraph().getNodes().size());
-		int term = selectedLeftEdges.size();
-		int term2 = selectedRightEdges.size();
-
-		/*
-		 * initialization of the vectors in the vector 
-		 */
-		for (int i = 0; i < selectedLeftEdges.size(); i++) {
-			Vector<AdjacencyEdge> contigVector = new Vector<AdjacencyEdge>();
-			selectedLeftEdges.add(i,contigVector);
-			if(i == term-1){
-				break;
-			}
-		}		
-
-		for (int i = 0; i < selectedRightEdges.size(); i++) {
-			Vector<AdjacencyEdge> contigVector = new Vector<AdjacencyEdge>();
-			selectedRightEdges.add(i,contigVector);
-			if(i == term2-1){
-				break;
-			}
-		}
+		
+		this.centralContig = cagModel.getCurrentContigObject();
+		this.centralContigIndex = cagModel.getCurrentContigIndex();
+	
+		
+		selectedLeftEdges = cagModel.getSelectedLeftEdges();
+		selectedRightEdges = cagModel.getSelectedRightEdges();
 		
 	}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			/*
-			 * This react on the toggle of absolute support of z-score
-			 */
-			if (e.getActionCommand().equals("absolute")) {
-				isZScore = false;
-				con.getChooseContigPanel().setZScore(isZScore);
-				absoluteSupport.setSelected(true);
-				zScore.setSelected(false);
-
-				updateModelAndGui();
-
-			} else if (e.getActionCommand().equals("zScore")) {
-				isZScore = true;
-				con.getChooseContigPanel().setZScore(isZScore);
-				absoluteSupport.setSelected(false);
-				zScore.setSelected(true);
-
-				updateModelAndGui();
+			
 			/*
 			 * Here are the options to react on a selection of a radion Button
 			 * next to the contigs
 			 * 
 			 *  If there is not a neighbour selected 
 			 */
-			} else if (e.getActionCommand().equals(
+		 if (e.getActionCommand().equals(
 					"noch kein nachbar ausgewaehlt")) {
 			
 				ContigRadioButton radioButton = (ContigRadioButton) e
@@ -279,14 +244,14 @@ public class RadioButtonActionListener implements ActionListener {
 
 		private void updateModelAndGui() {
 			
-			JPanel rightContainer = win.chooseContigPanel.getRightContainer();
-			JPanel leftContainer = win.chooseContigPanel.getLeftContainer();
+			JPanel rightContainer = con.getChooseContigPanel().getRightContainer();
+			JPanel leftContainer = con.getChooseContigPanel().getLeftContainer();
 			if (rightContainer.getComponentCount() != 0
 					|| leftContainer.getComponentCount() != 0) {
-				win.model.sendCurrentContig();
-				win.model.sendLeftNeighbours();
-				win.model.sendRightNeighbours();
-				win.repaint();
+				cagModel.sendCurrentContig();
+				cagModel.sendLeftNeighbours();
+				cagModel.sendRightNeighbours();
+				con.getWindow().repaint();
 			}
 		}
 

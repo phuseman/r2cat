@@ -62,7 +62,7 @@ public class ContigAppearance extends JPanel {
 	public ContigAppearance(LayoutGraph graph, AdjacencyEdge includingEdge,
 			int indexOfNeighbour, boolean sideIsLeft, long maxSize, long minSize, boolean woandersAusgewaehlt) {
 		super();
-
+		
 		this.lGraph = graph;
 		this.i = indexOfNeighbour;
 		this.isReverse = isContigReverse(sideIsLeft, includingEdge, indexOfNeighbour);

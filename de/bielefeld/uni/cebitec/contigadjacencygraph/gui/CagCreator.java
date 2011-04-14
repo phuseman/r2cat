@@ -32,6 +32,7 @@ import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
 public class CagCreator {
 
 	private static CAGWindow window;
+	private static CagController controller;
 	private static CagCreator model;
 
 	private LayoutGraph graph;
@@ -54,7 +55,7 @@ public class CagCreator {
 	private double[] sDeviationsForRightNeigbours;
 	private Vector<DNASequence> contigs;
 
-	private int neighbourOfNumbers = 5;
+	private int numberOfNeighbours= 5;
 	private Vector<Vector<AdjacencyEdge>> selectedLeftEdges = new Vector<Vector<AdjacencyEdge>>();
 	private Vector<Vector<AdjacencyEdge>> selectedRightEdges = new Vector<Vector<AdjacencyEdge>>();
 	private boolean isZScore;
@@ -84,6 +85,31 @@ public class CagCreator {
 
 		calculateMeanAndSDeviationForLeftNeigbours(leftNeighbours);
 		calculateMeanAndSDeviationForRightNeigbours(rightNeighbours);
+		
+		selectedLeftEdges.setSize(graph.getNodes().size());
+		selectedRightEdges.setSize(graph.getNodes().size());
+		int term = selectedLeftEdges.size();
+		int term2 = selectedRightEdges.size();
+
+		/*
+		 * initialization of the vectors in the vector 
+		 */
+		for (int i = 0; i < selectedLeftEdges.size(); i++) {
+			Vector<AdjacencyEdge> contigVector = new Vector<AdjacencyEdge>();
+			selectedLeftEdges.add(i,contigVector);
+			if(i == term-1){
+				break;
+			}
+		}		
+
+		for (int i = 0; i < selectedRightEdges.size(); i++) {
+			Vector<AdjacencyEdge> contigVector = new Vector<AdjacencyEdge>();
+			selectedRightEdges.add(i,contigVector);
+			if(i == term2-1){
+				break;
+			}
+		}
+		
 	}
 
 
@@ -136,7 +162,6 @@ public class CagCreator {
 			model = new CagCreator(completeGraph);
 
 			java.awt.EventQueue.invokeLater(new Runnable() {
-				private CagController controller;
 
 				public void run() {
 					try {
@@ -148,6 +173,7 @@ public class CagCreator {
 						ex.printStackTrace();
 					}
 					controller = new CagController(model);
+					controller.initWindowWithAllPanel();
 				}
 			});
 
@@ -390,7 +416,6 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendLeftNeighbours() {
-		System.out.println("sende linke nachbarn");
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_LEFT_NEIGHBOURS,
 				fiveMostLikleyLeftNeighbours(currentContigIndex,
 						currentContigIsReverse));
@@ -403,7 +428,6 @@ public class CagCreator {
 	 * neighbours.
 	 */
 	public void sendRightNeighbours() {
-		System.out.println("sende rechte nachbarn");
 		CagEvent event = new CagEvent(EventType.EVENT_SEND_RIGHT_NEIGHBOURS,
 				fiveMostLikleyRightNeighbours(currentContigIndex,
 						currentContigIsReverse));
@@ -496,13 +520,13 @@ public class CagCreator {
 	
 
 
-	public int getNeighbourOfNumbers() {
-		return neighbourOfNumbers;
+	public int getNumberOfNeighbours() {
+		return numberOfNeighbours;
 	}
 
 
-	public void setNeighbourOfNumbers(int neighbourOfNumbers) {
-		this.neighbourOfNumbers = neighbourOfNumbers;
+	public void setNumberOfNeighbours(int neighbourOfNumbers) {
+		this.numberOfNeighbours = neighbourOfNumbers;
 	}
 
 
@@ -533,4 +557,5 @@ public class CagCreator {
 	public DNASequence getCurrentContigObject() {
 		return currentContigObject;
 	}
+
 }

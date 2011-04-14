@@ -3,6 +3,8 @@ package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.text.NumberFormat;
 
 import javax.swing.ButtonGroup;
@@ -13,31 +15,29 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 
-public class LegendAndInputOptionPanel extends JPanel{
+public class LegendAndInputOptionPanel extends JPanel implements ActionListener{
 	
 	private JRadioButton absoluteSupport;
 	private JRadioButton zScoreRadioButton;
 	private int numberOfNeighbours;
-	private CAGWindow win;
+	private CagController con;
+	private CagCreator model;
+	private boolean isZScore;
 	
 	/*
 	 * This panel contains the textfield for entering the number of neighbours
 	 * and also the options to choose  absolute support or z-scores 
 	 * and a legend
 	 */
-	public LegendAndInputOptionPanel(CAGWindow window) {
+	public LegendAndInputOptionPanel(CagController controller, CagCreator mymodel) {
 		
-		this.win = window;  
+		this.con = controller; 
+		this.model = mymodel;
 		GridBagLayout inputOptionLayout = new GridBagLayout();
 		this.setLayout(inputOptionLayout);
 		this.setPreferredSize(new Dimension(1000, 60));
 	}
 	
-
-	public LegendAndInputOptionPanel(CagController cagController,
-			CagCreator cagModel) {
-		// TODO Auto-generated constructor stub
-	}
 
 	public void createLegendAndInputOption(int neighboursNumber){
 		
@@ -65,7 +65,7 @@ public class LegendAndInputOptionPanel extends JPanel{
 				numberOfNeighbours));
 		inputOptionForNumberOfNeighbours.setColumns(3);
 		inputOptionForNumberOfNeighbours.addPropertyChangeListener("value",
-				new NumberOfNeighboursListener(win));
+				new NumberOfNeighboursListener(con, model));
 		inputOptionForNumberOfNeighbours.setToolTipText("<html>"
 				+ "Please type a number <br>" +
 						"between 1 and 10<br>"
@@ -81,7 +81,8 @@ public class LegendAndInputOptionPanel extends JPanel{
 		absoluteSupport.setToolTipText("<html>If you choose this option<br> you see at each line <br>" +
 				"the likelyhood score.</html> ");
 		absoluteSupport.setActionCommand("absolute");
-		absoluteSupport.addActionListener(new RadioButtonActionListener(win));
+		absoluteSupport.addActionListener(this);
+		
 		
 		c.gridx = 2;
 		c.gridy = 0;
@@ -93,7 +94,7 @@ public class LegendAndInputOptionPanel extends JPanel{
 		zScoreRadioButton.setToolTipText("<html> If you choose this option <br>you see at each line <br> "
 				+" a normalized score.</html>");
 		zScoreRadioButton.setActionCommand("zScore");
-		zScoreRadioButton.addActionListener(new RadioButtonActionListener(win));
+		zScoreRadioButton.addActionListener(this);
 		
 		supportGroup.add(absoluteSupport);
 		supportGroup.add(zScoreRadioButton);
@@ -142,6 +143,31 @@ public class LegendAndInputOptionPanel extends JPanel{
 		this.add(selectedLabel, c);		
 
 
+	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		/*
+		 * This react on the toggle of absolute support of z-score
+		 */
+		if (e.getActionCommand().equals("absolute")) {
+			isZScore = false;
+			con.getChooseContigPanel().setZScore(isZScore);
+			absoluteSupport.setSelected(true);
+			model.setZScore(false);
+
+			con.updateLines();
+
+		} else if (e.getActionCommand().equals("zScore")) {
+			isZScore = true;
+			con.getChooseContigPanel().setZScore(isZScore);
+			absoluteSupport.setSelected(false);
+			model.setZScore(true);
+
+			con.updateLines();
+		}
+		
 	}
 
 }

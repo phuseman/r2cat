@@ -8,11 +8,13 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
-public class ContigListPanel extends JScrollPane {
+public class ContigListPanel extends JScrollPane implements ListSelectionListener{
 
 	private ContigListPanel contigList;
 	private LayoutGraph graph;
@@ -53,7 +55,7 @@ public class ContigListPanel extends JScrollPane {
 		
 		list = new JList(dataForList);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		list.addListSelectionListener(new ContigListChangedListener(controller, dataForList));
+		list.addListSelectionListener(this);
 		list.setToolTipText("<html>Choose a contig<br>"+
 				" by a click on a name.</html>");
 
@@ -73,5 +75,45 @@ public class ContigListPanel extends JScrollPane {
 
 	public JList getList() {
 		return list;
+	}
+
+
+
+	@Override
+	public void valueChanged(ListSelectionEvent e) {
+		
+
+		boolean selectionByUpdate = controller.isSelectionByUpdate();
+		
+		list =(JList) e.getSource();
+		
+		if (e.getValueIsAdjusting() == false&& !selectionByUpdate) {
+
+			int index = 0;
+			String selection = (String) list.getSelectedValue();
+
+			for (int i = 0; i < dataForList.length; i++) {
+				if (dataForList[i].equals(selection)) {
+					index = i;
+				}
+			}
+
+			/*
+			 * Eigentlich sollte hier eine Methode des Controllers aufgerufen werden,
+			 * wenn das MVC Pattern sehr konsequent umgesetzt werden soll.
+			 * Habe mich aber entschieden auf direktem weg mit dem model 
+			 * zu komunizieren. Code wird lesbarer, Controller nicht ueberladen
+			 */
+			myModel.changeContigs(index, false);
+			 controller.getChooseContigPanel().setFlag(false);
+
+			ThreadForRightAndLeftNeigbours threadForRightNeighbours = new ThreadForRightAndLeftNeigbours( controller, myModel, false);
+			threadForRightNeighbours.execute();
+
+			ThreadForRightAndLeftNeigbours threadForLeftNeighbours =new ThreadForRightAndLeftNeigbours( controller, myModel, true);
+			threadForLeftNeighbours.execute();
+
+		}
+			
 	}
 }

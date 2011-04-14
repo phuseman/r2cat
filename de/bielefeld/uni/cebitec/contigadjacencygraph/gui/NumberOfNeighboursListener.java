@@ -11,10 +11,12 @@ import javax.swing.JPanel;
 public class NumberOfNeighboursListener implements PropertyChangeListener {
 	
 	private CagController con;
+	private CagCreator model;
 	private int numberOfNeighbours;
 	
-	public NumberOfNeighboursListener(CagController controller){
+	public NumberOfNeighboursListener(CagController controller, CagCreator myModel){
 		this.con = controller;
+		this.model = myModel;
 	}
 
 		@Override
@@ -48,7 +50,7 @@ public class NumberOfNeighboursListener implements PropertyChangeListener {
 				numberOfNeighbours = neighboursNumber;
 				inputOptionForNumberOfNeighbours.setValue(new Integer(
 						numberOfNeighbours));
-				con.setNumberOfNeighbours(neighboursNumber);
+				model.setNumberOfNeighbours(neighboursNumber);
 				con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
 
 				
@@ -65,7 +67,7 @@ public class NumberOfNeighboursListener implements PropertyChangeListener {
 				numberOfNeighbours = 5;
 				inputOptionForNumberOfNeighbours .setValue(new Integer(
 						numberOfNeighbours));
-				con.setNumberOfNeighbours(neighboursNumber);
+				model.setNumberOfNeighbours(neighboursNumber);
 				con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
 
 				if (rightContainer.getComponentCount() != 0
@@ -83,7 +85,7 @@ public class NumberOfNeighboursListener implements PropertyChangeListener {
 				int breite = (int) con.getChooseContigPanel().getSize().getWidth();
 
 				con.getChooseContigPanel().setPreferredSize(new Dimension(breite, 600));
-				con.setNumberOfNeighbours(neighboursNumber);
+				model.setNumberOfNeighbours(neighboursNumber);
 				con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
 
 				if (rightContainer.getComponentCount() != 0
@@ -95,8 +97,8 @@ public class NumberOfNeighboursListener implements PropertyChangeListener {
 		}
 		
 		private void updateModelAndGui(){
-			con.sendLeftNeighbours();
-			con.sendRightNeighbours();
+			model.sendLeftNeighbours();
+			model.sendRightNeighbours();
 			con.getChooseContigPanel().repaint();
 		}
 

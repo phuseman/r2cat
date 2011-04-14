@@ -1,41 +1,13 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-import java.text.NumberFormat;
-import java.util.Vector;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JFormattedTextField;
+
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingWorker;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
-import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
-import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
 public class CAGWindow extends JFrame {
 
@@ -72,8 +44,8 @@ public class CAGWindow extends JFrame {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		// setSize(Toolkit.getDefaultToolkit().getScreenSize());
 		// hier wird das Fenster auf die Größe des Bildschirmes angepasst.
+		
 		setVisible(true);
-
 		pack();
 	}
 	
