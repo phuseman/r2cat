@@ -4,13 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.TreeMap;
+import java.util.Observable;
 import java.util.Vector;
-import java.util.Map.Entry;
 
 import javax.naming.CannotProceedException;
 import javax.swing.UIManager;
@@ -29,7 +24,7 @@ import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
  * hier werden die Daten- Zustands- und Anwendungslogik implementiert
  * 
  */
-public class CagCreator {
+public class CagCreator extends Observable {
 
 	private static CAGWindow window;
 	private static CagController controller;
@@ -59,6 +54,8 @@ public class CagCreator {
 	private Vector<Vector<AdjacencyEdge>> selectedLeftEdges = new Vector<Vector<AdjacencyEdge>>();
 	private Vector<Vector<AdjacencyEdge>> selectedRightEdges = new Vector<Vector<AdjacencyEdge>>();
 	private boolean isZScore;
+	private Vector<AdjacencyEdge> currentLeftNeighbours;
+	private Vector<AdjacencyEdge> currentRightNeighbours;
 
 	public boolean isZScore() {
 		return isZScore;
@@ -477,11 +474,25 @@ public class CagCreator {
 	 */
 	public void changeContigs(int index, boolean isReverse) {
 
+		setChanged();
 		this.currentContigIndex = index;
 		this.currentContigIsReverse = isReverse;
 		this.currentContigObject = graph.getNodes().get(index);
-		sendCurrentContig();
+		currentLeftNeighbours = fiveMostLikleyLeftNeighbours(currentContigIndex, isReverse);
+		currentRightNeighbours = fiveMostLikleyRightNeighbours(currentContigIndex, isReverse);
+		notifyObservers(currentContigIndex);
+		//sendCurrentContig();
 	}
+
+	public Vector<AdjacencyEdge> getCurrentLeftNeighbours() {
+		return currentLeftNeighbours;
+	}
+
+
+	public Vector<AdjacencyEdge> getCurrentRightNeighbours() {
+		return currentRightNeighbours;
+	}
+
 
 	public long getMaxSizeOfContigs() {
 		return maxSizeOfContigs;

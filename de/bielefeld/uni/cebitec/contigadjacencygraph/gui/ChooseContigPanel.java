@@ -80,6 +80,7 @@ public class ChooseContigPanel extends JPanel {
 		leftContainer.setOpaque(false);
 		leftContainer.setPreferredSize(new Dimension(310, 400));
 		leftContainer.setMinimumSize(new Dimension(310, 400));
+		
 		// leftContainer.setMaximumSize(new Dimension(310, 400));
 
 		leftRadioButtonContainer.setLayout(leftRadioBoxLayout);
@@ -104,6 +105,7 @@ public class ChooseContigPanel extends JPanel {
 		rightContainer.setOpaque(false);
 		rightContainer.setPreferredSize(new Dimension(310, 400));
 		rightContainer.setMinimumSize(new Dimension(310, 400));
+		
 		// rightContainer.setMaximumSize(new Dimension(310, 400));
 
 		rightRadioButtonContainer.setLayout(rightRadioBoxLayout);
@@ -130,7 +132,7 @@ public class ChooseContigPanel extends JPanel {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-
+System.out.println("ja paint ");
 		Graphics2D g2 = (Graphics2D) g;
 
 		/*
@@ -152,7 +154,9 @@ public class ChooseContigPanel extends JPanel {
 		 * This part will to run, during the time we get new central and
 		 * neigbour contigs
 		 */
+		System.out.println(flag);
 		if (flag) {
+			System.out.println("auch flag true");
 			int laenge2 = (int) centralContig.getSize().getWidth();
 			int höhe2 = (int) centralContig.getHeight();
 
@@ -190,7 +194,7 @@ public class ChooseContigPanel extends JPanel {
 				 * calculate lines between left neigbours and central contig
 				 */
 				if (left) {
-
+System.out.println("linke seite");
 					int z = 1;
 					int zaehler = 0;
 					int zaehlerFuerSupport = 0;
@@ -296,6 +300,7 @@ public class ChooseContigPanel extends JPanel {
 													dash, 0));
 								}
 								g2.drawLine(x + laenge, y, x2, y2);	
+								System.out.println("sollte nun linie gezeichnet haben");
 								zaehlerFuerSupport++;
 							}
 						}
@@ -397,6 +402,7 @@ public class ChooseContigPanel extends JPanel {
 	}
 
 	public void setFlag(boolean flag) {
+		System.out.println("setzte flag "+flag);
 		this.flag = flag;
 	}
 

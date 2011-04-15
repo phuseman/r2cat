@@ -105,13 +105,13 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 			 * zu komunizieren. Code wird lesbarer, Controller nicht ueberladen
 			 */
 			myModel.changeContigs(index, false);
-			 controller.getChooseContigPanel().setFlag(false);
+		//	 controller.getChooseContigPanel().setFlag(false);
 
-			ThreadForRightAndLeftNeigbours threadForRightNeighbours = new ThreadForRightAndLeftNeigbours( controller, myModel, false);
+			/*ThreadForRightAndLeftNeigbours threadForRightNeighbours = new ThreadForRightAndLeftNeigbours( controller, myModel, false);
 			threadForRightNeighbours.execute();
 
 			ThreadForRightAndLeftNeigbours threadForLeftNeighbours =new ThreadForRightAndLeftNeigbours( controller, myModel, true);
-			threadForLeftNeighbours.execute();
+			threadForLeftNeighbours.execute();*/
 
 		}
 			

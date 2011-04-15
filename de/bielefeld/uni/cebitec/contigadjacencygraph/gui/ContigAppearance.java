@@ -73,7 +73,11 @@ public class ContigAppearance extends JPanel {
 		this.setBackground(Color.WHITE);
 		this.add(contigLabel);
 		this.setName(contig.getId());
-
+		if (sideIsLeft){
+			this.setAlignmentX(RIGHT_ALIGNMENT);
+		}else{
+			this.setAlignmentX(LEFT_ALIGNMENT);
+		}
 		selected = false;
 		if (includingEdge.isSelected()) {
 			selected = true;
