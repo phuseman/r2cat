@@ -17,9 +17,16 @@
  */
 package de.bielefeld.uni.cebitec.referencematches;
 
+import de.bielefeld.uni.cebitec.qgram.MatchList;
+import de.bielefeld.uni.cebitec.qgram.MatchList.NotifyEvent;
+import java.io.File;
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
+import org.openide.awt.StatusDisplayer;
+import org.openide.cookies.SaveCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObjectExistsException;
@@ -34,14 +41,18 @@ import org.openide.text.DataEditorSupport;
 import org.openide.util.lookup.Lookups;
 import org.openide.util.lookup.ProxyLookup;
 
-public class ReferenceMatchesDataObject extends MultiDataObject {
+public class ReferenceMatchesDataObject extends MultiDataObject implements Observer {
 
   private MatchListNBApiObject referenceMatches = null;
 
   public ReferenceMatchesDataObject(FileObject pf, MultiFileLoader loader) throws DataObjectExistsException, IOException {
     super(pf, loader);
     CookieSet cookies = getCookieSet();
+    //the DataEditorSupport allows to open the file in a text editor
     cookies.add((Node.Cookie) DataEditorSupport.create(this, getPrimaryEntry(), cookies));
+
+
+
   }
 
   @Override
@@ -53,19 +64,19 @@ public class ReferenceMatchesDataObject extends MultiDataObject {
 
   @Override
   public Lookup getLookup() {
-            Project p = FileOwnerQuery.getOwner(this.getPrimaryFile());
-            if(p!=null){
-              return  new ProxyLookup(
-                      new Lookup[]{
+    Project p = FileOwnerQuery.getOwner(this.getPrimaryFile());
+    if (p != null) {
+      return new ProxyLookup(
+              new Lookup[]{
                 Lookups.singleton(getReferenceMatches()),
-              getCookieSet().getLookup(),
+                getCookieSet().getLookup(),
                 //include the project into the lookup. I found no better way..
-              Lookups.singleton(p)
-            });
-            } else {
-              return  new ProxyLookup(new Lookup[]{Lookups.singleton(getReferenceMatches()),
-              getCookieSet().getLookup()
-            });
+                Lookups.singleton(p)
+              });
+    } else {
+      return new ProxyLookup(new Lookup[]{Lookups.singleton(getReferenceMatches()),
+                getCookieSet().getLookup()
+              });
     }
   }
 
@@ -85,10 +96,50 @@ public class ReferenceMatchesDataObject extends MultiDataObject {
       referenceMatches = new MatchListNBApiObject();
       try {
         referenceMatches.readFromFile(FileUtil.toFile(this.getPrimaryFile()));
+        referenceMatches.addObserver(this);
       } catch (IOException ex) {
         Exceptions.printStackTrace(ex);
       }
     }
     return referenceMatches;
+  }
+
+  @Override
+  public void update(Observable o, Object arg) {
+
+    boolean changed = false;
+
+    if (arg != null) {
+      MatchList.NotifyEvent action = (MatchList.NotifyEvent) arg;
+      if (action == NotifyEvent.CHANGE) {
+        changed = true;
+      } else if (action == NotifyEvent.ORDER_CHANGED_OR_CONTIG_REVERSED) {
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      this.setModified(changed);
+      this.getCookieSet().assign(SaveCookie.class, new MatchListSaver(this));
+    }
+  }
+
+  private class MatchListSaver implements SaveCookie {
+
+    private final ReferenceMatchesDataObject dataObj;
+
+    private MatchListSaver(ReferenceMatchesDataObject data) {
+      this.dataObj = data;
+    }
+
+    @Override
+    public void save() throws IOException {
+      File saveTo = FileUtil.toFile(dataObj.getPrimaryFile());
+      MatchListNBApiObject matches = dataObj.getReferenceMatches();
+      matches.writeToFile(saveTo);
+      StatusDisplayer.getDefault().setStatusText("Wrote " + saveTo.getName());
+      dataObj.getCookieSet().assign(SaveCookie.class);
+      dataObj.setModified(false);
+    }
   }
 }

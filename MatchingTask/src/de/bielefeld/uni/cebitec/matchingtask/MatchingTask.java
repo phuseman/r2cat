@@ -114,7 +114,7 @@ public class MatchingTask extends SwingWorker<MatchList, String> implements Abst
         FastaFileReader queryFasta = new FastaFileReader(contigs);
         boolean queryIsFasta = queryFasta.isFastaQuickCheck();
         if (queryIsFasta) {
-          progress.reportProgress(-1, "Opening query file" + contigs.getName()
+          progress.reportProgress(-1, "Opening query file " + contigs.getName()
                   + " (" + contigs.length() + ")");
           t.startTimer();
           queryFasta.scanContents(true);
