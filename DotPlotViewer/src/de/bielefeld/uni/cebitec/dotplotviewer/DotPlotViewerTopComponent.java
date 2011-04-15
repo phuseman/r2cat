@@ -53,6 +53,7 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
   private boolean grid;
   private boolean reversed;
   private boolean stacked;
+  private MatchList matchList;
 
   public DotPlotViewerTopComponent() {
     initComponents();
@@ -199,12 +200,10 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
     }
 
   }
-//		drawing.setViewportView(matchViewerPlugin);
-//		drawing.setVisible(true);
-//		drawing.validate();
 
   public void setMatchList(MatchList ml) {
     if (ml != null && !ml.isEmpty()) {
+      this.matchList=ml;
       this.dotplotMatchViewer.setAlignmentsPositionsList(ml);
 
       dotplotMatchViewer.setLables();
@@ -219,6 +218,7 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
     } else {
       this.jScrollPane1.getViewport().removeAll();
       this.jScrollPane1.setVisible(false);
+      this.matchList=null;
     }
 
     this.invalidate();
@@ -264,5 +264,9 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
       this.repaint();
     }
 
+  }
+
+  MatchList getMatchList() {
+    return matchList;
   }
 }
