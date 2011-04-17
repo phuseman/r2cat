@@ -5,6 +5,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
 
 import javax.swing.ButtonGroup;
@@ -15,11 +17,11 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 
-public class LegendAndInputOptionPanel extends JPanel implements ActionListener{
+public class LegendAndInputOptionPanel extends JPanel implements ActionListener,PropertyChangeListener{
 	
 	private JRadioButton absoluteSupport;
 	private JRadioButton zScoreRadioButton;
-	private int numberOfNeighbours;
+	private int numberOfNeighbours = 5;
 	private CagController con;
 	private CagCreator model;
 	private boolean isZScore;
@@ -64,8 +66,7 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener{
 		inputOptionForNumberOfNeighbours.setValue(new Integer(
 				numberOfNeighbours));
 		inputOptionForNumberOfNeighbours.setColumns(3);
-		inputOptionForNumberOfNeighbours.addPropertyChangeListener("value",
-				new NumberOfNeighboursListener(con, model));
+		inputOptionForNumberOfNeighbours.addPropertyChangeListener("value",this);
 		inputOptionForNumberOfNeighbours.setToolTipText("<html>"
 				+ "Please type a number <br>" +
 						"between 1 and 10<br>"
@@ -153,21 +154,110 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener{
 		 */
 		if (e.getActionCommand().equals("absolute")) {
 			isZScore = false;
-			con.getChooseContigPanel().setZScore(isZScore);
 			absoluteSupport.setSelected(true);
 			model.setZScore(false);
 
-			con.updateLines();
+			con.updateLines(isZScore);
+//			updateModelAndGui();
 
 		} else if (e.getActionCommand().equals("zScore")) {
 			isZScore = true;
-			con.getChooseContigPanel().setZScore(isZScore);
 			absoluteSupport.setSelected(false);
 			model.setZScore(true);
 
-			con.updateLines();
+			con.updateLines(isZScore);
+//			updateModelAndGui();
 		}
 		
 	}
 
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		System.out.println("reagiert");
+		JFormattedTextField inputOptionForNumberOfNeighbours = 
+			((JFormattedTextField) evt.getSource());
+		/*
+		 * This is going to be activated, if the user set a new number of
+		 * neighbours.
+		 * But only between 1 and 10
+		 */
+		int neighboursNumber = ((Number) evt.getNewValue()).intValue();
+		System.out.println(neighboursNumber);
+
+		JPanel rightContainer = con.getChooseContigPanel().getRightContainer();
+		JPanel leftContainer = con.getChooseContigPanel().getLeftContainer();
+
+		if (neighboursNumber <= 10 && neighboursNumber > 0) {
+
+			if (neighboursNumber < numberOfNeighbours) {
+				int breite = (int) con.getChooseContigPanel().getSize().getWidth();
+				con.getChooseContigPanel().setPreferredSize(new Dimension(breite,
+						400));
+			}
+
+			if (neighboursNumber > 8) {
+				int breite = (int) con.getChooseContigPanel().getSize().getWidth();
+				con.getChooseContigPanel().setPreferredSize(new Dimension(breite,
+						600));
+			}
+
+			numberOfNeighbours = neighboursNumber;
+			inputOptionForNumberOfNeighbours.setValue(new Integer(
+					numberOfNeighbours));
+			model.setNumberOfNeighbours(neighboursNumber);
+			con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
+
+			
+			if (rightContainer.getComponentCount() != 0
+					|| leftContainer.getComponentCount() != 0) {
+				updateModelAndGui();
+			}
+
+		} else if (neighboursNumber == 0) {
+			javax.swing.JOptionPane.showMessageDialog(con.getWindow(), "Sorry.\n"
+					+ "You can't choose " + neighboursNumber
+					+ " Neighbours.\n" + "Please choose between 1 and 10.");
+
+			numberOfNeighbours = 5;
+			inputOptionForNumberOfNeighbours .setValue(new Integer(
+					numberOfNeighbours));
+			model.setNumberOfNeighbours(neighboursNumber);
+			con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
+
+			if (rightContainer.getComponentCount() != 0
+					|| leftContainer.getComponentCount() != 0) {
+				updateModelAndGui();
+			}
+		} else {
+			javax.swing.JOptionPane.showMessageDialog(con.getWindow(), "Sorry.\n"
+					+ "You can't choose " + neighboursNumber
+					+ " Neighbours.\n" + "Please choose between 1 and 10.");
+
+			numberOfNeighbours = 10;
+			inputOptionForNumberOfNeighbours.setValue(new Integer(
+					numberOfNeighbours));
+			int breite = (int) con.getChooseContigPanel().getSize().getWidth();
+
+			con.getChooseContigPanel().setPreferredSize(new Dimension(breite, 600));
+			model.setNumberOfNeighbours(neighboursNumber);
+			con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
+
+			if (rightContainer.getComponentCount() != 0
+					|| leftContainer.getComponentCount() != 0) {
+				updateModelAndGui();
+			}
+		}
+
+	}
+	
+	private void updateModelAndGui(){
+		con.updateLeftNeighbours();
+		con.updateRightNeighbours();
+//		model.sendLeftNeighbours();
+//		model.sendRightNeighbours();
+		con.getChooseContigPanel().repaint();
+	}
+
+	
 }

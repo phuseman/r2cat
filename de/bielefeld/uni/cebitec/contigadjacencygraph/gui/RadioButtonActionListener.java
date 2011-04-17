@@ -20,8 +20,8 @@ public class RadioButtonActionListener implements ActionListener {
 	private int centralContigIndex;
 	private JRadioButton absoluteSupport;
 	private JRadioButton zScore;
-	private Vector<Vector<AdjacencyEdge>> selectedLeftEdges;
-	private Vector<Vector<AdjacencyEdge>> selectedRightEdges;
+//	private Vector<Vector<AdjacencyEdge>> selectedLeftEdges;
+//	private Vector<Vector<AdjacencyEdge>> selectedRightEdges;
 	
 
 	
@@ -35,14 +35,14 @@ public class RadioButtonActionListener implements ActionListener {
 		this.centralContigIndex = cagModel.getCurrentContigIndex();
 	
 		
-		selectedLeftEdges = cagModel.getSelectedLeftEdges();
-		selectedRightEdges = cagModel.getSelectedRightEdges();
+//		selectedLeftEdges = cagModel.getSelectedLeftEdges();
+//		selectedRightEdges = cagModel.getSelectedRightEdges();
 		
 	}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			
+			System.out.println(e.getActionCommand());
 			/*
 			 * Here are the options to react on a selection of a radion Button
 			 * next to the contigs
@@ -146,8 +146,8 @@ public class RadioButtonActionListener implements ActionListener {
 			int indexLeft = -1;
 			int indexRight = -1;
 
-			if ((radioButton.isLeft() && !centralContig.isReverse())
-					|| (!radioButton.isLeft() && centralContig.isReverse())) {
+			if ((radioButton.isLeft() && !false)//centralContig.isReverse())
+					|| (!radioButton.isLeft() && false)){//centralContig.isReverse())) {
 
 				if (centralContigIndex == selectedEdge.geti()) {
 					indexLeft = selectedEdge.getj();
@@ -157,8 +157,8 @@ public class RadioButtonActionListener implements ActionListener {
 					indexRight = selectedEdge.getj();
 				}
 
-			} else if (!radioButton.isLeft() && !centralContig.isReverse()
-					|| (radioButton.isLeft() && centralContig.isReverse())) {
+			} else if (!radioButton.isLeft() && !false//centralContig.isReverse()
+					|| (radioButton.isLeft() && false)){//centralContig.isReverse())) {
 
 				if (centralContigIndex == selectedEdge.geti()) {
 					indexLeft = selectedEdge.geti();
@@ -193,10 +193,10 @@ public class RadioButtonActionListener implements ActionListener {
 			 */
 			oldEdge.deselect();
 
-			neighbourl = selectedLeftEdges.get(leftIndex);
+			neighbourl = cagModel.getSelectedLeftEdges().get(leftIndex);
 			neighbourl.remove(oldEdge);
 			
-			neighbourR = selectedRightEdges.get(rightIndex);
+			neighbourR = cagModel.getSelectedRightEdges().get(rightIndex);
 			neighbourR.remove(oldEdge);
 			
 			/*
@@ -205,9 +205,9 @@ public class RadioButtonActionListener implements ActionListener {
 			 * but currently the radio button is not right) 
 			 */
 			 if (!neighbourl.remove(oldEdge)&& !neighbourR.remove(oldEdge)){
-				 neighbourl = selectedLeftEdges.get(rightIndex);
+				 neighbourl = cagModel.getSelectedLeftEdges().get(rightIndex);
 				 neighbourl.remove(oldEdge);
-				 neighbourR = selectedRightEdges.get(leftIndex);
+				 neighbourR = cagModel.getSelectedRightEdges().get(leftIndex);
 				 neighbourR.remove(oldEdge);
 			 }
 
@@ -232,10 +232,10 @@ public class RadioButtonActionListener implements ActionListener {
 			 */
 			selectedEdge.select();
 			
-			contigCollectionL = selectedLeftEdges.get(leftIndex);
+			contigCollectionL = cagModel.getSelectedLeftEdges().get(leftIndex);
 			contigCollectionL.add(selectedEdge);
 			
-			contigCollectionR = selectedRightEdges.get(rightIndex);		
+			contigCollectionR = cagModel.getSelectedRightEdges().get(rightIndex);		
 			contigCollectionR.add(selectedEdge);
 
 			updateModelAndGui();
@@ -248,9 +248,8 @@ public class RadioButtonActionListener implements ActionListener {
 			JPanel leftContainer = con.getChooseContigPanel().getLeftContainer();
 			if (rightContainer.getComponentCount() != 0
 					|| leftContainer.getComponentCount() != 0) {
-				cagModel.sendCurrentContig();
-				cagModel.sendLeftNeighbours();
-				cagModel.sendRightNeighbours();
+
+				cagModel.changeContigs(centralContigIndex, cagModel.isCurrentContigIsReverse());
 				con.getWindow().repaint();
 			}
 		}

@@ -1,11 +1,15 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.GeneralPath;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
@@ -31,7 +35,7 @@ public class CagController implements  Observer  {
 	private ContigListPanel listScroller;
 	private LegendAndInputOptionPanel inputOption;
 	
-	private boolean selectionByUpdate;
+	private boolean selectionByUpdate = false;
 	public boolean isSelectionByUpdate() {
 		return selectionByUpdate;
 	}
@@ -155,7 +159,7 @@ public class CagController implements  Observer  {
 				con.getChooseContigPanel().setFlag(true);
 				con.getChooseContigPanel().repaint();
 				//con.getWindow().repaint();
-				System.out.println("l rufe repaint auf "+con.isLeftNeigboursReady()+" "+con.isRightNeighboursReady());
+				//System.out.println("l rufe repaint auf "+con.isLeftNeigboursReady()+" "+con.isRightNeighboursReady());
 				setLeftNeigboursReady(false);
 				setRightNeighboursReady(false);
 				zentralesContigDa = false;
@@ -274,25 +278,18 @@ public class CagController implements  Observer  {
 				chooseContigPanel.setFlag(false);
 				cagModel.changeContigs(index, currentContigIsReverse);
 				
-				/*
-				ThreadForRightAndLeftNeigbours threadForRightNeighbours = new ThreadForRightAndLeftNeigbours(con, cagModel, false);
-				threadForRightNeighbours.execute();
-
-				ThreadForRightAndLeftNeigbours threadForLeftNeighbours =new ThreadForRightAndLeftNeigbours(con, cagModel, true);
-				threadForLeftNeighbours.execute();
-*/
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-			/*	ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-				
-				 Graphics2D g = contigPanel.getBorder().getG2();
-				 GeneralPath p = contigPanel.getBorder().getP();
-			
-				 GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
-					g.setPaint(redtowhite);
-					g.fill(p);*/
+//				ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+//				
+//				 Graphics2D g = contigPanel.getBorder().getG2();
+//				 GeneralPath p = contigPanel.getBorder().getP();
+//			
+//				 GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
+//					g.setPaint(redtowhite);
+//					g.fill(p);
 					//contigPanel.update(g);
 					//chooseContigPanel.updateUI();
 				
@@ -332,37 +329,56 @@ public class CagController implements  Observer  {
 		public LegendAndInputOptionPanel getInputOption() {
 			return inputOption;
 		}
-
-		public void updateLines() {
-			//TODO
+		
+		public void updateLines(boolean isZscore) {
+			con.getChooseContigPanel().setZScore(isZscore);
+			con.getChooseContigPanel().setFlag(true);
+			con.getChooseContigPanel().repaint();
+			/*TODO
+			 * Wenn ich das hier so machen will muss ich noch
+			 *  die liniendicke bzw. den Support irgendwo 
+			 *  speichern. Sonst werden die linien auf min 
+			 *  dicke gesetzt
+			 *  s. absolute support
+			 */
 			
 		}
+	
 
 		@Override
 		public void update(Observable o, Object arg) {
-		//	selectionByUpdate = true;
-			contigsInChooseContigPanel = true;
+			selectionByUpdate = true;
 			
+			updateCentralContig((Integer)arg);
+			updateLeftNeighbours();
+			updateRightNeighbours();
+			contigsInChooseContigPanel = true;
+			selectionByUpdate = false;
+			
+		}
+		
+		private void updateCentralContig(int index) {
+			
+			JPanel centerContainer = chooseContigPanel.getCenterContainer();
+			
+			if (centerContainer.getComponentCount() > 0) {
+				centerContainer.removeAll();
+			}
 
-			int centralContigIndex = (Integer) arg;
+			int centralContigIndex = index;
 			DNASequence currentContig = cagModel.getGraph().getNodes().get(centralContigIndex);
-			boolean isReverse = cagModel.getGraph().getNodes().get(centralContigIndex).isReverse();
+			boolean isReverse = cagModel.isCurrentContigIsReverse();
 			boolean isSelected = false;
 
-			/*if (!selectedLeftEdges.elementAt(centralContigIndex).isEmpty()
-					|| !selectedRightEdges.elementAt(centralContigIndex).isEmpty()) {
+			if (!cagModel.getSelectedLeftEdges().elementAt(centralContigIndex).isEmpty()
+					|| !cagModel.getSelectedRightEdges().elementAt(centralContigIndex).isEmpty()) {
 				isSelected = true;
-			}*/
+			}
 
 			ContigAppearance centralContig = new ContigAppearance(currentContig,
 					centralContigIndex, isSelected, isReverse,
 					cagModel.getMaxSizeOfContigs(), cagModel.getMinSizeOfContigs());
 
-			JPanel centerContainer = chooseContigPanel.getCenterContainer();
-
-			if (centerContainer.getComponentCount() > 0) {
-				centerContainer.removeAll();
-			}
 
 			listScroller.getList().setSelectedValue(currentContig.getId(), true);
 			chooseContigPanel.setCentralContig(centralContig);
@@ -370,15 +386,11 @@ public class CagController implements  Observer  {
 			centerContainer.updateUI();
 			zentralesContigDa = true;
 			
-			updateLeftNeighbours();
-			updateRightNeighbours();
-	//		selectionByUpdate = false;
-			
 		}
-		
-		private void updateRightNeighbours(){
+
+		public void updateRightNeighbours(){
+			System.out.println("update von rechten nachbarn");
 			rightNeighboursReady = false;
-			System.out.println("rechte nachbarn angekommen ");
 			int s = 0;
 
 			Vector<AdjacencyEdge> rightNeighbourEdges = cagModel.getCurrentRightNeighbours();
@@ -515,7 +527,8 @@ public class CagController implements  Observer  {
 		
 		}
 
-		private void updateLeftNeighbours(){
+		public void updateLeftNeighbours(){
+			System.out.println("update von linken nachbarn");
 			leftNeigboursReady = false;
 
 			Vector<AdjacencyEdge> leftNeighbourEdges = cagModel.getCurrentLeftNeighbours();
@@ -584,7 +597,6 @@ public class CagController implements  Observer  {
 					/*
 					 * Set the appearance for each contig
 					 */
-					System.out.println("l erzeuge contig appearance ");
 					contigPanel = new ContigAppearance(cagModel.getGraph(), edge,
 							indexOfContig, true, cagModel.getMaxSizeOfContigs(),
 							cagModel.getMinSizeOfContigs(), anderweitigAusgewaehlt);
@@ -607,12 +619,12 @@ public class CagController implements  Observer  {
 						.setActionCommand("noch kein nachbar ausgewaehlt");
 					}					
 					
-				/*	if (anderweitigAusgewaehlt) {
+					if (anderweitigAusgewaehlt) {
 						radioButton.setActionCommand("anderweitigAusgewaehlt");
-						AdjacencyEdge otherEdgeForThisNeighbour = selectedLeftEdges.get(indexOfContig).firstElement();
+						AdjacencyEdge otherEdgeForThisNeighbour = cagModel.getSelectedLeftEdges().get(indexOfContig).firstElement();
 						radioButton
 								.setNeighboursForTheThisNeighbour(otherEdgeForThisNeighbour);
-					}*/
+					}
 					if (edge.isSelected()) {
 						radioButton.setSelected(true);
 					}
@@ -650,6 +662,8 @@ public class CagController implements  Observer  {
 			leftNeigboursReady = true;
 			repaintWindowAndSubcomponents();			
 		}
+
+	
 
 
 }

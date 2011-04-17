@@ -484,6 +484,11 @@ public class CagCreator extends Observable {
 		//sendCurrentContig();
 	}
 
+	public boolean isCurrentContigIsReverse() {
+		return currentContigIsReverse;
+	}
+
+
 	public Vector<AdjacencyEdge> getCurrentLeftNeighbours() {
 		return currentLeftNeighbours;
 	}

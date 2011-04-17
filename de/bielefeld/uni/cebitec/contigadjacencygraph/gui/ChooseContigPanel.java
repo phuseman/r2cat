@@ -132,7 +132,7 @@ public class ChooseContigPanel extends JPanel {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-System.out.println("ja paint ");
+
 		Graphics2D g2 = (Graphics2D) g;
 
 		/*
@@ -154,9 +154,9 @@ System.out.println("ja paint ");
 		 * This part will to run, during the time we get new central and
 		 * neigbour contigs
 		 */
-		System.out.println(flag);
+
 		if (flag) {
-			System.out.println("auch flag true");
+			
 			int laenge2 = (int) centralContig.getSize().getWidth();
 			int höhe2 = (int) centralContig.getHeight();
 
@@ -194,7 +194,7 @@ System.out.println("ja paint ");
 				 * calculate lines between left neigbours and central contig
 				 */
 				if (left) {
-System.out.println("linke seite");
+
 					int z = 1;
 					int zaehler = 0;
 					int zaehlerFuerSupport = 0;
@@ -214,7 +214,7 @@ System.out.println("linke seite");
 							z++;
 							if (z % 2 == 0) {
 								
-								float lineStrokeLeft;
+								float lineStrokeLeft = 0.01f;
 								if (isZScore) {
 									if (leftSupport[zaehlerFuerSupport] > 0
 											&& leftSupport[zaehlerFuerSupport] < 5) {
@@ -228,21 +228,21 @@ System.out.println("linke seite");
 									/*
 									 * normalized absolute support
 									 */
-									float nenner = (float) (leftSupport[zaehlerFuerSupport] - minSupport);
-									float counter = (float) (maxSupport - minSupport);
-									float xInIntervall = nenner / counter;
-
-									lineStrokeLeft = (float) ((xInIntervall * 3) + 1);
+//									float nenner = (float) (leftSupport[zaehlerFuerSupport] - minSupport);
+//									float counter = (float) (maxSupport - minSupport);
+//									float xInIntervall = nenner / counter;
+//
+//									lineStrokeLeft = (float) ((xInIntervall * 3) + 1);
 //									System.out.println(leftSupport[zaehlerFuerSupport / 1000]);
-//									if ((leftSupport[zaehlerFuerSupport]/1000)<5){
-//										
-//										lineStrokeLeft = (float) leftSupport[zaehlerFuerSupport]/1000;
-//									}else if((leftSupport[zaehlerFuerSupport]/100)<0.01){
-//										lineStrokeLeft = 0.01f;
-//									}
-//									else{
-//										lineStrokeLeft = 5.0f;
-//									}
+									if ((leftSupport[zaehlerFuerSupport]/1000)>0&&(leftSupport[zaehlerFuerSupport]/1000)<5){
+										
+										lineStrokeLeft = (float) leftSupport[zaehlerFuerSupport]/1000;
+									}else if((leftSupport[zaehlerFuerSupport]/100)<0.01){
+										lineStrokeLeft = 0.01f;
+									}
+									else{
+										lineStrokeLeft = 5.0f;
+									}
 								}
 								
 
@@ -300,7 +300,6 @@ System.out.println("linke seite");
 													dash, 0));
 								}
 								g2.drawLine(x + laenge, y, x2, y2);	
-								System.out.println("sollte nun linie gezeichnet haben");
 								zaehlerFuerSupport++;
 							}
 						}
@@ -320,7 +319,7 @@ System.out.println("linke seite");
 							z++;
 							if (z % 2 == 0) {
 						
-								float lineStroke;
+								float lineStroke = 0.01f;
 								if (isZScore) {
 									if (rightSupport[zaehlerFuerSupport] > 0 && rightSupport[zaehlerFuerSupport] < 5) {
 										lineStroke = (float) (rightSupport[zaehlerFuerSupport]);
@@ -330,19 +329,19 @@ System.out.println("linke seite");
 										lineStroke = 0.01f;
 									}
 								} else {
-									float nenner = (float) (rightSupport[zaehlerFuerSupport] - minSupport);
-									float counter = (float) (maxSupport - minSupport);
-									float xInIntervall = nenner / counter;
-									lineStroke = (float) ((xInIntervall * 3) + 1);
+//									float nenner = (float) (rightSupport[zaehlerFuerSupport] - minSupport);
+//									float counter = (float) (maxSupport - minSupport);
+//									float xInIntervall = nenner / counter;
+//									lineStroke = (float) ((xInIntervall * 3) + 1);
 //									System.out.println(rightSupport[zaehlerFuerSupport]/1000);
-//									if ((rightSupport[zaehlerFuerSupport]/1000)<5){
-//									lineStroke =(float) rightSupport[zaehlerFuerSupport]/1000;
-//									}else if((rightSupport[zaehlerFuerSupport]/1000)<0.01){
-//										lineStroke = 0.01f;
-//									}
-//									else{
-//										lineStroke = 5.0f;
-//									}
+									if ((rightSupport[zaehlerFuerSupport]/1000)>0 &&(rightSupport[zaehlerFuerSupport]/1000)<5){
+									lineStroke =(float) rightSupport[zaehlerFuerSupport]/1000;
+									}else if((rightSupport[zaehlerFuerSupport]/1000)<0.01){
+										lineStroke = 0.01f;
+									}
+									else{
+										lineStroke = 5.0f;
+									}
 								}
 								
 								Point point = co.getLocation();
@@ -402,7 +401,7 @@ System.out.println("linke seite");
 	}
 
 	public void setFlag(boolean flag) {
-		System.out.println("setzte flag "+flag);
+
 		this.flag = flag;
 	}
 
