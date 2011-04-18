@@ -1,15 +1,10 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.GradientPaint;
-import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.GeneralPath;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
@@ -20,7 +15,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
-import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
@@ -36,36 +30,9 @@ public class CagController implements  Observer  {
 	private LegendAndInputOptionPanel inputOption;
 	
 	private boolean selectionByUpdate = false;
-	public boolean isSelectionByUpdate() {
-		return selectionByUpdate;
-	}
-
-	public void setSelectionByUpdate(boolean selectionByUpdate) {
-		this.selectionByUpdate = selectionByUpdate;
-	}
-
-	private boolean contigsInChooseContigPanel;
-	private RadioButtonActionListener radioButtonListener;
 	private boolean leftNeigboursReady;
 	private boolean rightNeighboursReady;
-	private boolean zentralesContigDa;
-
-	
-	public boolean isLeftNeigboursReady() {
-		return leftNeigboursReady;
-	}
-
-	public void setLeftNeigboursReady(boolean leftNeigboursReady) {
-		this.leftNeigboursReady = leftNeigboursReady;
-	}
-
-	public boolean isRightNeighboursReady() {
-		return rightNeighboursReady;
-	}
-
-	public void setRightNeighboursReady(boolean rightNeighboursReady) {
-		this.rightNeighboursReady = rightNeighboursReady;
-	}
+	private boolean centralContigThere;
 
 	public CagController (CagCreator model) {
 		
@@ -76,10 +43,8 @@ public class CagController implements  Observer  {
 	
 	public void initWindowWithAllPanel(){
 		
-		window = new CAGWindow(this, cagModel);
-		LayoutGraph layoutGraph = cagModel.getGraph();
+		window = new CAGWindow();
 
-//		Vector<DNASequence> nodes = cagModel.getListData();
 		Vector<DNASequence> nodes = cagModel.getGraph().getNodes();
 		int width = nodes .firstElement().getId().getBytes().length;
 		
@@ -129,8 +94,7 @@ public class CagController implements  Observer  {
 				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane
 				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollPane.setName("scroll pane");
-//		scrollPane.setAlignmentX(TOP_ALIGNMENT);
+
 		scrollPane.setVisible(true);
 		scrollPane.setOpaque(false);
 		scrollPane.validate();
@@ -142,27 +106,18 @@ public class CagController implements  Observer  {
 
 		inputOption = new LegendAndInputOptionPanel(this, cagModel);
 		inputOption.createLegendAndInputOption(numberOfNeighbours);
-		window.add(inputOption, BorderLayout.SOUTH);
-		radioButtonListener = new RadioButtonActionListener(this, cagModel);
+		window.add(inputOption, BorderLayout.SOUTH);		
 		
 		window.initWindow();
 	}
-		public CAGWindow getWindow() {
-		return window;
-	}
 
-	public ChooseContigPanel getChooseContigPanel() {
-		return chooseContigPanel;
-	}
 		private void repaintWindowAndSubcomponents(){
-			if(con.isRightNeighboursReady() && con.isLeftNeigboursReady() && con.zentralesContigDa){
+			if(con.isRightNeighboursReady() && con.isLeftNeigboursReady() && con.centralContigThere){
 				con.getChooseContigPanel().setFlag(true);
 				con.getChooseContigPanel().repaint();
-				//con.getWindow().repaint();
-				//System.out.println("l rufe repaint auf "+con.isLeftNeigboursReady()+" "+con.isRightNeighboursReady());
 				setLeftNeigboursReady(false);
 				setRightNeighboursReady(false);
-				zentralesContigDa = false;
+				centralContigThere = false;
 			}
 		}
 
@@ -262,87 +217,20 @@ public class CagController implements  Observer  {
 				radioButtonContainer.removeAll();
 			}
 		}
-		public class ContigMouseListener implements MouseListener {
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				/*
-				 * If this will be activated the choosed contig will be displayed 
-				 * as central contig with its neighbours.			
-				 */
-				ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-
-				int index = contigPanel.getI();
-				boolean currentContigIsReverse = contigPanel.isReverse();
-				
-				chooseContigPanel.setFlag(false);
-				cagModel.changeContigs(index, currentContigIsReverse);
-				
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-//				ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-//				
-//				 Graphics2D g = contigPanel.getBorder().getG2();
-//				 GeneralPath p = contigPanel.getBorder().getP();
-//			
-//				 GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
-//					g.setPaint(redtowhite);
-//					g.fill(p);
-					//contigPanel.update(g);
-					//chooseContigPanel.updateUI();
-				
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				/*ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-				 Graphics2D g = contigPanel.getBorder().getG2();
-				 GeneralPath p = contigPanel.getBorder().getP();
-				 g.draw(p);*/
-				 
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				// Auto-generated method stub
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				// Auto-generated method stub
-			}
-
-			
-		}
-
-		public JScrollPane getScrollPane() {
-			return scrollPane;
-		}
-
-		public ContigListPanel getListScroller() {
-			return listScroller;
-		}
-
-
-		public LegendAndInputOptionPanel getInputOption() {
-			return inputOption;
-		}
 		
-		public void updateLines(boolean isZscore) {
+		/*public void updateLines(boolean isZscore) {
 			con.getChooseContigPanel().setZScore(isZscore);
 			con.getChooseContigPanel().setFlag(true);
 			con.getChooseContigPanel().repaint();
-			/*TODO
+			TODO
 			 * Wenn ich das hier so machen will muss ich noch
 			 *  die liniendicke bzw. den Support irgendwo 
 			 *  speichern. Sonst werden die linien auf min 
 			 *  dicke gesetzt
 			 *  s. absolute support
-			 */
+			 
 			
-		}
+		}*/
 	
 
 		@Override
@@ -352,7 +240,6 @@ public class CagController implements  Observer  {
 			updateCentralContig((Integer)arg);
 			updateLeftNeighbours();
 			updateRightNeighbours();
-			contigsInChooseContigPanel = true;
 			selectionByUpdate = false;
 			
 		}
@@ -384,12 +271,12 @@ public class CagController implements  Observer  {
 			chooseContigPanel.setCentralContig(centralContig);
 			centerContainer.add(centralContig);
 			centerContainer.updateUI();
-			zentralesContigDa = true;
+			centralContigThere = true;
 			
 		}
 
 		public void updateRightNeighbours(){
-			System.out.println("update von rechten nachbarn");
+
 			rightNeighboursReady = false;
 			int s = 0;
 
@@ -488,14 +375,14 @@ public class CagController implements  Observer  {
 						radioButton
 						.setActionCommand("noch kein nachbar ausgewaehlt");
 					}
-					/*if (anderweitigAusgewaehlt) {
+					if (anderweitigAusgewaehlt) {
 						radioButton.setActionCommand("anderweitigAusgewaehlt");
-						AdjacencyEdge otherEdge = selectedRightEdges.get(indexOfContig).firstElement();
+						AdjacencyEdge otherEdge = cagModel.getSelectedLeftEdges().get(indexOfContig).firstElement();
 						radioButton.setNeighboursForTheThisNeighbour(otherEdge);
 						
-					}*/
+					}
 
-					radioButton.setNachbarIndex(indexOfContig);
+					radioButton.setNeighbourIndex(indexOfContig);
 					radioButton.setCentralIndex(cagModel.getCurrentContigIndex());
 					radioButton.setLeft(false);
 					radioButton.setOpaque(false);
@@ -528,7 +415,7 @@ public class CagController implements  Observer  {
 		}
 
 		public void updateLeftNeighbours(){
-			System.out.println("update von linken nachbarn");
+
 			leftNeigboursReady = false;
 
 			Vector<AdjacencyEdge> leftNeighbourEdges = cagModel.getCurrentLeftNeighbours();
@@ -580,9 +467,6 @@ public class CagController implements  Observer  {
 					 * Save the support or z-scores here in an array
 					 * to commit them to the choose contig panel
 					 * for setting the linestroke 
-					 * 
-					 * TODO berechnung des zScore für alle nachbarn zu
-					 * Anfang im model
 					 */
 					if (cagModel.isZScore()) {
 						leftSupport[t] = calculateZScore(edge,
@@ -662,8 +546,105 @@ public class CagController implements  Observer  {
 			leftNeigboursReady = true;
 			repaintWindowAndSubcomponents();			
 		}
+		
+		public class ContigMouseListener implements MouseListener {
 
-	
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				/*
+				 * If this will be activated the choosed contig will be displayed 
+				 * as central contig with its neighbours.			
+				 */
+				ContigAppearance contigPanel = (ContigAppearance) e.getSource();
 
+				int index = contigPanel.getI();
+				boolean currentContigIsReverse = contigPanel.isReverse();
+				
+				chooseContigPanel.setFlag(false);
+				cagModel.changeContigs(index, currentContigIsReverse);
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+//				ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+//				
+//				 Graphics2D g = contigPanel.getBorder().getG2();
+//				 GeneralPath p = contigPanel.getBorder().getP();
+//			
+//				 GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
+//					g.setPaint(redtowhite);
+//					g.fill(p);
+					//contigPanel.update(g);
+					//chooseContigPanel.updateUI();
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				/*ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+				 Graphics2D g = contigPanel.getBorder().getG2();
+				 GeneralPath p = contigPanel.getBorder().getP();
+				 g.draw(p);*/
+				 
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// Auto-generated method stub
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// Auto-generated method stub
+			}
+
+			
+		}
+
+		public JScrollPane getScrollPane() {
+			return scrollPane;
+		}
+
+		public ContigListPanel getListScroller() {
+			return listScroller;
+		}
+
+
+		public LegendAndInputOptionPanel getInputOption() {
+			return inputOption;
+		}
+		
+
+		public boolean isSelectionByUpdate() {
+			return selectionByUpdate;
+		}
+
+		public void setSelectionByUpdate(boolean selectionByUpdate) {
+			this.selectionByUpdate = selectionByUpdate;
+		}
+
+		public boolean isLeftNeigboursReady() {
+			return leftNeigboursReady;
+		}
+
+		public void setLeftNeigboursReady(boolean leftNeigboursReady) {
+			this.leftNeigboursReady = leftNeigboursReady;
+		}
+
+		public boolean isRightNeighboursReady() {
+			return rightNeighboursReady;
+		}
+
+		public void setRightNeighboursReady(boolean rightNeighboursReady) {
+			this.rightNeighboursReady = rightNeighboursReady;
+		}
+		public CAGWindow getWindow() {
+			return window;
+		}
+
+		public ChooseContigPanel getChooseContigPanel() {
+			return chooseContigPanel;
+		}
 
 }

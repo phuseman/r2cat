@@ -14,35 +14,20 @@ public class RadioButtonActionListener implements ActionListener {
 	
 	private CagController con;
 	private CagCreator cagModel;
-
-	private boolean isZScore = false;
-	private DNASequence centralContig;
 	private int centralContigIndex;
-	private JRadioButton absoluteSupport;
-	private JRadioButton zScore;
-//	private Vector<Vector<AdjacencyEdge>> selectedLeftEdges;
-//	private Vector<Vector<AdjacencyEdge>> selectedRightEdges;
-	
 
 	
 	public RadioButtonActionListener (CagController controller, CagCreator model){
 
 		this.con = controller;
 		this.cagModel = model;
-		this.isZScore = cagModel.isZScore();
-		
-		this.centralContig = cagModel.getCurrentContigObject();
 		this.centralContigIndex = cagModel.getCurrentContigIndex();
-	
-		
-//		selectedLeftEdges = cagModel.getSelectedLeftEdges();
-//		selectedRightEdges = cagModel.getSelectedRightEdges();
-		
+
 	}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println(e.getActionCommand());
+
 			/*
 			 * Here are the options to react on a selection of a radion Button
 			 * next to the contigs

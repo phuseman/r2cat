@@ -156,17 +156,17 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener,
 			isZScore = false;
 			absoluteSupport.setSelected(true);
 			model.setZScore(false);
+			con.getChooseContigPanel().setZScore(isZScore);
 
-			con.updateLines(isZScore);
-//			updateModelAndGui();
+			updateGui();
 
 		} else if (e.getActionCommand().equals("zScore")) {
 			isZScore = true;
 			absoluteSupport.setSelected(false);
 			model.setZScore(true);
+			con.getChooseContigPanel().setZScore(isZScore);			
 
-			con.updateLines(isZScore);
-//			updateModelAndGui();
+			updateGui();
 		}
 		
 	}
@@ -174,7 +174,7 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener,
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		System.out.println("reagiert");
+
 		JFormattedTextField inputOptionForNumberOfNeighbours = 
 			((JFormattedTextField) evt.getSource());
 		/*
@@ -183,7 +183,6 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener,
 		 * But only between 1 and 10
 		 */
 		int neighboursNumber = ((Number) evt.getNewValue()).intValue();
-		System.out.println(neighboursNumber);
 
 		JPanel rightContainer = con.getChooseContigPanel().getRightContainer();
 		JPanel leftContainer = con.getChooseContigPanel().getLeftContainer();
@@ -205,13 +204,13 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener,
 			numberOfNeighbours = neighboursNumber;
 			inputOptionForNumberOfNeighbours.setValue(new Integer(
 					numberOfNeighbours));
-			model.setNumberOfNeighbours(neighboursNumber);
+			model.setNumberOfNeighbours(numberOfNeighbours);
 			con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
 
 			
 			if (rightContainer.getComponentCount() != 0
 					|| leftContainer.getComponentCount() != 0) {
-				updateModelAndGui();
+				updateGui();
 			}
 
 		} else if (neighboursNumber == 0) {
@@ -222,12 +221,12 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener,
 			numberOfNeighbours = 5;
 			inputOptionForNumberOfNeighbours .setValue(new Integer(
 					numberOfNeighbours));
-			model.setNumberOfNeighbours(neighboursNumber);
+			model.setNumberOfNeighbours(numberOfNeighbours);
 			con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
 
 			if (rightContainer.getComponentCount() != 0
 					|| leftContainer.getComponentCount() != 0) {
-				updateModelAndGui();
+				updateGui();
 			}
 		} else {
 			javax.swing.JOptionPane.showMessageDialog(con.getWindow(), "Sorry.\n"
@@ -240,22 +239,20 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener,
 			int breite = (int) con.getChooseContigPanel().getSize().getWidth();
 
 			con.getChooseContigPanel().setPreferredSize(new Dimension(breite, 600));
-			model.setNumberOfNeighbours(neighboursNumber);
+			model.setNumberOfNeighbours(numberOfNeighbours);
 			con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
 
 			if (rightContainer.getComponentCount() != 0
 					|| leftContainer.getComponentCount() != 0) {
-				updateModelAndGui();
+				updateGui();
 			}
 		}
 
 	}
 	
-	private void updateModelAndGui(){
+	private void updateGui(){
 		con.updateLeftNeighbours();
 		con.updateRightNeighbours();
-//		model.sendLeftNeighbours();
-//		model.sendRightNeighbours();
 		con.getChooseContigPanel().repaint();
 	}
 

@@ -1,6 +1,5 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
-import java.awt.Component;
 import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
@@ -73,11 +72,6 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 		
 	}
 
-	public JList getList() {
-		return list;
-	}
-
-
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
@@ -105,15 +99,12 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 			 * zu komunizieren. Code wird lesbarer, Controller nicht ueberladen
 			 */
 			myModel.changeContigs(index, false);
-		//	 controller.getChooseContigPanel().setFlag(false);
-
-			/*ThreadForRightAndLeftNeigbours threadForRightNeighbours = new ThreadForRightAndLeftNeigbours( controller, myModel, false);
-			threadForRightNeighbours.execute();
-
-			ThreadForRightAndLeftNeigbours threadForLeftNeighbours =new ThreadForRightAndLeftNeigbours( controller, myModel, true);
-			threadForLeftNeighbours.execute();*/
 
 		}
 			
 	}
+	public JList getList() {
+		return list;
+	}
+
 }

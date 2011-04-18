@@ -1,16 +1,13 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
-import java.util.Vector;
-
 import javax.swing.JRadioButton;
+
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
-import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
 public class ContigRadioButton extends JRadioButton {
 	
 	private AdjacencyEdge edge;
 	private ContigAppearance contigObject;
-//	private int i;
 	private boolean isLeft;
 	private int nachbarIndex;
 	private int centralIndex; 
@@ -22,7 +19,6 @@ public class ContigRadioButton extends JRadioButton {
 	public ContigRadioButton (AdjacencyEdge includingEdge, ContigAppearance contig){
 		this.edge = includingEdge;
 		this.contigObject = contig;
-//		this.i = index;
 	}
 	
 	public ContigAppearance getContigObject() {
@@ -49,7 +45,7 @@ public class ContigRadioButton extends JRadioButton {
 		return nachbarIndex;
 	}
 
-	public void setNachbarIndex(int nachbarIndex) {
+	public void setNeighbourIndex(int nachbarIndex) {
 		this.nachbarIndex = nachbarIndex;
 	}
 

@@ -2,7 +2,6 @@ package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Observable;
 import java.util.Vector;
@@ -26,7 +25,6 @@ import de.bielefeld.uni.cebitec.treecat.TreebasedContigSorterProject;
  */
 public class CagCreator extends Observable {
 
-	private static CAGWindow window;
 	private static CagController controller;
 	private static CagCreator model;
 
@@ -37,8 +35,6 @@ public class CagCreator extends Observable {
 	private int currentContigIndex;
 	private boolean currentContigIsReverse = false;
 	private DNASequence currentContigObject;
-
-	private ArrayList<CagEventListener> listeners;
 	
 	private long maxSizeOfContigs;
 	private long minSizeOfContigs;
@@ -57,20 +53,9 @@ public class CagCreator extends Observable {
 	private Vector<AdjacencyEdge> currentLeftNeighbours;
 	private Vector<AdjacencyEdge> currentRightNeighbours;
 
-	public boolean isZScore() {
-		return isZScore;
-	}
 
-
-	public void setZScore(boolean isZScore) {
-		this.isZScore = isZScore;
-	}
-
-
-	// private CAGWindow window;
 	public CagCreator(LayoutGraph g) {
 		this.graph = g;
-		listeners = new ArrayList<CagEventListener>();
 
 		leftAndRightNeighbour();
 		contigs = graph.getNodes();
@@ -397,76 +382,6 @@ public class CagCreator extends Observable {
 
 	}
 
-	/*
-	 * Send an event, if the user selected a contig
-	 */
-	public void sendCurrentContig() {
-
-		CagEvent event = new CagEvent(EventType.EVENT_CHOOSED_CONTIG,
-				currentContigObject, currentContigIndex, currentContigIsReverse);
-		fireEvent(event);
-	}
-
-	/*
-	 * Send an event. If the user selected an node(contig) the neighbours will
-	 * be caculated. This Event carries an Array with the most likely left
-	 * neighbours.
-	 */
-	public void sendLeftNeighbours() {
-		CagEvent event = new CagEvent(EventType.EVENT_SEND_LEFT_NEIGHBOURS,
-				fiveMostLikleyLeftNeighbours(currentContigIndex,
-						currentContigIsReverse));
-		fireEvent(event);
-	}
-
-	/*
-	 * Send an event. If the user selected an node(contig) the neighbours will
-	 * be caculated. This Event carries an Array with the most likely right
-	 * neighbours.
-	 */
-	public void sendRightNeighbours() {
-		CagEvent event = new CagEvent(EventType.EVENT_SEND_RIGHT_NEIGHBOURS,
-				fiveMostLikleyRightNeighbours(currentContigIndex,
-						currentContigIsReverse));
-		fireEvent(event);
-	}
-
-	/*
-	 * Save class (listener) which register itself 
-	 */
-	public void addEventListener(CagEventListener listener) {
-		listeners.add(listener);
-	}
-
-	/*
-	 * Delete class from the list
-	 */
-	public void removeEventListener(CagEventListener listener) {
-		listeners.remove(listener);
-	}
-
-	/*
-	 * Send events with data and eventtype
-	 */
-	private void fireEvent(CagEvent event) {
-
-		ArrayList<CagEventListener> copyList = new ArrayList<CagEventListener>(
-				listeners);
-		for (CagEventListener listener : copyList) {
-			listener.event_fired(event);
-
-		}
-	}
-
-	/*
-	 * This list has all names of contigs, which will be display in the
-	 * scrollbar / window the user is able to select a contig, such that this
-	 * contig will be display at the central contig
-	 */
-	public Vector<DNASequence> getListData() {
-		return contigs;
-	}
-
 
 	/*
 	 * necessary to change the current contig and also the
@@ -481,7 +396,7 @@ public class CagCreator extends Observable {
 		currentLeftNeighbours = fiveMostLikleyLeftNeighbours(currentContigIndex, isReverse);
 		currentRightNeighbours = fiveMostLikleyRightNeighbours(currentContigIndex, isReverse);
 		notifyObservers(currentContigIndex);
-		//sendCurrentContig();
+
 	}
 
 	public boolean isCurrentContigIsReverse() {
@@ -573,5 +488,16 @@ public class CagCreator extends Observable {
 	public DNASequence getCurrentContigObject() {
 		return currentContigObject;
 	}
+	
+	public boolean isZScore() {
+		return isZScore;
+	}
+
+
+	public void setZScore(boolean isZScore) {
+		this.isZScore = isZScore;
+	}
+
+
 
 }
