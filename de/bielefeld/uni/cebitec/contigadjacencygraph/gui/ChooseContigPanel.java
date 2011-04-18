@@ -230,11 +230,20 @@ public class ChooseContigPanel extends JPanel {
 								// + 1);
 								// System.out.println(leftSupport[zaehlerFuerSupport
 								// / 1000]);
-								if ((leftSupport[zaehlerFuerSupport] / 1000) > 0
+							/*	if ((leftSupport[zaehlerFuerSupport] / 1000) > 0
 										&& (leftSupport[zaehlerFuerSupport] / 1000) < 5) {
 
 									lineStrokeLeft = (float) leftSupport[zaehlerFuerSupport] / 1000;
 								} else if ((leftSupport[zaehlerFuerSupport] / 100) < 0.01) {
+									lineStrokeLeft = 0.01f;
+								} else {
+									lineStrokeLeft = 5.0f;
+								}*/
+								if (Math.log(leftSupport[zaehlerFuerSupport]) > 0
+										&& Math.log(leftSupport[zaehlerFuerSupport]) < 5) {
+
+									lineStrokeLeft = (float) Math.log(leftSupport[zaehlerFuerSupport]);
+								} else if (Math.log(leftSupport[zaehlerFuerSupport]) < 0.01) {
 									lineStrokeLeft = 0.01f;
 								} else {
 									lineStrokeLeft = 5.0f;
@@ -326,10 +335,19 @@ public class ChooseContigPanel extends JPanel {
 								// lineStroke = (float) ((xInIntervall * 3) +
 								// 1);
 								// System.out.println(rightSupport[zaehlerFuerSupport]/1000);
-								if ((rightSupport[zaehlerFuerSupport] / 1000) > 0
+								/*if ((rightSupport[zaehlerFuerSupport] / 1000) > 0
 										&& (rightSupport[zaehlerFuerSupport] / 1000) < 5) {
 									lineStroke = (float) rightSupport[zaehlerFuerSupport] / 1000;
 								} else if ((rightSupport[zaehlerFuerSupport] / 1000) < 0.01) {
+									lineStroke = 0.01f;
+								} else {
+									lineStroke = 5.0f;
+								}*/
+								if (Math.log(rightSupport[zaehlerFuerSupport]) > 0
+										&& Math.log(rightSupport[zaehlerFuerSupport]) < 5) {
+
+									lineStroke = (float) Math.log(rightSupport[zaehlerFuerSupport]);
+								} else if (Math.log(rightSupport[zaehlerFuerSupport]) < 0.01) {
 									lineStroke = 0.01f;
 								} else {
 									lineStroke = 5.0f;
