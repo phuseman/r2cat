@@ -679,10 +679,10 @@ public class MatchList extends Observable implements
 						if (line.charAt(start)=='"') {
 							//remove quotation (if present)
 							target.setDescription(line.substring(start+1, line
-									.length() - 2));
+									.length() - 1));
 						} else {
 						target.setDescription(line.substring(start, line
-								.length() - 1));
+								.length() ));
 						}
 					} else if (propertyValue[0].matches(".+size")) {
 						target.setSize(Long.parseLong(propertyValue[1]));
@@ -735,10 +735,10 @@ public class MatchList extends Observable implements
 						if (line.charAt(start)=='"') {
 							//remove quotation (if present)
 							query.setDescription(line.substring(start+1, line
-									.length() - 2));
+									.length() - 1));
 						} else {
 							query.setDescription(line.substring(start, line
-								.length() - 1));
+								.length()));
 						}
 					} else if (propertyValue[0].matches(".+size")) {
 						query.setSize(Long.parseLong(propertyValue[1]));
