@@ -2,6 +2,9 @@ package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
+import java.awt.geom.GeneralPath;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -50,7 +53,7 @@ public class ContigAppearance extends JPanel {
 		this.add(contigLabel);
 		this.setName(node.getId());
 		setContigAppearance(node.getId(), node.getSize(), new ContigBorder(isRepetitiv,
-				isReverse, isCurrentContigSelected, false));
+				isReverse, isCurrentContigSelected, false, false));
 		setSizeOfContig(node.getSize(), maxSize, minSize);
 	}
 
@@ -91,17 +94,11 @@ public class ContigAppearance extends JPanel {
 
 		isRepetitiv = contig.isRepetitive();
 		border = new ContigBorder(
-				isRepetitiv, isReverse, selected, anderweitigAusgewaehlt);
+				isRepetitiv, isReverse, selected, anderweitigAusgewaehlt, false);
 		setContigAppearance(contig.getId(), contig.getSize(), border);
 		setSizeOfContig(contig.getSize(), maxSize, minSize);
 	}
-	public ContigBorder getBorder() {
-		return border;
-	}
-
-	public void setBorder(ContigBorder border) {
-		this.border = border;
-	}
+	
 
 	/*
 	 * Figure out, if the contig have to be displayed as reverse or not
@@ -198,6 +195,12 @@ public class ContigAppearance extends JPanel {
 		this.setMaximumSize(new Dimension(wSize, 50));
 		this.setMinimumSize(new Dimension(wSize, 50));
 
+	}
+	
+	public void highlightOfContigPanel ( boolean highlight){
+
+		ContigBorder border = new ContigBorder(isRepetitiv, isReverse, selected	, anderweitigAusgewaehlt	, highlight);
+		this.setBorder(border);	
 	}
 
 	public LayoutGraph getlGraph() {

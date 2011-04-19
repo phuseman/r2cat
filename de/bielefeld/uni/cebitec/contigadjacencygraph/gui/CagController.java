@@ -1,10 +1,14 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.GeneralPath;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
@@ -567,26 +571,15 @@ public class CagController implements  Observer  {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-//				ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-//				
-//				 Graphics2D g = contigPanel.getBorder().getG2();
-//				 GeneralPath p = contigPanel.getBorder().getP();
-//			
-//				 GradientPaint redtowhite = new GradientPaint(0,0,Color.RED,100, 0,Color.WHITE);
-//					g.setPaint(redtowhite);
-//					g.fill(p);
-					//contigPanel.update(g);
-					//chooseContigPanel.updateUI();
+				ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+				contigPanel.highlightOfContigPanel(true);
 				
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				/*ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-				 Graphics2D g = contigPanel.getBorder().getG2();
-				 GeneralPath p = contigPanel.getBorder().getP();
-				 g.draw(p);*/
-				 
+				ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+				contigPanel.highlightOfContigPanel(false); 
 			}
 
 			@Override

@@ -24,22 +24,25 @@ public class ContigBorder extends AbstractBorder{
 	private float[] dash2 = {15,2};
 	private Graphics2D g2;
 	private GeneralPath p;
+	private boolean highlightContig;
 	
 	public ContigBorder(boolean isRepeat, boolean isReverse) {
 		this.isRepeat = isRepeat;
 		this.isReverse = isReverse;
 	}
-	public ContigBorder(boolean isRepeat, boolean isReverse, boolean flag, boolean anderweitigAusgewaehlt) {
+	public ContigBorder(boolean isRepeat, boolean isReverse, boolean flag, boolean anderweitigAusgewaehlt, boolean highlight) {
 		this.isRepeat = isRepeat;
 		this.isReverse = isReverse;
 		this.isSelected = flag;
 		this.woandersAusgewaehlt = anderweitigAusgewaehlt;
+		this.highlightContig = highlight;
 	}
 
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
 	        
 	    Color oldColor = g.getColor();     
 		g2 = (Graphics2D) g;
+		Stroke oldStroke = g2.getStroke();
 		
 		/*
 		 * For drawing the edging soft
@@ -68,25 +71,33 @@ public class ContigBorder extends AbstractBorder{
 		
 		if(isRepeat ==false && isReverse == false){
 			p = makeContig(0,0, c.getWidth(),c.getHeight());
-			g2.draw(p);
 		}
-		if(isRepeat == true && isReverse == false){
-			
+		if(isRepeat == true && isReverse == false){	
 			p = makeRepeatContig(0,0, c.getWidth(),c.getHeight());
-			g2.draw(p);
 		}
 		if(isRepeat == false && isReverse == true){
 			p = makeReverseContig(0,0, c.getWidth(),c.getHeight());
-			g2.draw(p);
 		}
 		if(isRepeat == true && isReverse == true){
 			p = makeReverseRepeatContig(0,0, c.getWidth(),c.getHeight());
+		}
+		
+		if (highlightContig){
+		//	GradientPaint redtowhite = new GradientPaint(0,0,Color.LIGHT_GRAY,100, 0,Color.WHITE);
+			g2.setPaint(Color.LIGHT_GRAY);
+			g2.fill(p);
+			g2.draw(p);
+		}else{
+			g2.setPaint(null);
 			g2.draw(p);
 		}
 		
+		g2.setStroke(oldStroke);
 		g.setColor(oldColor);
+		
 	}
-
+	
+	
 	public GeneralPath getP() {
 		return p;
 	}

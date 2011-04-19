@@ -8,6 +8,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -128,6 +129,8 @@ public class ChooseContigPanel extends JPanel {
 		super.paintComponent(g);
 
 		Graphics2D g2 = (Graphics2D) g;
+		Stroke originalStroke = g2.getStroke();
+		Color originalColor = g2.getColor();
 
 		/*
 		 * save point of positions, so that there are no problems to draw the
@@ -388,6 +391,8 @@ public class ChooseContigPanel extends JPanel {
 				}
 			}
 		}
+		g2.setStroke(originalStroke);
+		g2.setColor(originalColor);
 	}
 
 	public int getNumberOfNeighbours() {
