@@ -77,6 +77,7 @@ public class CagCreator extends Observable {
 		 * initialization of the vectors in the vector 
 		 */
 		for (int i = 0; i < selectedLeftEdges.size(); i++) {
+			
 			Vector<AdjacencyEdge> contigVector = new Vector<AdjacencyEdge>();
 			selectedLeftEdges.add(i,contigVector);
 			if(i == term-1){
@@ -92,9 +93,70 @@ public class CagCreator extends Observable {
 			}
 		}
 		
+		for(int i = 0; i<leftNeighbours.length; i++){
+			
+		}
 	}
 
+	public void setLayoutGraph(LayoutGraph g){
+		
+		this.graph = g;
+		leftAndRightNeighbour();
+		contigs = graph.getNodes();
+		calculateMinSizeOfContigs(contigs);
+		calculateMaxSizeOfContigs(contigs);
+		
+		calculateMaxSupport(g);
+		calculateMinSupport(g);
 
+		calculateMeanAndSDeviationForLeftNeigbours(leftNeighbours);
+		calculateMeanAndSDeviationForRightNeigbours(rightNeighbours);
+		
+		selectedLeftEdges.setSize(graph.getNodes().size());
+		selectedRightEdges.setSize(graph.getNodes().size());
+		int term = selectedLeftEdges.size();
+		int term2 = selectedRightEdges.size();
+
+		/*
+		 * initialization of the vectors in the vector 
+		 */
+		for (int i = 0; i < selectedLeftEdges.size(); i++) {
+			Vector<AdjacencyEdge> contigVector = new Vector<AdjacencyEdge>();
+			
+			/*
+			 * And figure out which neighbours are already selected
+			 */
+			Vector<AdjacencyEdge> neighboursForCurrentIndex = leftNeighbours[i];
+			for (AdjacencyEdge adjacencyEdge : neighboursForCurrentIndex) {
+				if(adjacencyEdge.isSelected()){
+					contigVector.add(adjacencyEdge);
+				}
+			}
+			
+			selectedLeftEdges.add(i,contigVector);
+			if(i == term-1){
+				break;
+			}
+		}		
+
+		for (int i = 0; i < selectedRightEdges.size(); i++) {
+			Vector<AdjacencyEdge> contigVector = new Vector<AdjacencyEdge>();
+			
+			Vector<AdjacencyEdge> neighboursForCurrentIndex = rightNeighbours[i];
+			for (AdjacencyEdge adjacencyEdge : neighboursForCurrentIndex) {
+				if(adjacencyEdge.isSelected()){
+					contigVector.add(adjacencyEdge);
+				}
+			}
+			selectedRightEdges.add(i,contigVector);
+			if(i == term2-1){
+				break;
+			}
+		}
+	}
+	
+	
+	
 	public static void main(String[] args) {
 
 		TreebasedContigSorterProject project = new TreebasedContigSorterProject();

@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
@@ -43,6 +44,19 @@ public class CagController implements  Observer  {
 		this.cagModel = model;
 		model.addObserver(this);
 		
+	}
+	
+	public void setLayoutGraph(LayoutGraph graph){
+		cagModel.setLayoutGraph(graph);
+		/*
+		 * this can be changed; 
+		 * if you know the old index of central contig
+		 */
+		if(chooseContigPanel == null){
+			
+		}else{
+			cagModel.changeContigs(0, false);
+		}
 	}
 	
 	public void initWindowWithAllPanel(){
@@ -222,19 +236,6 @@ public class CagController implements  Observer  {
 			}
 		}
 		
-		/*public void updateLines(boolean isZscore) {
-			con.getChooseContigPanel().setZScore(isZscore);
-			con.getChooseContigPanel().setFlag(true);
-			con.getChooseContigPanel().repaint();
-			TODO
-			 * Wenn ich das hier so machen will muss ich noch
-			 *  die liniendicke bzw. den Support irgendwo 
-			 *  speichern. Sonst werden die linien auf min 
-			 *  dicke gesetzt
-			 *  s. absolute support
-			 
-			
-		}*/
 	
 
 		@Override
@@ -559,27 +560,32 @@ public class CagController implements  Observer  {
 				 * If this will be activated the choosed contig will be displayed 
 				 * as central contig with its neighbours.			
 				 */
-				ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+				if(e.getSource() instanceof ContigAppearance){
+					ContigAppearance contigPanel = (ContigAppearance) e.getSource();
 
 				int index = contigPanel.getI();
 				boolean currentContigIsReverse = contigPanel.isReverse();
 				
 				chooseContigPanel.setFlag(false);
 				cagModel.changeContigs(index, currentContigIsReverse);
-				
+				}
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-				contigPanel.highlightOfContigPanel(true);
+				if(e.getSource() instanceof ContigAppearance){
+					ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+					contigPanel.highlightOfContigPanel(true);					
+				}
 				
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-				contigPanel.highlightOfContigPanel(false); 
+				if(e.getSource() instanceof ContigAppearance){
+					ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+					contigPanel.highlightOfContigPanel(false);					
+				}
 			}
 
 			@Override

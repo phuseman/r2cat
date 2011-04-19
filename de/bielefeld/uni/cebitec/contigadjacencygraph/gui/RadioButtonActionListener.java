@@ -27,7 +27,12 @@ public class RadioButtonActionListener implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-
+			if(e.getSource() instanceof ContigRadioButton){
+				
+				ContigRadioButton radioButton = 
+					(ContigRadioButton) e.getSource();
+				
+				AdjacencyEdge selectedEdge = radioButton.getEdge();
 			/*
 			 * Here are the options to react on a selection of a radion Button
 			 * next to the contigs
@@ -36,10 +41,6 @@ public class RadioButtonActionListener implements ActionListener {
 			 */
 		 if (e.getActionCommand().equals(
 					"noch kein nachbar ausgewaehlt")) {
-			
-				ContigRadioButton radioButton = (ContigRadioButton) e
-						.getSource();
-				AdjacencyEdge selectedEdge = radioButton.getEdge();
 
 				int[] indices = leftAndRightIndex(radioButton, selectedEdge);
 				/*
@@ -51,9 +52,6 @@ public class RadioButtonActionListener implements ActionListener {
 				 * if there is a neighbour already selected
 				 */
 			} else if (e.getActionCommand().equals("nachbarAusgewaehlt")) {
-
-				ContigRadioButton radioButton = (ContigRadioButton) e.getSource();
-				AdjacencyEdge selectedEdge = radioButton.getEdge();
 
 				int[] indices = leftAndRightIndex(radioButton, selectedEdge);
 				AdjacencyEdge oldEdge = radioButton
@@ -75,10 +73,6 @@ public class RadioButtonActionListener implements ActionListener {
 				 *  This will treat that possibility.
 				 */
 			} else if (e.getActionCommand().equals("anderweitigAusgewaehlt")) {
-
-				ContigRadioButton radioButton = (ContigRadioButton) e
-						.getSource();
-				AdjacencyEdge selectedEdge = radioButton.getEdge();
 
 				int[] indices = leftAndRightIndex(radioButton, selectedEdge);
 				AdjacencyEdge otherEdge = radioButton
@@ -112,7 +106,7 @@ public class RadioButtonActionListener implements ActionListener {
 						selectEdge(selectedEdge, indices);
 						updateModelAndGui();
 					}
-				
+			}
 			}
 
 		}

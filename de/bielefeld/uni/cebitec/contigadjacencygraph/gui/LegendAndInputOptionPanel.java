@@ -174,7 +174,8 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener,
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-
+		
+		if(evt.getSource() instanceof JFormattedTextField){
 		JFormattedTextField inputOptionForNumberOfNeighbours = 
 			((JFormattedTextField) evt.getSource());
 		/*
@@ -247,7 +248,7 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener,
 				updateGui();
 			}
 		}
-
+		}
 	}
 	
 	private void updateGui(){
