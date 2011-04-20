@@ -9,12 +9,16 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
-public class ChooseContigPanel extends JPanel {
+public class ChooseContigPanel extends JPanel  implements MouseListener, Observer {
 
 	private BoxLayout layout;
 	private JPanel leftContainer;
@@ -33,16 +37,14 @@ public class ChooseContigPanel extends JPanel {
 	private double minSupport;
 	private double maxSupport;
 	private double[] rightSupport;
+  private final CagCreator model;
 
-	public ChooseContigPanel(int neighboursNumber, boolean zScore, double max,
-			double min) {
 
-		this.numberOfNeighbours = neighboursNumber;
-		this.isZScore = zScore;
-		this.maxSupport = max;
-		this.minSupport = min;
-
-	}
+  ChooseContigPanel(CagCreator cagModel) {
+    this.model = cagModel;
+    model.addObserver(this);
+    this.addMouseListener(this);
+  }
 
 	/*
 	 * this panel contains the central contig and its neighbours
@@ -491,5 +493,56 @@ public class ChooseContigPanel extends JPanel {
 	public void setCentralContig(ContigAppearance centralContig) {
 		this.centralContig = centralContig;
 	}
+
+
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+      /*
+       * If this will be activated the choosed contig will be displayed
+       * as central contig with its neighbours.
+       */
+      if (e.getSource() instanceof ContigAppearance) {
+        ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+
+        int index = contigPanel.getI();
+        boolean currentContigIsReverse = contigPanel.isReverse();
+
+        this.setFlag(false);
+        model.changeContigs(index, currentContigIsReverse);
+      }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+      if (e.getSource() instanceof ContigAppearance) {
+        ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+        contigPanel.highlightOfContigPanel(true);
+      }
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+      if (e.getSource() instanceof ContigAppearance) {
+        ContigAppearance contigPanel = (ContigAppearance) e.getSource();
+        contigPanel.highlightOfContigPanel(false);
+      }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+      // Auto-generated method stub
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+      // Auto-generated method stub
+    }
+
+  @Override
+  public void update(Observable o, Object arg) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
 }

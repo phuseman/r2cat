@@ -54,48 +54,11 @@ public class CagCreator extends Observable {
 	private Vector<AdjacencyEdge> currentRightNeighbours;
 
 
-	public CagCreator(LayoutGraph g) {
-		this.graph = g;
+	public CagCreator() {
+	}
 
-		leftAndRightNeighbour();
-		contigs = graph.getNodes();
-		calculateMinSizeOfContigs(contigs);
-		calculateMaxSizeOfContigs(contigs);
-		
-		calculateMaxSupport(g);
-		calculateMinSupport(g);
-
-		calculateMeanAndSDeviationForLeftNeigbours(leftNeighbours);
-		calculateMeanAndSDeviationForRightNeigbours(rightNeighbours);
-		
-		selectedLeftEdges.setSize(graph.getNodes().size());
-		selectedRightEdges.setSize(graph.getNodes().size());
-		int term = selectedLeftEdges.size();
-		int term2 = selectedRightEdges.size();
-
-		/*
-		 * initialization of the vectors in the vector 
-		 */
-		for (int i = 0; i < selectedLeftEdges.size(); i++) {
-			
-			Vector<AdjacencyEdge> contigVector = new Vector<AdjacencyEdge>();
-			selectedLeftEdges.add(i,contigVector);
-			if(i == term-1){
-				break;
-			}
-		}		
-
-		for (int i = 0; i < selectedRightEdges.size(); i++) {
-			Vector<AdjacencyEdge> contigVector = new Vector<AdjacencyEdge>();
-			selectedRightEdges.add(i,contigVector);
-			if(i == term2-1){
-				break;
-			}
-		}
-		
-		for(int i = 0; i<leftNeighbours.length; i++){
-			
-		}
+  public CagCreator(LayoutGraph l) {
+    this.setLayoutGraph(l);
 	}
 
 	public void setLayoutGraph(LayoutGraph g){
@@ -160,7 +123,7 @@ public class CagCreator extends Observable {
 	public static void main(String[] args) {
 
 		TreebasedContigSorterProject project = new TreebasedContigSorterProject();
-		
+
 		project.register(new SimpleProgressReporter());
 		try {
 			try {
@@ -170,7 +133,7 @@ public class CagCreator extends Observable {
 						// "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
 //								 "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs.tcp"));
 								"/homes/aseidel/testdaten/perfekt/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
-				
+
 				if (!projectParsed) {
 					System.err
 							.println("The given project file was not sucessfully parsed");
