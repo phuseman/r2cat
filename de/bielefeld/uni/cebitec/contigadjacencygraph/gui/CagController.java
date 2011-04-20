@@ -53,8 +53,11 @@ public class CagController implements  Observer  {
 		 * if you know the old index of central contig
 		 */
 		if(chooseContigPanel == null){
-			
+			// only initialize scrollPane with (choose) contig panel
+			initContigView();
+			// if you want to create a new window use initWindowWithAllPanel
 		}else{
+			// update initialized contig view
 			cagModel.changeContigs(0, false);
 		}
 	}
@@ -127,6 +130,63 @@ public class CagController implements  Observer  {
 		window.add(inputOption, BorderLayout.SOUTH);		
 		
 		window.initWindow();
+	}
+	
+	private void initContigView(){
+		
+		Vector<DNASequence> nodes = cagModel.getGraph().getNodes();
+		int width = nodes .firstElement().getId().getBytes().length;
+		
+		if (width * 20 <= 100) {
+			width = 100;
+		} else if (width * 20 >= 200) {
+			width = 200;
+		} else {
+			width = width * 20;
+		}
+		
+		window.setMinimumSize(new Dimension((int) Toolkit.getDefaultToolkit()
+				.getScreenSize().getWidth()
+				- width, 500));
+		window.setPreferredSize(new Dimension((int) Toolkit.getDefaultToolkit()
+				.getScreenSize().getWidth()
+				- width, 500));
+		window.setMaximumSize(new Dimension((int) Toolkit.getDefaultToolkit()
+				.getScreenSize().getWidth()
+				- width, 500));
+		
+
+		double maxSupport = cagModel.getMaxSupport();
+		double minSupport = cagModel.getMinSupport();
+		
+		
+		boolean isZScore = cagModel.isZScore();
+		int numberOfNeighbours = cagModel.getNumberOfNeighbours();
+		/*
+		 * This panel contains all illustrations of the contigs
+		 * central contig in the middle and neighbours on the right and left side
+		 */
+		chooseContigPanel = new ChooseContigPanel(numberOfNeighbours, isZScore,
+				maxSupport, minSupport);
+		chooseContigPanel.createPanel();
+		
+		/*
+		 * This scrollpane is going to be used, when the user choose 
+		 * more than 8 neighbours or just when the size of the chooseContigPanel
+		 * is to big.
+		 */
+		scrollPane = new JScrollPane(chooseContigPanel);
+		scrollPane.setPreferredSize(new Dimension((int) Toolkit
+				.getDefaultToolkit().getScreenSize().getWidth()
+				- width, 500));
+		scrollPane
+				.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scrollPane
+				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+		scrollPane.setVisible(true);
+		scrollPane.setOpaque(false);
+		scrollPane.validate();
 	}
 
 		private void repaintWindowAndSubcomponents(){
