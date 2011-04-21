@@ -116,7 +116,6 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 	public void update(Observable o, Object arg) {
 		
 		selectionByUpdate = true;
-		
 		DNASequence c = (DNASequence) arg;		
 		list.setSelectedValue(c.getId(), true);
 		

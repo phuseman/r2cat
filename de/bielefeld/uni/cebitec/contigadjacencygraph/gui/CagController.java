@@ -24,6 +24,13 @@ public class CagController {
 
 		this.cagModel = new CagCreator();
 		contigViewPanel = new JPanel();
+		contigView = new ChooseContigPanel(cagModel);
+		
+		listViewPanel = new JPanel();
+		listView = new ContigListPanel(cagModel);
+		
+		legendViewPanel = new JPanel();
+		legendView = new LegendAndInputOptionPanel(cagModel);
 
 		this.setNeutral();
 
@@ -78,6 +85,8 @@ public class CagController {
 				legendViewPanel.removeAll();
 				legendViewPanel.add(legendView);
 			}
+			
+			
 		}
 	}
 
@@ -86,16 +95,27 @@ public class CagController {
 		cagModel.changeContigs(index, false);
 	}
 
-	public JPanel getContigView() {
+	public JPanel getContigViewPanel() {
 		return contigViewPanel;
 	}
 
-	public JPanel getLegendView() {
+	public JPanel getLegendViewPanel() {
 		return legendViewPanel;
 	}
 
-	public JPanel getListView() {
+	public JPanel getListViewPanel() {
 		return listViewPanel;
 	}
 
+	public ChooseContigPanel getContigView() {
+		return contigView;
+	}
+
+	public LegendAndInputOptionPanel getLegendView() {
+		return legendView;
+	}
+
+	public ContigListPanel getListView() {
+		return listView;
+	}
 }

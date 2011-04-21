@@ -8,6 +8,7 @@ import java.util.Observable;
 import java.util.Vector;
 
 import javax.naming.CannotProceedException;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import de.bielefeld.uni.cebitec.common.SimpleProgressReporter;
@@ -182,12 +183,24 @@ public class CagCreator extends Observable {
 					}
 					controller = new CagController();
 					controller.setLayoutGraph(completeGraph);
-					CAGWindow win = new CAGWindow();
 					
-					System.out.println(controller.getLegendView());
-					win.add(controller.getContigView(), BorderLayout.CENTER);
-					win.add(controller.getLegendView(), BorderLayout.SOUTH);
-					win.add(controller.getListView(), BorderLayout.EAST);
+					CAGWindow win = new CAGWindow();
+					win.initWindow();
+					
+					ChooseContigPanel contigView = controller.getContigView();
+					LegendAndInputOptionPanel legendView = controller.getLegendView();
+					ContigListPanel listView = controller.getListView();
+					
+					contigView.setVisible(true);
+					legendView.setVisible(true);
+					listView.setVisible(true);
+					
+					win.add(contigView, BorderLayout.CENTER);
+					win.add(legendView, BorderLayout.SOUTH);
+					win.add(listView, BorderLayout.EAST);
+					
+					
+					
 				}
 			});
 
@@ -427,7 +440,7 @@ public class CagCreator extends Observable {
 		this.currentContigObject = graph.getNodes().get(index);
 		currentLeftNeighbours = fiveMostLikleyLeftNeighbours(currentContigIndex, isReverse);
 		currentRightNeighbours = fiveMostLikleyRightNeighbours(currentContigIndex, isReverse);
-		notifyObservers(currentContigIndex);
+		notifyObservers(currentContigObject);
 		
 	}
 	

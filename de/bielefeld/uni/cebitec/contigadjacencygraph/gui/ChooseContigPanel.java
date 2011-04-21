@@ -385,9 +385,9 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 		}
 
 		if (numberOfNeighbours != model.getNumberOfNeighbours()
-				|| centralContigIndex != (Integer) arg) {
+				|| centralContigIndex != model.getCurrentContigIndex()) {
 			this.numberOfNeighbours = model.getNumberOfNeighbours();
-			updateCentralContig((Integer) arg);
+			updateCentralContig(model.getCurrentContigIndex());
 			updateLeftNeighbours();
 			updateRightNeighbours();
 		}
