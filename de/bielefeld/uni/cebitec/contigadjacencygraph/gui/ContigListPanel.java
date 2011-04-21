@@ -80,7 +80,7 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 		
-		list =(JList) e.getSource();
+//		list =(JList) e.getSource();
 		
 		if (e.getValueIsAdjusting() == false&& !selectionByUpdate) {
 
@@ -116,8 +116,11 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 	public void update(Observable o, Object arg) {
 		
 		selectionByUpdate = true;
+
+    if(arg instanceof DNASequence){
 		DNASequence c = (DNASequence) arg;		
 		list.setSelectedValue(c.getId(), true);
+    }
 		
 	}
 

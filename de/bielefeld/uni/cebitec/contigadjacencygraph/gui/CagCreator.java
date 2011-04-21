@@ -8,7 +8,6 @@ import java.util.Observable;
 import java.util.Vector;
 
 import javax.naming.CannotProceedException;
-import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import de.bielefeld.uni.cebitec.common.SimpleProgressReporter;
@@ -122,96 +121,92 @@ public class CagCreator extends Observable {
 	
 	
 	
-	public static void main(String[] args) {
+  public static void main(String[] args) {
 
-		TreebasedContigSorterProject project = new TreebasedContigSorterProject();
+    TreebasedContigSorterProject project = new TreebasedContigSorterProject();
 
-		project.register(new SimpleProgressReporter());
-		try {
-			try {
+    project.register(new SimpleProgressReporter());
+    try {
+      try {
 
-				boolean projectParsed = project
-						.readProject(new File(
-						// "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
-//								 "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs.tcp"));
-								"/homes/aseidel/testdaten/perfekt/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
+        boolean projectParsed = project.readProject(new File(
+                // "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
+                //								 "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs.tcp"));
+                "/homes/aseidel/testdaten/perfekt/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
 
-				if (!projectParsed) {
-					System.err
-							.println("The given project file was not sucessfully parsed");
-					System.exit(1);
-				}
+        if (!projectParsed) {
+          System.err.println("The given project file was not sucessfully parsed");
+          System.exit(1);
+        }
 
-			} catch (IOException e) {
-				System.err
-						.println("The given project file was not sucessfully parsed:\n"
-								+ e.getMessage());
-				System.exit(1);
-			}
+      } catch (IOException e) {
+        System.err.println("The given project file was not sucessfully parsed:\n"
+                + e.getMessage());
+        System.exit(1);
+      }
 
-			LayoutGraph layoutGraph;
-			ContigAdjacencyGraph cag;
-			final LayoutGraph completeGraph;
+      LayoutGraph layoutGraph;
+      ContigAdjacencyGraph cag;
+      final LayoutGraph completeGraph;
 
-			Timer t = Timer.getInstance();
-			t.startTimer();
-			t.startTimer();
+      Timer t = Timer.getInstance();
+      t.startTimer();
+      t.startTimer();
 
-			project.generateMatches();
+      project.generateMatches();
 
-			t.restartTimer("matches");
+      t.restartTimer("matches");
 
-			layoutGraph = project.sortContigs();
-			layoutGraph.writeLayoutAsNeato(new File("test.dot"),
-					NeatoOutputType.ONENODE);
+      layoutGraph = project.sortContigs();
+      layoutGraph.writeLayoutAsNeato(new File("test.dot"),
+              NeatoOutputType.ONENODE);
 
-			cag = project.getContigAdjacencyGraph();
-			completeGraph = cag.getCompleteGraph();
-			// model = new CagCreator(layoutGraph);
-			model = new CagCreator(completeGraph);
+      cag = project.getContigAdjacencyGraph();
+      completeGraph = cag.getCompleteGraph();
+      // model = new CagCreator(layoutGraph);
+      model = new CagCreator(completeGraph);
 
-			java.awt.EventQueue.invokeLater(new Runnable() {
+      java.awt.EventQueue.invokeLater(new Runnable() {
 
-				public void run() {
-					try {
-						UIManager
-								.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-						// "com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-						// UIManager.getCrossPlatformLookAndFeelClassName());
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-					controller = new CagController();
-					controller.setLayoutGraph(completeGraph);
-					
-					CAGWindow win = new CAGWindow();
-					win.initWindow();
-					
-					ChooseContigPanel contigView = controller.getContigView();
-					LegendAndInputOptionPanel legendView = controller.getLegendView();
-					ContigListPanel listView = controller.getListView();
-					
-					contigView.setVisible(true);
-					legendView.setVisible(true);
-					listView.setVisible(true);
-					
-					win.add(contigView, BorderLayout.CENTER);
-					win.add(legendView, BorderLayout.SOUTH);
-					win.add(listView, BorderLayout.EAST);
-					
-					
-					
-				}
-			});
+        public void run() {
+          try {
+            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+            // "com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+            // UIManager.getCrossPlatformLookAndFeelClassName());
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
+          controller = new CagController();
+          controller.setLayoutGraph(completeGraph);
 
-			t.stopTimer("sorting");
+          CAGWindow win = new CAGWindow();
+          win.initWindow();
 
-			t.stopTimer("Total time");
-		} catch (CannotProceedException e) {
-			System.err.println("Programm failed:\n" + e.getMessage());
-		}
+          ChooseContigPanel contigView = controller.getContigView();
+          LegendAndInputOptionPanel legendView = controller.getLegendView();
+          ContigListPanel listView = controller.getListView();
 
-	}
+          contigView.setVisible(true);
+          legendView.setVisible(true);
+          listView.setVisible(true);
+
+          win.add(contigView, BorderLayout.CENTER);
+          win.add(legendView, BorderLayout.SOUTH);
+          win.add(listView, BorderLayout.EAST);
+
+
+
+        }
+      });
+
+      t.stopTimer("sorting");
+
+      t.stopTimer("Total time");
+    } catch (CannotProceedException e) {
+      System.err.println("Programm failed:\n" + e.getMessage());
+    }
+
+  }
 
 	/*
 	 * Separate edges of the graph in left and right edges of 

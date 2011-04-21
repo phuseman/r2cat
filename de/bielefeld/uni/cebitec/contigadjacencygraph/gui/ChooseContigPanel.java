@@ -205,7 +205,6 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				 */
 				if (left) {
 
-					int z = 1;
 					int zaehler = 0;
 					int zaehlerFuerSupport = 0;
 
@@ -219,8 +218,8 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 						 * if the user use z-scores or absolute support
 						 */
 
-						z++;
-						if (z % 2 == 0) {
+ 						if (co instanceof ContigAppearance) {
+ 							ContigAppearance test2 = (ContigAppearance) co;
 
 							float lineStrokeLeft = 0.01f;
 							if (isZScore) {
@@ -249,7 +248,6 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 							}
 
 							Point point = co.getLocation();
-							ContigAppearance test2 = (ContigAppearance) co;
 							/*
 							 * working with different panels it is necessary to
 							 * calculate the right positions of the contigs on
@@ -304,14 +302,14 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 					/*
 					 * equivalent to top, but for right neighbours
 					 */
-					int z = 1;
 					int c = 0;
 					int zaehlerFuerSupport = 0;
 
 					for (Component co : rightContainer.getComponents()) {
 
-						z++;
-						if (z % 2 == 0) {
+						if (co instanceof ContigAppearance) {
+ 							ContigAppearance test = (ContigAppearance) co;
+
 
 							float lineStroke = 0.01f;
 							if (isZScore) {
@@ -340,7 +338,6 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 							}
 
 							Point point = co.getLocation();
-							ContigAppearance test = (ContigAppearance) co;
 
 							int x = (int) co.getParent().getX();
 							int y = (int) point.getY()
