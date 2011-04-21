@@ -16,34 +16,34 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+public class LegendAndInputOptionPanel extends JPanel implements
+		ActionListener, PropertyChangeListener {
 
-public class LegendAndInputOptionPanel extends JPanel implements ActionListener,PropertyChangeListener{
-	
 	private JRadioButton absoluteSupport;
 	private JRadioButton zScoreRadioButton;
 	private int numberOfNeighbours = 5;
 	private CagController con;
 	private CagCreator model;
 	private boolean isZScore;
-	
+
 	/*
 	 * This panel contains the textfield for entering the number of neighbours
-	 * and also the options to choose  absolute support or z-scores 
-	 * and a legend
+	 * and also the options to choose absolute support or z-scores and a legend
 	 */
-	public LegendAndInputOptionPanel(CagController controller, CagCreator mymodel) {
-		
-		this.con = controller; 
-		this.model = mymodel;
+	public LegendAndInputOptionPanel() {
+
+	}
+
+	public LegendAndInputOptionPanel(CagCreator cagModel) {
+		this.model = cagModel;
 		GridBagLayout inputOptionLayout = new GridBagLayout();
 		this.setLayout(inputOptionLayout);
 		this.setPreferredSize(new Dimension(1000, 60));
 	}
-	
 
-	public void createLegendAndInputOption(int neighboursNumber){
-		
-		this.numberOfNeighbours = neighboursNumber;
+	public void createLegendAndInputOption() {
+
+		this.numberOfNeighbours = model.getNumberOfNeighbours();
 		GridBagConstraints c = new GridBagConstraints();
 
 		JLabel chooseNumberOfNeighbours = new JLabel("number of neighbors ");
@@ -52,39 +52,39 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener,
 		chooseNumberOfNeighbours.setToolTipText("<html>"
 				+ "Here you are able to choose the number of neighbours.<br>"
 				+ "Please type a number between 1 and 10 in the textfield<br>"
-				+ "and press ENTER."
-				+ "</html>");
-		this.add(chooseNumberOfNeighbours,c);
+				+ "and press ENTER." + "</html>");
+		this.add(chooseNumberOfNeighbours, c);
 
 		NumberFormat nformat = NumberFormat.getNumberInstance();
 		c.gridx = 1;
 		c.gridy = 0;
 		c.ipadx = 20;
 		c.anchor = GridBagConstraints.LINE_START;
-		JFormattedTextField inputOptionForNumberOfNeighbours = new JFormattedTextField(nformat);
-		inputOptionForNumberOfNeighbours.setPreferredSize(new Dimension(100, 100));
+		JFormattedTextField inputOptionForNumberOfNeighbours = new JFormattedTextField(
+				nformat);
+		inputOptionForNumberOfNeighbours.setPreferredSize(new Dimension(100,
+				100));
 		inputOptionForNumberOfNeighbours.setValue(new Integer(
 				numberOfNeighbours));
 		inputOptionForNumberOfNeighbours.setColumns(3);
-		inputOptionForNumberOfNeighbours.addPropertyChangeListener("value",this);
+		inputOptionForNumberOfNeighbours.addPropertyChangeListener("value",
+				this);
 		inputOptionForNumberOfNeighbours.setToolTipText("<html>"
-				+ "Please type a number <br>" +
-						"between 1 and 10<br>"
-				+ "and press ENTER/Return."
-				+ "</html>");
+				+ "Please type a number <br>" + "between 1 and 10<br>"
+				+ "and press ENTER/Return." + "</html>");
 
-		this.add(inputOptionForNumberOfNeighbours,c);
+		this.add(inputOptionForNumberOfNeighbours, c);
 
 		ButtonGroup supportGroup = new ButtonGroup();
 
 		absoluteSupport = new JRadioButton("absolute Support");
 		absoluteSupport.setSelected(true);
-		absoluteSupport.setToolTipText("<html>If you choose this option<br> you see at each line <br>" +
-				"the likelyhood score.</html> ");
+		absoluteSupport
+				.setToolTipText("<html>If you choose this option<br> you see at each line <br>"
+						+ "the likelyhood score.</html> ");
 		absoluteSupport.setActionCommand("absolute");
 		absoluteSupport.addActionListener(this);
-		
-		
+
 		c.gridx = 2;
 		c.gridy = 0;
 		c.ipadx = 0;
@@ -92,60 +92,60 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener,
 		this.add(absoluteSupport, c);
 
 		zScoreRadioButton = new JRadioButton("z-Score");
-		zScoreRadioButton.setToolTipText("<html> If you choose this option <br>you see at each line <br> "
-				+" a normalized score.</html>");
+		zScoreRadioButton
+				.setToolTipText("<html> If you choose this option <br>you see at each line <br> "
+						+ " a normalized score.</html>");
 		zScoreRadioButton.setActionCommand("zScore");
 		zScoreRadioButton.addActionListener(this);
-		
+
 		supportGroup.add(absoluteSupport);
 		supportGroup.add(zScoreRadioButton);
-		
+
 		c.gridx = 2;
 		c.gridy = 1;
 		c.anchor = GridBagConstraints.LINE_START;
 		this.add(zScoreRadioButton, c);
-		
+
 		JLabel legendLabel = new JLabel("     legend: ");
 		c.gridx = 3;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.LINE_END;
 		this.add(legendLabel, c);
-		
+
 		ImageIcon nsIcon = new ImageIcon("pictures/nsLine.png");
 		c.gridx = 4;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.LINE_START;
-		this.add(new JLabel(nsIcon),c);
-		
+		this.add(new JLabel(nsIcon), c);
+
 		JLabel notSelectedLabel = new JLabel("not selected adjacency");
 		c.gridx = 5;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.LINE_START;
-		this.add(notSelectedLabel, c);	
-		
+		this.add(notSelectedLabel, c);
+
 		ImageIcon swsIcon = new ImageIcon("pictures/swsLine.png");
 		c.gridx = 4;
 		c.gridy = 1;
-		this.add(new JLabel(swsIcon),c);
-		
-		JLabel somewhereElseSelectedLabel = new JLabel("somewhere else selected adjacency");
+		this.add(new JLabel(swsIcon), c);
+
+		JLabel somewhereElseSelectedLabel = new JLabel(
+				"somewhere else selected adjacency");
 		c.gridx = 5;
 		c.gridy = 1;
 		this.add(somewhereElseSelectedLabel, c);
-		
+
 		ImageIcon sIcon = new ImageIcon("pictures/sLine.png");
 		c.gridx = 4;
 		c.gridy = 2;
-		this.add(new JLabel(sIcon),c);
-		
+		this.add(new JLabel(sIcon), c);
+
 		JLabel selectedLabel = new JLabel("selected adjacency");
 		c.gridx = 5;
 		c.gridy = 2;
-		this.add(selectedLabel, c);		
-
+		this.add(selectedLabel, c);
 
 	}
-
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -156,106 +156,61 @@ public class LegendAndInputOptionPanel extends JPanel implements ActionListener,
 			isZScore = false;
 			absoluteSupport.setSelected(true);
 			model.setZScore(false);
-			con.getChooseContigPanel().setZScore(isZScore);
-
-			updateGui();
 
 		} else if (e.getActionCommand().equals("zScore")) {
 			isZScore = true;
 			absoluteSupport.setSelected(false);
 			model.setZScore(true);
-			con.getChooseContigPanel().setZScore(isZScore);			
-
-			updateGui();
+	
 		}
-		
-	}
 
+	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		
-		if(evt.getSource() instanceof JFormattedTextField){
-		JFormattedTextField inputOptionForNumberOfNeighbours = 
-			((JFormattedTextField) evt.getSource());
-		/*
-		 * This is going to be activated, if the user set a new number of
-		 * neighbours.
-		 * But only between 1 and 10
-		 */
-		int neighboursNumber = ((Number) evt.getNewValue()).intValue();
 
-		JPanel rightContainer = con.getChooseContigPanel().getRightContainer();
-		JPanel leftContainer = con.getChooseContigPanel().getLeftContainer();
+		if (evt.getSource() instanceof JFormattedTextField) {
+			JFormattedTextField inputOptionForNumberOfNeighbours = ((JFormattedTextField) evt
+					.getSource());
+			/*
+			 * This is going to be activated, if the user set a new number of
+			 * neighbours. But only between 1 and 10
+			 */
+			int neighboursNumber = ((Number) evt.getNewValue()).intValue();
 
-		if (neighboursNumber <= 10 && neighboursNumber > 0) {
+			if (neighboursNumber <= 10 && neighboursNumber > 0) {
 
-			if (neighboursNumber < numberOfNeighbours) {
-				int breite = (int) con.getChooseContigPanel().getSize().getWidth();
-				con.getChooseContigPanel().setPreferredSize(new Dimension(breite,
-						400));
-			}
+				numberOfNeighbours = neighboursNumber;
+				inputOptionForNumberOfNeighbours.setValue(new Integer(
+						numberOfNeighbours));
+				model.setNumberOfNeighbours(numberOfNeighbours);
 
-			if (neighboursNumber > 8) {
-				int breite = (int) con.getChooseContigPanel().getSize().getWidth();
-				con.getChooseContigPanel().setPreferredSize(new Dimension(breite,
-						600));
-			}
+			} else if (neighboursNumber == 0) {
+				
+				javax.swing.JOptionPane.showMessageDialog(this.getParent(),
+						"Sorry.\n" + "You can't choose " + neighboursNumber
+								+ " Neighbours.\n"
+								+ "Please choose between 1 and 10.");
 
-			numberOfNeighbours = neighboursNumber;
-			inputOptionForNumberOfNeighbours.setValue(new Integer(
-					numberOfNeighbours));
-			model.setNumberOfNeighbours(numberOfNeighbours);
-			con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
+				numberOfNeighbours = 5;
+				inputOptionForNumberOfNeighbours.setValue(new Integer(
+						numberOfNeighbours));
+				model.setNumberOfNeighbours(numberOfNeighbours);
 
-			
-			if (rightContainer.getComponentCount() != 0
-					|| leftContainer.getComponentCount() != 0) {
-				updateGui();
-			}
+			} else {
+				javax.swing.JOptionPane.showMessageDialog(this.getParent(),
+						"Sorry.\n" + "You can't choose " + neighboursNumber
+								+ " Neighbours.\n"
+								+ "Please choose between 1 and 10.");
 
-		} else if (neighboursNumber == 0) {
-			javax.swing.JOptionPane.showMessageDialog(con.getWindow(), "Sorry.\n"
-					+ "You can't choose " + neighboursNumber
-					+ " Neighbours.\n" + "Please choose between 1 and 10.");
+				numberOfNeighbours = 10;
+				inputOptionForNumberOfNeighbours.setValue(new Integer(
+						numberOfNeighbours));
 
-			numberOfNeighbours = 5;
-			inputOptionForNumberOfNeighbours .setValue(new Integer(
-					numberOfNeighbours));
-			model.setNumberOfNeighbours(numberOfNeighbours);
-			con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
+				model.setNumberOfNeighbours(numberOfNeighbours);
 
-			if (rightContainer.getComponentCount() != 0
-					|| leftContainer.getComponentCount() != 0) {
-				updateGui();
-			}
-		} else {
-			javax.swing.JOptionPane.showMessageDialog(con.getWindow(), "Sorry.\n"
-					+ "You can't choose " + neighboursNumber
-					+ " Neighbours.\n" + "Please choose between 1 and 10.");
-
-			numberOfNeighbours = 10;
-			inputOptionForNumberOfNeighbours.setValue(new Integer(
-					numberOfNeighbours));
-			int breite = (int) con.getChooseContigPanel().getSize().getWidth();
-
-			con.getChooseContigPanel().setPreferredSize(new Dimension(breite, 600));
-			model.setNumberOfNeighbours(numberOfNeighbours);
-			con.getChooseContigPanel().setNumberOfNeighbours(numberOfNeighbours);
-
-			if (rightContainer.getComponentCount() != 0
-					|| leftContainer.getComponentCount() != 0) {
-				updateGui();
 			}
 		}
-		}
-	}
-	
-	private void updateGui(){
-		con.updateLeftNeighbours();
-		con.updateRightNeighbours();
-		con.getChooseContigPanel().repaint();
 	}
 
-	
 }

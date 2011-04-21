@@ -1,11 +1,10 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 import java.awt.BasicStroke;
-import java.awt.GradientPaint;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.GeneralPath;

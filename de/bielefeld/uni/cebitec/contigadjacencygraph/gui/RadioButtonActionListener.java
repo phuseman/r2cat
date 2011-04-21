@@ -1,25 +1,21 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
+
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
+
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
-import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
 public class RadioButtonActionListener implements ActionListener {
-	
-	private CagController con;
+
 	private CagCreator cagModel;
 	private int centralContigIndex;
 
 	
-	public RadioButtonActionListener (CagController controller, CagCreator model){
+	public RadioButtonActionListener (CagCreator model){
 
-		this.con = controller;
 		this.cagModel = model;
 		this.centralContigIndex = cagModel.getCurrentContigIndex();
 
@@ -90,7 +86,7 @@ public class RadioButtonActionListener implements ActionListener {
 				 */
 					Object[] options = { "Yes", "No" };
 
-					int n = javax.swing.JOptionPane.showOptionDialog(con.getWindow(),
+					int n = javax.swing.JOptionPane.showOptionDialog(radioButton.getParent(),
 							"You already selected this neighbour for an another selection.\n"
 									+ " Do you want to delete that selection and want to select this selection?",
 							"", JOptionPane.YES_NO_OPTION,
@@ -104,7 +100,7 @@ public class RadioButtonActionListener implements ActionListener {
 							deleteEdge(neighbourEdge, neighbourIndices);
 						}
 						selectEdge(selectedEdge, indices);
-						updateModelAndGui();
+						updateModel();
 					}
 			}
 			}
@@ -190,7 +186,7 @@ public class RadioButtonActionListener implements ActionListener {
 				 neighbourR.remove(oldEdge);
 			 }
 
-			updateModelAndGui();
+			updateModel();
 
 		}
 
@@ -217,20 +213,14 @@ public class RadioButtonActionListener implements ActionListener {
 			contigCollectionR = cagModel.getSelectedRightEdges().get(rightIndex);		
 			contigCollectionR.add(selectedEdge);
 
-			updateModelAndGui();
+			updateModel();
 
 		}
 
-		private void updateModelAndGui() {
+		private void updateModel() {
 			
-			JPanel rightContainer = con.getChooseContigPanel().getRightContainer();
-			JPanel leftContainer = con.getChooseContigPanel().getLeftContainer();
-			if (rightContainer.getComponentCount() != 0
-					|| leftContainer.getComponentCount() != 0) {
-
-				cagModel.changeContigs(centralContigIndex, cagModel.isCurrentContigIsReverse());
-				con.getWindow().repaint();
-			}
+			cagModel.changeContigs(centralContigIndex, cagModel.isCurrentContigIsReverse());
+			
 		}
 
 }

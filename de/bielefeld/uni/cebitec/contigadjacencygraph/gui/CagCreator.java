@@ -1,5 +1,6 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
+import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -149,7 +150,7 @@ public class CagCreator extends Observable {
 
 			LayoutGraph layoutGraph;
 			ContigAdjacencyGraph cag;
-			LayoutGraph completeGraph;
+			final LayoutGraph completeGraph;
 
 			Timer t = Timer.getInstance();
 			t.startTimer();
@@ -179,8 +180,14 @@ public class CagCreator extends Observable {
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
-					controller = new CagController(model);
-					controller.initWindowWithAllPanel();
+					controller = new CagController();
+					controller.setLayoutGraph(completeGraph);
+					CAGWindow win = new CAGWindow();
+					
+					System.out.println(controller.getLegendView());
+					win.add(controller.getContigView(), BorderLayout.CENTER);
+					win.add(controller.getLegendView(), BorderLayout.SOUTH);
+					win.add(controller.getListView(), BorderLayout.EAST);
 				}
 			});
 
@@ -421,8 +428,9 @@ public class CagCreator extends Observable {
 		currentLeftNeighbours = fiveMostLikleyLeftNeighbours(currentContigIndex, isReverse);
 		currentRightNeighbours = fiveMostLikleyRightNeighbours(currentContigIndex, isReverse);
 		notifyObservers(currentContigIndex);
-
+		
 	}
+	
 
 	public boolean isCurrentContigIsReverse() {
 		return currentContigIsReverse;

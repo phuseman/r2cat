@@ -2,9 +2,6 @@ package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GradientPaint;
-import java.awt.Graphics2D;
-import java.awt.geom.GeneralPath;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;

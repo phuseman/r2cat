@@ -20,5 +20,5 @@ public class CAGWindow extends JFrame {
 		setVisible(true);
 		pack();
 	}
-	
+
 }

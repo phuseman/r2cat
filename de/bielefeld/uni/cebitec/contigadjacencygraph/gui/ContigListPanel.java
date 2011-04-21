@@ -1,6 +1,8 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.awt.Dimension;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.BorderFactory;
 import javax.swing.JList;
@@ -13,20 +15,20 @@ import javax.swing.event.ListSelectionListener;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
-public class ContigListPanel extends JScrollPane implements ListSelectionListener{
+public class ContigListPanel extends JScrollPane implements ListSelectionListener, Observer{
 
-	private ContigListPanel contigList;
 	private LayoutGraph graph;
 	private String[] dataForList;
 	private CagController controller;
 	private JList list;
 	private CagCreator myModel;
+	private boolean selectionByUpdate;
 
-	public ContigListPanel(CagController controller, CagCreator model) {
-		contigList = this;
-		graph = model.getGraph();
-		this.controller = controller;
+
+	public ContigListPanel(CagCreator model) {
 		this.myModel = model;
+		myModel.addObserver(this);
+		graph = myModel.getGraph();
 		
 		this.setToolTipText("<html>Choose a contig<br>"
 				+ " by a click on a name.</html>");
@@ -39,11 +41,13 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 		this.setAlignmentY(RIGHT_ALIGNMENT);
 		this.setVisible(true);
 		this.validate();
+	
 	}
-	
-	
+
+
 
 	public void createList(){
+		System.out.println("liste initialisiert");
 		int i = 0;
 		dataForList = new String[graph.getNodes().size()];
 		for (DNASequence c : graph.getNodes()) {
@@ -76,9 +80,6 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 		
-
-		boolean selectionByUpdate = controller.isSelectionByUpdate();
-		
 		list =(JList) e.getSource();
 		
 		if (e.getValueIsAdjusting() == false&& !selectionByUpdate) {
@@ -101,10 +102,24 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 			myModel.changeContigs(index, false);
 
 		}
+		
+		selectionByUpdate = false;
 			
 	}
 	public JList getList() {
 		return list;
+	}
+
+
+
+	@Override
+	public void update(Observable o, Object arg) {
+		
+		selectionByUpdate = true;
+		
+		DNASequence c = (DNASequence) arg;		
+		list.setSelectedValue(c.getId(), true);
+		
 	}
 
 }
