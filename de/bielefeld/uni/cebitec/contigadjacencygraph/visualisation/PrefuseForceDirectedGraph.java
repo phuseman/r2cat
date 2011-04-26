@@ -35,7 +35,6 @@ import prefuse.util.force.ForceSimulator;
 import prefuse.util.force.NBodyForce;
 import prefuse.util.force.SpringForce;
 import prefuse.util.force.DragForce;
-import prefuse.Constants;
 import prefuse.Display;
 import prefuse.Visualization;
 import prefuse.action.ActionList;
@@ -94,9 +93,9 @@ public class PrefuseForceDirectedGraph
 		// create the label-renderer and edge-renderer and do some rendering with the nodes and edges
 		CustomNodeRenderer nodeRenderer = new CustomNodeRenderer();
 		EdgeRenderer edgerenderer = new EdgeRenderer();
-		edgerenderer.setHorizontalAlignment1(Constants.RIGHT);
-	    edgerenderer.setHorizontalAlignment2(Constants.LEFT);
-	    edgerenderer.setEdgeType(1);
+		//edgerenderer.setHorizontalAlignment1(Constants.RIGHT);
+	    //edgerenderer.setHorizontalAlignment2(Constants.LEFT);
+	    edgerenderer.setEdgeType(0);
 	    
 		// create a default renderer factory and add node- and edge-renderer
 		DefaultRendererFactory rendererFactory = new DefaultRendererFactory();

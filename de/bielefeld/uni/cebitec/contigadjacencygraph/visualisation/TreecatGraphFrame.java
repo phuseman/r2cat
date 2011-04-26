@@ -168,6 +168,17 @@ public class TreecatGraphFrame implements ActionListener
 		return this.window;
 	}
 	
+	public JPanel getControlPanel()
+	{
+		this.controlPanel.add(this.searchPanel);
+		return this.controlPanel;
+	}
+	
+	public JPanel getDisplayPanel()
+	{
+		return this.displayPanel;
+	}
+	
 	public void actionPerformed(ActionEvent e) {
 		
 		if ("fdl".equals(e.getActionCommand()))

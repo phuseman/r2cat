@@ -69,7 +69,7 @@ public class ContigGraph extends Graph
 			this.nodes.set(nodeRowCounter, "label", this.lg.getNodes().get(nodeCounter).getId());
 			this.nodes.set(nodeRowCounter, "key", nodeRowCounter);  // TODO, getNodeCopy einfließen lassen!
 			this.nodes.set(nodeRowCounter, "drawableContigLength", this.lg.getNodes().get(nodeCounter).getSize());
-
+			this.lg.getNodes().get(nodeCounter).getDescription();
 			
 			String arrangedDescription = this.lg.getNodes().get(nodeCounter).getDescription();
 			this.nodes.set(nodeRowCounter, "description", arrangedDescription);
@@ -94,41 +94,16 @@ public class ContigGraph extends Graph
 			int rightConnector = this.lg.getEdges().get(edgeCounter).getj();
 			
 			LayoutGraph.AdjacencyEdge e = this.lg.getEdges().get(edgeCounter);
-			//System.out.println(String.format((Locale)null,"Support: %.2f\n(%.2f%%) %s (%.2f%%)", e.getSupport(), e.getRelativeSupporti()*100, e.showContigConnectionAsciiString(), e.getRelativeSupportj()*100 ));
+			
 			String asciSupport = String.format((Locale)null,"Support: %.2f\n(%.2f%%) %s (%.2f%%)", e.getSupport(), e.getRelativeSupporti()*100, e.showContigConnectionAsciiString(), e.getRelativeSupportj()*100 );
-			//System.out.println(asciSupport);
 			asciSupport = asciSupport.replaceAll("<", " &lt ");
 			asciSupport = asciSupport.replaceAll(">", " &gt ");
 			asciSupport = asciSupport.replaceAll("\n", "<br>");
 			asciSupport = "<html><body><center>"+asciSupport+"</center></body></html>";
 			
-			if(this.lg.getEdges().get(edgeCounter).isLeftConnectori())
-			{
-				rightConnector = this.lg.getEdges().get(edgeCounter).geti();
-			}
-
-			if(this.lg.getEdges().get(edgeCounter).isRightConnectori())
-			{
-				leftConnector = this.lg.getEdges().get(edgeCounter).geti();
-			}
-
-			if(this.lg.getEdges().get(edgeCounter).isLeftConnectorj())
-			{
-				rightConnector = this.lg.getEdges().get(edgeCounter).getj();
-			}
-
-			if(this.lg.getEdges().get(edgeCounter).isRightConnectorj())
-			{
-				leftConnector = this.lg.getEdges().get(edgeCounter).getj();
-			}	
-			
 			double drawableEdgesupport = Math.log(this.lg.getEdges().get(edgeCounter).getSupport())/10;
-			//double realEdgeSupport = this.lg.getEdges().get(edgeCounter).getSupport();
-			//String stringRealEdgeSupport = String.valueOf(realEdgeSupport);
-			//stringRealEdgeSupport = stringRealEdgeSupport + " edge support";
-
+	
 			this.edges.set(edgeRowCounter, "drawableEdgeSupport", drawableEdgesupport);
-			//this.edges.set(edgeRowCounter, "realEdgeSupport", stringRealEdgeSupport);
 			this.edges.set(edgeRowCounter, "asciSupport", asciSupport);
 			this.edges.set(edgeRowCounter, "leftConnector", leftConnector);
 	        this.edges.set(edgeRowCounter, "rightConnector", rightConnector);

@@ -26,7 +26,6 @@ import java.awt.Dimension;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import prefuse.Constants;
 import prefuse.Display;
 import prefuse.Visualization;
 import prefuse.action.ActionList;
@@ -90,9 +89,9 @@ public class PrefuseFruchtermanReingoldGraph
 		// create the label-renderer and edge-renderer and do some rendering with the nodes and edges
 		CustomNodeRenderer nodeRenderer = new CustomNodeRenderer();
 		EdgeRenderer edgerenderer = new EdgeRenderer();
-		edgerenderer.setHorizontalAlignment1(Constants.RIGHT);
-	    edgerenderer.setHorizontalAlignment2(Constants.LEFT);
-	    edgerenderer.setEdgeType(1);
+		//edgerenderer.setHorizontalAlignment1(Constants.RIGHT);
+	    //edgerenderer.setHorizontalAlignment2(Constants.LEFT);
+	    edgerenderer.setEdgeType(0);
 	    
 		// create a default renderer factory and add node- and edge-renderer
 		DefaultRendererFactory rendererFactory = new DefaultRendererFactory();
@@ -126,7 +125,6 @@ public class PrefuseFruchtermanReingoldGraph
 		ActionList layout = new ActionList();
 		ActionList color = new ActionList(Activity.INFINITY);
 		ActionList filter = new ActionList(Activity.INFINITY);
-
 
 		// create DataSizeAction for EdgeSupport
 		DataSizeAction edgeWeight = new DataSizeAction("graph.edges","drawableEdgeSupport");
