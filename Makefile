@@ -7,12 +7,14 @@ QGRAM := `find de/bielefeld/uni/cebitec/qgram/ -iname '*.class'`
 R2CAT := `find de/bielefeld/uni/cebitec/r2cat/ -iname '*.class' -o -iname '*.png' -o -iname '*.html'`
 TREECAT := `find de/bielefeld/uni/cebitec/treecat/ -iname '*.class'`
 FREEHEP := `find org/freehep/ -iname '*.class'` META-INF/services/org.freehep.util.export.ExportFileType org/freehep/graphicsio/ps/PSProlog.txt
+FREEHEP_SOURCES := `find org/freehep/ -iname '*.java'`
 
 JAVAC := javac 
 
 R2CAT_JARFILE := r2cat.jar
 CGCAT_JARFILE := cg-cat.jar
 TREE_JARFILE := treecat.jar
+FREEHEP_JARFILE := freehepGraphicsExport.jar
 
 
 DATE=`date "+%Y%m%d"`
@@ -40,17 +42,15 @@ $(TREE_JARFILE):all
 
 $(CGCAT_JARFILE):all
 	jar cvf $(CGCAT_JARFILE) $(COMMON) $(CONTIGADJACENCYGRAPH) $(PRIMERDESIGN) $(QGRAM) $(R2CAT) $(TREECAT) $(FREEHEP)
-# 	jarsigner -tsa https://timestamp.geotrust.com/tsa -keystore /homes/phuseman/.gnupg/jarsigner_keystore_r2cat  -storepass phooM1AhInei5Sho $(CGCAT_JARFILE) cgcat
+	jarsigner -tsa https://timestamp.geotrust.com/tsa -keystore /homes/phuseman/.gnupg/jarsigner_keystore_cg-cat  $(CGCAT_JARFILE) cgcat
 # I changed the storepass after migrating to sourceforge :)
 
-zipsources:
-	zip -9 sources.zip Manifest_*.txt `find . -iname '*.java'` images/*.png extra/* \
-	META-INF/services/org.freehep.util.export.ExportFileType LICENSE.txt ReadmeLicenses.txt
-
-
+$(FREEHEP_JARFILE):all
+	jar cvf $(FREEHEP_JARFILE) $(FREEHEP) $(FREEHEP_SOURCES)
 
 clean:
 	find . -iname '*.class' -print0 | xargs -0 rm -rvf
+
 startjar:$(R2CAT_JARFILE)
 	java -jar $(R2CAT_JARFILE)
 
