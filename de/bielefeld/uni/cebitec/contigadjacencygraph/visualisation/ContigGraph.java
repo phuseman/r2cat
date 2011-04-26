@@ -107,6 +107,8 @@ public class ContigGraph extends Graph
 			this.edges.set(edgeRowCounter, "asciSupport", asciSupport);
 			this.edges.set(edgeRowCounter, "leftConnector", leftConnector);
 	        this.edges.set(edgeRowCounter, "rightConnector", rightConnector);
+	        
+	        System.out.println(this.lg.getEdges().get(edgeCounter).getContigi());
 		}
 		this.init(this.nodes,this.edges,false,"key","leftConnector","rightConnector");
 	}
