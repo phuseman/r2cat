@@ -1,6 +1,5 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -47,6 +46,10 @@ public class CagController {
     legendViewPanel.removeAll();
     legendViewPanel.add(new JLabel(" No graph! "));
     legendView = null;
+
+    //remove the observers that were set in the constructors of the two panels.
+    cagModel.deleteObservers();
+
   }
 
   public void setLayoutGraph(LayoutGraph graph) {
@@ -93,5 +96,4 @@ public class CagController {
   public JPanel getListView() {
     return listViewPanel;
   }
-
 }
