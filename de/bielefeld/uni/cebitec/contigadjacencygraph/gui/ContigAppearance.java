@@ -1,10 +1,12 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
@@ -28,6 +30,10 @@ public class ContigAppearance extends JPanel {
 	private boolean selected;
 	private boolean isRepetitiv;
 	private ContigBorder border;
+	private int textSize = 3;
+	private int contigHeight = 50;
+	private int contigMinWidth = 60;
+	private int contigMaxWidth = 215;
 
 	public ContigAppearance() {
 		super();
@@ -159,38 +165,56 @@ public class ContigAppearance extends JPanel {
 					+ "</html>");
 		} else {
 			this.setToolTipText("<html><font size = -2><u>" + contigId + "</u>"
-					+ "<br>length:" + size + " b <br>" + "support: "
+					+ "<br>l:" + size + " b <br>" + "support: "
 					+ Math.ceil(support) + " <br>"
 					+ "</html>");
 		}
 
 		if (size < 1000) {
-			contigLabel.setText("<html><font size = -2><u>" + contigId + "</u>"
-					+ "<br>length:" + "&lt; 1" + " kb<br>" + "</html>");
+			contigLabel.setText("<html><font size = -"+textSize+"><u>" + contigId + "</u>"
+					+ "<br><b>length:" + "&lt; 1" + " kb</b>" + "</html>");
 			this.setBorder(border);
 			this.setName(contigId);
 		} else {
-			contigLabel.setText("<html><font size = -2><u>" + contigId + "</u>"
-					+ "<br>length: " + size / 1000 + " kb </html>");
+			contigLabel.setText("<html><font size = -"+textSize+"><u>" + contigId + "</u>"
+					+ "<br><b>length: " + size / 1000 + " kb </b> </html>");
 			this.setBorder(border);
 			this.setName(contigId);
 		}
 		setVisible(true);
 	}
+	
+	public void setTextSize(int size){
+		textSize = size;
+	}
+	
+	/*
+	 * This method set height of contigs and 
+	 * min and max width of contigs
+	 */
+	public void setSize(int height, int minWidth, int maxWidth){
+		contigHeight = height;
+		if(minWidth >= 60){			
+			contigMinWidth = minWidth;
+		}
+		if(maxWidth <= 215){
+			contigMaxWidth = maxWidth;
+		}
+	}
 
 	private  void setSizeOfContig(long size, long maxSize,
 			long minSize) {
-
+	
 		float nenner = (float) (Math.log(size) - Math.log(minSize));
 		float zaehler = (float) (Math.log(maxSize) - Math.log(minSize));
 
 		float xInIntervall = nenner / zaehler;
 
-		int wSize = (int) ((xInIntervall * 215) + 85);
+		int wSize = (int) ((xInIntervall * contigMaxWidth) + contigMinWidth);
 
-		this.setPreferredSize(new Dimension(wSize, 50));
-		this.setMaximumSize(new Dimension(wSize, 50));
-		this.setMinimumSize(new Dimension(wSize, 50));
+		this.setPreferredSize(new Dimension(wSize, contigHeight));
+		this.setMaximumSize(new Dimension(wSize, contigHeight));
+		this.setMinimumSize(new Dimension(wSize, contigHeight));
 
 	}
 	

@@ -8,6 +8,8 @@ import java.util.Observable;
 import java.util.Vector;
 
 import javax.naming.CannotProceedException;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 
 import de.bielefeld.uni.cebitec.common.SimpleProgressReporter;
@@ -190,7 +192,11 @@ public class CagCreator extends Observable {
           legendView.setVisible(true);
           listView.setVisible(true);
 
-          win.add(contigView, BorderLayout.CENTER);
+          JScrollPane scroll = new JScrollPane(contigView);
+          scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+          scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+          
+          win.add(scroll, BorderLayout.CENTER);
           win.add(legendView, BorderLayout.SOUTH);
           win.add(listView, BorderLayout.EAST);
 
@@ -498,7 +504,9 @@ public class CagCreator extends Observable {
 
 
 	public void setNumberOfNeighbours(int neighbourOfNumbers) {
+		setChanged();
 		this.numberOfNeighbours = neighbourOfNumbers;
+		notifyObservers();
 	}
 
 
@@ -536,7 +544,9 @@ public class CagCreator extends Observable {
 
 
 	public void setZScore(boolean isZScore) {
+		setChanged();
 		this.isZScore = isZScore;
+		notifyObservers();
 	}
 
 

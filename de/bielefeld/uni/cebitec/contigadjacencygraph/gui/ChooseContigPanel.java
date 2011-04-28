@@ -35,8 +35,6 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 	private JPanel rightRadioButtonContainer;
 	private JPanel rightContainer;
 	private int numberOfNeighbours;
-	private Point[] leftComponentPositions;
-	private Point[] rightComponentPositions;
 
 	private Point[] centralPosition;
 	private boolean isZScore;
@@ -50,7 +48,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 
 	ChooseContigPanel(CagCreator cagModel) {
 		this.model = cagModel;
-		model.addObserver(this);
+	//	model.addObserver(this);
 		this.addMouseListener(this);
 	}
 
@@ -129,6 +127,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 		this.add(Box.createHorizontalGlue());
 		this.add(rightRadioButtonContainer);
 		this.add(rightContainer);
+		
 		updateUI();
 	}
 
@@ -141,27 +140,21 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 		Color originalColor = g2.getColor();
 
 		/*
-		 * save point of positions, so that there are no problems to draw the
-		 * lines
-		 */
-		leftComponentPositions = new Point[numberOfNeighbours];
-		rightComponentPositions = new Point[numberOfNeighbours];
-
-		/*
 		 * For drawing the edging soft
 		 */
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
 				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-
+		
+	
 		/*
 		 * This part will to run, during the time we get new central and
 		 * neigbour contigs
 		 */
 
 		if (leftNeigboursReady && rightNeighboursReady && centralContigThere) {
-
+			
 			ContigAppearance centralContig = null;
 
 			if (centerContainer.getComponent(0) instanceof ContigAppearance) {
@@ -221,32 +214,8 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
  						if (co instanceof ContigAppearance) {
  							ContigAppearance test2 = (ContigAppearance) co;
 
-							float lineStrokeLeft = 0.01f;
-							if (isZScore) {
-								if (leftSupport[zaehlerFuerSupport] > 0
-										&& leftSupport[zaehlerFuerSupport] < 5) {
-									lineStrokeLeft = (float) (leftSupport[zaehlerFuerSupport]);
-								} else if (leftSupport[zaehlerFuerSupport] > 5) {
-									lineStrokeLeft = 5.0f;
-								} else {
-									lineStrokeLeft = 0.01f;
-								}
-							} else {
-								
-								if (Math.log(leftSupport[zaehlerFuerSupport]) > 0
-										&& Math
-												.log(leftSupport[zaehlerFuerSupport]) < 5) {
-
-									lineStrokeLeft = (float) Math
-											.log(leftSupport[zaehlerFuerSupport]);
-								} else if (Math
-										.log(leftSupport[zaehlerFuerSupport]) < 0.01) {
-									lineStrokeLeft = 0.01f;
-								} else {
-									lineStrokeLeft = 5.0f;
-								}
-							}
-
+							float lineStrokeLeft = setStroke(leftSupport[zaehlerFuerSupport], isZScore);
+							
 							Point point = co.getLocation();
 							/*
 							 * working with different panels it is necessary to
@@ -260,9 +229,6 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 							int x = (int) point.getX();
 							int y = (int) point.getY()
 									+ (int) (co.getHeight() * 0.5);
-							Point currentPoint = new Point(x, y);
-
-							leftComponentPositions[zaehlerFuerSupport] = currentPoint;
 
 							/*
 							 * if the contig is "some where else" selected the
@@ -311,41 +277,13 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
  							ContigAppearance test = (ContigAppearance) co;
 
 
-							float lineStroke = 0.01f;
-							if (isZScore) {
-								if (rightSupport[zaehlerFuerSupport] > 0
-										&& rightSupport[zaehlerFuerSupport] < 5) {
-									lineStroke = (float) (rightSupport[zaehlerFuerSupport]);
-								} else if (rightSupport[zaehlerFuerSupport] > 5) {
-									lineStroke = 5.0f;
-								} else {
-									lineStroke = 0.01f;
-								}
-							} else {
-							
-								if (Math.log(rightSupport[zaehlerFuerSupport]) > 0
-										&& Math
-												.log(rightSupport[zaehlerFuerSupport]) < 5) {
-
-									lineStroke = (float) Math
-											.log(rightSupport[zaehlerFuerSupport]);
-								} else if (Math
-										.log(rightSupport[zaehlerFuerSupport]) < 0.01) {
-									lineStroke = 0.01f;
-								} else {
-									lineStroke = 5.0f;
-								}
-							}
-
+							float lineStroke = setStroke(rightSupport[zaehlerFuerSupport], isZScore);
 							Point point = co.getLocation();
 
 							int x = (int) co.getParent().getX();
 							int y = (int) point.getY()
 									+ (int) (0.5 * co.getHeight());
-							Point currentPoint = new Point(x, y);
-
-							rightComponentPositions[zaehlerFuerSupport] = currentPoint;
-
+	
 							if (test.isAnderweitigAusgewaehlt()) {
 								float[] dash2 = { 30, 10 };
 								g2.setColor(Color.DARK_GRAY);
@@ -373,6 +311,38 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 		g2.setStroke(originalStroke);
 		g2.setColor(originalColor);
 	}
+	
+	/*
+	 * Here will be calculated the stroke of the lines
+	 * regulated by support of the edge and 
+	 * if the user want to see the zScores or absolute support
+	 */
+	public float setStroke(double support, boolean isZScore){
+		
+		float lineStroke = 0.01f;
+		if (isZScore) {
+			if (support > 0
+					&& support < 5) {
+				lineStroke = (float) (support);
+			} else if (support > 5) {
+				lineStroke = 5.0f;
+			} else {
+				lineStroke = 0.01f;
+			}
+		} else {
+		
+			if (Math.log(support) > 0
+					&& Math.log(support) < 5) {
+
+				lineStroke = (float) Math.log(support);
+			} else if (Math	.log(support) < 0.01) {
+				lineStroke = 0.01f;
+			} else {
+				lineStroke = 5.0f;
+			}
+		}
+		return lineStroke;
+	}
 
 	@Override
 	public void update(Observable o, Object arg) {
@@ -380,14 +350,14 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 		if (isZScore != model.isZScore()) {
 			this.isZScore = model.isZScore();
 		}
-
+		
 		if (numberOfNeighbours != model.getNumberOfNeighbours()
 				|| centralContigIndex != model.getCurrentContigIndex()) {
 			this.numberOfNeighbours = model.getNumberOfNeighbours();
-			updateCentralContig(model.getCurrentContigIndex());
-			updateLeftNeighbours();
-			updateRightNeighbours();
 		}
+		updateCentralContig(model.getCurrentContigIndex());
+		updateLeftNeighbours();
+		updateRightNeighbours();
 		
 		this.repaint();
 	}
@@ -730,7 +700,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 	 */
 	private boolean ulteriorSelected(boolean isLeft, int indexOfNeighbour,
 			AdjacencyEdge edge) {
-		
+
 		boolean isSelected = false;
 
 		if (isLeft) {

@@ -27,7 +27,7 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 
 	public ContigListPanel(CagCreator model) {
 		this.myModel = model;
-		myModel.addObserver(this);
+		//myModel.addObserver(this);
 		graph = myModel.getGraph();
 		
 		this.setToolTipText("<html>Choose a contig<br>"
@@ -47,7 +47,7 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 
 
 	public void createList(){
-		System.out.println("liste initialisiert");
+
 		int i = 0;
 		dataForList = new String[graph.getNodes().size()];
 		for (DNASequence c : graph.getNodes()) {

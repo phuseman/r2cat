@@ -168,8 +168,8 @@ public class LegendAndInputOptionPanel extends JPanel implements
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-
-		if (evt.getSource() instanceof JFormattedTextField) {
+		
+	if (evt.getSource() instanceof JFormattedTextField) {
 			JFormattedTextField inputOptionForNumberOfNeighbours = ((JFormattedTextField) evt
 					.getSource());
 			/*
@@ -179,7 +179,7 @@ public class LegendAndInputOptionPanel extends JPanel implements
 			int neighboursNumber = ((Number) evt.getNewValue()).intValue();
 
 			if (neighboursNumber <= 10 && neighboursNumber > 0) {
-
+				
 				numberOfNeighbours = neighboursNumber;
 				inputOptionForNumberOfNeighbours.setValue(new Integer(
 						numberOfNeighbours));
