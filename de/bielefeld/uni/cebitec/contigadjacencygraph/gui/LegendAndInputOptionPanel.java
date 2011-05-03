@@ -22,7 +22,6 @@ public class LegendAndInputOptionPanel extends JPanel implements
 	private JRadioButton absoluteSupport;
 	private JRadioButton zScoreRadioButton;
 	private int numberOfNeighbours = 5;
-	private CagController con;
 	private CagCreator model;
 	private boolean isZScore;
 

@@ -18,7 +18,7 @@ public class ContigBorder extends AbstractBorder{
 	private boolean isRepeat;
 	private boolean isReverse;
 	private boolean isSelected = false;
-	private boolean woandersAusgewaehlt;
+	private boolean someWhereElseSelected;
 	private float[] dash = {2,2};
 	private float[] dash2 = {15,2};
 	private Graphics2D g2;
@@ -29,11 +29,11 @@ public class ContigBorder extends AbstractBorder{
 		this.isRepeat = isRepeat;
 		this.isReverse = isReverse;
 	}
-	public ContigBorder(boolean isRepeat, boolean isReverse, boolean flag, boolean anderweitigAusgewaehlt, boolean highlight) {
+	public ContigBorder(boolean isRepeat, boolean isReverse, boolean flag, boolean ulteriorSelected, boolean highlight) {
 		this.isRepeat = isRepeat;
 		this.isReverse = isReverse;
 		this.isSelected = flag;
-		this.woandersAusgewaehlt = anderweitigAusgewaehlt;
+		this.someWhereElseSelected = ulteriorSelected;
 		this.highlightContig = highlight;
 	}
 
@@ -59,7 +59,7 @@ public class ContigBorder extends AbstractBorder{
 		if (isSelected) {
 			g2.setColor(Color.BLACK);
 			g2.setStroke(new BasicStroke(1));
-		}else if (woandersAusgewaehlt){
+		}else if (someWhereElseSelected){
 			g2.setColor(Color.DARK_GRAY);
 			g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1, dash2 , 0));
 		}

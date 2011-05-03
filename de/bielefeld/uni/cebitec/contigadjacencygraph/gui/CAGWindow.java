@@ -15,7 +15,7 @@ public class CAGWindow extends JFrame {
 		setTitle("View of a contig adjacency graph");
 		setName("fenster");
 		
-		setPreferredSize(new Dimension(1000, 500));
+		setPreferredSize(new Dimension(1000, 600));
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		// setSize(Toolkit.getDefaultToolkit().getScreenSize());

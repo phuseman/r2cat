@@ -15,7 +15,11 @@ public class ContigRadioButton extends JRadioButton {
 	private AdjacencyEdge selectedNeighbourOfButtonGroup;
 	private AdjacencyEdge neighboursForTheThisNeighbour;
 
-	
+
+	/*
+	 * This exits only to get easy the informations about the 
+	 * selected contig
+	 */
 	public ContigRadioButton (AdjacencyEdge includingEdge, ContigAppearance contig){
 		this.edge = includingEdge;
 		this.contigObject = contig;

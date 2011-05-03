@@ -1,16 +1,12 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 
-import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
-import de.bielefeld.uni.cebitec.qgram.DNASequence;
 
 /**
  * Erstellt, das Aussehen eines Contigs. D.h. Länge, Orientierung und
@@ -18,95 +14,32 @@ import de.bielefeld.uni.cebitec.qgram.DNASequence;
  */
 public class ContigAppearance extends JPanel {
 
-	private LayoutGraph lGraph;
 	private JLabel contigLabel;
 	private AdjacencyEdge edge;
-	private int i;
+	private int index;
 	private String contigName;
-	private double support;
 	private int numberOfNeighbours = 5;
 	private boolean isReverse;
-	private boolean anderweitigAusgewaehlt;
+	private boolean someWhereElseSelected;
 	private boolean selected;
 	private boolean isRepetitiv;
-	private ContigBorder border;
-	private int textSize = 3;
-	private int contigHeight = 50;
-	private int contigMinWidth = 60;
-	private int contigMaxWidth = 215;
+	private int textSize = 4;
+	private int contigPanelHeight = 50;
+	private int contigPanelMinWidth = 70;
+	private int contigPanelMaxWidth = 210;
 
 	public ContigAppearance() {
 		super();
-		this.setBackground(Color.WHITE);
+		setBackground(Color.WHITE);
 		contigLabel = new JLabel();
-		this.add(contigLabel);
-	}
-
-	/*
-	 * This should be used for the central contig 
-	 * where we don't need the edge
-	 */
-	public ContigAppearance(DNASequence node, int indexOfCentralContig,boolean isCurrentContigSelected,
-			boolean isCurrentContigReverse, long maxSize, long minSize) {
-		this.i = indexOfCentralContig;
-		isReverse = isCurrentContigReverse;
-		isRepetitiv= node.isRepetitive();
-		contigLabel = new JLabel();
-		this.setBackground(Color.WHITE);
-		this.add(contigLabel);
-		this.setName(node.getId());
-		setContigAppearance(node.getId(), node.getSize(), new ContigBorder(isRepetitiv,
-				isReverse, isCurrentContigSelected, false, false));
-		setSizeOfContig(node.getSize(), maxSize, minSize);
-	}
-
-
-	/*
-	 * This is should be used for the neighbours.
-	 * The edge is needed.
-	 */
-	public ContigAppearance(LayoutGraph graph, AdjacencyEdge includingEdge,
-			int indexOfNeighbour, boolean sideIsLeft, long maxSize, long minSize, boolean woandersAusgewaehlt) {
-		super();
-		
-		this.lGraph = graph;
-		this.i = indexOfNeighbour;
-		this.isReverse = isContigReverse(sideIsLeft, includingEdge, indexOfNeighbour);
-
-		DNASequence contig = lGraph.getNodes().get(i);
-		contigLabel = new JLabel();
-
-		this.setBackground(Color.WHITE);
-		this.add(contigLabel);
-		this.setName(contig.getId());
-		if (sideIsLeft){
-			this.setAlignmentX(RIGHT_ALIGNMENT);
-		}else{
-			this.setAlignmentX(LEFT_ALIGNMENT);
-		}
-		selected = false;
-		if (includingEdge.isSelected()) {
-			selected = true;
-		}
-		anderweitigAusgewaehlt = false;
-		if(!selected && woandersAusgewaehlt){
-			anderweitigAusgewaehlt = true;
-		}
-		
-		support = includingEdge.getSupport();
-
-		isRepetitiv = contig.isRepetitive();
-		border = new ContigBorder(
-				isRepetitiv, isReverse, selected, anderweitigAusgewaehlt, false);
-		setContigAppearance(contig.getId(), contig.getSize(), border);
-		setSizeOfContig(contig.getSize(), maxSize, minSize);
 	}
 	
 
 	/*
 	 * Figure out, if the contig have to be displayed as reverse or not
+	 * this should only used for neighbours!
 	 */
-	private boolean isContigReverse( boolean isLeftContig, AdjacencyEdge edge, int indexOfContig ){
+	public void isContigReverse( boolean isLeftContig, AdjacencyEdge edge, int indexOfContig ){
 		
 		boolean isContigReverse = false;
 		
@@ -125,16 +58,28 @@ public class ContigAppearance extends JPanel {
 			}
 		}
 		
-		return isContigReverse;
+		isReverse =  isContigReverse;
 	}
 
-
-	private synchronized void setContigAppearance(String contigId, long size,
-			ContigBorder border) {
+	/*
+	 * Set the individual appearance for this contig
+	 */
+	public void setContigAppearance(String contigId, long size,
+			boolean isRepetitiv, boolean selected, 
+			boolean someWhereElseSelected, double support) {
+		
+		this.someWhereElseSelected = someWhereElseSelected;
+		this.selected = selected;
+		
+		/*
+		 * Create a new Border
+		 */
+		ContigBorder border = new ContigBorder(
+				isRepetitiv, isReverse, selected, someWhereElseSelected, false);
+		
 		String contigNameAusChar = "";
 		char[] dst = new char[numberOfNeighbours + (numberOfNeighbours - 1)];
 
-		contigLabel.setName("contigLabel "+contigId);
 		/*
 		 * If the name of a contig is to big
 		 * this is going to handle that.
@@ -170,6 +115,9 @@ public class ContigAppearance extends JPanel {
 					+ "</html>");
 		}
 
+		/*
+		 * Create the text at the panel
+		 */
 		if (size < 1000) {
 			contigLabel.setText("<html><font size = -"+textSize+"><u>" + contigId + "</u>"
 					+ "<br><b>length:" + "&lt; 1" + " kb</b>" + "</html>");
@@ -181,28 +129,15 @@ public class ContigAppearance extends JPanel {
 			this.setBorder(border);
 			this.setName(contigId);
 		}
+		add(contigLabel);
 		setVisible(true);
 	}
 	
-	public void setTextSize(int size){
-		textSize = size;
-	}
-	
 	/*
-	 * This method set height of contigs and 
-	 * min and max width of contigs
+	 * Necessary if the contigs have to be very small
+	 * if the number is high the size will be small.
 	 */
-	public void setSize(int height, int minWidth, int maxWidth){
-		contigHeight = height;
-		if(minWidth >= 60){			
-			contigMinWidth = minWidth;
-		}
-		if(maxWidth <= 215){
-			contigMaxWidth = maxWidth;
-		}
-	}
-
-	private  void setSizeOfContig(long size, long maxSize,
+	public  void setSizeOfContig(long size, long maxSize,
 			long minSize) {
 	
 		float nenner = (float) (Math.log(size) - Math.log(minSize));
@@ -210,30 +145,65 @@ public class ContigAppearance extends JPanel {
 
 		float xInIntervall = nenner / zaehler;
 
-		int wSize = (int) ((xInIntervall * contigMaxWidth) + contigMinWidth);
+		int wSize = (int) ((xInIntervall * contigPanelMaxWidth) + contigPanelMinWidth);
 
-		this.setPreferredSize(new Dimension(wSize, contigHeight));
-		this.setMaximumSize(new Dimension(wSize, contigHeight));
-		this.setMinimumSize(new Dimension(wSize, contigHeight));
+		this.setPreferredSize(new Dimension(wSize, contigPanelHeight));
+		this.setMaximumSize(new Dimension(wSize, contigPanelHeight));
+		this.setMinimumSize(new Dimension(wSize, contigPanelHeight));
 
 	}
 	
-	public void highlightOfContigPanel ( boolean highlight){
-
-		ContigBorder border = new ContigBorder(isRepetitiv, isReverse, selected	, anderweitigAusgewaehlt	, highlight);
-		this.setBorder(border);	
+	public void setTextSize(int textSize) {
+		this.textSize = textSize;
 	}
 
-	public LayoutGraph getlGraph() {
-		return lGraph;
+
+	public void setContigPanelHeight(int contigPanelHeight) {
+		if(contigPanelHeight > 40){
+			this.contigPanelHeight = contigPanelHeight;
+		}else{
+			this.contigPanelHeight = 40;
+		}
+	}
+
+
+	public void setContigPanelMinWidth(int contigPanelMinWidth) {
+		if(contigPanelMinWidth > 60){
+			this.contigPanelMinWidth = contigPanelMinWidth;
+		}else{
+			this.contigPanelMinWidth = 60;
+		}
+	}
+
+
+	public void setContigPanelMaxWidth(int contigPanelMaxWidth) {
+		if(contigPanelMaxWidth< 215){
+			this.contigPanelMaxWidth = contigPanelMaxWidth;
+		}else{
+			this.contigPanelMaxWidth = 215;
+		}
+	}
+
+
+	/*
+	 * this do the background of the panels grey
+	 */
+	public void highlightOfContigPanel ( boolean highlight){
+
+		ContigBorder border = new ContigBorder(isRepetitiv, isReverse, selected	, someWhereElseSelected	, highlight);
+		this.setBorder(border);	
 	}
 
 	public AdjacencyEdge getEdge() {
 		return edge;
 	}
 
-	public int getI() {
-		return i;
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
 	}
 
 	public String getContigName() {
@@ -244,8 +214,12 @@ public class ContigAppearance extends JPanel {
 		return isReverse;
 	}
 	
+	public void setReverse(boolean isReverse) {
+		this.isReverse = isReverse;
+	}
+
 	public boolean isAnderweitigAusgewaehlt() {
-		return anderweitigAusgewaehlt;
+		return someWhereElseSelected;
 	}
 	
 	public boolean isSelected() {

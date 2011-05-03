@@ -20,7 +20,7 @@ public class CagController {
 
     this.cagModel = new CagCreator();
     contigViewPanel = new JPanel();
-    contigView = new ChooseContigPanel(cagModel);
+    contigView = new ChooseContigPanel(cagModel, this);
 
     listViewPanel = new JPanel();
     listView = new ContigListPanel(cagModel);
@@ -71,7 +71,7 @@ private void setNeutral() {
     } else {
       cagModel.setLayoutGraph(graph);
 
-      contigView = new ChooseContigPanel(cagModel);
+      contigView = new ChooseContigPanel(cagModel, this);
       contigView.createPanel();
       contigViewPanel.removeAll();
       contigViewPanel.add(contigView);

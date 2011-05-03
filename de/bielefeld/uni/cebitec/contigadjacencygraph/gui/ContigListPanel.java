@@ -19,15 +19,12 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 
 	private LayoutGraph graph;
 	private String[] dataForList;
-	private CagController controller;
 	private JList list;
 	private CagCreator myModel;
 	private boolean selectionByUpdate;
 
-
 	public ContigListPanel(CagCreator model) {
 		this.myModel = model;
-		//myModel.addObserver(this);
 		graph = myModel.getGraph();
 		
 		this.setToolTipText("<html>Choose a contig<br>"
@@ -45,7 +42,10 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 	}
 
 
-
+	/*
+	 * create the list with data
+	 * and size
+	 */
 	public void createList(){
 
 		int i = 0;
@@ -77,10 +77,14 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 	}
 
 
+	/*
+	 * If the user select a contig name will this be register by this 
+	 * method
+	 * 
+	 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
+	 */
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		
-//		list =(JList) e.getSource();
 		
 		if (e.getValueIsAdjusting() == false&& !selectionByUpdate) {
 
@@ -111,7 +115,12 @@ public class ContigListPanel extends JScrollPane implements ListSelectionListene
 	}
 
 
-
+	/*
+	 * If the user selected an another contig in the panel
+	 * the selection of the list have to be changed.
+	 * 
+	 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+	 */
 	@Override
 	public void update(Observable o, Object arg) {
 		

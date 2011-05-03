@@ -121,8 +121,8 @@ public class RadioButtonActionListener implements ActionListener {
 			int indexLeft = -1;
 			int indexRight = -1;
 
-			if ((radioButton.isLeft() && !false)//centralContig.isReverse())
-					|| (!radioButton.isLeft() && false)){//centralContig.isReverse())) {
+			if ((radioButton.isLeft() && !false)
+					|| (!radioButton.isLeft() && false)){
 
 				if (centralContigIndex == selectedEdge.geti()) {
 					indexLeft = selectedEdge.getj();
@@ -132,8 +132,8 @@ public class RadioButtonActionListener implements ActionListener {
 					indexRight = selectedEdge.getj();
 				}
 
-			} else if (!radioButton.isLeft() && !false//centralContig.isReverse()
-					|| (radioButton.isLeft() && false)){//centralContig.isReverse())) {
+			} else if (!radioButton.isLeft() && !false
+					|| (radioButton.isLeft() && false)){
 
 				if (centralContigIndex == selectedEdge.geti()) {
 					indexLeft = selectedEdge.geti();
@@ -212,11 +212,19 @@ public class RadioButtonActionListener implements ActionListener {
 			
 			contigCollectionR = cagModel.getSelectedRightEdges().get(rightIndex);		
 			contigCollectionR.add(selectedEdge);
-
+			System.out.println("left "+cagModel.getSelectedLeftEdges().get(leftIndex));
+			System.out.println("right "+cagModel.getSelectedRightEdges().get(rightIndex));
 			updateModel();
 
 		}
 
+		/*
+		 * if the user select a contig by this radio button 
+		 * the model have to be changed.
+		 * which adjacency is selected, which have to be deselected
+		 * will be set above
+		 * but the contigs have to be repainted this will be done here
+		 */
 		private void updateModel() {
 			
 			cagModel.changeContigs(centralContigIndex, cagModel.isCurrentContigIsReverse());

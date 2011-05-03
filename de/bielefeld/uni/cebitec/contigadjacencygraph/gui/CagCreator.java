@@ -1,6 +1,7 @@
 package de.bielefeld.uni.cebitec.contigadjacencygraph.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -193,6 +194,8 @@ public class CagCreator extends Observable {
           listView.setVisible(true);
 
           JScrollPane scroll = new JScrollPane(contigView);
+//          scroll.setPreferredSize(new Dimension(300, 100));
+//          scroll.setMaximumSize(new Dimension(300, 100));
           scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
           scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
           
