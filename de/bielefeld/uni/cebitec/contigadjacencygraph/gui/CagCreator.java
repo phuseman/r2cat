@@ -13,6 +13,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 
+import com.sun.org.apache.bcel.internal.generic.CPInstruction;
+
 import de.bielefeld.uni.cebitec.common.SimpleProgressReporter;
 import de.bielefeld.uni.cebitec.common.Timer;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.ContigAdjacencyGraph;
@@ -186,6 +188,8 @@ public class CagCreator extends Observable {
           win.initWindow();
 
           ChooseContigPanel contigView = controller.getContigView();
+          contigView.setMinimumSize(new Dimension(400, 220));
+          contigView.setSizeOfPanel(300, 100);	
           LegendAndInputOptionPanel legendView = controller.getLegendView();
           ContigListPanel listView = controller.getListView();
 
@@ -193,9 +197,9 @@ public class CagCreator extends Observable {
           legendView.setVisible(true);
           listView.setVisible(true);
 
+   
+          
           JScrollPane scroll = new JScrollPane(contigView);
-//          scroll.setPreferredSize(new Dimension(300, 100));
-//          scroll.setMaximumSize(new Dimension(300, 100));
           scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
           scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
           

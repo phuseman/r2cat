@@ -23,10 +23,10 @@ public class ContigAppearance extends JPanel {
 	private boolean someWhereElseSelected;
 	private boolean selected;
 	private boolean isRepetitiv;
-	private int textSize = 4;
+	private int textSize = 2;
 	private int contigPanelHeight = 50;
 	private int contigPanelMinWidth = 70;
-	private int contigPanelMaxWidth = 210;
+	private int contigPanelMaxWidth = 215;
 
 	public ContigAppearance() {
 		super();
@@ -144,7 +144,7 @@ public class ContigAppearance extends JPanel {
 		float zaehler = (float) (Math.log(maxSize) - Math.log(minSize));
 
 		float xInIntervall = nenner / zaehler;
-
+		
 		int wSize = (int) ((xInIntervall * contigPanelMaxWidth) + contigPanelMinWidth);
 
 		this.setPreferredSize(new Dimension(wSize, contigPanelHeight));
@@ -177,10 +177,10 @@ public class ContigAppearance extends JPanel {
 
 
 	public void setContigPanelMaxWidth(int contigPanelMaxWidth) {
-		if(contigPanelMaxWidth< 215){
-			this.contigPanelMaxWidth = contigPanelMaxWidth;
+		if(contigPanelMaxWidth< 180){
+			this.contigPanelMaxWidth = 180;
 		}else{
-			this.contigPanelMaxWidth = 215;
+			this.contigPanelMaxWidth = contigPanelMaxWidth;
 		}
 	}
 

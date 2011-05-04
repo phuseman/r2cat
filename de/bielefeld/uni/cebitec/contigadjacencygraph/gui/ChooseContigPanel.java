@@ -46,12 +46,9 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 
 	private int centralContigIndex;
 
-	private CagController con;
 
-
-	ChooseContigPanel(CagCreator cagModel, CagController controller) {
+	ChooseContigPanel(CagCreator cagModel) {
 		this.model = cagModel;
-		this.con = controller;
 		this.addMouseListener(this);
 	}
 
@@ -64,6 +61,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 
 		layout = new BoxLayout(this, BoxLayout.LINE_AXIS);
 		this.setLayout(layout);
+		
 		leftContainer = new JPanel();
 		leftContainer.setName("leftContainer");
 		leftRadioButtonContainer = new JPanel();
@@ -364,37 +362,31 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 	}
 
 	public void setSizeOfPanel(int width, int height) {
-
+		int h = 50;
+		int w= 560;
 		/*
 		 * This is the absolute min size of panel
 		 */
-		int h = 50;
-		int w = 560;
 
 		if (height < (model.getNumberOfNeighbours()*50)) {
 			h = model.getNumberOfNeighbours() * 50;
 		} else {
 			h = height;
 		}
-		if (width < con.getContigViewPanel().getWidth()) {
-			if(con.getContigViewPanel().getWidth()<w){
-				/*
-				 * Hier sollten die Contig größen skaliert werden
-				 * absolutes min: h 35, min w = 60, max w = 180  schriftgröße (-)4
-				 * 
-				 * absolutes max: h 50, min w = 70, max w = 210  schriftgröße (-)2
-				 */
-			}else{
-				w = con.getContigViewPanel().getWidth();
-			}
-		} else {
+		if (width > w) {
 			w = width;
 		}
 		
-		setPreferredSize(new Dimension(w, h));
+		setMinimumSize(new Dimension(w, h));
 
 	}
 	
+	
+	/*public void resetSizeOnDefault(){
+	
+		
+		setMinimumSize(new Dimension(h, w));
+	}*/
 
 	private void updateCentralContig(int index) {
 
@@ -405,7 +397,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 		if (centerContainer.getComponentCount() > 0) {
 			centerContainer.removeAll();
 		}
-
+	
 		int centralContigIndex = index;
 		DNASequence currentContig = model.getGraph().getNodes().get(
 				centralContigIndex);
@@ -436,7 +428,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 	}
 
 	private void updateLeftNeighbours() {
-
+		
 		leftNeigboursReady = false;
 
 		Vector<AdjacencyEdge> leftNeighbourEdges = model
@@ -473,6 +465,9 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				whichNeighbourIsSelected = e;
 			}
 		}
+		
+		Dimension size = new Dimension(5, 15);		
+		leftRadioButtonContainer.add(new Box.Filler(size, size, size));
 		/*
 		 * This is necessary to set the layout of the choosed ContigPanel or
 		 * rather for the leftcontainer
@@ -510,11 +505,15 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				contigPanel.setContigAppearance(contig.getId(), contig
 						.getSize(), contig.isRepetitive(), edge.isSelected(),
 						someWhereElseSelected, edge.getSupport());
+				/*
+				 * Divide by 3 because 3 Contigs need space in this 
+				 * choose contig Panel and subtract 20 pixels for the 
+				 * radio Button
+				 */
+				int maxContigPanelSize = (this.getWidth() / 3) - 20;
+				contigPanel.setContigPanelMaxWidth(maxContigPanelSize);
 				contigPanel.setSizeOfContig(contig.getSize(), model
 						.getMaxSizeOfContigs(), model.getMinSizeOfContigs());
-				// model.getGraph(), edge,
-				// indexOfContig, true, model.getMaxSizeOfContigs(), model
-				// .getMinSizeOfContigs(), anderweitigAusgewaehlt);
 				contigPanel.addMouseListener(this);
 
 				/*
@@ -523,7 +522,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				 * else or not selected
 				 */
 				radioButton = new ContigRadioButton(edge, contigPanel);
-
+				
 				if (isALeftNeighourSelected) {
 					radioButton.setActionCommand("nachbarAusgewaehlt");
 					radioButton
@@ -560,8 +559,11 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				 * There will be added some dynamic space
 				 */
 				if (t < (model.getNumberOfNeighbours() - 1)) {
-					leftContainer.add(Box.createVerticalGlue());
-					leftRadioButtonContainer.add(Box.createVerticalGlue());
+					Dimension minSize = new Dimension(5, 10);
+					Dimension prefSize = new Dimension(5, 10);
+					Dimension maxSize = new Dimension(5, 10);
+					leftContainer.add(new Box.Filler(minSize, prefSize, maxSize));
+					leftRadioButtonContainer.add(Box.createVerticalStrut(40));
 				}
 				leftContainer.updateUI();
 				leftRadioButtonContainer.updateUI();
@@ -575,7 +577,6 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 		leftRadioButtonContainer.add(Box.createVerticalGlue());
 		this.leftSupport = leftSupport;
 		leftNeigboursReady = true;
-
 	}
 
 	/*
@@ -609,6 +610,13 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				neighbourForThisGroup = e;
 			}
 		}
+		/*
+		 * First gap for radioButton contain
+		 * cause that the button next to the peak
+		 * of the contigs
+		 */
+		Dimension size = new Dimension(5, 15);
+		rightRadioButtonContainer.add(new Box.Filler(size, size, size));
 
 		/*
 		 * For each adjacency edge here is going to be a contig Panel
@@ -639,6 +647,14 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				contigPanel.setContigAppearance(contig.getId(), contig
 						.getSize(), contig.isRepetitive(), edge.isSelected(),
 						someWhereElseSelected, edge.getSupport());
+				/*
+				 * Divide by 3 because 3 Contigs need space in this 
+				 * choose contig Panel and subtract 20 pixels for the 
+				 * radio Button
+				 */
+				int maxContigPanelSize = (this.getWidth() / 3) - 20;
+				contigPanel.setContigPanelMaxWidth(maxContigPanelSize);
+
 				contigPanel.setSizeOfContig(contig.getSize(), model
 						.getMaxSizeOfContigs(), model.getMinSizeOfContigs());
 				// contigPanel = new ContigAppearance(model.getGraph(), edge,
@@ -647,7 +663,8 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				contigPanel.addMouseListener(this);
 
 				radioButton = new ContigRadioButton(edge, contigPanel);
-
+				//radioButton.setAlignmentX(LEFT_ALIGNMENT);
+				
 				if (edge.isSelected()) {
 					radioButton.setSelected(true);
 				}
@@ -663,7 +680,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				}
 				if (someWhereElseSelected) {
 					radioButton.setActionCommand("anderweitigAusgewaehlt");
-					AdjacencyEdge otherEdge = model.getSelectedLeftEdges().get(
+					AdjacencyEdge otherEdge = model.getSelectedRightEdges().get(
 							indexOfContig).firstElement();
 					radioButton.setNeighboursForTheThisNeighbour(otherEdge);
 
@@ -681,8 +698,11 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				rightRadioButtonContainer.add(radioButton);
 
 				if (s < (model.getNumberOfNeighbours() - 1)) {
-					rightContainer.add(Box.createVerticalGlue());
-					rightRadioButtonContainer.add(Box.createVerticalGlue());
+					Dimension minSize = new Dimension(5, 10);
+					Dimension prefSize = new Dimension(5, 10);
+					Dimension maxSize = new Dimension(5, 10);
+					rightContainer.add(new Box.Filler(minSize, prefSize, maxSize));
+					rightRadioButtonContainer.add(Box.createVerticalStrut(40));//(new Box.Filler(minSize, prefSize, maxSize));
 				}
 				rightContainer.updateUI();
 				rightRadioButtonContainer.updateUI();
