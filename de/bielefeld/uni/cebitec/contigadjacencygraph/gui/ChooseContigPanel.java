@@ -415,11 +415,13 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 
 		ContigAppearance centralContig = new ContigAppearance();
 		centralContig.setReverse(isReverse);
+		centralContig.setIndex(index);
 		centralContig.setContigAppearance(currentContig.getId(), currentContig
 				.getSize(), currentContig.isRepetitive(), isSelected, false,
 				0.0);
 		centralContig.setSizeOfContig(currentContig.getSize(), model
 				.getMaxSizeOfContigs(), model.getMinSizeOfContigs());
+		centralContig.addMouseListener(this);
 
 		centerContainer.add(centralContig);
 		centerContainer.updateUI();
@@ -831,10 +833,23 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 		 */
 		if (e.getSource() instanceof ContigAppearance) {
 			ContigAppearance contigPanel = (ContigAppearance) e.getSource();
-
-			int index = contigPanel.getIndex();
-			boolean currentContigIsReverse = contigPanel.isReverse();
-
+		
+			int index;
+			index = contigPanel.getIndex();
+			boolean currentContigIsReverse;
+			
+			
+			if(contigPanel.getIndex() == model.getCurrentContigIndex()){
+				
+				if(contigPanel.isReverse()){
+					currentContigIsReverse = false;
+				}
+				else{
+					currentContigIsReverse = true;
+				}
+			}else{
+				currentContigIsReverse = contigPanel.isReverse();
+			}
 			model.changeContigs(index, currentContigIsReverse);
 		}
 	}

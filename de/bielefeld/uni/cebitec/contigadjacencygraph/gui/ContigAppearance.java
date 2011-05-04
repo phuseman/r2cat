@@ -17,7 +17,6 @@ public class ContigAppearance extends JPanel {
 	private JLabel contigLabel;
 	private AdjacencyEdge edge;
 	private int index;
-	private String contigName;
 	private int numberOfNeighbours = 5;
 	private boolean isReverse;
 	private boolean someWhereElseSelected;
@@ -204,10 +203,6 @@ public class ContigAppearance extends JPanel {
 
 	public void setIndex(int index) {
 		this.index = index;
-	}
-
-	public String getContigName() {
-		return contigName;
 	}
 
 	public boolean isReverse() {

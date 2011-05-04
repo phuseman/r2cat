@@ -89,7 +89,7 @@ private void setNeutral() {
     cagModel.changeContigs(index, false);
   }
 
-/*public ChooseContigPanel getContigView() {
+public ChooseContigPanel getContigView() {
 	return contigView;
 }
 
@@ -110,9 +110,9 @@ public JPanel getListViewPanel() {
 
 public JPanel getLegendViewPanel() {
 	return legendViewPanel;
-}*/
+}
 
-  public JPanel getContigView() {
+ /* public JPanel getContigView() {
     return contigViewPanel;
   }
 
@@ -122,5 +122,5 @@ public JPanel getLegendViewPanel() {
 
   public JPanel getListView() {
     return listViewPanel;
-  }
+  }*/
 }

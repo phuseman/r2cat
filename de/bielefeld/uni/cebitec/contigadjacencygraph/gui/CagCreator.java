@@ -187,7 +187,7 @@ public class CagCreator extends Observable {
           CAGWindow win = new CAGWindow();
           win.initWindow();
 
-/*          ChooseContigPanel contigView = controller.getContigView();
+          ChooseContigPanel contigView = controller.getContigView();
           contigView.setMinimumSize(new Dimension(400, 220));
           contigView.setSizeOfPanel(300, 100);
           LegendAndInputOptionPanel legendView = controller.getLegendView();
@@ -205,7 +205,7 @@ public class CagCreator extends Observable {
           
           win.add(scroll, BorderLayout.CENTER);
           win.add(legendView, BorderLayout.SOUTH);
-          win.add(listView, BorderLayout.EAST);*/
+          win.add(listView, BorderLayout.EAST);
 
 
 
