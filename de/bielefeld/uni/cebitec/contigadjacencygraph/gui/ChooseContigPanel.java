@@ -416,11 +416,11 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 		ContigAppearance centralContig = new ContigAppearance();
 		centralContig.setReverse(isReverse);
 		centralContig.setIndex(index);
+		centralContig.setSizeOfContig(currentContig.getSize(), model
+				.getMaxSizeOfContigs(), model.getMinSizeOfContigs());
 		centralContig.setContigAppearance(currentContig.getId(), currentContig
 				.getSize(), currentContig.isRepetitive(), isSelected, false,
 				0.0);
-		centralContig.setSizeOfContig(currentContig.getSize(), model
-				.getMaxSizeOfContigs(), model.getMinSizeOfContigs());
 		centralContig.addMouseListener(this);
 
 		centerContainer.add(centralContig);
@@ -504,9 +504,6 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				contigPanel.setIndex(indexOfContig);
 				contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
 				contigPanel.isContigReverse(true, edge, indexOfContig);
-				contigPanel.setContigAppearance(contig.getId(), contig
-						.getSize(), contig.isRepetitive(), edge.isSelected(),
-						someWhereElseSelected, edge.getSupport());
 				/*
 				 * Divide by 3 because 3 Contigs need space in this 
 				 * choose contig Panel and subtract 20 pixels for the 
@@ -516,6 +513,9 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				contigPanel.setContigPanelMaxWidth(maxContigPanelSize);
 				contigPanel.setSizeOfContig(contig.getSize(), model
 						.getMaxSizeOfContigs(), model.getMinSizeOfContigs());
+				contigPanel.setContigAppearance(contig.getId(), contig
+						.getSize(), contig.isRepetitive(), edge.isSelected(),
+						someWhereElseSelected, edge.getSupport());
 				contigPanel.addMouseListener(this);
 
 				/*
@@ -646,9 +646,6 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				contigPanel.setIndex(indexOfContig);
 				contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 				contigPanel.isContigReverse(false, edge, indexOfContig);
-				contigPanel.setContigAppearance(contig.getId(), contig
-						.getSize(), contig.isRepetitive(), edge.isSelected(),
-						someWhereElseSelected, edge.getSupport());
 				/*
 				 * Divide by 3 because 3 Contigs need space in this 
 				 * choose contig Panel and subtract 20 pixels for the 
@@ -662,6 +659,9 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				// contigPanel = new ContigAppearance(model.getGraph(), edge,
 				// indexOfContig, false, model.getMaxSizeOfContigs(),
 				// model.getMinSizeOfContigs(), anderweitigAusgewaehlt);
+				contigPanel.setContigAppearance(contig.getId(), contig
+						.getSize(), contig.isRepetitive(), edge.isSelected(),
+						someWhereElseSelected, edge.getSupport());
 				contigPanel.addMouseListener(this);
 
 				radioButton = new ContigRadioButton(edge, contigPanel);

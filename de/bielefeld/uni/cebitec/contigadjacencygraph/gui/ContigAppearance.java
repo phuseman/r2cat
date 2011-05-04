@@ -9,15 +9,14 @@ import javax.swing.JPanel;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph.AdjacencyEdge;
 
 /**
- * Erstellt, das Aussehen eines Contigs. D.h. Länge, Orientierung und
- * Beschriftung
+ * Create a Contig illustration 
+ * size, orientation, (not) selected or ulterior selected 
  */
 public class ContigAppearance extends JPanel {
 
 	private JLabel contigLabel;
 	private AdjacencyEdge edge;
 	private int index;
-	private int numberOfNeighbours = 5;
 	private boolean isReverse;
 	private boolean someWhereElseSelected;
 	private boolean selected;
@@ -26,6 +25,7 @@ public class ContigAppearance extends JPanel {
 	private int contigPanelHeight = 50;
 	private int contigPanelMinWidth = 70;
 	private int contigPanelMaxWidth = 215;
+	private int wSize;
 
 	public ContigAppearance() {
 		super();
@@ -64,6 +64,7 @@ public class ContigAppearance extends JPanel {
 	 * Set the individual appearance for this contig
 	 */
 	public void setContigAppearance(String contigId, long size,
+			
 			boolean isRepetitiv, boolean selected, 
 			boolean someWhereElseSelected, double support) {
 		
@@ -75,28 +76,32 @@ public class ContigAppearance extends JPanel {
 		 */
 		ContigBorder border = new ContigBorder(
 				isRepetitiv, isReverse, selected, someWhereElseSelected, false);
-		
-		String contigNameAusChar = "";
-		char[] dst = new char[numberOfNeighbours + (numberOfNeighbours - 1)];
+	
+		String contigNameAusChar = contigId; // is going to be shorter, if it is to long
+		char[] dst = new char[11];
 
 		/*
-		 * If the name of a contig is to big
+		 * If the name of a contig is to big 
+		 * for the size of the contig
 		 * this is going to handle that.
 		 */
-		if (contigId.length() > 10) {
-			contigId.getChars(0, 3, dst, 0);
 
-			dst[3] = '.';
-			dst[4] = ' ';
-			dst[5] = '.';
+		if (contigId.length() > 10 && !(wSize > 140)) {
 
-			contigId.getChars(contigId.length() - 3, contigId.length(), dst, 6);
+			contigNameAusChar = "";
+
+			dst[0] = '.';
+			dst[1] = ' ';
+			dst[2] = '.';
+			dst[3] = ' ';
+			dst[4] = '.';
+			dst[5] = ' ';
+			contigId.getChars(contigId.length() - 5, contigId.length(), dst, 6);
 
 			for (int i = 0; i < dst.length; i++) {
 				char c = dst[i];
 				contigNameAusChar = contigNameAusChar + c;
 			}
-			contigId = contigNameAusChar;
 		}
 
 		/*
@@ -118,12 +123,12 @@ public class ContigAppearance extends JPanel {
 		 * Create the text at the panel
 		 */
 		if (size < 1000) {
-			contigLabel.setText("<html><font size = -"+textSize+"><u>" + contigId + "</u>"
+			contigLabel.setText("<html><font size = -"+textSize+"><u>" + contigNameAusChar + "</u>"
 					+ "<br><b>length:" + "&lt; 1" + " kb</b>" + "</html>");
 			this.setBorder(border);
 			this.setName(contigId);
 		} else {
-			contigLabel.setText("<html><font size = -"+textSize+"><u>" + contigId + "</u>"
+			contigLabel.setText("<html><font size = -"+textSize+"><u>" + contigNameAusChar + "</u>"
 					+ "<br><b>length: " + size / 1000 + " kb </b> </html>");
 			this.setBorder(border);
 			this.setName(contigId);
@@ -144,7 +149,7 @@ public class ContigAppearance extends JPanel {
 
 		float xInIntervall = nenner / zaehler;
 		
-		int wSize = (int) ((xInIntervall * contigPanelMaxWidth) + contigPanelMinWidth);
+		wSize = (int) ((xInIntervall * contigPanelMaxWidth) + contigPanelMinWidth);
 
 		this.setPreferredSize(new Dimension(wSize, contigPanelHeight));
 		this.setMaximumSize(new Dimension(wSize, contigPanelHeight));

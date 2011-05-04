@@ -136,7 +136,7 @@ public class CagCreator extends Observable {
 
         boolean projectParsed = project.readProject(new File(
                 // "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
-                //								 "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs.tcp"));
+                				//				 "/homes/aseidel/testdaten/treecat_project/Corynebacterium_urealyticum_DSM_7109_454LargeContigs.tcp"));
                 "/homes/aseidel/testdaten/perfekt/Corynebacterium_urealyticum_DSM_7109_454LargeContigs_renumbered_repeatmarked.tcp"));
 
         if (!projectParsed) {
@@ -188,8 +188,8 @@ public class CagCreator extends Observable {
           win.initWindow();
 
           ChooseContigPanel contigView = controller.getContigView();
-          contigView.setMinimumSize(new Dimension(400, 220));
-          contigView.setSizeOfPanel(300, 100);
+         // contigView.setMinimumSize(new Dimension(400, 220));
+          //contigView.setSizeOfPanel(300, 100);
           LegendAndInputOptionPanel legendView = controller.getLegendView();
           ContigListPanel listView = controller.getListView();
 
