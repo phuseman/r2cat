@@ -1,17 +1,18 @@
 package de.bielefeld.uni.cebitec.r2cat;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.prefs.BackingStoreException;
+
 import de.bielefeld.uni.cebitec.common.MiscFileUtils;
-import de.bielefeld.uni.cebitec.common.ProgressMonitorReporter;
 import de.bielefeld.uni.cebitec.common.SimpleProgressReporter;
 import de.bielefeld.uni.cebitec.common.Timer;
 import de.bielefeld.uni.cebitec.qgram.FastaFileReader;
 import de.bielefeld.uni.cebitec.qgram.MatchList;
 import de.bielefeld.uni.cebitec.qgram.QGramFilter;
 import de.bielefeld.uni.cebitec.qgram.QGramIndex;
-import java.io.File;
-import java.io.IOException;
-import java.util.prefs.BackingStoreException;
-
 import de.bielefeld.uni.cebitec.r2cat.gui.GuiController;
 
 /***************************************************************************
@@ -180,7 +181,7 @@ public class R2cat {
 
         if (matchList != null
                 && matchList.size() > 0
-                && queryFasta.getSequences().size() > matchList.getQueries().size()) {
+                && queryFasta.getSequences().size() >= matchList.getQueries().size()) {
           //if not all contigs could be matched
           int contigs = queryFasta.getSequences().size();
           int matchedContigs = matchList.getQueries().size();
@@ -194,9 +195,29 @@ public class R2cat {
                   + MiscFileUtils.getFileNameWithoutExtension(target) + ".r2c");
 
           matchList.writeToFile(output);
+          
 
-          progress.reportProgress(-1, "Wrote results to file: " + output.getCanonicalPath());
+          progress.reportProgress(-1, "Wrote matches to file:\n" + output.getCanonicalPath());
 
+          
+          t.startTimer();
+          //sort contigs
+  		ContigSorter sorter = new ContigSorter(matchList);
+
+  		sorter.run();
+  		progress.reportProgress(-1, "Sorting contigs took: " +t.stopTimer());
+		matchList.changeQueryOrder(sorter.getQueryOrder());
+		
+		File orderOutput = new File(System.getProperty("user.dir") + File.separator
+                + MiscFileUtils.getFileNameWithoutExtension(query) + "--"
+                + MiscFileUtils.getFileNameWithoutExtension(target) + ".order");
+
+		BufferedWriter orderWriter = new BufferedWriter(new FileWriter(orderOutput));
+		orderWriter.write(matchList.getContigsOrderAsText());
+		orderWriter.close();
+        progress.reportProgress(-1, "Wrote contig order to file:\n" + orderOutput.getCanonicalPath());
+
+		
         }
 
       } catch (IOException e) {
