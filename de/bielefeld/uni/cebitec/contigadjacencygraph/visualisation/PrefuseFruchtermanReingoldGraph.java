@@ -23,8 +23,11 @@ package de.bielefeld.uni.cebitec.contigadjacencygraph.visualisation;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
+import java.awt.event.MouseEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+
 
 import prefuse.Display;
 import prefuse.Visualization;
@@ -54,6 +57,7 @@ import prefuse.visual.VisualItem;
 import prefuse.controls.NeighborHighlightControl;
 import prefuse.controls.ToolTipControl;
 import prefuse.controls.FocusControl;
+import prefuse.controls.ControlAdapter;
 
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
@@ -82,7 +86,7 @@ public class PrefuseFruchtermanReingoldGraph
 		prefuseLogger.setLevel(Level.OFF);
 		
 		this.vis.add("graph", g);
-	     
+		
 		// sets interactivity status for all items in given data group
 		this.vis.setInteractive("graph.edges", null, true);
 	     
@@ -201,6 +205,14 @@ public class PrefuseFruchtermanReingoldGraph
 		this.searchPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		this.searchPanel.setShowCancel(false);
 		this.searchPanel.setShowResultCount(false);
+
+		// make nodes selectable via click
+		display.addControlListener(new ControlAdapter() { 
+			public void itemClicked(VisualItem item, MouseEvent e)
+			{
+				System.out.println(item.getString("label"));
+			}
+		});
 		
 		// fix selected focus nodes
         TupleSet focusGroup = vis.getGroup(Visualization.FOCUS_ITEMS); 

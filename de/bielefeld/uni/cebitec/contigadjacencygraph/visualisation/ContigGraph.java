@@ -69,8 +69,7 @@ public class ContigGraph extends Graph
 			this.nodes.set(nodeRowCounter, "label", this.lg.getNodes().get(nodeCounter).getId());
 			this.nodes.set(nodeRowCounter, "key", nodeRowCounter);  // TODO, getNodeCopy einfließen lassen!
 			this.nodes.set(nodeRowCounter, "drawableContigLength", this.lg.getNodes().get(nodeCounter).getSize());
-			this.lg.getNodes().get(nodeCounter).getDescription();
-			
+		
 			String arrangedDescription = this.lg.getNodes().get(nodeCounter).getDescription();
 			this.nodes.set(nodeRowCounter, "description", arrangedDescription);
 			this.nodes.set(nodeRowCounter, "totalAlignmentLength", this.lg.getNodes().get(nodeCounter).getTotalAlignmentLength());
@@ -107,8 +106,8 @@ public class ContigGraph extends Graph
 			this.edges.set(edgeRowCounter, "asciSupport", asciSupport);
 			this.edges.set(edgeRowCounter, "leftConnector", leftConnector);
 	        this.edges.set(edgeRowCounter, "rightConnector", rightConnector);
-	        
-	        System.out.println(this.lg.getEdges().get(edgeCounter).getContigi());
+	       
+	    
 		}
 		this.init(this.nodes,this.edges,false,"key","leftConnector","rightConnector");
 	}

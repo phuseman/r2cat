@@ -23,6 +23,7 @@ package de.bielefeld.uni.cebitec.contigadjacencygraph.visualisation;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.MouseEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +44,7 @@ import prefuse.action.assignment.ColorAction;
 import prefuse.action.assignment.DataSizeAction;
 import prefuse.action.layout.graph.ForceDirectedLayout;
 import prefuse.activity.Activity;
+import prefuse.controls.ControlAdapter;
 import prefuse.controls.DragControl;
 import prefuse.controls.PanControl;
 import prefuse.controls.ToolTipControl;
@@ -213,6 +215,14 @@ public class PrefuseForceDirectedGraph
 		this.searchPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		this.searchPanel.setShowCancel(false);
 		this.searchPanel.setShowResultCount(false);
+		
+		// make nodes selectable via click
+		display.addControlListener(new ControlAdapter() { 
+			public void itemClicked(VisualItem item, MouseEvent e)
+			{
+				System.out.println(item.getString("label"));
+			}
+		});
 		
 		// fix selected focus nodes
         TupleSet focusGroup = vis.getGroup(Visualization.FOCUS_ITEMS); 
