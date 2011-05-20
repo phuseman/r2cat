@@ -59,6 +59,7 @@ import prefuse.controls.ToolTipControl;
 import prefuse.controls.FocusControl;
 import prefuse.controls.ControlAdapter;
 
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.BorderFactory;
@@ -125,6 +126,9 @@ public class PrefuseFruchtermanReingoldGraph
 		ColorAction filledges = new ColorAction("graph.edges", VisualItem.FILLCOLOR, ColorLib.rgb(0,0,0)); 
 		filledges.add(VisualItem.HIGHLIGHT, ColorLib.rgb(0,0,0)); 
 		
+		ColorAction recolourBackground = new ColorAction("disp", VisualItem.FILLCOLOR, ColorLib.rgb(255,255,255));
+		
+		display.setBackground(new Color(255,255,255));
 		// create action lists
 		ActionList layout = new ActionList();
 		ActionList color = new ActionList(Activity.INFINITY);
@@ -156,6 +160,7 @@ public class PrefuseFruchtermanReingoldGraph
 		color.add(nodeText);
 		color.add(fill);
 		color.add(filledges);
+		color.add(recolourBackground);
 		
 		// assign TreeLayout to layout-ActionList
 	    layout.add(frl);

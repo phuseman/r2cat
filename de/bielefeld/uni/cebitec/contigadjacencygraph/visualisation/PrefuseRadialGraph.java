@@ -122,7 +122,7 @@ public class PrefuseRadialGraph
 		ColorAction fill = new ColorAction("graph.nodes", VisualItem.FILLCOLOR, ColorLib.rgb(204,204,153)); 
 		fill.add(VisualItem.FIXED, ColorLib.rgb(255,204,51)); 
 		fill.add(VisualItem.HIGHLIGHT, ColorLib.rgb(230,204,102)); 
-	     
+		
 		// create action lists
 		ActionList layout = new ActionList(Activity.INFINITY);
 		ActionList color = new ActionList(Activity.INFINITY);

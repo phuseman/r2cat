@@ -45,7 +45,7 @@ public class CustomNodeRenderer extends LabelRenderer
 		int xPoint = (int)outshape.getBounds2D().getX();
 		int yPoint = (int)outshape.getBounds2D().getY();
 		 
-		int rectWidth = (int)outshape.getBounds2D().getWidth()-4;
+		int rectWidth = (int)outshape.getBounds2D().getWidth(); // -4
 		int rectHeight = (int)outshape.getBounds2D().getHeight();
 		
 		double peakX = xPoint + rectWidth + rectWidth * 0.25;
@@ -62,7 +62,8 @@ public class CustomNodeRenderer extends LabelRenderer
 		p.addPoint(xPoint, yPoint + rectHeight);
 		
 		outshape = p;
-		
+		item.setBounds(xPoint, yPoint, rectWidth+5, rectHeight);
+	
 		drawShape(g, item, outshape);	
 		g.setFont(new Font("Florida", Font.BOLD, 9));
 		g.drawString(getText(item), (int)xTextCoordinate, (int)yTextCoordinate);
