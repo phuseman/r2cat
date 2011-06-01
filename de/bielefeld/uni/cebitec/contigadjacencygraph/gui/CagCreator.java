@@ -448,6 +448,10 @@ public class CagCreator extends Observable {
 		this.currentContigObject = graph.getNodes().get(index);
 		currentLeftNeighbours = fiveMostLikleyLeftNeighbours(currentContigIndex, isReverse);
 		currentRightNeighbours = fiveMostLikleyRightNeighbours(currentContigIndex, isReverse);
+		
+		if(numberOfNeighbours>7){
+			
+		}
 		notifyObservers(currentContigObject);
 		
 	}

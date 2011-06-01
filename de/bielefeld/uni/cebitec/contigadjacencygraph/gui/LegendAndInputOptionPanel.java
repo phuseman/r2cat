@@ -129,7 +129,7 @@ public class LegendAndInputOptionPanel extends JPanel implements
 		this.add(new JLabel(swsIcon), c);
 
 		JLabel somewhereElseSelectedLabel = new JLabel(
-				"somewhere else selected adjacency");
+				"awarded adjacency");
 		c.gridx = 5;
 		c.gridy = 1;
 		this.add(somewhereElseSelectedLabel, c);

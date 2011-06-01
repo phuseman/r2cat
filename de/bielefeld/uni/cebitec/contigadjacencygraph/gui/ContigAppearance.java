@@ -65,7 +65,7 @@ public class ContigAppearance extends JPanel {
 	 */
 	public void setContigAppearance(String contigId, long size,
 			
-			boolean isRepetitiv, boolean selected, 
+			boolean selected, 
 			boolean someWhereElseSelected, double support) {
 		
 		this.someWhereElseSelected = someWhereElseSelected;
@@ -137,6 +137,11 @@ public class ContigAppearance extends JPanel {
 		setVisible(true);
 	}
 	
+	public void setRepetitiv(boolean isRepetitiv) {
+		this.isRepetitiv = isRepetitiv;
+	}
+
+
 	/*
 	 * Necessary if the contigs have to be very small
 	 * if the number is high the size will be small.

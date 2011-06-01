@@ -212,7 +212,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 						 */
 
 						if (co instanceof ContigAppearance) {
-							ContigAppearance test2 = (ContigAppearance) co;
+							ContigAppearance contig = (ContigAppearance) co;
 
 							float lineStrokeLeft = setStroke(
 									leftSupport[zaehlerFuerSupport], isZScore);
@@ -235,7 +235,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 							 * if the contig is "some where else" selected the
 							 * line will be dashed with long lines
 							 */
-							if (test2.isAnderweitigAusgewaehlt()) {
+							if (contig.isAnderweitigAusgewaehlt()) {
 								float[] dash2 = { 30, 10 };
 								g2.setColor(Color.DARK_GRAY);
 								g2.setStroke(new BasicStroke(lineStrokeLeft,
@@ -245,7 +245,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 								 * if the contig is selected the line is
 								 * continuous
 								 */
-							} else if (test2.isSelected()) {
+							} else if (contig.isSelected()) {
 								g2.setColor(Color.BLACK);
 								g2.setStroke(new BasicStroke(lineStrokeLeft));
 								/*
@@ -275,7 +275,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 					for (Component co : rightContainer.getComponents()) {
 
 						if (co instanceof ContigAppearance) {
-							ContigAppearance test = (ContigAppearance) co;
+							ContigAppearance contigApp = (ContigAppearance) co;
 
 							float lineStroke = setStroke(
 									rightSupport[zaehlerFuerSupport], isZScore);
@@ -285,13 +285,13 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 							int y = (int) point.getY()
 									+ (int) (0.5 * co.getHeight());
 
-							if (test.isAnderweitigAusgewaehlt()) {
+							if (contigApp.isAnderweitigAusgewaehlt()) {
 								float[] dash2 = { 30, 10 };
 								g2.setColor(Color.DARK_GRAY);
 								g2.setStroke(new BasicStroke(lineStroke,
 										BasicStroke.CAP_BUTT,
 										BasicStroke.JOIN_MITER, 1, dash2, 0));
-							} else if (test.isSelected()) {
+							} else if (contigApp.isSelected()) {
 								g2.setColor(Color.BLACK);
 								g2.setStroke(new BasicStroke(lineStroke));
 							} else {
@@ -415,11 +415,12 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 
 		ContigAppearance centralContig = new ContigAppearance();
 		centralContig.setReverse(isReverse);
+		centralContig.setRepetitiv(currentContig.isRepetitive());
 		centralContig.setIndex(index);
 		centralContig.setSizeOfContig(currentContig.getSize(), model
 				.getMaxSizeOfContigs(), model.getMinSizeOfContigs());
 		centralContig.setContigAppearance(currentContig.getId(), currentContig
-				.getSize(), currentContig.isRepetitive(), isSelected, false,
+				.getSize(), isSelected, false,
 				0.0);
 		centralContig.addMouseListener(this);
 
@@ -504,6 +505,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				contigPanel.setIndex(indexOfContig);
 				contigPanel.setAlignmentX(RIGHT_ALIGNMENT);
 				contigPanel.isContigReverse(true, edge, indexOfContig);
+				contigPanel.setRepetitiv(contig.isRepetitive());
 				/*
 				 * Divide by 3 because 3 Contigs need space in this 
 				 * choose contig Panel and subtract 20 pixels for the 
@@ -514,7 +516,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				contigPanel.setSizeOfContig(contig.getSize(), model
 						.getMaxSizeOfContigs(), model.getMinSizeOfContigs());
 				contigPanel.setContigAppearance(contig.getId(), contig
-						.getSize(), contig.isRepetitive(), edge.isSelected(),
+						.getSize(), edge.isSelected(),
 						someWhereElseSelected, edge.getSupport());
 				contigPanel.addMouseListener(this);
 
@@ -646,6 +648,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				contigPanel.setIndex(indexOfContig);
 				contigPanel.setAlignmentX(LEFT_ALIGNMENT);
 				contigPanel.isContigReverse(false, edge, indexOfContig);
+				contigPanel.setRepetitiv(contig.isRepetitive());
 				/*
 				 * Divide by 3 because 3 Contigs need space in this 
 				 * choose contig Panel and subtract 20 pixels for the 
@@ -660,7 +663,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				// indexOfContig, false, model.getMaxSizeOfContigs(),
 				// model.getMinSizeOfContigs(), anderweitigAusgewaehlt);
 				contigPanel.setContigAppearance(contig.getId(), contig
-						.getSize(), contig.isRepetitive(), edge.isSelected(),
+						.getSize(),  edge.isSelected(),
 						someWhereElseSelected, edge.getSupport());
 				contigPanel.addMouseListener(this);
 
@@ -811,7 +814,7 @@ public class ChooseContigPanel extends JPanel implements MouseListener,
 				}
 			}
 		}
-
+		
 		return isSelected;
 	}
 

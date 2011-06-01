@@ -87,8 +87,8 @@ public class RadioButtonActionListener implements ActionListener {
 					Object[] options = { "Yes", "No" };
 
 					int n = javax.swing.JOptionPane.showOptionDialog(radioButton.getParent(),
-							"You already selected this neighbour for an another selection.\n"
-									+ " Do you want to delete that selection and want to select this selection?",
+							"You already used this neighbour for an another adjacency.\n"
+									+ " Do you want to delete that choice and want to choose this selection?",
 							"", JOptionPane.YES_NO_OPTION,
 							JOptionPane.QUESTION_MESSAGE, null, options,
 							options[0]);
