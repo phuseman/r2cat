@@ -80,7 +80,7 @@ private void setNeutral() {
       cagModel.addObserver(listView);
 
       //initially select the first contig
-      cagModel.changeContigs(0, false);
+    //  cagModel.changeContigs(0, false);
     }
   }
 

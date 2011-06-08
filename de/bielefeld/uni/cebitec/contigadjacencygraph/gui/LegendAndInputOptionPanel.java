@@ -76,7 +76,7 @@ public class LegendAndInputOptionPanel extends JPanel implements
 
 		ButtonGroup supportGroup = new ButtonGroup();
 
-		absoluteSupport = new JRadioButton("absolute Support");
+		absoluteSupport = new JRadioButton("Support");
 		absoluteSupport.setSelected(true);
 		absoluteSupport
 				.setToolTipText("<html>If you choose this option<br> you see at each line <br>"
@@ -129,7 +129,7 @@ public class LegendAndInputOptionPanel extends JPanel implements
 		this.add(new JLabel(swsIcon), c);
 
 		JLabel somewhereElseSelectedLabel = new JLabel(
-				"awarded adjacency");
+				"ulterior selected adjacency");
 		c.gridx = 5;
 		c.gridy = 1;
 		this.add(somewhereElseSelectedLabel, c);
