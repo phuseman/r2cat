@@ -19,6 +19,7 @@ package de.bielefeld.uni.cebitec.contigadjacencyvisualization;
 
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CAGWindow;
+import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CagController;
 import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CagCreator;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeEvent;
@@ -40,7 +41,8 @@ public final class ContigAdjacencyGraphLocalExplorerTopComponent extends TopComp
     /** path to the icon used by the component and its open action */
 //    static final String ICON_PATH = "SET/PATH/TO/ICON/HERE";
     private static final String PREFERRED_ID = "ContigAdjacencyGraphLocalExplorerTopComponent";
-  private CagCreator localView;
+
+        private CagController viewController;
 
     public ContigAdjacencyGraphLocalExplorerTopComponent() {
         initComponents();
@@ -57,6 +59,11 @@ public final class ContigAdjacencyGraphLocalExplorerTopComponent extends TopComp
                     "Could not register a change listener.");
 
         }
+
+        viewController = new CagController();
+
+        jScrollPane1.getViewport().add(viewController.getContigView());
+        jScrollPane1.setVisible(true);
 
     }
 
@@ -167,14 +174,9 @@ public final class ContigAdjacencyGraphLocalExplorerTopComponent extends TopComp
     }
 
   private void setLayoutGraph(LayoutGraph layoutGraph) {
-    if(layoutGraph == null) {
-      return;
-    }
-     this.localView = new CagCreator(layoutGraph);
-    CAGWindow window = new CAGWindow(localView);
-    
-    //     jScrollPane1.getViewport().add(localView);
+    viewController.setLayoutGraph(layoutGraph);
+    this.invalidate();
+    this.revalidate();
   }
-
 
 }
