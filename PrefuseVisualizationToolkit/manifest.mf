@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-OpenIDE-Module: prefuse
+OpenIDE-Module: prefuse/1
 OpenIDE-Module-Localizing-Bundle: prefuse/Bundle.properties
-OpenIDE-Module-Specification-Version: 2007.10.21beta
+OpenIDE-Module-Specification-Version: 2007.10.21
 
