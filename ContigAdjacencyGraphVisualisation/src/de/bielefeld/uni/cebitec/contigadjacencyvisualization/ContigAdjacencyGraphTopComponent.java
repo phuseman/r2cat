@@ -18,7 +18,7 @@
 package de.bielefeld.uni.cebitec.contigadjacencyvisualization;
 
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
-import de.bielefeld.uni.cebitec.contigadjacencygraph.visualisation.PrefuseGraphController;
+import de.bielefeld.uni.cebitec.contigadjacencyvisualization.global.PrefuseGraphController;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;

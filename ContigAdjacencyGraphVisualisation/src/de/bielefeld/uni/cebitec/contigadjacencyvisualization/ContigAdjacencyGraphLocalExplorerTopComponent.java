@@ -18,9 +18,9 @@
 package de.bielefeld.uni.cebitec.contigadjacencyvisualization;
 
 import de.bielefeld.uni.cebitec.contigadjacencygraph.LayoutGraph;
-import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CAGWindow;
-import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CagController;
-import de.bielefeld.uni.cebitec.contigadjacencygraph.gui.CagCreator;
+import de.bielefeld.uni.cebitec.contigadjacencyvisualization.local.CAGWindow;
+import de.bielefeld.uni.cebitec.contigadjacencyvisualization.local.CagController;
+import de.bielefeld.uni.cebitec.contigadjacencyvisualization.local.CagCreator;
 import java.util.logging.Logger;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;

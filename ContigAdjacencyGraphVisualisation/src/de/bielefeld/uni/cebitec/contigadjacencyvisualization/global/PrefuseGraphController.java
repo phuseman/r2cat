@@ -1,4 +1,4 @@
-package de.bielefeld.uni.cebitec.contigadjacencygraph.visualisation;
+package de.bielefeld.uni.cebitec.contigadjacencyvisualization.global;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;

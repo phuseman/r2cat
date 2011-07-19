@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-package de.bielefeld.uni.cebitec.contigadjacencygraph.visualisation;
+package de.bielefeld.uni.cebitec.contigadjacencyvisualization.global;
 
 import java.awt.Toolkit;
 import java.awt.Dimension;
