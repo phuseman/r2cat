@@ -391,6 +391,25 @@ public class GuiController {
 			return;
 		}
 
+		
+//		//debugging:-----------------------------------------
+//		boolean debug = true;
+//		if (debug) {
+//		JFrame orderInformation = new JFrame();
+//		orderInformation.setMinimumSize(new Dimension(600,800));
+//		orderInformation.setLayout(new BorderLayout());
+//		JTextArea order = new JTextArea();
+//		order.setText(R2cat.dataModelController.getMatchesList().getContigsOrderAsTextWithExtendedInformation());
+//		ScrollPane scroll = new ScrollPane();
+//		scroll.add(order);
+//		orderInformation.add(scroll,BorderLayout.CENTER);
+//		orderInformation.pack();
+//		orderInformation.setVisible(true);
+//		return;
+//		}
+//		//---------------------------------------------
+//		
+
 		File f = this.chooseFile(
 				"Export contig order and orientation to text file", false,
 				new CustomFileFilter(".txt,.text", "Text File"));

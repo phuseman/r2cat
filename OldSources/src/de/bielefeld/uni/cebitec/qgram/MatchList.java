@@ -780,13 +780,68 @@ public class MatchList extends Observable implements
 	 */
 	public void writeContigsOrder(File f) throws IOException {
 		BufferedWriter out = new BufferedWriter(new FileWriter(f));
+		out.write(getContigsOrderAsText());
+		out.close();
+	}
+	
+	
+
+	/**
+	 * Gets the current order of the contigs as text. Each line is an identifier of a
+	 * contig. The orientation is given by a preceding + for forward and - for
+	 * reverse complement.
+	 */
+	public String getContigsOrderAsText() {
+		StringBuilder out = new StringBuilder();
 
 		for (DNASequence query : queryOrder) {
-				out.write( query.getId() + " " +
-						(query.isReverseComplemented() ? "-" : "+") +		
+				out.append( query.getId() + " " +
+						(query.isReverseComplemented() ? "-" : "+") +
 				"\n");
 		}
-		out.close();
+		return out.toString();
+	}
+	
+	/**
+	 * Gets the current order of the contigs as text. 
+	 * Each line gives the identiefier, the orientation, the repetitiveness,
+	 * and a proposed name that reflects the order.
+	 * regular contigs should have the order 000, 001, 002.
+	 * repetitive contigs are just numbered as r000, r001 but this
+	 *  does not tell anything about the order or them.
+	 */
+	public String getContigsOrderAsTextWithExtendedInformation() {
+		StringBuilder out = new StringBuilder();
+
+		int regularContigsCounter = 0;
+		int repetitiveContigsCounter = 0;
+		String newName ="";
+		
+		for (DNASequence query : queryOrder) {
+			if(query.isRepetitive()) {
+				newName= String.format("r%02d", repetitiveContigsCounter);
+			} else {
+				newName= String.format("c%02d", regularContigsCounter);
+			}
+			
+			out.append(
+					String.format((Locale)null,
+							"%s, %s, %s, %s\n", 
+							query.getId(),
+							(query.isReverseComplemented() ? "-" : "+"),
+							(query.isRepetitive() ? "repetitive" : "regular"),
+							newName)
+						);
+
+					
+					if(query.isRepetitive()) {
+						repetitiveContigsCounter++;
+					} else {
+						regularContigsCounter++;
+					}
+
+		}
+		return out.toString();
 	}
 
 	/**

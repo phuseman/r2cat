@@ -26,12 +26,12 @@ my $outputfilename = $contigBasename . "-" . $referenceBasename;
 
 
 #Start the matching. First create a database for blast..
-if (! -e "$reference.nsq") {
+if (! -e "$referenceBasename.nsq") {
 	print "Creating db for the reference in order to use BLAST:\n";
-	print "  formatdb -p F -i $reference\n";
-	system "formatdb -p F -i $reference";
+	print "  formatdb -p F -i $reference -n $referenceBasename\n";
+	system "formatdb -p F -i $reference -n $referenceBasename";
 } else {
-	print "A database for the reference was already created.\nRemove \n$reference.nsq\n to create it in the next run.\n";
+	print "A database for the reference was already created.\nRemove \n$referenceBasename.nsq\n to create it in the next run.\n";
 }
 print "done\n";
 
@@ -39,8 +39,8 @@ print "done\n";
 my $blastmatchfile="$outputfilename.blastmatches";
 if (! -e "$blastmatchfile") {
 	print "BLASTing contigs on reference db:\n";
-	print "  blastall -p blastn -d $reference -i $contigs -o $blastmatchfile -e 1e-10 -m 8\n";
-	system "blastall -p blastn -d $reference -i $contigs -o $blastmatchfile -e 1e-10 -m 8";
+	print "  blastall -p blastn -d $referenceBasename -i $contigs -o $blastmatchfile -e 1e-10 -m 8\n";
+	system "blastall -p blastn -d $referenceBasename -i $contigs -o $blastmatchfile -e 1e-10 -m 8";
 	print "done\n";
 } else {
 	print "The Matching was already performed.\nRemove \n$blastmatchfile\n to redo the matching in the next run.\n";
@@ -110,7 +110,7 @@ while (my $entry=$referenceseq->next_seq()){
 		push @outputTargets, " size=$len\n";
 		push @outputTargets, " offset=$totalRefLen\n";
 		$totalRefLen+=$len;
-		push @outputTargets, " file=$ARGV[0]\n";
+		push @outputTargets, " file=$reference\n";
 		push @outputTargets, "END_TARGET\n\n";
  }
 }
@@ -129,7 +129,7 @@ while (my $entry=$contigseq->next_seq()){
 		push @outputQueries, " size=$len\n";
 		push @outputQueries, " offset=$totalConLen\n";
 		$totalConLen+=$len;
-		push @outputQueries, " file=$ARGV[0]\n";
+		push @outputQueries, " file=$contigs\n";
 		push @outputQueries, "END_QUERY\n\n";
 	}
 }
