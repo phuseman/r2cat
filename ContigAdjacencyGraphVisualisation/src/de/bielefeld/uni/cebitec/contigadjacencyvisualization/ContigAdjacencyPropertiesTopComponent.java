@@ -136,9 +136,12 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
     run = new javax.swing.JButton();
     references = new javax.swing.JScrollPane();
 
-    setPreferredSize(new java.awt.Dimension(160, 400));
+    setMinimumSize(new java.awt.Dimension(100, 100));
+    setPreferredSize(new java.awt.Dimension(200, 400));
 
     org.openide.awt.Mnemonics.setLocalizedText(run, org.openide.util.NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "ContigAdjacencyPropertiesTopComponent.run.text")); // NOI18N
+    run.setMaximumSize(null);
+    run.setMinimumSize(new java.awt.Dimension(100, 50));
     run.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         runActionPerformed(evt);
@@ -149,20 +152,20 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
     this.setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
+      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
         .addContainerGap()
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(run, javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(references, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE))
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+          .addComponent(references, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE)
+          .addComponent(run, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE))
         .addContainerGap())
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(references, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addComponent(run)
+        .addComponent(references, javax.swing.GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+        .addComponent(run, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addContainerGap())
     );
   }// </editor-fold>//GEN-END:initComponents
