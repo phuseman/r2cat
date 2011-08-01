@@ -98,6 +98,7 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 
     jScrollPane1 = new javax.swing.JScrollPane();
 
+    setMinimumSize(new java.awt.Dimension(100, 100));
     setLayout(new java.awt.BorderLayout());
     add(jScrollPane1, java.awt.BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
@@ -202,6 +203,7 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
   }
 
   public void setMatchList(MatchList ml) {
+    MatchList old = matchList;
     if (ml != null && !ml.isEmpty()) {
       this.matchList=ml;
       this.dotplotMatchViewer.setAlignmentsPositionsList(ml);
@@ -223,6 +225,8 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 
     this.invalidate();
     this.repaint();
+    
+    this.firePropertyChange("matchList", old, this.matchList);
   }
 
   @Override

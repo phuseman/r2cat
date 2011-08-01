@@ -9,7 +9,7 @@
 <!-- Change icons for mac. see:  http://wiki.netbeans.org/DevFaqExecutableIcon 
 icon converted from svg with http://iconverticons.com/ -->
 <!--  Since Netbeans 6.9 (Issue #182230) is possible to specify the Mac dock icon just by setting the property app.icon.icns in your build.xml -->
-  <property name="app.icon.icns" value="${basedir}/${app.name}.icns"/>
+  <property name="app.icon.icns" value="${basedir}/htscat.icns"/>
   
 <!-- Override to change Mac application icon. -->
   <target name="build-mac" depends="suite.build-mac" description="Build Mac OS X Application">

@@ -17,6 +17,7 @@
  */
 package de.bielefeld.uni.cebitec.referencematches;
 
+import de.bielefeld.uni.cebitec.dotplotviewer.ContigTableTopComponent;
 import de.bielefeld.uni.cebitec.dotplotviewer.DotPlotViewerTopComponent;
 import de.bielefeld.uni.cebitec.qgram.MatchList;
 import java.awt.event.ActionListener;
@@ -32,15 +33,23 @@ public final class OpenDotPlotViewerTopComponent implements ActionListener {
     this.context = context;
   }
 
+  @Override
   public void actionPerformed(ActionEvent ev) {
     DotPlotViewerTopComponent viewer = (DotPlotViewerTopComponent) WindowManager.getDefault().findTopComponent("DotPlotViewerTopComponent");
     if (viewer != null) {
       MatchList ml = context.getNodeDelegate().getLookup().lookup(MatchList.class);
-      if(ml!=null) {
+      if (ml != null) {
         viewer.setMatchList(ml);
       }
       viewer.open();
       viewer.requestActive();
+
+      //also open the contigs table
+      ContigTableTopComponent contigs = (ContigTableTopComponent) WindowManager.getDefault().findTopComponent("ContigTableTopComponent");
+      if (contigs != null) {
+        contigs.open();
+      }
+
     }
   }
 }

@@ -135,18 +135,46 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
 
     run = new javax.swing.JButton();
     references = new javax.swing.JScrollPane();
+    parametersPanel = new javax.swing.JPanel();
+    sigmaLabel = new javax.swing.JLabel();
+    sigmaTextfield = new javax.swing.JTextField();
+    muLabel = new javax.swing.JLabel();
+    muTextfield = new javax.swing.JTextField();
 
     setMinimumSize(new java.awt.Dimension(100, 100));
     setPreferredSize(new java.awt.Dimension(200, 400));
 
     org.openide.awt.Mnemonics.setLocalizedText(run, org.openide.util.NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "ContigAdjacencyPropertiesTopComponent.run.text")); // NOI18N
-    run.setMaximumSize(null);
-    run.setMinimumSize(new java.awt.Dimension(100, 50));
+    run.setMinimumSize(new java.awt.Dimension(50, 25));
     run.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         runActionPerformed(evt);
       }
     });
+
+    references.setViewportBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "ContigAdjacencyPropertiesTopComponent.references.viewportBorder.title"))); // NOI18N
+
+    parametersPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "ContigAdjacencyPropertiesTopComponent.parametersPanel.border.title"))); // NOI18N
+    parametersPanel.setLayout(new java.awt.GridLayout(2, 2, 5, 5));
+
+    org.openide.awt.Mnemonics.setLocalizedText(sigmaLabel, org.openide.util.NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "ContigAdjacencyPropertiesTopComponent.sigmaLabel.text")); // NOI18N
+    parametersPanel.add(sigmaLabel);
+
+    sigmaTextfield.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+    sigmaTextfield.setText(org.openide.util.NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "ContigAdjacencyPropertiesTopComponent.sigmaTextfield.text")); // NOI18N
+    parametersPanel.add(sigmaTextfield);
+
+    org.openide.awt.Mnemonics.setLocalizedText(muLabel, org.openide.util.NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "ContigAdjacencyPropertiesTopComponent.muLabel.text")); // NOI18N
+    parametersPanel.add(muLabel);
+
+    muTextfield.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+    muTextfield.setText(org.openide.util.NbBundle.getMessage(ContigAdjacencyPropertiesTopComponent.class, "ContigAdjacencyPropertiesTopComponent.muTextfield.text")); // NOI18N
+    muTextfield.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        muTextfieldActionPerformed(evt);
+      }
+    });
+    parametersPanel.add(muTextfield);
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
@@ -155,17 +183,20 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(references, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE)
-          .addComponent(run, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE))
+          .addComponent(run, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
+          .addComponent(references, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
+          .addComponent(parametersPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE))
         .addContainerGap())
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(references, javax.swing.GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-        .addComponent(run, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addComponent(references, javax.swing.GroupLayout.DEFAULT_SIZE, 337, Short.MAX_VALUE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(parametersPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(run, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addContainerGap())
     );
   }// </editor-fold>//GEN-END:initComponents
@@ -211,9 +242,19 @@ public final class ContigAdjacencyPropertiesTopComponent extends TopComponent im
     }
 
   }//GEN-LAST:event_runActionPerformed
+
+  private void muTextfieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_muTextfieldActionPerformed
+    // TODO add your handling code here:
+  }//GEN-LAST:event_muTextfieldActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JLabel muLabel;
+  private javax.swing.JTextField muTextfield;
+  private javax.swing.JPanel parametersPanel;
   private javax.swing.JScrollPane references;
   private javax.swing.JButton run;
+  private javax.swing.JLabel sigmaLabel;
+  private javax.swing.JTextField sigmaTextfield;
   // End of variables declaration//GEN-END:variables
 
   /**

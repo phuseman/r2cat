@@ -17,6 +17,7 @@
  */
 package de.bielefeld.uni.cebitec.dotplotviewer;
 
+import de.bielefeld.uni.cebitec.qgram.MatchList;
 import de.bielefeld.uni.cebitec.r2cat.gui.SequenceOrderTable;
 import de.bielefeld.uni.cebitec.r2cat.gui.SequenceOrderTableModel;
 import java.awt.BorderLayout;
@@ -53,15 +54,23 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
 
 
     			this.setLayout(new BorderLayout());
-          			SequenceOrderTable qso = new SequenceOrderTable(
-					DotPlotViewerTopComponent.findInstance().getMatchList());
+
+          this.setMatchList(DotPlotViewerTopComponent.findInstance().getMatchList());
+
+
+  }
+  
+  
+  public void setMatchList(MatchList ml) {
+    this.removeAll();
+              			SequenceOrderTable qso = new SequenceOrderTable(ml);
 			SequenceOrderTableModel model = (SequenceOrderTableModel) qso
 					.getModel();
 			model.setShowComplementColumn(true);
 			JScrollPane tp = new JScrollPane(qso);
 			this.add(tp,BorderLayout.CENTER);
-
-			JPanel controlPanel = new JPanel();
+      
+      			JPanel controlPanel = new JPanel();
 			controlPanel.add(new JLabel("Move one step towards sequence"));
 			JButton up = new JButton("start");
 			up.setActionCommand("up");
@@ -73,7 +82,8 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
 			down.addActionListener(qso);
 
 			this.add(controlPanel,BorderLayout.SOUTH);
-
+      this.revalidate();
+      
 
   }
 
@@ -163,6 +173,12 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
 
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    if (evt.getNewValue()==null) {
+      this.close();
+    } else {
+      if ( evt.getNewValue() instanceof  MatchList ) {
+        this.setMatchList((MatchList) evt.getNewValue());
+      }
+    }
   }
 }
