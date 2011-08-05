@@ -20,6 +20,8 @@ package de.bielefeld.uni.cebitec.dotplotviewer;
 import de.bielefeld.uni.cebitec.qgram.MatchList;
 import de.bielefeld.uni.cebitec.r2cat.gui.DotPlotMatchViewer;
 import de.bielefeld.uni.cebitec.r2cat.gui.DotPlotMatchViewerActionListener;
+import de.bielefeld.uni.cebitec.referencematches.MatchListNBApiObject;
+import de.bielefeld.uni.cebitec.referencematches.ReferenceMatchesDataObject;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Logger;
@@ -145,7 +147,7 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 
   @Override
   public void componentOpened() {
-    result = Utilities.actionsGlobalContext().lookupResult(MatchList.class);
+    result = Utilities.actionsGlobalContext().lookupResult(ReferenceMatchesDataObject.class);
     result.addLookupListener(this);
   }
 
@@ -193,8 +195,8 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
     }
     if (c.size() == 1) {
       for (Iterator it = c.iterator(); it.hasNext();) {
-        MatchList matchList = (MatchList) it.next();
-        this.setMatchList(matchList);
+        ReferenceMatchesDataObject matchListDataObject = (ReferenceMatchesDataObject) it.next();
+        this.setMatchList(matchListDataObject.getReferenceMatches());
       }
     } else if (c.size() > 1) {
       this.setMatchList(null);
@@ -216,10 +218,8 @@ public final class DotPlotViewerTopComponent extends TopComponent implements Loo
 
       dotplotMatchViewer.getMatchDisplayerList().setNeedsRegeneration(true);
       this.jScrollPane1.setViewportView(dotplotMatchViewer);
-      this.jScrollPane1.setVisible(true);
     } else {
-      this.jScrollPane1.getViewport().removeAll();
-      this.jScrollPane1.setVisible(false);
+      this.jScrollPane1.setViewportView(null);
       this.matchList=null;
     }
 

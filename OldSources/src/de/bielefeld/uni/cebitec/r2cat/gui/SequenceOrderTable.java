@@ -67,6 +67,14 @@ public class SequenceOrderTable extends JTable implements Observer,
 		this.setTransferHandler(new SequenceOrderTableTransferHandler());
 	}
 
+  @Override
+  protected void finalize() throws Throwable {
+    matches.deleteObserver(this);
+    super.finalize();
+  }
+  
+  
+
 	
     /* (non-Javadoc)
      * @see javax.swing.JTable#getToolTipText(java.awt.event.MouseEvent)

@@ -2,13 +2,25 @@
 <!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
 <filesystem>
   <folder name="Actions">
+      <folder name="View">
+        <file name="de-bielefeld-uni-cebitec-referencematches-OpenDotPlotViewerTopComponent.instance">
+          <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+          <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#CTL_OpenDotPlotViewerTopComponent"/>
+          <attr name="injectable" stringvalue="de.bielefeld.uni.cebitec.dotplotviewer.OpenDotPlotViewerTopComponent"/>
+          <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+          <attr name="noIconInMenu" boolvalue="false"/>
+          <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+          <attr name="type" stringvalue="org.openide.loaders.DataObject"/>
+        </file>
+      </folder>
+
     <folder name="Window">
       <file name="de-bielefeld-uni-cebitec-dotplotviewer-ContigTableAction.instance">
-                <attr name="component" methodvalue="de.bielefeld.uni.cebitec.dotplotviewer.ContigTableTopComponent.findInstance"/>
-                <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#CTL_ContigTableAction"/>
-                <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
-            </file>
-            <file name="de-bielefeld-uni-cebitec-dotplotviewer-DotPlotViewerAction.instance">
+        <attr name="component" methodvalue="de.bielefeld.uni.cebitec.dotplotviewer.ContigTableTopComponent.findInstance"/>
+        <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#CTL_ContigTableAction"/>
+        <attr name="instanceCreate" methodvalue="org.openide.windows.TopComponent.openAction"/>
+      </file>
+      <file name="de-bielefeld-uni-cebitec-dotplotviewer-DotPlotViewerAction.instance">
         <attr name="component" methodvalue="de.bielefeld.uni.cebitec.dotplotviewer.DotPlotViewerTopComponent.findInstance"/>
         <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#Actions/Window/de-bielefeld-uni-cebitec-dotplotviewer-DotPlotViewerAction.instance"/>
         <attr name="iconBase" stringvalue="de/bielefeld/uni/cebitec/dotplotviewer/recources/dotploticon.png"/>
@@ -19,9 +31,9 @@
   <folder name="Menu">
     <folder name="Window">
       <file name="ContigTableAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/Window/de-bielefeld-uni-cebitec-dotplotviewer-ContigTableAction.instance"/>
-            </file>
-            <file name="DotPlotViewerAction.shadow">
+        <attr name="originalFile" stringvalue="Actions/Window/de-bielefeld-uni-cebitec-dotplotviewer-ContigTableAction.instance"/>
+      </file>
+      <file name="DotPlotViewerAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Window/de-bielefeld-uni-cebitec-dotplotviewer-DotPlotViewerAction.instance"/>
       </file>
     </folder>
@@ -29,27 +41,39 @@
   <folder name="Windows2">
     <folder name="Components">
       <file name="ContigTableTopComponent.settings" url="ContigTableTopComponentSettings.xml"/>
-            <file name="DotPlotViewerTopComponent.settings" url="DotPlotViewerTopComponentSettings.xml"/>
+      <file name="DotPlotViewerTopComponent.settings" url="DotPlotViewerTopComponentSettings.xml"/>
     </folder>
     <folder name="Modes">
       <folder name="editor">
         <file name="DotPlotViewerTopComponent.wstcref" url="DotPlotViewerTopComponentWstcref.xml"/>
       </folder>
-        <folder name="properties">
-                <file name="ContigTableTopComponent.wstcref" url="ContigTableTopComponentWstcref.xml"/>
-            </folder>
-        </folder>
+      <folder name="properties">
+        <file name="ContigTableTopComponent.wstcref" url="ContigTableTopComponentWstcref.xml"/>
+      </folder>
+    </folder>
   </folder>
   <folder name="OptionsDialog">
-     <folder name="Advanced">
-         <file name="DotPlotViewerPanel.instance">
-             <attr name="instanceCreate" methodvalue="org.netbeans.spi.options.AdvancedOption.createSubCategory"/>
-             <attr name="controller" newvalue="de.bielefeld.uni.cebitec.dotplotviewer.DotPlotViewerOptionsPanelController"/>
-             <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#AdvancedOption_DisplayName_DotPlotViewer"/>
-             <attr name="toolTip" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle"/>
-             <attr name="keywords" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#AdvancedOption_Keywords_DotPlotViewer"/>
-             <attr name="keywordsCategory" stringvalue="Advanced/DotPlotViewer"/>
-         </file>
-     </folder>
- </folder>
+    <folder name="Advanced">
+      <file name="DotPlotViewerPanel.instance">
+        <attr name="instanceCreate" methodvalue="org.netbeans.spi.options.AdvancedOption.createSubCategory"/>
+        <attr name="controller" newvalue="de.bielefeld.uni.cebitec.dotplotviewer.DotPlotViewerOptionsPanelController"/>
+        <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#AdvancedOption_DisplayName_DotPlotViewer"/>
+        <attr name="toolTip" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle"/>
+        <attr name="keywords" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#AdvancedOption_Keywords_DotPlotViewer"/>
+        <attr name="keywordsCategory" stringvalue="Advanced/DotPlotViewer"/>
+      </file>
+    </folder>
+  </folder>
+  <folder name="Loaders">
+    <folder name="text">
+      <folder name="x-r2cat">
+        <folder name="Actions">
+          <file name="de-bielefeld-uni-cebitec-referencematches-OpenDotPlotViewerTopComponent.shadow">
+            <attr name="originalFile" stringvalue="Actions/View/de-bielefeld-uni-cebitec-referencematches-OpenDotPlotViewerTopComponent.instance"/>
+            <attr name="position" intvalue="0"/>
+          </file>
+        </folder>
+      </folder>
+    </folder>
+  </folder>
 </filesystem>

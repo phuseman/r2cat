@@ -50,9 +50,7 @@ public class ReferenceMatchesDataObject extends MultiDataObject implements Obser
     CookieSet cookies = getCookieSet();
     //the DataEditorSupport allows to open the file in a text editor
     cookies.add((Node.Cookie) DataEditorSupport.create(this, getPrimaryEntry(), cookies));
-
-
-
+    getReferenceMatches();
   }
 
   @Override
@@ -74,7 +72,9 @@ public class ReferenceMatchesDataObject extends MultiDataObject implements Obser
                 Lookups.singleton(p)
               });
     } else {
-      return new ProxyLookup(new Lookup[]{Lookups.singleton(getReferenceMatches()),
+      return new ProxyLookup(
+              new Lookup[]{
+                Lookups.singleton(getReferenceMatches()),
                 getCookieSet().getLookup()
               });
     }
@@ -96,11 +96,11 @@ public class ReferenceMatchesDataObject extends MultiDataObject implements Obser
       referenceMatches = new MatchListNBApiObject();
       try {
         referenceMatches.readFromFile(FileUtil.toFile(this.getPrimaryFile()));
-        referenceMatches.addObserver(this);
       } catch (IOException ex) {
         Exceptions.printStackTrace(ex);
       }
     }
+    referenceMatches.addObserver(this);
     return referenceMatches;
   }
 
@@ -119,7 +119,7 @@ public class ReferenceMatchesDataObject extends MultiDataObject implements Obser
     }
 
     if (changed) {
-      this.setModified(changed);
+      this.setModified(true);
       this.getCookieSet().assign(SaveCookie.class, new MatchListSaver(this));
     }
   }
