@@ -18,6 +18,7 @@
 package de.bielefeld.uni.cebitec.dotplotviewer;
 
 import de.bielefeld.uni.cebitec.qgram.MatchList;
+import de.bielefeld.uni.cebitec.r2cat.ContigSorter;
 import de.bielefeld.uni.cebitec.r2cat.gui.SequenceOrderTable;
 import de.bielefeld.uni.cebitec.r2cat.gui.SequenceOrderTableModel;
 import java.awt.BorderLayout;
@@ -29,6 +30,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ProgressMonitor;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
@@ -76,12 +78,6 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
 
       contigTableScrollPane.setViewportView(contigTable);
     }
-    
-    
-//    debug.setText(Integer.toString(matchList.countObservers()));
-//    if(matchList.countObservers()!=3) {
-//      System.out.println("Bla");
-//    }
 
     if (matchList == null) {
       enableButtons(false);
@@ -138,6 +134,11 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
     controlPanel.add(moveEndButton, gridBagConstraints);
 
     org.openide.awt.Mnemonics.setLocalizedText(sortButton, org.openide.util.NbBundle.getMessage(ContigTableTopComponent.class, "ContigTableTopComponent.sortButton.text")); // NOI18N
+    sortButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        sortButtonActionPerformed(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -177,6 +178,23 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
     add(contigTableScrollPane, java.awt.BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
 
+  private void sortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortButtonActionPerformed
+
+    ContigSorter sorter = new ContigSorter(matchList);
+
+    		ProgressMonitor progress = new NetbeansProgressMonitor("Sorting contigs","Sorting contigs");
+	
+		if (progress!=null) {
+		sorter.register(progress);
+		}
+
+
+    //if the sorting is not done in a thread, the gui blocks
+    Thread t = new Thread(sorter);
+    t.start();
+
+
+  }//GEN-LAST:event_sortButtonActionPerformed
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel MoveLabel;
   private javax.swing.JScrollPane contigTableScrollPane;

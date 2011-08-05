@@ -49,8 +49,7 @@ public class ReferenceMatchesDataObject extends MultiDataObject implements Obser
     super(pf, loader);
     CookieSet cookies = getCookieSet();
     //the DataEditorSupport allows to open the file in a text editor
-    cookies.add((Node.Cookie) DataEditorSupport.create(this, getPrimaryEntry(), cookies));
-    getReferenceMatches();
+    cookies.add((Node.Cookie) DataEditorSupport.create(this, getPrimaryEntry(), cookies)); 
   }
 
   @Override
@@ -119,8 +118,8 @@ public class ReferenceMatchesDataObject extends MultiDataObject implements Obser
     }
 
     if (changed) {
-      this.setModified(true);
       this.getCookieSet().assign(SaveCookie.class, new MatchListSaver(this));
+      this.setModified(true);
     }
   }
 

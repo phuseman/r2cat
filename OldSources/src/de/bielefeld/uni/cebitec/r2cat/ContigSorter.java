@@ -106,6 +106,11 @@ public class ContigSorter implements Runnable {
 
 		reportProgress(1.);
 
+    //change the order
+    matches.changeQueryOrder(this.getQueryOrder());
+		matches.notifyObservers(MatchList.NotifyEvent.ORDER_CHANGED_OR_CONTIG_REVERSED);
+
+
 		// if this runs in a thread, report that we have finnished
 		if (guiController != null) {
 			guiController.sortContigsDone(this);
@@ -259,4 +264,5 @@ public class ContigSorter implements Runnable {
 		this.progress = progress;
 	}
 
+    
 }

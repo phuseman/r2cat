@@ -1,55 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
 <filesystem>
-    <folder name="Loaders">
-        <folder name="text">
-            <folder name="x-r2cat">
-                <folder name="Actions">
-                    <file name="de-bielefeld-uni-cebitec-referencematches-OpenDotPlotViewerTopComponent.shadow">
-                        <attr name="originalFile" stringvalue="Actions/View/de-bielefeld-uni-cebitec-referencematches-OpenDotPlotViewerTopComponent.instance"/>
-                        <attr name="position" intvalue="0"/>
-                    </file>
-                    <file name="org-openide-actions-DeleteAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/Edit/org-openide-actions-DeleteAction.instance"/>
-                        <attr name="position" intvalue="700"/>
-                    </file>
-                    <file name="org-openide-actions-FileSystemAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-FileSystemAction.instance"/>
-                        <attr name="position" intvalue="1100"/>
-                    </file>
-                    <file name="org-openide-actions-OpenAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-OpenAction.instance"/>
-                        <attr name="position" intvalue="100"/>
-                    </file>
-                    <file name="org-openide-actions-PropertiesAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-PropertiesAction.instance"/>
-                        <attr name="position" intvalue="1400"/>
-                    </file>
-                    <file name="org-openide-actions-RenameAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-RenameAction.instance"/>
-                        <attr name="position" intvalue="600"/>
-                    </file>
-                    <file name="org-openide-actions-SaveAsTemplateAction.shadow">
-                        <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-SaveAsTemplateAction.instance"/>
-                        <attr name="position" intvalue="900"/>
-                    </file>
-                </folder>
-                <folder name="Factories">
-                    <file name="ReferenceMatchesDataLoader.instance">
-                        <attr name="SystemFileSystem.icon" urlvalue="nbresloc:de/bielefeld/uni/cebitec/referencematches/resources/referenceMatchesIcon.png"/>
-                        <attr name="dataObjectClass" stringvalue="de.bielefeld.uni.cebitec.referencematches.ReferenceMatchesDataObject"/>
-                        <attr name="instanceCreate" methodvalue="org.openide.loaders.DataLoaderPool.factory"/>
-                        <attr name="mimeType" stringvalue="text/x-r2cat"/>
-                    </file>
-                </folder>
-            </folder>
+  <folder name="Loaders">
+    <folder name="text">
+      <folder name="x-r2cat">
+        <folder name="Actions">
+          <file name="de-bielefeld-uni-cebitec-referencematches-OpenDotPlotViewerTopComponent.shadow">
+            <attr name="originalFile" stringvalue="Actions/View/de-bielefeld-uni-cebitec-referencematches-OpenDotPlotViewerTopComponent.instance"/>
+            <attr name="position" intvalue="0"/>
+          </file>
+          <file name="org-openide-actions-DeleteAction.shadow">
+            <attr name="originalFile" stringvalue="Actions/Edit/org-openide-actions-DeleteAction.instance"/>
+            <attr name="position" intvalue="700"/>
+          </file>
+          <file name="org-openide-actions-SaveAction.shadow">
+            <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-SaveAction.instance"/>
+            <attr name="position" intvalue="200"/>
+          </file>
+          <file name="org-openide-actions-FileSystemAction.shadow">
+            <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-FileSystemAction.instance"/>
+            <attr name="position" intvalue="1100"/>
+          </file>
+          <file name="org-openide-actions-OpenAction.shadow">
+            <attr name="displayName" stringvalue="Open as Text"/>
+            <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-OpenAction.instance"/>
+            <attr name="position" intvalue="100"/>
+          </file>
+          <file name="org-openide-actions-PropertiesAction.shadow">
+            <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-PropertiesAction.instance"/>
+            <attr name="position" intvalue="1400"/>
+          </file>
+          <file name="org-openide-actions-RenameAction.shadow">
+            <attr name="originalFile" stringvalue="Actions/System/org-openide-actions-RenameAction.instance"/>
+            <attr name="position" intvalue="600"/>
+          </file>
         </folder>
-    </folder>
-    <folder name="Services">
-        <folder name="MIMEResolver">
-            <file name="ReferenceMatchesResolver.xml" url="ReferenceMatchesResolver.xml">
-                <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.referencematches.Bundle#Services/MIMEResolver/ReferenceMatchesResolver.xml"/>
-            </file>
+        <folder name="Factories">
+          <file name="ReferenceMatchesDataLoader.instance">
+            <attr name="SystemFileSystem.icon" urlvalue="nbresloc:de/bielefeld/uni/cebitec/referencematches/resources/referenceMatchesIcon.png"/>
+            <attr name="dataObjectClass" stringvalue="de.bielefeld.uni.cebitec.referencematches.ReferenceMatchesDataObject"/>
+            <attr name="instanceCreate" methodvalue="org.openide.loaders.DataLoaderPool.factory"/>
+            <attr name="mimeType" stringvalue="text/x-r2cat"/>
+          </file>
         </folder>
+      </folder>
     </folder>
+  </folder>
+  <folder name="Services">
+    <folder name="MIMEResolver">
+      <file name="ReferenceMatchesResolver.xml" url="ReferenceMatchesResolver.xml">
+        <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.referencematches.Bundle#Services/MIMEResolver/ReferenceMatchesResolver.xml"/>
+      </file>
+    </folder>
+  </folder>
 </filesystem>
