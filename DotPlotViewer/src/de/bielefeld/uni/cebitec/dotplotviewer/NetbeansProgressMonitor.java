@@ -32,16 +32,14 @@ import org.openide.awt.StatusDisplayer;
 public class NetbeansProgressMonitor extends ProgressMonitor {
 
   private boolean started = false;
-  private String progressHandle = null;
   private ProgressHandle p = null;
+  private String statusText;
 
-
-  public NetbeansProgressMonitor(String statusbar, String progressHandle) {
-    super(null, statusbar, progressHandle, 0, 100);
-    StatusDisplayer.getDefault().setStatusText(statusbar);
+  public NetbeansProgressMonitor(String progressHandle, String statusbar) {
+    super(null, progressHandle, progressHandle, 0, 100);
+    statusText = statusbar;
     p = ProgressHandleFactory.createHandle(progressHandle);
   }
-  
 
   @Override
   public void setProgress(int progress) {
@@ -51,12 +49,13 @@ public class NetbeansProgressMonitor extends ProgressMonitor {
       started = true;
     }
 
-
     p.progress(progress);
-    if(progress>=100) {
+    if (progress >= 100) {
       p.finish();
+      StatusDisplayer.getDefault().setStatusText(statusText);
+
     }
-    
+
 
   }
 }

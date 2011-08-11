@@ -2,17 +2,17 @@
 <!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
 <filesystem>
   <folder name="Actions">
-      <folder name="View">
-        <file name="de-bielefeld-uni-cebitec-referencematches-OpenDotPlotViewerTopComponent.instance">
-          <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
-          <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#CTL_OpenDotPlotViewerTopComponent"/>
-          <attr name="injectable" stringvalue="de.bielefeld.uni.cebitec.dotplotviewer.OpenDotPlotViewerTopComponent"/>
-          <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
-          <attr name="noIconInMenu" boolvalue="false"/>
-          <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
-          <attr name="type" stringvalue="org.openide.loaders.DataObject"/>
-        </file>
-      </folder>
+    <folder name="View">
+      <file name="de-bielefeld-uni-cebitec-referencematches-OpenDotPlotViewerTopComponent.instance">
+        <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+        <attr name="displayName" bundlevalue="de.bielefeld.uni.cebitec.dotplotviewer.Bundle#CTL_OpenDotPlotViewerTopComponent"/>
+        <attr name="injectable" stringvalue="de.bielefeld.uni.cebitec.dotplotviewer.OpenDotPlotViewerTopComponent"/>
+        <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+        <attr name="noIconInMenu" boolvalue="false"/>
+        <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+        <attr name="type" stringvalue="org.openide.loaders.DataObject"/>
+      </file>
+    </folder>
 
     <folder name="Window">
       <file name="de-bielefeld-uni-cebitec-dotplotviewer-ContigTableAction.instance">
@@ -32,9 +32,12 @@
     <folder name="Window">
       <file name="ContigTableAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Window/de-bielefeld-uni-cebitec-dotplotviewer-ContigTableAction.instance"/>
+        <attr name="position" intvalue="20"/>
       </file>
       <file name="DotPlotViewerAction.shadow">
         <attr name="originalFile" stringvalue="Actions/Window/de-bielefeld-uni-cebitec-dotplotviewer-DotPlotViewerAction.instance"/>
+        <attr name="position" intvalue="10"/>
+
       </file>
     </folder>
   </folder>

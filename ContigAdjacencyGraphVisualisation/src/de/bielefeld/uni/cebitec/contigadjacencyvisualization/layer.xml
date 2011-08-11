@@ -35,19 +35,23 @@
     <folder name="File">
       <file name="de-bielefeld-uni-cebitec-contigadjacencyvisualization-OpenCAGGroupAction.shadow">
         <attr name="originalFile" stringvalue="Actions/File/de-bielefeld-uni-cebitec-contigadjacencyvisualization-OpenCAGGroupAction.instance"/>
-        <attr name="position" intvalue="0"/>
+        <attr name="position" intvalue="10"/>
       </file>
     </folder>
     <folder name="Window">
       <folder name="Contig Adjacency Graph">
+        <attr name="position" intvalue="40"/>
         <file name="ContigAdjacencyGraphAction.shadow">
           <attr name="originalFile" stringvalue="Actions/Window/de-bielefeld-uni-cebitec-contigadjacencyvisualization-ContigAdjacencyGraphAction.instance"/>
+          <attr name="position" intvalue="200"/>
         </file>
         <file name="ContigAdjacencyPropertiesAction.shadow" >
           <attr name="originalFile" stringvalue="Actions/Window/de-bielefeld-uni-cebitec-contigadjacencyvisualization-ContigAdjacencyPropertiesAction.instance"/>
+          <attr name="position" intvalue="100"/>
         </file>
         <file name="ContigAdjacencyGraphLocalExplorerAction.shadow">
           <attr name="originalFile" stringvalue="Actions/Window/de-bielefeld-uni-cebitec-contigadjacencyvisualization-ContigAdjacencyGraphLocalExplorerAction.instance"/>
+          <attr name="position" intvalue="300"/>
         </file>
       </folder>
     </folder>

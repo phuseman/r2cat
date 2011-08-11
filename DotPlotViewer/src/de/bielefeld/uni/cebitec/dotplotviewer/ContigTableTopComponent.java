@@ -182,11 +182,11 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
 
     ContigSorter sorter = new ContigSorter(matchList);
 
-    		ProgressMonitor progress = new NetbeansProgressMonitor("Sorting contigs","Sorting contigs");
-	
-		if (progress!=null) {
-		sorter.register(progress);
-		}
+    ProgressMonitor progress = new NetbeansProgressMonitor("Sorting contigs", "Sorted contigs");
+
+    if (progress != null) {
+      sorter.register(progress);
+    }
 
 
     //if the sorting is not done in a thread, the gui blocks
