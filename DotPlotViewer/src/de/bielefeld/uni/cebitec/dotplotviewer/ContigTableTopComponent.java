@@ -17,26 +17,30 @@
  */
 package de.bielefeld.uni.cebitec.dotplotviewer;
 
+import de.bielefeld.uni.cebitec.common.CustomFileFilter;
+import de.bielefeld.uni.cebitec.common.MiscFileUtils;
+import de.bielefeld.uni.cebitec.common.SequenceNotFoundException;
 import de.bielefeld.uni.cebitec.qgram.MatchList;
 import de.bielefeld.uni.cebitec.r2cat.ContigSorter;
+import de.bielefeld.uni.cebitec.r2cat.R2cat;
 import de.bielefeld.uni.cebitec.r2cat.gui.SequenceOrderTable;
 import de.bielefeld.uni.cebitec.r2cat.gui.SequenceOrderTableModel;
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
 import java.util.logging.Logger;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 //import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
+import org.openide.filesystems.FileChooserBuilder;
 
 /**
  * Top component which displays something.
@@ -155,6 +159,11 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
     controlPanel.add(MoveLabel, gridBagConstraints);
 
     org.openide.awt.Mnemonics.setLocalizedText(exportTextButton, org.openide.util.NbBundle.getMessage(ContigTableTopComponent.class, "ContigTableTopComponent.exportTextButton.text")); // NOI18N
+    exportTextButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        exportTextButtonActionPerformed(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
@@ -162,6 +171,11 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
     controlPanel.add(exportTextButton, gridBagConstraints);
 
     org.openide.awt.Mnemonics.setLocalizedText(exportFastaButton, org.openide.util.NbBundle.getMessage(ContigTableTopComponent.class, "ContigTableTopComponent.exportFastaButton.text")); // NOI18N
+    exportFastaButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        exportFastaButtonActionPerformed(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
@@ -180,21 +194,95 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
 
   private void sortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortButtonActionPerformed
 
-    ContigSorter sorter = new ContigSorter(matchList);
+    if (checkMatchList()) {
+      ContigSorter sorter = new ContigSorter(matchList);
 
-    ProgressMonitor progress = new NetbeansProgressMonitor("Sorting contigs", "Sorted contigs");
+      ProgressMonitor progress = new NetbeansProgressMonitor("Sorting contigs", "Sorted contigs");
 
-    if (progress != null) {
-      sorter.register(progress);
+      if (progress != null) {
+        sorter.register(progress);
+      }
+
+
+      //if the sorting is not done in a thread, the gui blocks
+      Thread t = new Thread(sorter);
+      t.start();
+    }
+
+  }//GEN-LAST:event_sortButtonActionPerformed
+
+  private void exportTextButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportTextButtonActionPerformed
+    if (checkMatchList()) {
+      ContigOrderDialog contigOrderDialog = new ContigOrderDialog(null, false);
+      contigOrderDialog.setText(matchList.getContigsOrderAsText());
+      contigOrderDialog.setLocationByPlatform(true);
+      contigOrderDialog.setVisible(true);
+
     }
 
 
-    //if the sorting is not done in a thread, the gui blocks
-    Thread t = new Thread(sorter);
-    t.start();
+  }//GEN-LAST:event_exportTextButtonActionPerformed
 
+  private void exportFastaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportFastaButtonActionPerformed
 
-  }//GEN-LAST:event_sortButtonActionPerformed
+    if (checkMatchList()) {
+      File f = new FileChooserBuilder("ExportContigOrderFASTA").setFilesOnly(true).addFileFilter(new CustomFileFilter(".fas,.fna,.fasta", "FASTA File")).setTitle("Export Order to Text File").showSaveDialog();
+
+      if (f != null) {
+        this.exportAsFastaFile(f, false);
+
+      }
+    }
+  }//GEN-LAST:event_exportFastaButtonActionPerformed
+
+  private void exportAsFastaFile(File f, boolean ignoreMissingFiles) {
+    try {
+
+      // mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+      int contigsWritten = matchList.writeContigsOrderFasta(f, ignoreMissingFiles);
+      int totalContigs = matchList.getQueries().size();
+
+      DialogDisplayer.getDefault().notify(
+              new NotifyDescriptor("Wrote " + contigsWritten
+              + (contigsWritten != totalContigs ? (" out of " + totalContigs) : "")
+              + " contigs into file:\n" + (f.getAbsolutePath()),
+              "Contig Order Exported to FASTA",
+              NotifyDescriptor.DEFAULT_OPTION,
+              NotifyDescriptor.INFORMATION_MESSAGE,
+              null,
+              null));
+
+    } catch (IOException e) {
+      if (e.getClass() == SequenceNotFoundException.class) {
+        int answer = SequenceNotFoundException.handleSequenceNotFoundException((SequenceNotFoundException) e);
+
+        switch (answer) {
+          case JOptionPane.YES_OPTION:
+            this.exportAsFastaFile(f, false);
+            break;
+          case JOptionPane.NO_OPTION:
+            this.exportAsFastaFile(f, true);
+            break;
+          case JOptionPane.CANCEL_OPTION:
+            return;
+
+          default:
+            return;
+        }
+
+      } else {
+        DialogDisplayer.getDefault().notify(
+                new NotifyDescriptor(e.getLocalizedMessage() + "\nNothing was saved",
+                "Something went wrong",
+                NotifyDescriptor.DEFAULT_OPTION,
+                NotifyDescriptor.ERROR_MESSAGE,
+                null,
+                null));
+
+      }
+    }
+
+  }
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel MoveLabel;
   private javax.swing.JScrollPane contigTableScrollPane;
@@ -224,17 +312,25 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
    */
   public static synchronized ContigTableTopComponent findInstance() {
     TopComponent win = WindowManager.getDefault().findTopComponent(PREFERRED_ID);
+
+
     if (win == null) {
       Logger.getLogger(ContigTableTopComponent.class.getName()).warning(
               "Cannot find " + PREFERRED_ID + " component. It will not be located properly in the window system.");
+
+
       return getDefault();
     }
     if (win instanceof ContigTableTopComponent) {
       return (ContigTableTopComponent) win;
+
+
     }
     Logger.getLogger(ContigTableTopComponent.class.getName()).warning(
             "There seem to be multiple components with the '" + PREFERRED_ID
             + "' ID. That is a potential source of errors and unexpected behavior.");
+
+
     return getDefault();
   }
 
@@ -287,6 +383,14 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
       if (evt.getNewValue() instanceof MatchList) {
         this.setMatchList((MatchList) evt.getNewValue());
       }
+    }
+  }
+
+  public boolean checkMatchList() {
+    if (matchList != null && !matchList.isEmpty()) {
+      return true;
+    } else {
+      return false;
     }
   }
 }
