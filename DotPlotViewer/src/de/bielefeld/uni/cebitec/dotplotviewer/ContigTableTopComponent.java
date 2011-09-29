@@ -81,12 +81,10 @@ public final class ContigTableTopComponent extends TopComponent implements Prope
       moveEndButton.addActionListener(contigTable);
 
       contigTableScrollPane.setViewportView(contigTable);
-    }
 
-    if (matchList == null) {
-      enableButtons(false);
-    } else {
       enableButtons(true);
+    } else {
+      enableButtons(false);
     }
 
     this.revalidate();
