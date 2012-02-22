@@ -100,7 +100,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 //		fileMenu.add(swift);
 
 		JMenuItem contigOrderExport = new JMenuItem("Export contigs order (text)");
-		contigOrderExport.setMnemonic(KeyEvent.VK_F);
+		contigOrderExport.setMnemonic(KeyEvent.VK_T);
 		contigOrderExport.getAccessibleContext()
 				.setAccessibleDescription("Save the contigs in the displayed order and orientation in FASTA format");
 		contigOrderExport.setActionCommand("save_order");
@@ -114,6 +114,14 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		fastaExport.setActionCommand("save_fasta");
 		fastaExport.addActionListener(this);
 		fileMenu.add(fastaExport);
+		
+		JMenuItem unmatchedFastaExport = new JMenuItem("Export unmatched contigs (FASTA)");
+		unmatchedFastaExport.setMnemonic(KeyEvent.VK_M);
+		unmatchedFastaExport.getAccessibleContext()
+				.setAccessibleDescription("Save all unmatched contigs in one file in FASTA format");
+		unmatchedFastaExport.setActionCommand("save_unmatched");
+		unmatchedFastaExport.addActionListener(this);
+		fileMenu.add(unmatchedFastaExport);
 
 		
 		JMenuItem imageExport = new JMenuItem("Export image");
@@ -271,6 +279,8 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			guiController.showGeneratePrimerFrame(R2cat.dataModelController.getMatchesList());
 		} else if (e.getActionCommand().matches("save_fasta")) {
 			guiController.exportOrderFasta();
+		} else if (e.getActionCommand().matches("save_unmatched")) {
+			guiController.exportUnmatchedFasta();
 		} else if (e.getActionCommand().matches("reverted")) {
 			guiController.displayReverseComplements(((JCheckBoxMenuItem) e.getSource())
 					.getState());

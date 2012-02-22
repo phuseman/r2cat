@@ -22,15 +22,17 @@ package de.bielefeld.uni.cebitec.r2cat;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import de.bielefeld.uni.cebitec.qgram.DNASequence;
 import de.bielefeld.uni.cebitec.qgram.MatchList;
 import de.bielefeld.uni.cebitec.qgram.MatchStatistics;
 
 
 /**
- * @author phuseman
+ * @author phuseman, Rolf Hilker
  * 
  */
 public class DataModelController {
@@ -112,8 +114,8 @@ public class DataModelController {
 	}
 	
 	public void writeMatches(File f) throws IOException {
-		if(isMatchesListReady()) {
-		matchList.writeToFile(f);
+		if (isMatchesListReady()) {
+			matchList.writeToFile(f);
 		}
 	}
 	
@@ -132,14 +134,45 @@ public class DataModelController {
 	public int writeOrderOfContigsFasta(File f, boolean ignoreMissingFiles) throws IOException {
 		//TODO check if all files are existent
 		if(isMatchesListReady()) {
-			return matchList.writeContigsOrderFasta(f, ignoreMissingFiles);
+			return matchList.writeContigsOrderFasta(f, ignoreMissingFiles, matchList.getQueries());
 		}
 		return 0;
+	}
+	
+	public int writeUnmatchedContigsFasta(File f, boolean ignoreMissingFiles) throws IOException {
+		return matchList.writeContigsOrderFasta(f, ignoreMissingFiles, this.matchList.getUnmatchedContigs());
 	}
 
 	
 	public boolean isMatchesListReady() {
 		if (matchList != null && !matchList.isEmpty()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * @return the unmatchedContigs
+	 */
+	public List<DNASequence> getUnmatchedContigs() {
+		return this.matchList.getUnmatchedContigs();
+	}
+
+	/**
+	 * @param unmatchedContigs the unmatchedContigs to set
+	 */
+	public void setUnmatchedContigs(List<DNASequence> unmatchedContigs) {
+		this.matchList.setUnmatchedContigs(unmatchedContigs);
+	}
+	
+	/**
+	 * @return <code>true</code> if there is data to output, 
+	 * 			<code>false</code> otherwise
+	 */
+	public boolean isUnmatchedListReady() {
+		List<DNASequence> unmatchedContigs = this.matchList.getUnmatchedContigs();
+		if (unmatchedContigs != null && !unmatchedContigs.isEmpty()) {
 			return true;
 		} else {
 			return false;

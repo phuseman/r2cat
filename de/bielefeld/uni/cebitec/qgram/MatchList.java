@@ -26,10 +26,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Observable;
 import java.util.Vector;
@@ -54,6 +57,8 @@ public class MatchList extends Observable implements
 	private Vector<DNASequence> queryOrder;
 	private boolean queryOrderDefined = false;
 	private boolean queryOrientationDefined = false;
+	
+	private List<DNASequence> unmatchedContigs;
 
 	MatchStatistics statistics;
 
@@ -81,11 +86,12 @@ public class MatchList extends Observable implements
 	 * 
 	 */
 	public MatchList() {
-		matches = new Vector<Match>();
-		targets = new HashMap<String, DNASequence>();
-		queries = new HashMap<String, DNASequence>();
-		targetOrder = new Vector<DNASequence>();
-		queryOrder = new Vector<DNASequence>();
+		this.matches = new Vector<Match>();
+		this.targets = new HashMap<String, DNASequence>();
+		this.queries = new HashMap<String, DNASequence>();
+		this.targetOrder = new Vector<DNASequence>();
+		this.queryOrder = new Vector<DNASequence>();
+		this.unmatchedContigs = new ArrayList<DNASequence>();
 
 		// Collections.sort(targets);
 		// Collections.sort(queries);
@@ -97,8 +103,7 @@ public class MatchList extends Observable implements
 	 * 
 	 * @param other
 	 */
-	public void copyDataFromOtherMatchList(
-			MatchList other) {
+	public void copyDataFromOtherMatchList(MatchList other) {
 		this.matches = other.matches;
 		this.targets = other.targets;
 		this.targetOrder = other.targetOrder;
@@ -377,6 +382,20 @@ public class MatchList extends Observable implements
 			return null;
 		}
 	}
+	
+	/**
+	 * @return the unmatchedContigs the list of unmatched contigs belonging to this project.
+	 */
+	public List<DNASequence> getUnmatchedContigs() {
+		return this.unmatchedContigs;
+	}
+
+	/**
+	 * @param unmatchedContigs the unmatchedContigs to set for this project.
+	 */
+	public void setUnmatchedContigs(List<DNASequence> unmatchedContigs) {
+		this.unmatchedContigs = unmatchedContigs;
+	}
 
 	public MatchStatistics getStatistics() {
 		checkStatistics();
@@ -445,13 +464,14 @@ public class MatchList extends Observable implements
 	 * informations are separated by a tab character.
 	 * 
 	 * @param f
+	 * @param unmatchedContigs the unmatched contigs of this data set. Since they
+	 * also need to be stored within the project.
 	 * @throws IOException
 	 */
 	public void writeToFile(File f) throws IOException {
 		BufferedWriter out = new BufferedWriter(new FileWriter(f));
 
-		out
-				.write("# r2cat output\n# Warning: Comments will be overwritten\n\n");
+		out.write("# r2cat output\n# Warning: Comments will be overwritten\n\n");
 		// write a section for each target
 		for (DNASequence target : targetOrder) {
 			out.write("BEGIN_TARGET " + target.getId() + "\n");
@@ -522,6 +542,26 @@ public class MatchList extends Observable implements
 
 		}
 		out.write("END_HITS\n");
+		
+		/** 
+		 * @author Rolf Hilker
+		 * write a section for each unmatched contig
+		 */
+		for (DNASequence contig : this.unmatchedContigs) {
+			out.write("BEGIN_UNMATCHED " + contig.getId() + "\n");
+			if (contig.getDescription() != null
+					&& !contig.getDescription().isEmpty()) {
+				out.write(" description=\"" + contig.getDescription() + "\"\n");
+			}
+			out.write(" size=" + contig.getSize() + "\n");
+			if (contig.getOffset() > 0) {
+				out.write(" offset=" + contig.getOffset() + "\n");
+			}
+			if (contig.getFile() != null) {
+				out.write(" file=" + contig.getFile().getAbsolutePath() + "\n");
+			}
+			out.write("END_UNMATCHED\n\n");
+		}
 
 		out.close();
 	}
@@ -545,6 +585,7 @@ public class MatchList extends Observable implements
 		this.targetOrder.clear();
 		this.queries.clear();
 		this.queryOrder.clear();
+		this.unmatchedContigs.clear();
 		statistics = null; // will be recomputed
 
 		String line;
@@ -552,6 +593,7 @@ public class MatchList extends Observable implements
 		String[] values;
 		DNASequence target;
 		DNASequence query;
+		DNASequence unmatchedContig;
 		int linenumber = 0;
 
 		while (in.ready()) {
@@ -752,6 +794,56 @@ public class MatchList extends Observable implements
 								.parseBoolean(propertyValue[1]));
 					}
 				}
+				
+				/** 
+				 * @author Rolf Hilker
+				 * process unmatched contigs
+				 */
+			} else if (line.matches("BEGIN_UNMATCHED .+")) {
+				String contig_id = line.split(" ")[1];
+				unmatchedContig = new DNASequence(contig_id);
+				unmatchedContigs.add(unmatchedContig);
+				
+				while (in.ready() && !line.matches("END_UNMATCHED")) {
+					line = in.readLine();
+					linenumber++;
+					if (line.startsWith("#") || line.startsWith("\"#")
+							|| line.matches("END_TARGET")) {
+						continue;
+					}
+					// read each line and process the
+					// property=value
+					// lines
+					propertyValue = line.split("=");
+					if (propertyValue.length != 2
+							&& !propertyValue[0].matches(".+description")) {
+						System.err.println("Line "
+										+ linenumber
+										+ " ignored, to much or to less values for property:\n"
+										+ line);
+						continue;
+					}
+
+					if (propertyValue[0].matches(".+description")) {
+						int start = line.indexOf("=") + 1;
+						if (line.charAt(start)=='"') {
+							//remove quotation (if present)
+							unmatchedContig.setDescription(line.substring(start+1, line
+									.length() - 2));
+						} else {
+							unmatchedContig.setDescription(line.substring(start, line
+								.length() - 1));
+						}
+					} else if (propertyValue[0].matches(".+size")) {
+						unmatchedContig.setSize(Long.parseLong(propertyValue[1]));
+					} else if (propertyValue[0].matches(".+offset")) {
+						unmatchedContig.setOffset(Long.parseLong(propertyValue[1]));
+					} else if (propertyValue[0].matches(".+file")) {
+						// TODO use one file object for all unmatched contigs
+						unmatchedContig.setFile(new File(propertyValue[1]));
+					}
+
+				}
 
 			} else {
 				// if this line does not match one of the sections, read the
@@ -857,7 +949,7 @@ public class MatchList extends Observable implements
 	 * @throws IOException if output is not writable. If some Id's are not present in the given files or if the given files do not exist
 	 * then a SequenceNotFoundException will be thrown.
 	 */
-	public int writeContigsOrderFasta(File f, boolean ignoreMissingFiles)
+	public int writeContigsOrderFasta(File f, boolean ignoreMissingFiles, Collection<DNASequence> dataToWrite)
 			throws IOException {
 		
 		
@@ -872,7 +964,7 @@ public class MatchList extends Observable implements
 		boolean anySequenceContained = false;
 		// ======================begin: check for files and id's
 		// check if all sequences and id's exist
-		for (DNASequence query : queryOrder) {
+		for (DNASequence query : dataToWrite) {
 			fastaFile = null;
 
 			// if the file was not set, check if the id is in another loaded
@@ -968,7 +1060,7 @@ public class MatchList extends Observable implements
 		// then write the output:
 		if (anySequenceContained) {
 			BufferedWriter out = new BufferedWriter(new FileWriter(f));
-			for (DNASequence query : queryOrder) {
+			for (DNASequence query : dataToWrite) {
 				if(query.getFile()==null) {
 					continue;
 				}

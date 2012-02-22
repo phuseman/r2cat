@@ -362,6 +362,25 @@ public class GuiController {
 		}
 
 	}
+	
+	/**
+	 * @author Rolf Hilker
+	 * Gives a dialog to save all unmatched contigs in one fasta file.
+	 */
+	public void exportUnmatchedFasta() {
+		if (!R2cat.dataModelController
+				.isUnmatchedListReady()) {
+			errorAlert("No unmatched contigs available to save!");
+			return;
+		}
+		
+		File f = this.chooseFile("Save unmatched contigs (fasta format)", false, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
+		if (f != null) {
+			this.exportUnmatchedAsFastaFile(f, false);
+		} else {
+			return;
+		}
+	}
 
 	/**
 	 * Gives a dialog to save the contigs in the displayed order and orientation
@@ -465,6 +484,50 @@ public class GuiController {
 			}
 		}
 
+	}
+	
+	/**
+	 * @author Rolf Hilker
+	 * 
+	 * Exports all unmatched contigs into a single fasta file.
+	 * @param f file to write to
+	 * @param ignoreMissingFiles true, if missing files should be ignored
+	 */
+	private void exportUnmatchedAsFastaFile(File f, boolean ignoreMissingFiles) {
+		try {
+			MiscFileUtils.enforceExtension(f, ".fas");
+
+			// mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			int contigsWritten = R2cat.dataModelController
+					.writeUnmatchedContigsFasta(f, ignoreMissingFiles);
+			JOptionPane.showMessageDialog(getMainWindow(),
+					"Wrote " + contigsWritten 
+					+ " unmatched contigs into file:\n"+(f.getAbsolutePath()) ,
+					"File written", JOptionPane.INFORMATION_MESSAGE);
+			// mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+		} catch (IOException e) {
+			if (e.getClass() == SequenceNotFoundException.class) {
+				int answer = SequenceNotFoundException.handleSequenceNotFoundException((SequenceNotFoundException)e);
+				
+				switch (answer) {
+				case JOptionPane.YES_OPTION:
+					this.exportUnmatchedAsFastaFile(f, ignoreMissingFiles);
+					break;
+				case JOptionPane.NO_OPTION:
+					this.exportUnmatchedAsFastaFile(f, true);
+					break;
+				case JOptionPane.CANCEL_OPTION:
+					return;
+
+				default:
+					return;
+				}
+
+			} else {
+				this.errorAlert(e.getMessage() + "\nNothing was saved");
+			}
+		}		
 	}
 
 	

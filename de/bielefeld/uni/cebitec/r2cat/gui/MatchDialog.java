@@ -34,6 +34,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 
@@ -63,7 +65,7 @@ import de.bielefeld.uni.cebitec.r2cat.R2cat;
 
 /**
  * This is a dialog to select two fasta files in order to match them.
- * @author phuseman
+ * @author phuseman, rhilker
  * 
  */
 public class MatchDialog extends JDialog implements ActionListener, WindowListener,
@@ -73,6 +75,7 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 
 	private JProgressBar progressBar;
 	private JButton startButton;
+	private JButton saveUnmatchedButton;
 	private JTextArea progress;
 	private QGramMatcherTask matcherTask;
 
@@ -97,6 +100,8 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 		protected MatchList doInBackground() {
 			try { // catches OutOfMemoryError s
 
+				int nbUnmatched = 0;
+				
 				progressBar.setValue(0);
 				progressBar.setIndeterminate(true);
 				progress.setText("");
@@ -120,7 +125,7 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 					} else {
 						progress
 								.append("Error: No valid id line (>idtag ...) found within the first 100 lines");
-						setEndMatching();
+						this.setEndMatching(false);
 						return null;
 					}
 
@@ -136,7 +141,7 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 					} else {
 						progress
 								.append("Error: No valid id line (>idtag ...) found within the first 100 lines");
-						setEndMatching();
+						this.setEndMatching(false);
 						return null;
 					}
 
@@ -214,8 +219,12 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 						//if not all contigs could be matched
 						int contigs = queryFasta.getSequences().size();
 						int matchedContigs = result.getQueries().size();
+						nbUnmatched = contigs - matchedContigs;
 						
-						informationAlert("There were " + (contigs - matchedContigs) + " out of "+ contigs+" queries that could not be matched." +
+						List<DNASequence> unmatchedContigs = this.setUnmatchedContigs(queryFasta);
+						R2cat.dataModelController.setUnmatchedContigs(unmatchedContigs);
+						
+						informationAlert("There were " + nbUnmatched + " out of "+ contigs+" queries that could not be matched." +
 						"\nDetails are shown in the progress log.");
 						
 					}
@@ -228,7 +237,7 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 				}
 
 
-				setEndMatching();
+				this.setEndMatching(nbUnmatched > 0);
 				
 				
 				return result;
@@ -248,14 +257,38 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 
 				progress.append(e.toString());
 
-				setEndMatching();
+				this.setEndMatching(false);
 
 				return null;
 			}
 		}
 		
-		private void setEndMatching() {
+		/**
+		 * @author Rolf Hilker
+		 * 
+		 * Identifies all unmatched contigs among the contigs in the
+		 * query fasta.
+		 * @param queryFasta the query fasta used as input for matching
+		 * @return the list of unmatched contigs
+		 */
+		private List<DNASequence> setUnmatchedContigs(FastaFileReader queryFasta) {
+			List<String> ids = new ArrayList<String>(); 
+			for (DNASequence seq : result.getQueries()) {
+				ids.add(seq.getId());
+			}
+			
+			List<DNASequence> unmatchedContigs = new ArrayList<DNASequence>();
+			for (DNASequence seq : queryFasta.getSequences()) {
+				if (!ids.contains(seq.getId())) {
+					unmatchedContigs.add(seq);
+				}
+			}
+			return unmatchedContigs;
+		}
+
+		private void setEndMatching(boolean enableSaveUnmated) {
 			startButton.setEnabled(true);
+			saveUnmatchedButton.setEnabled(enableSaveUnmated);
 			setCursor(null); // turn off the wait cursor
 			progress.setCaretPosition(progress.getDocument().getLength());
 			progressBar.setIndeterminate(false);
@@ -279,6 +312,13 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 					}
 					startButton.setText("Continue");
 					startButton.setActionCommand("ok");
+					
+					//disable choose buttons, to prevent confusing the user
+					final String msg = "You need to continue first and open a new match dialog then.";
+					buQuery.setEnabled(false);
+					buQuery.setToolTipText(msg);
+					buTarget.setEnabled(false);
+					buTarget.setToolTipText(msg);
 
 					R2cat.dataModelController.setAlignmentsPositonsList(result);
 					R2cat.guiController.setVisualisationNeedsUpdate();
@@ -343,6 +383,10 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 		progressBar = new JProgressBar(0, 100);
 		progressBar.setValue(0);
 		progressBar.setStringPainted(true);
+		
+		saveUnmatchedButton = new JButton("Save Unmatched Contigs");
+		saveUnmatchedButton.setEnabled(false);
+		saveUnmatchedButton.addActionListener(this);
 
 		startButton = new JButton("Start Matching");
 		startButton.setActionCommand("start");
@@ -402,6 +446,12 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 		c.weightx = 1; // progress bar as large as possible
 		c.weighty = 0; // but only horizontally
 		this.add(progressBar, c);
+		
+		// save unmatched button
+		c.weightx = 0; // not broader than necessary
+		c.weighty = 0;
+		c.gridwidth = GridBagConstraints.EAST;
+		this.add(saveUnmatchedButton, c);
 
 		// match button
 		c.weightx = 0; // not broader than necessary
@@ -415,8 +465,8 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 	 * was cancelled, then null is returned
 	 * 
 	 * @param prevFile
-	 *            File that was previously assinged. This is used to determine
-	 *            the apropriate directory. If this parameter is null nothing
+	 *            File that was previously assigned. This is used to determine
+	 *            the appropriate directory. If this parameter is null nothing
 	 *            happens.
 	 * @param dialogTitle
 	 *            Gives the dialog a custom title. If null nothing happens.
@@ -453,14 +503,16 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 			}
 			
 		} else if (e.getSource().equals(buQuery)) {
-			this
-					.setQuery(this.chooseFile(query,
+			this.setQuery(this.chooseFile(query,
 							"Select query (fasta format)"), false);
 			
 			
 		} else if (e.getSource().equals(buTarget)) {
 			this.setTarget(this.chooseFile(target,
 					"Select target (fasta format)"), false);
+		
+		} else if (e.getSource().equals(saveUnmatchedButton)) {
+			R2cat.guiController.exportUnmatchedFasta();
 		}
 
 	}
@@ -485,7 +537,7 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 	/**
 	 * Pop up an information message
 	 * 
-	 * @param error
+	 * @param info
 	 *            Message
 	 */
 	private void informationAlert(String info) {
@@ -498,7 +550,7 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 	 * Additionally the appropriate textfield is labeled and the path is stored
 	 * in the preferences.
 	 * 
-	 * @param file
+	 * @param q
 	 *            File to set
 	 */
 	public void setQuery(File q, boolean silent) {
