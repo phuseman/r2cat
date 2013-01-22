@@ -78,7 +78,7 @@ public class GuiController {
 
 	public void createMainWindow() {
 		mainWindow = new MainWindow(this);
-		URL url = Thread.currentThread().getContextClassLoader().getResource("images/icon.png");
+		URL url = Thread.currentThread().getContextClassLoader().getResource("de/bielefeld/uni/cebitec/r2cat/gui/cursorimages/icon.png");
 	//	URL url = R2cat.class.getResource("/images/icon.png");
 		
 
@@ -236,7 +236,7 @@ public class GuiController {
 	public void showAbout() {
 		JEditorPane about = new JEditorPane();
 		URL aboutUrl = Thread.currentThread().getContextClassLoader().getResource(
-		"extra/about.html");
+		"de/bielefeld/uni/cebitec/r2cat/help/about.html");
 		try {
 			about.setPage(aboutUrl);
 		} catch (IOException e) {
