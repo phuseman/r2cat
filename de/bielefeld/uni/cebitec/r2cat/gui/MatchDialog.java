@@ -222,7 +222,10 @@ public class MatchDialog extends JDialog implements ActionListener, WindowListen
 						nbUnmatched = contigs - matchedContigs;
 						
 						List<DNASequence> unmatchedContigs = this.setUnmatchedContigs(queryFasta);
-						R2cat.dataModelController.setUnmatchedContigs(unmatchedContigs);
+						//the following does only work if there is already a list of matches displayed...
+						//R2cat.dataModelController.setUnmatchedContigs(unmatchedContigs);
+						// instead, we want to set this in the freshly matched contigs...
+						result.setUnmatchedContigs(unmatchedContigs);
 						
 						informationAlert("There were " + nbUnmatched + " out of "+ contigs+" queries that could not be matched." +
 						"\nDetails are shown in the progress log.");
