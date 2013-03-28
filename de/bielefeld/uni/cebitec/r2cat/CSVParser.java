@@ -20,15 +20,14 @@
 
 package de.bielefeld.uni.cebitec.r2cat;
 
+import de.bielefeld.uni.cebitec.qgram.DNASequence;
+import de.bielefeld.uni.cebitec.qgram.Match;
+import de.bielefeld.uni.cebitec.qgram.MatchList;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
-import de.bielefeld.uni.cebitec.qgram.DNASequence;
-import de.bielefeld.uni.cebitec.qgram.Match;
-import de.bielefeld.uni.cebitec.qgram.MatchList;
 
 /**
  * @author Peter Husemann

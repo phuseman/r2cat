@@ -87,6 +87,10 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		fileMenu.add(save);
 		
 		fileMenu.addSeparator();
+                
+                JMenuItem export = new JMenuItem( de.bielefeld.uni.cebitec.r2cat.UnimogExport.Constants.MENUPOINT);
+                export.addActionListener(this);
+                fileMenu.add(export);
 
 
 		//outdated... no need to import swift files
@@ -294,19 +298,21 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			R2cat.guiController.showAlignmentsPositionTableFrame();
 		} else if (e.getActionCommand().matches("show_query_table")) {
 			R2cat.guiController.showQuerySortTable(R2cat.dataModelController.getMatchesList());
-	} else if (e.getActionCommand().matches("sort_queries")) {
-		R2cat.guiController.sortContigs();
-	}else if (e.getActionCommand().matches("sort_targets")) {
-		R2cat.guiController.sortTargetsBySize();
-	} else if (e.getActionCommand().matches("show_help")) {
-			R2cat.guiController.showHelpFrame();
-		} else if (e.getActionCommand().matches("show_about")) {
-			R2cat.guiController.showAbout();
-		} else if (e.getActionCommand().matches("exit")) {
-			System.exit(0);
-		} else if (e.getActionCommand().matches("export_image")) {
-		guiController.exportMatchesAsImage();
-	}  
+                } else if (e.getActionCommand().matches("sort_queries")) {
+                        R2cat.guiController.sortContigs();
+                } else if (e.getActionCommand().matches("sort_targets")) {
+                        R2cat.guiController.sortTargetsBySize();
+                } else if (e.getActionCommand().matches("show_help")) {
+                        R2cat.guiController.showHelpFrame();
+                } else if (e.getActionCommand().matches("show_about")) {
+                        R2cat.guiController.showAbout();
+                } else if (e.getActionCommand().matches("exit")) {
+                        System.exit(0);
+                } else if (e.getActionCommand().matches("export_image")) {
+                        guiController.exportMatchesAsImage();
+                } else if (e.getActionCommand().equals( de.bielefeld.uni.cebitec.r2cat.UnimogExport.Constants.MENUPOINT)){
+                        new  de.bielefeld.uni.cebitec.r2cat.UnimogExport.ExportController();
+                }
 		
 		
 	}

@@ -214,7 +214,7 @@ public class GuiController {
 
 	}
 
-	public void showMatchDialog() {
+	 public void showMatchDialog() {
 		MatchDialog matchDialog = new MatchDialog(mainWindow);
 		matchDialog.setIconImage(mainWindow.getIconImage());
 		if (matchDialog != null) {
