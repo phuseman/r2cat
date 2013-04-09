@@ -12,6 +12,7 @@ import java.awt.List;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
@@ -29,9 +30,11 @@ public class ExportFrame extends JFrame{
     private final JPanel buttonPanel;
     private JButton runButton;
     private JButton cancel;
+    private JButton save;
     
     private final JPanel minLengthPanel;
     private final long sequenceLength;
+    private final JLabel minLengthLabel;
     private JTextField minLengthField;
     private JSlider minLengthSlider;
     private List formList;
@@ -41,22 +44,25 @@ public class ExportFrame extends JFrame{
     private JScrollPane outputScroll;
     
     
-    public ExportFrame(long seqLength, int majorTickSpacing, String seqName, String patName){
-        super("Export to Unimog: " + seqName +" / " + patName);
+    public ExportFrame(long seqLength, int majorTickSpacing){
+        super("Export to Unimog");
         this.sequenceLength = seqLength;
         
         this.buttonPanel = new JPanel();
         this.runButton = new JButton(ExportConstants.BUTTON_RUN);
         this.cancel = new JButton(ExportConstants.BUTTON_CANCEL);
+        this.save = new JButton(ExportConstants.BUTTON_SAVE);
         this.buttonPanel.add(this.cancel);
         this.buttonPanel.add(this.runButton);
-       
+        this.buttonPanel.add(this.save);
+        
         this.minLengthPanel = new JPanel();
+        this.minLengthLabel = new JLabel(ExportConstants.LABEL_LENGTH);
+        this.minLengthPanel.add(this.minLengthLabel);
         
         this.minLengthSlider = new JSlider();
         this.minLengthSlider.setMinimum(0);
-        this.minLengthSlider.setMaximum((int)this.sequenceLength);
-        
+        this.minLengthSlider.setMaximum((int)this.sequenceLength); 
         this.minLengthSlider.setMinorTickSpacing(1);
         this.minLengthSlider.setMajorTickSpacing(majorTickSpacing);
 
@@ -85,7 +91,7 @@ public class ExportFrame extends JFrame{
         int width =java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
         this.setSize(width,this.getHeight());
         // configurate the length of the JSlider
-        this.minLengthSlider.setPreferredSize(new Dimension((int)(width*0.8),minLengthSlider.getHeight()));
+        this.minLengthSlider.setPreferredSize(new Dimension((int)(width*0.6),minLengthSlider.getHeight()));
         this.setVisible(true);
         
         this.outputPanel = null;
@@ -119,6 +125,7 @@ public class ExportFrame extends JFrame{
         this.minLengthField.addKeyListener(vL);
         this.cancel.addActionListener(vL);
         this.runButton.addActionListener(vL);
+        this.save.addActionListener(vL);
     }
     
     public void setOutput(String text){
@@ -141,6 +148,13 @@ public class ExportFrame extends JFrame{
         this.outputPane.setText(text);
         this.pack();
         this.setSize(java.awt.Toolkit.getDefaultToolkit().getScreenSize().width,this.getHeight());   
+    }
+    
+    public String getOutput(){
+        if(this.outputPanel == null){
+            return "";
+        }
+        return this.outputPane.getText();
     }
     
     public boolean linearIsChoosen(){

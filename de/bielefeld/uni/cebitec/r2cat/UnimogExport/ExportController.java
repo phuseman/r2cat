@@ -64,17 +64,10 @@ public class ExportController {
     
     private void init(){
         this.matches = this.dataControl.getMatchesList();
-        this.sequenceName = matches.getQueries().elementAt(0).getDescription();
-        // cutting the sequenceName if it's longer than the given NAMELENGTH
-        this.sequenceName = this.sequenceName.substring(0, Math.min(this.sequenceName.length(), NAMELENGTH));
-        
-        this.patternName = matches.getTargets().elementAt(0).getDescription();
-        this.patternName = this.patternName.substring(0, Math.min(this.patternName.length(), NAMELENGTH));
-        
+
         this.sequenceLength = matches.getQueries().elementAt(0).getSize();
-        
-        
-        frame = new ExportFrame(sequenceLength, calculateMajorTickSpacing((int)sequenceLength), sequenceName, patternName);
+
+        frame = new ExportFrame(sequenceLength, calculateMajorTickSpacing((int)sequenceLength));
         valueListener = new FrameListener(frame, this);
         frame.setListener(valueListener);
     }
@@ -104,4 +97,5 @@ public class ExportController {
         Model model = new Model(this.matches, this.frame.getMinLength_field(), linear);
         return model.getOuput();
     }
+    
 }

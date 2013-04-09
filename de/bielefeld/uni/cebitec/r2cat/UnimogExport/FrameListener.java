@@ -47,6 +47,9 @@ public class FrameListener implements ChangeListener,KeyListener,ActionListener 
         else if(e.getActionCommand().equals(ExportConstants.BUTTON_RUN)){
             this.frame.setOutput(this.eC.calculateOutput(this.frame.linearIsChoosen()));
         }
+        else if(e.getActionCommand().equals(ExportConstants.BUTTON_SAVE)){
+            new ExportFileChooser(this.frame.getOutput());
+        }
     }
     
 
