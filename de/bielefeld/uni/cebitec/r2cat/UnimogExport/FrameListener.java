@@ -25,7 +25,7 @@ public class FrameListener implements ChangeListener,KeyListener,ActionListener 
     }
 
     public void stateChanged(ChangeEvent e) {
-        this.frame.setGapValue(this.frame.getGapValue_slider());
+        this.frame.setMinLength(this.frame.getMinLength_slider());
     }
 
     public void keyTyped(KeyEvent e) {
@@ -37,7 +37,7 @@ public class FrameListener implements ChangeListener,KeyListener,ActionListener 
     }
 
     public void keyReleased(KeyEvent e) {
-        this.frame.setGapValue(this.frame.getGapValue_field());
+        this.frame.setMinLength(this.frame.getMinLength_field());
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -45,7 +45,7 @@ public class FrameListener implements ChangeListener,KeyListener,ActionListener 
             frame.dispose();
         }    
         else if(e.getActionCommand().equals(ExportConstants.BUTTON_RUN)){
-            this.frame.setOutput(this.eC.calculate(this.frame.linearIsChoosen()));
+            this.frame.setOutput(this.eC.calculateOutput(this.frame.linearIsChoosen()));
         }
     }
     

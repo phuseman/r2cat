@@ -40,7 +40,7 @@ public class Model {
     }
     
     private void calculate(){
-        // calculate the filteredQ ArrayList from all matches while filtering by length
+        // calculate the filteredQ ArrayList from all matches while filtering by minLength
 
         for(int indexM = 0; indexM<this.matches.size(); indexM++){
             Match m = this.matches.getMatchAt(indexM);

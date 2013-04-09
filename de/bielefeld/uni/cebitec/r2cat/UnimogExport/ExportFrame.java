@@ -27,13 +27,13 @@ import javax.swing.event.ChangeListener;
 public class ExportFrame extends JFrame{
     
     private final JPanel buttonPanel;
-    private JButton run;
+    private JButton runButton;
     private JButton cancel;
     
-    private final JPanel maxGapPanel;
-    private final int sequenceLength;
-    private JTextField maxGapField;
-    private JSlider maxGapSlider;
+    private final JPanel minLengthPanel;
+    private final long sequenceLength;
+    private JTextField minLengthField;
+    private JSlider minLengthSlider;
     private List formList;
     
     private JPanel outputPanel;
@@ -41,96 +41,100 @@ public class ExportFrame extends JFrame{
     private JScrollPane outputScroll;
     
     
-    public ExportFrame(int seqLength, int majorTickSpacing, String seqName, String patName){
+    public ExportFrame(long seqLength, int majorTickSpacing, String seqName, String patName){
         super("Export to Unimog: " + seqName +" / " + patName);
         this.sequenceLength = seqLength;
         
         this.buttonPanel = new JPanel();
-        this.run = new JButton(ExportConstants.BUTTON_RUN);
+        this.runButton = new JButton(ExportConstants.BUTTON_RUN);
         this.cancel = new JButton(ExportConstants.BUTTON_CANCEL);
         this.buttonPanel.add(this.cancel);
-        this.buttonPanel.add(this.run);
+        this.buttonPanel.add(this.runButton);
+       
+        this.minLengthPanel = new JPanel();
+        
+        this.minLengthSlider = new JSlider();
+        this.minLengthSlider.setMinimum(0);
+        this.minLengthSlider.setMaximum((int)this.sequenceLength);
+        
+        this.minLengthSlider.setMinorTickSpacing(1);
+        this.minLengthSlider.setMajorTickSpacing(majorTickSpacing);
 
+        this.minLengthSlider.setPaintTicks(true);
+        this.minLengthSlider.setPaintLabels(true);
+        this.minLengthSlider.setPaintTrack(true);
+        this.minLengthSlider.setValue(0);
+        this.minLengthPanel.add(this.minLengthSlider);
         
-        this.maxGapPanel = new JPanel();
-        
-        this.maxGapSlider = new JSlider();
-        this.maxGapSlider.setMinimum(0);
-        this.maxGapSlider.setMaximum(this.sequenceLength);
-        this.maxGapSlider.setMinorTickSpacing(1);
-        this.maxGapSlider.setMajorTickSpacing(majorTickSpacing);
-
-        this.maxGapSlider.setPaintTicks(true);
-        this.maxGapSlider.setPaintLabels(true);
-        this.maxGapSlider.setPaintTrack(true);
-        this.maxGapPanel.add(this.maxGapSlider);
-        
-        this.maxGapField = new JTextField(this.sequenceLength+"",(this.sequenceLength+"").length());
-        this.maxGapPanel.add(this.maxGapField);
+        this.minLengthField = new JTextField(this.sequenceLength+"",(this.sequenceLength+"").length());
+        this.minLengthField.setText("0");
+        this.minLengthPanel.add(this.minLengthField);
         
         this.formList = new List(2);
         this.formList.add(ExportConstants.LISTENTRY_LIN);
         this.formList.add(ExportConstants.LISTENTRY_CIRC);
         this.formList.select(0);
-        this.maxGapPanel.add(this.formList);
+        this.minLengthPanel.add(this.formList);
         
           
         this.setLayout(new BorderLayout());
-        this.add(this.maxGapPanel, BorderLayout.CENTER);
+        this.add(this.minLengthPanel, BorderLayout.CENTER);
         this.add(this.buttonPanel, BorderLayout.SOUTH);
+        // define the size of the ExportFrame by the size of the used screen (hardware)
         this.pack();
         int width =java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
         this.setSize(width,this.getHeight());
-        this.maxGapSlider.setSize(maxGapSlider.getHeight(), (int)(width*0.8));
+        // configurate the length of the JSlider
+        this.minLengthSlider.setPreferredSize(new Dimension((int)(width*0.8),minLengthSlider.getHeight()));
         this.setVisible(true);
         
         this.outputPanel = null;
     }
     
-    public int getGapValue_slider(){
-        int value = this.maxGapSlider.getValue();
+    public long getMinLength_slider(){
+        int value = this.minLengthSlider.getValue();
         if(value > this.sequenceLength){
-            value = this.sequenceLength;
+            value = (int)this.sequenceLength;
         }
         return value;
     }
-    public int getGapValue_field(){
-        int value = Integer.parseInt(this.maxGapField.getText());
+    public long getMinLength_field(){
+        int value = Integer.parseInt(this.minLengthField.getText());
         if(value > this.sequenceLength){
-            value = this.sequenceLength;
+            value = (int)this.sequenceLength;
         }
         return value;
     }
     
-    public void setGapValue(int value){
+    public void setMinLength(long value){
         if(value > this.sequenceLength){
             return;
         }
-        this.maxGapSlider.setValue(value);
-        this.maxGapField.setText(""+value);
+        this.minLengthSlider.setValue((int)value);
+        this.minLengthField.setText(""+value);
     }
     
     public void setListener(FrameListener vL){
-        this.maxGapSlider.addChangeListener(vL);
-        this.maxGapField.addKeyListener(vL);
+        this.minLengthSlider.addChangeListener(vL);
+        this.minLengthField.addKeyListener(vL);
         this.cancel.addActionListener(vL);
-        this.run.addActionListener(vL);
+        this.runButton.addActionListener(vL);
     }
     
     public void setOutput(String text){
         if (this.outputPanel == null){
-            System.out.println("create OutputPanel");
             this.outputPanel = new JPanel();
             this.outputPane = new JTextPane();
-            this.outputPane.setMaximumSize(
-                    new Dimension(
-                                (int)(java.awt.Toolkit.getDefaultToolkit().getScreenSize().width*0.8),
-                                (int)(java.awt.Toolkit.getDefaultToolkit().getScreenSize().height*0.8)
-                                )
-                 );
+            
             this.outputScroll = new JScrollPane(outputPane, 
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            this.outputScroll.setPreferredSize(
+                    new Dimension(
+                                (int)(java.awt.Toolkit.getDefaultToolkit().getScreenSize().width*0.9),
+                                (int)(java.awt.Toolkit.getDefaultToolkit().getScreenSize().height*0.8)
+                                )
+                 );
             this.outputPanel.add(this.outputScroll);
             this.add(this.outputPanel, BorderLayout.NORTH);
         }
