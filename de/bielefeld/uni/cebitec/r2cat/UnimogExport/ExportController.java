@@ -4,6 +4,7 @@
  */
 package de.bielefeld.uni.cebitec.r2cat.UnimogExport;
 
+import de.bielefeld.uni.cebitec.r2cat.UnimogExport.Model.ExportMainModel;
 import de.bielefeld.uni.cebitec.qgram.MatchList;
 import de.bielefeld.uni.cebitec.r2cat.DataModelController;
 
@@ -47,6 +48,8 @@ public class ExportController {
      */
     private String patternName;
     
+    private ExportMainModel model;
+    
     
     /**
      * The Constructor needs the DataModelController
@@ -89,13 +92,21 @@ public class ExportController {
      * Unimog. 
      * @param matches are the given matches from the DataModelController
      * @param frame.getGapValue_field is the minimal length of the q-gram-cluster
-     * @param linear is the chosen by the user and discribes wether the input
+     * @param qCircular is the chosen by the user and discribes wether the input
      * sequence comes from a linear chromosom or not
      * @return the output
      */
-    public String calculateOutput(boolean linear){
-        Model model = new Model(this.matches, this.frame.getMinLength_field(), linear);
-        return model.getOuput();
+    public String calculateOutput(boolean qCircular, boolean tCircular){
+        this.model = new ExportMainModel(this.matches, this.frame.getMaxGap_field(), this.frame.getMinLength_field(), qCircular, tCircular);
+        this.model.run();
+        if(this.model.isWritten){
+           return this.model.getOuput(); 
+        }
+        else return null;
+    }
+    
+    public void forceStop(){
+        this.model.stop();
     }
     
 }
