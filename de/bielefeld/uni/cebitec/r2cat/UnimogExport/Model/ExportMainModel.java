@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class ExportMainModel extends Thread{
 
     private MatchList matches;
-    private long maxDistance;
+    private long maxDistanceSquare;
     private long minlenght;
     
     private boolean queryIsCircular;
@@ -31,7 +31,7 @@ public class ExportMainModel extends Thread{
     
     public ExportMainModel(MatchList matchList, long maxDis, long minLen, boolean qCirc, boolean tCirc){
         this.matches = matchList;
-        this.maxDistance = maxDis*maxDis;
+        this.maxDistanceSquare = maxDis*maxDis;
         this.minlenght = minLen;
         this.queryIsCircular = qCirc;
         this.targetIsCircular = tCirc;
@@ -46,6 +46,7 @@ public class ExportMainModel extends Thread{
         this.calculate();
         this.write();
     }
+    
     public String getOuput(){
         return output.toString();
     }
@@ -62,7 +63,7 @@ public class ExportMainModel extends Thread{
                    // sorting match in filteredQ while inserting 
                    // TODO use Quicksort
                    int  indexQ = (this.filteredQ.size()-1);
-                   while(indexQ>0 && c.getQueryStart()<this.filteredQ.get(indexQ).getQueryStart()){
+                   while(indexQ>0 && c.getQueryStart()< this.filteredQ.get(indexQ).getQueryStart()){
                        indexQ--;
                    }
                    this.filteredQ.add(indexQ, c);
@@ -72,7 +73,7 @@ public class ExportMainModel extends Thread{
         int inQ=0;
         // merging Clusters whose distance is shorter than the maximal distance the user configured
         while(inQ<this.filteredQ.size()-2){
-            if(this.filteredQ.getSquareDistance(inQ, inQ+1)<=this.maxDistance){
+            if(this.filteredQ.getSquareDistance(inQ, inQ+1)<=this.maxDistanceSquare){
                 this.filteredQ.join(inQ, inQ+1);
             }
             else{
@@ -91,23 +92,68 @@ public class ExportMainModel extends Thread{
             }
         }
         
+        
         // reject Clusters which are in the "shadow" of a bigger cluster
         inQ = 0;
-        while(inQ < this.filteredQ.size()-2){
+        while(inQ < this.filteredQ.size()-1){
             if(
                 this.filteredQ.get(inQ).getQueryStart() <= this.filteredQ.get(inQ+1).getQueryStart()
                 && this.filteredQ.get(inQ).getQueryEnd() >= this.filteredQ.get(inQ+1).getQueryEnd()
                 )   {
-                this.filteredQ.remove(inQ+1);
+                    this.filteredQ.remove(inQ+1);
             }
             else if(
                     this.filteredQ.get(inQ+1).getQueryStart() <= this.filteredQ.get(inQ).getQueryStart()
                     && this.filteredQ.get(inQ+1).getQueryEnd() >= this.filteredQ.get(inQ).getQueryEnd()
                 )   {
-                this.filteredQ.remove(inQ);
+                    this.filteredQ.remove(inQ);
             }
             else{
                 inQ++;
+            }
+        }
+        
+        // detecting repeats 
+        //(wherever there is a overlap greater than the maxDistance, there are two repeats
+        // and both together can be presented by ONE Cluster)
+        
+        inQ = 0;
+        while(inQ<this.filteredQ.size()-1){
+            Cluster c1 =  this.filteredQ.get(inQ);
+            Cluster c2 = this.filteredQ.get(inQ+1);
+            if(//this.filteredQ.getSquareDistance(inQ, inQ+1)>this.maxDistanceSquare && <-- allready proven while merging
+                c1.getQueryEnd()>c2.getTargetStart()){
+                // recognize that the overlap in the query and the overlap in the target are the same
+                long overlap = c1.getQueryEnd() - c2.getQueryStart();
+                //cutting the second Cluster
+                this.filteredQ.remove(inQ+1);
+                this.filteredQ.add(inQ+1,new Cluster (c2.getQueryStart()+(2*overlap), c2.getQueryEnd(), c2.getTargetStart()+(2*overlap), c2.getTargetEnd(),true));
+                
+                this.filteredQ.remove(inQ);
+                //adding two repeats as one Cluster (not unique / problems with unimog)
+                //TODO Checkbox for the user (the following should be optional)
+                if(true){
+                    this.filteredQ.add(inQ,new Cluster(c1,c2,overlap));
+                }
+                //cutting the first cluster
+                this.filteredQ.add(inQ, new Cluster (c1.getQueryStart(), c1.getQueryEnd()-(2*overlap), c1.getTargetStart()+(2*overlap), c2.getTargetEnd(),true));
+            }
+            inQ++;
+        }
+        
+        // checking for unique regions -> whereever there is no Match, there must be a unique region
+        inQ = 0;
+        // TODO Checkbox for the user (the following should be optional)
+        if(true){
+            while(inQ<this.filteredQ.size()-1){
+                if(this.filteredQ.getSquareDistance(inQ, inQ+1)>this.maxDistanceSquare){
+                    Cluster c1 = this.filteredQ.get(inQ);
+                    Cluster c2 = this.filteredQ.get(inQ+1);
+                    this.filteredQ.add(inQ, new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false));
+                }
+                else{
+                    inQ++;  
+                }
             }
         }
         
@@ -120,7 +166,7 @@ public class ExportMainModel extends Thread{
             else{
                 Cluster c = this.filteredQ.get(indexQ);
                 int indexT = (this.orderT.size()-1);
-                while(indexT>0 && c.getTargetStart()<this.filteredQ.get(indexT).getTargetStart()){
+                while(indexT > 0 && c.getTargetStart() < this.filteredQ.get(indexT).getTargetStart()){
                     indexT--;
                 }
                 this.orderT.add(indexT, indexQ);
@@ -128,6 +174,7 @@ public class ExportMainModel extends Thread{
             
         }        
     }
+    
     private void write(){
         // writing query data
         this.output.append(">"+this.matches.getQueries().get(0)+"\n");

@@ -33,9 +33,11 @@ public class Cluster {
     private long targetEnd;
     
     private boolean isMatch;
+    private boolean isRepeat;
     
     public Cluster(Match m){
         this.isMatch = true;
+        this.isRepeat = false;
         
         this.queryStart = m.getQueryStart();
         this.queryEnd = m.getQueryEnd();
@@ -53,6 +55,7 @@ public class Cluster {
     
     public Cluster(long qStart, long qEnd, long tStart, long tEnd, boolean isM){
         this.isMatch = isM;
+        this.isRepeat = false;
         
         this.queryStart = qStart;
         this.queryEnd = qEnd;
@@ -65,8 +68,25 @@ public class Cluster {
         
         this.nameInQuery = this.generateQueryName();
         this.nameInTarget = this.generateTargetName();
+    }
+    
+    // creating a repeat 
+    public Cluster(Cluster parent1, Cluster parent2, long overlap){
+        this.isMatch = true;
+        this.isRepeat = true;
+        
+        this.queryStart =parent1.getQueryEnd()-2*overlap;
+        this.queryEnd = parent1.getQueryEnd();
+        
+        this.targetStart = parent2.getTargetStart();
+        this.targetEnd = parent2.getTargetEnd();
+        
+        this.nameInQuery = this.generateQueryName();
+        this.nameInTarget = this.generateTargetName();
         
     }
+    
+   
     
     private String generateQueryName(){
         StringBuilder ret = new StringBuilder();
@@ -74,6 +94,10 @@ public class Cluster {
             ret.append(this.queryStart);
             ret.append("matches");
             ret.append(this.targetStart);
+            if(this.isRepeat){
+                ret.append(" ");
+                ret.append(ret);
+            }
         }
         else{
             ret.append("unmatch");
@@ -94,6 +118,10 @@ public class Cluster {
             ret.append(this.queryStart);
             ret.append("matches");
             ret.append(this.targetStart);
+            if(this.isRepeat){
+                ret.append(" ");
+                ret.append(ret);
+            }
         }
         else{
             ret.append("unmatch");
@@ -161,6 +189,10 @@ public class Cluster {
     
     public boolean isMatch(){
         return this.isMatch;
+    }
+    
+    public boolean isRepeat(){
+        return this.isRepeat;
     }
     
     // returns true if the Cluster is inverted in the target

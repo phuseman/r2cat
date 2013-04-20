@@ -61,7 +61,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
      */
     public double getSquareDistance(int i1, int i2){
         int index1, index2;
-        if(this.get(i1).getQueryStart()<=this.get(i2).getQueryStart()){
+        if(this.get(i1).getQueryStart() <= this.get(i2).getQueryStart()){
             index1 = i1;
             index2 = i2;
         }
