@@ -1,6 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/** 
+ * This Class takes all signals from the frame except from the Checkboxes. 
  */
 package de.bielefeld.uni.cebitec.r2cat.UnimogExport;
 
@@ -64,7 +63,7 @@ public class FrameListener implements ChangeListener,KeyListener,ActionListener 
             this.frame.dispose();
         }    
         else if(e.getActionCommand().equals(ExportConstants.BUTTON_RUN)){
-            String output = this.eC.calculateOutput(this.frame.queryIsCircular(), this.frame.targetIsCircular());
+            String output = this.eC.calculateOutput(this.frame.useUnique(), this.frame.useRepeats(), this.frame.queryIsCircular(), this.frame.targetIsCircular());
             if(output != null){
                 this.frame.setOutput(output);
             } 

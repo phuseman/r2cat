@@ -7,6 +7,7 @@ package de.bielefeld.uni.cebitec.r2cat.UnimogExport;
 import de.bielefeld.uni.cebitec.r2cat.UnimogExport.ExportConstants;
 import de.bielefeld.uni.cebitec.r2cat.UnimogExport.FrameListener;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.List;
 import java.awt.event.ActionListener;
@@ -41,13 +42,15 @@ public class ExportFrame extends JFrame{
     private final JLabel maxGapLabel;
     private JSlider maxGapSlider;
     private JTextField maxGapField;
-    private final JCheckBox maxGapCheck;
+    private final JPanel gapCheckPanel;
+    private final JCheckBox uniqueCheck;
+    private final JCheckBox repeatCheck;
     
     private final JPanel minLengthPanel;
     private final JLabel minLengthLabel;
     private JTextField minLengthField;
     private JSlider minLengthSlider;
-    private JPanel formCheckPanel;
+    private final JPanel formCheckPanel;
     private JCheckBox formCheckQuery;
     private JCheckBox formCheckTarget;
     
@@ -74,6 +77,7 @@ public class ExportFrame extends JFrame{
         // model after choosing the run - JButton
         
         this.maxGapPanel = new JPanel();
+        this.maxGapPanel.setLayout(new BoxLayout(this.maxGapPanel, BoxLayout.X_AXIS));
         this.maxGapLabel = new JLabel(ExportConstants.LABEL_MAXGAP);
         this.maxGapPanel.add(this.maxGapLabel);
         
@@ -94,9 +98,15 @@ public class ExportFrame extends JFrame{
         this.maxGapField.setName(ExportConstants.LABEL_MAXGAP);
         this.maxGapPanel.add(this.maxGapField);
         
-        this.maxGapCheck = new JCheckBox(ExportConstants.CHECKBOX_GAP);
-        this.maxGapCheck.setMnemonic('g');
-        this.maxGapPanel.add(this.maxGapCheck);
+        this.gapCheckPanel = new JPanel();
+        this.gapCheckPanel.setLayout(new BoxLayout(this.gapCheckPanel, BoxLayout.PAGE_AXIS));
+        this.uniqueCheck = new JCheckBox(ExportConstants.CHECKBOX_UNIQUE);
+        this.uniqueCheck.setMnemonic('u');
+        this.gapCheckPanel.add(this.uniqueCheck);
+        this.repeatCheck = new JCheckBox(ExportConstants.CHECKBOX_REPEAT);
+        this.repeatCheck.setMnemonic('r');
+        this.gapCheckPanel.add(this.repeatCheck);
+        this.maxGapPanel.add(this.gapCheckPanel);
         
         this.paraPanel.add(this.maxGapPanel);
         
@@ -266,6 +276,12 @@ public class ExportFrame extends JFrame{
     }
     public boolean targetIsCircular(){
         return this.formCheckTarget.isSelected();
+    }
+    public boolean useUnique(){
+        return this.uniqueCheck.isSelected();
+    }
+    public boolean useRepeats(){
+        return this.repeatCheck.isSelected();
     }
     
  

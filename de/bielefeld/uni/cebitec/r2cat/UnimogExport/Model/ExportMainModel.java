@@ -16,8 +16,10 @@ public class ExportMainModel extends Thread{
 
     private MatchList matches;
     private long maxDistanceSquare;
-    private long minlenght;
+    private boolean useUnique;
+    private boolean useRepeats;
     
+    private long minlenght;
     private boolean queryIsCircular;
     private boolean targetIsCircular;
     //ArrayList which is filtered by length and sorted by the starting postion in the query
@@ -29,9 +31,11 @@ public class ExportMainModel extends Thread{
     
     public boolean isWritten;
     
-    public ExportMainModel(MatchList matchList, long maxDis, long minLen, boolean qCirc, boolean tCirc){
+    public ExportMainModel(MatchList matchList, long maxDis,  boolean useU, boolean useR, long minLen, boolean qCirc, boolean tCirc){
         this.matches = matchList;
         this.maxDistanceSquare = maxDis*maxDis;
+        this.useUnique = useU;
+        this.useRepeats = useR;
         this.minlenght = minLen;
         this.queryIsCircular = qCirc;
         this.targetIsCircular = tCirc;
@@ -56,34 +60,50 @@ public class ExportMainModel extends Thread{
         // sorting the filteredQ ArrayList while constructing
         for(Match m:matches){
                Cluster c = new Cluster(m);
-               if(this.filteredQ.isEmpty()){
-                   this.filteredQ.add(c);
-               }
-               else{
-                   // sorting match in filteredQ while inserting 
-                   // TODO use Quicksort
-                   int  indexQ = (this.filteredQ.size()-1);
-                   while(indexQ>0 && c.getQueryStart()< this.filteredQ.get(indexQ).getQueryStart()){
-                       indexQ--;
-                   }
-                   this.filteredQ.add(indexQ, c);
-               }
-             
+               this.filteredQ.add(c);
         }    
+        
         int inQ=0;
         // merging Clusters whose distance is shorter than the maximal distance the user configured
+            // first step: going through the List in order of the queryStarts
         while(inQ<this.filteredQ.size()-2){
-            if(this.filteredQ.getSquareDistance(inQ, inQ+1)<=this.maxDistanceSquare){
+            // checking if sorted - for testing only
+            if(this.filteredQ.get(inQ).getQueryStart()>this.filteredQ.get(inQ+1).getQueryStart()){
+                    System.err.println("---------------not sorted!!!---------");
+                }
+            
+            if(this.filteredQ.getSquareDistance(inQ, inQ+1)<=this.maxDistanceSquare 
+                    && this.filteredQ.get(inQ).isInverted() == this.filteredQ.get(inQ+1).isInverted()){
                 this.filteredQ.join(inQ, inQ+1);
             }
             else{
                 inQ++;
             }
         }
+        inQ=0;
+            // second step: going through the List in order of the targetStarts
+        filteredQ.createSortedTargetStartList();
+        ArrayList<Integer> targetOrder = this.filteredQ.getTargetOrder();
+        int po1;
+        int po2;
+        while(inQ<targetOrder.size()-2){
+            po1 = targetOrder.get(inQ);
+            po2 = targetOrder.get(inQ+1);
+            if(this.filteredQ.getSquareDistance(po1, po2)<=this.maxDistanceSquare 
+                    && this.filteredQ.get(po1).isInverted() == this.filteredQ.get(po2).isInverted()){
+                this.filteredQ.join(po1, po2);
+            }
+            else{
+                inQ++;
+            }
+        }
+        
         // reject Clusters which are shorter than the minlength (given by user)
+
         inQ = 0;
+        long squareMinLength = ((long)this.minlenght * (long)this.minlenght);
         while(inQ<this.filteredQ.size()){
-            if(this.filteredQ.get(inQ).size()<this.minlenght){
+            if(this.filteredQ.get(inQ).getSquareSize()<squareMinLength){
                 this.filteredQ.remove(inQ);
             }
             else{
@@ -92,72 +112,37 @@ public class ExportMainModel extends Thread{
             }
         }
         
+        //detecting the optimal path threw the remaining Clusters
         
-        // reject Clusters which are in the "shadow" of a bigger cluster
-        inQ = 0;
-        while(inQ < this.filteredQ.size()-1){
-            if(
-                this.filteredQ.get(inQ).getQueryStart() <= this.filteredQ.get(inQ+1).getQueryStart()
-                && this.filteredQ.get(inQ).getQueryEnd() >= this.filteredQ.get(inQ+1).getQueryEnd()
-                )   {
-                    this.filteredQ.remove(inQ+1);
-            }
-            else if(
-                    this.filteredQ.get(inQ+1).getQueryStart() <= this.filteredQ.get(inQ).getQueryStart()
-                    && this.filteredQ.get(inQ+1).getQueryEnd() >= this.filteredQ.get(inQ).getQueryEnd()
-                )   {
-                    this.filteredQ.remove(inQ);
-            }
-            else{
-                inQ++;
-            }
-        }
         
-        // detecting repeats 
-        //(wherever there is a overlap greater than the maxDistance, there are two repeats
-        // and both together can be presented by ONE Cluster)
-        
-        inQ = 0;
-        while(inQ<this.filteredQ.size()-1){
-            Cluster c1 =  this.filteredQ.get(inQ);
-            Cluster c2 = this.filteredQ.get(inQ+1);
-            if(//this.filteredQ.getSquareDistance(inQ, inQ+1)>this.maxDistanceSquare && <-- allready proven while merging
-                c1.getQueryEnd()>c2.getTargetStart()){
-                // recognize that the overlap in the query and the overlap in the target are the same
-                long overlap = c1.getQueryEnd() - c2.getQueryStart();
-                //cutting the second Cluster
-                this.filteredQ.remove(inQ+1);
-                this.filteredQ.add(inQ+1,new Cluster (c2.getQueryStart()+(2*overlap), c2.getQueryEnd(), c2.getTargetStart()+(2*overlap), c2.getTargetEnd(),true));
-                
-                this.filteredQ.remove(inQ);
-                //adding two repeats as one Cluster (not unique / problems with unimog)
-                //TODO Checkbox for the user (the following should be optional)
-                if(true){
-                    this.filteredQ.add(inQ,new Cluster(c1,c2,overlap));
-                }
-                //cutting the first cluster
-                this.filteredQ.add(inQ, new Cluster (c1.getQueryStart(), c1.getQueryEnd()-(2*overlap), c1.getTargetStart()+(2*overlap), c2.getTargetEnd(),true));
-            }
-            inQ++;
-        }
         
         // checking for unique regions -> whereever there is no Match, there must be a unique region
         inQ = 0;
-        // TODO Checkbox for the user (the following should be optional)
-        if(true){
+        if(this.useUnique){
             while(inQ<this.filteredQ.size()-1){
                 if(this.filteredQ.getSquareDistance(inQ, inQ+1)>this.maxDistanceSquare){
                     Cluster c1 = this.filteredQ.get(inQ);
                     Cluster c2 = this.filteredQ.get(inQ+1);
-                    this.filteredQ.add(inQ, new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false));
+                    this.filteredQ.add(inQ+1, new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false, false));
+                    inQ++;
                 }
-                else{
-                    inQ++;  
-                }
+                inQ++;  
             }
         }
+        testOrder();
         
-        // sorting reference for orderT which points to a match in filteredQ
+        
+        
+        //TODO
+        /** detecting repeats 
+         * wherever there is a overlap greater than the maxDistance, there are two repeats
+         * and both together can be presented by ONE Cluster
+        */
+        
+
+        this.testOrder();
+        
+        /** sorting reference for orderT which points to a match in filteredQ*/
         // TODO possible whith quicksort?
         for(int indexQ =0; indexQ<this.filteredQ.size(); indexQ++){
             if(this.orderT.isEmpty()){
@@ -174,6 +159,8 @@ public class ExportMainModel extends Thread{
             
         }        
     }
+    
+    
     
     private void write(){
         // writing query data
@@ -192,5 +179,15 @@ public class ExportMainModel extends Thread{
         }
         this.output.append(this.targetIsCircular ? ")":"|");
         this.isWritten = true;
+    }
+
+    // only for testing!
+    private void testOrder() {
+        //only for testing
+        for(int i= 0; i<this.filteredQ.size()-1; i++){
+            if(this.filteredQ.get(i).getQueryStart()>this.filteredQ.get(i+1).getQueryStart()){
+                System.err.println("---------------not sorted!!!---------");
+            }
+        }
     }
 }

@@ -13,7 +13,9 @@ public abstract class ExportConstants {
     
     public static final String LABEL_MAXGAP = "maximal length of gaps";
     
-    public static final String CHECKBOX_GAP = "use greater gaps as clusters";
+    public static final String CHECKBOX_UNIQUE = "use greater gaps as unique regions";
+    
+    public static final String CHECKBOX_REPEAT = "remain repeats (not conform to Unimog)";
     
     public static final String LABEL_MINLENGTH = "minimal length of cluster";
     

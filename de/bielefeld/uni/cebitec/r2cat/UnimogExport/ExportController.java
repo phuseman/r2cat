@@ -96,8 +96,8 @@ public class ExportController {
      * sequence comes from a linear chromosom or not
      * @return the output
      */
-    public String calculateOutput(boolean qCircular, boolean tCircular){
-        this.model = new ExportMainModel(this.matches, this.frame.getMaxGap_field(), this.frame.getMinLength_field(), qCircular, tCircular);
+    public String calculateOutput(boolean unique, boolean repeat, boolean qCircular, boolean tCircular){
+        this.model = new ExportMainModel(this.matches, this.frame.getMaxGap_field(), unique, repeat, this.frame.getMinLength_field(), qCircular, tCircular);
         this.model.run();
         if(this.model.isWritten){
            return this.model.getOuput(); 
