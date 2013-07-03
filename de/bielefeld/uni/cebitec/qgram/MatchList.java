@@ -1133,6 +1133,8 @@ public class MatchList extends Observable implements
 		return contigsWritten;
 	}
 	
-	
+	public void notifyMatchObserver(){
+            this.notifyObservers(NotifyEvent.CHANGE);
+        }
 
 }

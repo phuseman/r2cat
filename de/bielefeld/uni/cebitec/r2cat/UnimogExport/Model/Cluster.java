@@ -60,7 +60,6 @@ public class Cluster {
     public Cluster(Match m){
         this.hasMatches = true;
         this.isDummy = false;
-        this.bestScore = m.size();
         this.bestPredecessor = null;
         this.includedMatches = new ArrayList();
         this.includedMatches.add(m);
@@ -76,7 +75,7 @@ public class Cluster {
         if(this.queryStart>this.queryEnd){
             this.switchStartEnd();
         }
-        
+        this.bestScore = this.size();
         this.nameInQuery = this.generateQueryName();
         this.nameInTarget = this.generateTargetName();         
     }
@@ -227,6 +226,7 @@ public class Cluster {
     }
     
     public long getTargetStart(){
+        
         return this.targetStart;
     }
     
@@ -291,7 +291,7 @@ public class Cluster {
     public Cluster getBestPredecessor(){
         return this.bestPredecessor;
     }
-    public void setBestScore(long bS){
+    public void setBestScore(double bS){
         this.bestScore = bS;
     }
     public void setBestPredecessor(Cluster c){

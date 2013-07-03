@@ -67,6 +67,7 @@ public class ExportController {
     
     private void init(){
         this.matches = this.dataControl.getMatchesList();
+        this.model=null;
 
         this.sequenceLength = matches.getQueries().elementAt(0).getSize();
 
@@ -106,7 +107,10 @@ public class ExportController {
     }
     
     public void forceStop(){
-        this.model.stop();
+        if(this.model != null){
+            this.model.stop();
+        }
+        
     }
     
 }
