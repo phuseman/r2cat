@@ -62,7 +62,7 @@ public class ExportMainModel extends Thread{
                Cluster c = new Cluster(m);
                this.filteredQ.add(c);
         }    
-        //testOrder();
+        testOrder();
         mergeShortCluster();
         rejectShortClusters();
         this.filteredQ = detectPath();
@@ -144,6 +144,7 @@ public class ExportMainModel extends Thread{
             
             if(this.filteredQ.getSquareDistance(inQ, inQ+1)<=this.maxDistanceSquare 
                     && this.filteredQ.get(inQ).isInverted() == this.filteredQ.get(inQ+1).isInverted()){
+                System.out.println("Merged while distance " +this.filteredQ.getSquareDistance(inQ, inQ+1));
                 this.filteredQ.join(inQ, inQ+1);
             }
             else{
@@ -196,8 +197,9 @@ public class ExportMainModel extends Thread{
         long squareMinLength = ((long)this.minlenght * (long)this.minlenght);
         while(inQ<this.filteredQ.size()){
             if(this.filteredQ.get(inQ).getSquareSize()<squareMinLength){
+                //System.out.println("Remove: size "+this.filteredQ.get(inQ).size());
                 this.filteredQ.remove(inQ);
-            }
+                }
             else{
                 //System.out.println(this.filteredQ.get(inQ).size());
                 inQ++;
@@ -222,7 +224,7 @@ public class ExportMainModel extends Thread{
                 }
             }
             if(bestEnd == null || c1.getBestScore()>bestEnd.getBestScore()){
-                System.out.println("new bestEnd has been found "+c1.getBestScore());
+                //System.out.println("new bestEnd has been found "+c1.getBestScore());
                 bestEnd = c1;
             }
         }
@@ -247,6 +249,6 @@ public class ExportMainModel extends Thread{
             }
         }
         this.matches.copyDataFromOtherMatchList(pathMatches);
-        this.matches.notifyMatchObserver();
+        this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
     }
 }

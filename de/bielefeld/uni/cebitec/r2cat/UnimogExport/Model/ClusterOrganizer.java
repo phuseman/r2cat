@@ -74,8 +74,6 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
                 return newUpper;
             }
             rel = this.get(newUpper);
-            long start1 = rel.getQueryStart();
-            long start2 = insert.getQueryStart();
             if(rel.getQueryStart() <= insert.getQueryStart()){
                 super.add(newUpper+1,insert);
                 return newUpper+1;
@@ -98,6 +96,12 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         }
     }
     
+    /**
+     * This method returns the next position in the ClusterOrganizer which
+     * consists of matches.
+     * @param index is the index after which will be searched
+     * @return is the position of the next Cluster which consists of Matches. 
+     */
    public int findNextMatchInQuery(int index){
         int position = index+1;
         while(position < this.size()  && !this.get(position).consistsOfMatches() ){
@@ -122,7 +126,16 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
             this.remove(index2);
     } 
     
-    
+    /**
+     * A Method which needs a Cluster and his position in the ClusterOrganizer.
+     * Since the position is a reference, this method is inserting the position
+     * of the Cluster in the ArrayList targetStarts so that all positions
+     * in targetStarts will be sorted by the startpoints of their Cluster .
+     * @param lowerBreakpoint 
+     * @param upperBreakpoint
+     * @param insert
+     * @param qPosition 
+     */
     private void targetSortByInsert(int lowerBreakpoint, int upperBreakpoint, Cluster insert, int qPosition){
         int newUpper = Math.min(this.targetStarts.size()-1,upperBreakpoint); 
         if (this.targetStarts.isEmpty()){
@@ -319,8 +332,31 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
             index2 = i1;
         }
         long qDis = (this.get(index2).getQuerySmallerIndex() - this.get(index1).getQueryLargerIndex());
+        qDis *= qDis;
+                
         long tDis = (this.get(index2).getTargetSmallerIndex() - this.get(index1).getTargetLargerIndex());
-        return qDis*tDis;
+        tDis*=tDis;
+        
+        return qDis+tDis;
+    }
+    
+    public double getSquareDistance(Cluster ce1, Cluster ce2){
+        Cluster c1, c2;
+        if(ce1.getQueryStart() <= ce2.getQueryStart()){
+            c1= ce1;
+            c2 =ce2;
+        }
+        else{
+            c1 = ce2;
+            c2 = ce1;
+        }
+        long qDis = (c2.getQuerySmallerIndex() - c1.getQueryLargerIndex());
+        qDis *= qDis;
+        
+        long tDis = (c2.getTargetSmallerIndex() - c1.getTargetLargerIndex());
+        tDis*=tDis;
+        
+        return qDis+tDis;
     }
     
     /**
@@ -345,7 +381,20 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
          * the repeatless score by cutting the leading repeat in c2 respective 
          * the closing repeat in c1. 
          */
-        return (c1.size()+c2.getBestScore() - this.getMaximalOverlap(c1, c2));
+        double renormJ =1;
+        double jumpcost =0;
+//                = Math.abs(
+//                        c1.getQuerySmallerIndex() - c2.getTargetSmallerIndex()
+//                        - c2.getQuerySmallerIndex() - c2.getTargetSmallerIndex()
+//                    ) * renormJ;
+        double renormE = 1;
+        double euklid = this.getMaximalOverlap(c1, c2); 
+                //(Math.sqrt(this.getSquareDistance(c1, c2))) * renormE;
+        
+        return ( c1.size()
+                +c2.getBestScore() 
+                - jumpcost
+                - euklid);
     }
     
     /**
@@ -372,15 +421,17 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
      * @return true, if c2 is "upper right" in comparison to c1
      */
     public boolean follows(Cluster c1, long cut, Cluster c2){
-        if(c1.getQuerySmallerIndex()+cut < c2.getQuerySmallerIndex()
-           && c1.getTargetSmallerIndex()+cut < c2.getTargetSmallerIndex()){
-            return true;
-        }
-        else{
-            return false;
-        }
+        return(c1.getQuerySmallerIndex()+cut < c2.getQuerySmallerIndex()
+                && c1.getTargetSmallerIndex()+cut < c2.getTargetSmallerIndex())
+                ?true:false;
+           
     }
     
+    /**
+     * If any ArrayList of Cluster allready exist, it can simply be converted 
+     * to a ClusterOrganizer.
+     * @param clusters has to be a ArrayList of Cluster.
+     */
     public void setClusters(ArrayList<Cluster> clusters){
         this.clear();
         for(Cluster c:clusters){
