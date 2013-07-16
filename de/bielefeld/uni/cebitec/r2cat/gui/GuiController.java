@@ -363,24 +363,6 @@ public class GuiController {
 
 	}
 	
-	/**
-	 * @author Rolf Hilker
-	 * Gives a dialog to save all unmatched contigs in one fasta file.
-	 */
-	public void exportUnmatchedFasta() {
-		if (!R2cat.dataModelController
-				.isUnmatchedListReady()) {
-			errorAlert("No unmatched contigs available to save!");
-			return;
-		}
-		
-		File f = this.chooseFile("Save unmatched contigs (fasta format)", false, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
-		if (f != null) {
-			this.exportUnmatchedAsFastaFile(f, false);
-		} else {
-			return;
-		}
-	}
 
 	/**
 	 * Gives a dialog to save the contigs in the displayed order and orientation
@@ -401,6 +383,52 @@ public class GuiController {
 		}
 	}
 
+	/**
+	 * @author Rolf Hilker
+	 * Gives a dialog to save all unmatched contigs in one fasta file.
+	 */
+	public void exportUnmatchedFasta() {
+		if (!R2cat.dataModelController
+				.isUnmatchedListReady()) {
+			errorAlert("No unmatched contigs available to save!");
+			return;
+		}
+		
+		File f = this.chooseFile("Save unmatched contigs (fasta format)", false, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
+		if (f != null) {
+			this.exportUnmatchedAsFastaFile(f, false);
+		} else {
+			return;
+		}
+	}
+
+
+	/**
+	 * Allows to save matched as well as unmatched contigs
+	 */
+
+	public void exportBothFasta() {
+		if (!R2cat.dataModelController
+				.isMatchesListReady()) {
+			errorAlert("There is nothing to save!");
+			return;
+		}
+		
+		if (!R2cat.dataModelController
+				.isUnmatchedListReady()) {
+			errorAlert("I have no information about unmatched contigs. Maybe try to match again.");
+		}
+
+		
+		File f = this.chooseFile("Save unmatched contigs (fasta format)", false, new CustomFileFilter(".fas,.fna,.fasta", "FASTA File"));
+		if (f != null) {
+			this.exportBothAsFastaFile(f, false);
+		} else {
+			return;
+		}
+	}
+
+	
 	/**
 	 * Creates a dialog to export the displayed order of the contigs' fasta id's into a text file.
 	 */
@@ -530,6 +558,46 @@ public class GuiController {
 		}		
 	}
 
+	private void exportBothAsFastaFile(File f, boolean ignoreMissingFiles) {
+		try {
+			MiscFileUtils.enforceExtension(f, ".fas");
+
+			// mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			int contigsWritten = R2cat.dataModelController
+					.writeAllContigsFasta(f, ignoreMissingFiles);
+			 int totalContigs = R2cat.dataModelController.getMatchesList().getQueries().size();
+			JOptionPane.showMessageDialog(getMainWindow(),
+					"Wrote " + contigsWritten 
+					+ (contigsWritten!=totalContigs?(" ("+ totalContigs+" of them were matched)"):"")
+					+ " contigs into file:\n"+(f.getAbsolutePath()) ,
+					"File written", JOptionPane.INFORMATION_MESSAGE);
+			// mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+		} catch (IOException e) {
+			if (e.getClass() == SequenceNotFoundException.class) {
+				int answer = SequenceNotFoundException.handleSequenceNotFoundException((SequenceNotFoundException)e);
+				
+				switch (answer) {
+				case JOptionPane.YES_OPTION:
+					this.exportBothAsFastaFile(f, ignoreMissingFiles);
+					break;
+				case JOptionPane.NO_OPTION:
+					this.exportBothAsFastaFile(f, true);
+					break;
+				case JOptionPane.CANCEL_OPTION:
+					return;
+
+				default:
+					return;
+				}
+
+			} else {
+				this.errorAlert(e.getMessage() + "\nNothing was saved");
+			}
+		}
+
+	}
+
 	
 	/**
 	 * Chooses a file for opening or saving data
@@ -631,4 +699,5 @@ public class GuiController {
 		pr.setLocationByPlatform(true);
 		pr.setVisible(true);
 	}*/
+
 }

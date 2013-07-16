@@ -105,6 +105,7 @@ public class MatchList extends Observable implements
 	 */
 	public void copyDataFromOtherMatchList(MatchList other) {
 		this.matches = other.matches;
+		this.unmatchedContigs = other.unmatchedContigs;
 		this.targets = other.targets;
 		this.targetOrder = other.targetOrder;
 		this.queries = other.queries;

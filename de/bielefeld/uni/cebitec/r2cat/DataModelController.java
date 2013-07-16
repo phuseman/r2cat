@@ -22,6 +22,7 @@ package de.bielefeld.uni.cebitec.r2cat;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -141,6 +142,18 @@ public class DataModelController {
 	
 	public int writeUnmatchedContigsFasta(File f, boolean ignoreMissingFiles) throws IOException {
 		return matchList.writeContigsOrderFasta(f, ignoreMissingFiles, this.matchList.getUnmatchedContigs());
+	}
+
+	public int writeAllContigsFasta(File f, boolean ignoreMissingFiles) throws IOException {
+		if(isMatchesListReady()) {
+			List<DNASequence> combined = new ArrayList<DNASequence>();
+			combined.addAll(this.matchList.getQueries());
+			combined.addAll(this.matchList.getUnmatchedContigs());
+
+			
+			return matchList.writeContigsOrderFasta(f, ignoreMissingFiles, combined);
+		}
+		return 0;
 	}
 
 	

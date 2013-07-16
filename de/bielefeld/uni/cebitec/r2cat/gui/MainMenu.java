@@ -123,6 +123,14 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		unmatchedFastaExport.addActionListener(this);
 		fileMenu.add(unmatchedFastaExport);
 
+		JMenuItem bothFastaExport = new JMenuItem("Export both (FASTA)");
+		bothFastaExport.setMnemonic(KeyEvent.VK_M);
+		bothFastaExport.getAccessibleContext()
+				.setAccessibleDescription("Save all matched contigs in order, as well as all unmatched in one file in FASTA format");
+		bothFastaExport.setActionCommand("save_both");
+		bothFastaExport.addActionListener(this);
+		fileMenu.add(bothFastaExport);
+
 		
 		JMenuItem imageExport = new JMenuItem("Export image");
 		imageExport.getAccessibleContext()
@@ -281,6 +289,8 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 			guiController.exportOrderFasta();
 		} else if (e.getActionCommand().matches("save_unmatched")) {
 			guiController.exportUnmatchedFasta();
+		} else if (e.getActionCommand().matches("save_both")) {
+			guiController.exportBothFasta();
 		} else if (e.getActionCommand().matches("reverted")) {
 			guiController.displayReverseComplements(((JCheckBoxMenuItem) e.getSource())
 					.getState());
