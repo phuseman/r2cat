@@ -88,7 +88,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 		
 		fileMenu.addSeparator();
                 
-                JMenuItem export = new JMenuItem( de.bielefeld.uni.cebitec.r2cat.UnimogExport.Constants.MENUPOINT);
+                JMenuItem export = new JMenuItem( de.bielefeld.uni.cebitec.r2cat.UnimogExport.ExportConstants.MENUPOINT);
                 export.addActionListener(this);
                 fileMenu.add(export);
 
@@ -310,8 +310,8 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
                         System.exit(0);
                 } else if (e.getActionCommand().matches("export_image")) {
                         guiController.exportMatchesAsImage();
-                } else if (e.getActionCommand().equals( de.bielefeld.uni.cebitec.r2cat.UnimogExport.Constants.MENUPOINT)){
-                        new  de.bielefeld.uni.cebitec.r2cat.UnimogExport.ExportController();
+                } else if (e.getActionCommand().equals( de.bielefeld.uni.cebitec.r2cat.UnimogExport.ExportConstants.MENUPOINT)){
+                        new  de.bielefeld.uni.cebitec.r2cat.UnimogExport.ExportController(R2cat.dataModelController);
                 }
 		
 		
