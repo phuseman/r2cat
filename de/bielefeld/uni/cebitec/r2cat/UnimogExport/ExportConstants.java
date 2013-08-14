@@ -28,4 +28,6 @@ public abstract class ExportConstants {
     public static final String FORMCHECK_QUERY = "query is circular";
     
     public static final String FORMCHECK_TARGET = "target is circular";
+    
+    public static final long MIN_REPEAT_LENGTH = 12;
 }

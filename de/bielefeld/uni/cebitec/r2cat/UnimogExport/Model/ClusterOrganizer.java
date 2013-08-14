@@ -11,6 +11,7 @@
 package de.bielefeld.uni.cebitec.r2cat.UnimogExport.Model;
 
 import de.bielefeld.uni.cebitec.qgram.Match;
+import de.bielefeld.uni.cebitec.r2cat.UnimogExport.ExportConstants;
 import java.util.ArrayList;
 
 /**
@@ -19,9 +20,11 @@ import java.util.ArrayList;
  */
 public class ClusterOrganizer extends ArrayList<Cluster> {
     private ArrayList<Integer> targetStarts;
+    private long repeatID;
     
     public ClusterOrganizer(){
         targetStarts = new ArrayList();
+        repeatID = 0;
     }
 
     @Override
@@ -247,70 +250,587 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
     private void cutRepeats(int pos1, int pos2){
         Cluster c1 = this.get(pos1);
         Cluster c2 = this.get(pos2);
-        
+        long minRepLengthSquare = ExportConstants.MIN_REPEAT_LENGTH*ExportConstants.MIN_REPEAT_LENGTH;
+       
         long qOverlap;
         long tOverlap;
-        long qRepeatStart;
-        long qRepeatEnd;
-        long tRepeatStart;
-        long tRepeatEnd;
-        
-        if(c1.getQueryLargerIndex()<= c2.getQuerySmallerIndex() 
-                && c1.getTargetLargerIndex() <= c2.getTargetSmallerIndex()){
-            // no repeat can be found
-        }
-        
-        //there are basically 4 different types of repeats (presented by overlaps) 
+        Repeat A1;
+        Repeat A2;
+        Repeat B1;
+        Repeat B2;
+       
+        if( c1.isInverted() == c2.isInverted() 
+            && c1.getQueryLargerIndex()<= c2.getQuerySmallerIndex()
+                //the following line could be an logical Error
+            && Math.min(c1.getTargetLargerIndex(), c2.getTargetLargerIndex()) <= Math.max(c1.getTargetSmallerIndex(), c2.getTargetSmallerIndex())
+           ){
+                    // no repeat can be found
+            }
+
+        //there are basically 4 different types of repeats (presented by overlaps)
         //for every direction (forward or backward)
-        
+
         //identify and cut the forward - repeats
         else if(!c1.isInverted() && !c2.isInverted()){
-            // overlap in query and target
+            // overlap in query and target, see scenario forward 1 and forward 2
             if(c1.getQueryEnd() > c2.getQueryStart() && c1.getTargetEnd() > c2.getTargetStart()){
+                qOverlap = c1.getQueryEnd() - c2.getQueryStart();
+                tOverlap = c1.getTargetEnd() - c2.getTargetStart();
+                //scenario forward 1
+                if(qOverlap >= tOverlap){
+                    A1 = new Repeat(    c1.getQueryEnd() -(c1.getGradient()*tOverlap), // qstart
+                                        c1.getQueryEnd(), // qend
+                                        c2.getTargetStart(), // tstart
+                                        c1.getTargetEnd(), // tend
+                                        repeatID// repeatID
+                    );                    
+                    A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                        c2.getQueryStart() +(c2.getGradient()*tOverlap),// qend
+                                        c2.getTargetStart(),// tstart
+                                        c1.getTargetEnd(),// tend
+                                        repeatID// repeatID
+                    );
+                    B1  = new Repeat(   c2.getQueryStart()+A2.getQuerySize(),// qstart
+                                        c1.getQueryEnd()-A1.getQuerySize(),// qend
+                                        c2.getTargetStart()-(c1.getReziprocalGradient()*(c1.getQueryEnd()-A1.getQuerySize() - c2.getQueryStart()- A2.getQuerySize())),// tstart
+                                        c2.getTargetStart(),// tend
+                                        repeatID+0.5// repeatID
+                    );
+                    B2  = new Repeat(   c2.getQueryStart()+A2.getQuerySize(),// qstart
+                                        c1.getQueryEnd()-A2.getQuerySize(),// qend
+                                        c1.getTargetStart(),// tstart
+                                        c1.getTargetStart() + (c2.getReziprocalGradient()*(c1.getQueryEnd()-A2.getQuerySize() - c2.getQueryStart()-A2.getQuerySize())),// tend
+                                        repeatID+0.5// repeatID
+                    );
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(A1);
+                        c1.addClosingTargetRepeat(A1);
+                    }
 
+                    if(B1.getSquareSize() >= minRepLengthSquare && B2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(B1);
+                        c1.addClosingTargetRepeat(B1);
+                        c2.addLeadingTargetRepeat(B2);
+                    }
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(A1);
+                        c1.addClosingTargetRepeat(A1);
+                        c2.addLeadingTargetRepeat(A2); 
+                    }
+                    repeatID++;
+                }
+                // scenario forward 2
+                else{
+                    A1 = new Repeat(    c2.getQueryStart(),// qstart
+                                        c1.getQueryEnd(),// qend
+                                        c1.getTargetEnd() - (c1.getGradient()*qOverlap),// tstart
+                                        c1.getTargetEnd(),// tend
+                                        repeatID// repeatID
+                    );                    
+                    A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                        c1.getQueryEnd(),// qend
+                                        c2.getTargetStart(),// tstart
+                                        c2.getTargetStart() - (c2.getGradient()*qOverlap),// tend
+                                        repeatID// repeatID
+                    );
+                    B1  = new Repeat( c2.getQueryStart() - (c1.getGradient() * (c1.getTargetEnd() - A1.getTargetSize()-c2.getTargetStart()-A2.getTargetSize())),// qstart
+                                    c2.getQueryStart(),// qend
+                                    c2.getTargetStart()+A2.getTargetSize(),// tstart
+                                    c1.getTargetEnd()-A1.getTargetSize(),// tend
+                                    repeatID+0.5// repeatID
+                    );
+                    B2  = new Repeat(   c1.getQueryEnd(),// qstart
+                                        c1.getQueryEnd() + (c2.getGradient()*( c1.getTargetEnd() - A1.getTargetSize() - c2.getTargetStart() - A2.getTargetSize())),// qend
+                                        c2.getTargetStart()+A2.getTargetSize(),// tstart
+                                        c1.getTargetEnd()-A1.getTargetSize(),// tend
+                                        repeatID+0.5// repeatID)
+                    );
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(A1);
+                        c1.addClosingTargetRepeat(A1);
+                    }
+
+                    if(B1.getSquareSize() >= minRepLengthSquare && B2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(B1);
+                        c1.addClosingTargetRepeat(B1);
+                        c2.addLeadingQueryRepeat(B2);
+                    }
+
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(A1);
+                        c1.addClosingTargetRepeat(A1);
+                        c2.addLeadingQueryRepeat(A2);
+                    }
+                    repeatID++;
+                }
             }
-            // overlap only in the query
+            
+            // overlap only in the query, see scenario forward 3
             else if(c1.getQueryEnd() > c2.getQueryStart()){
-
+                qOverlap = c1.getQueryEnd() - c2.getQueryStart();
+                tOverlap = 0;
+                A1 = new Repeat(    c2.getQueryStart(),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c1.getTargetEnd() - (c1.getReziprocalGradient()*qOverlap),// tstart
+                                    c1.getTargetEnd(),// tend
+                                    repeatID// repeatID
+                );                    
+                A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c2.getTargetStart(),// tstart
+                                    c2.getTargetStart() + (c2.getReziprocalGradient()*qOverlap),// tend
+                                    repeatID// repeatID
+                );
+                if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                    c1.addClosingQueryRepeat(A1);
+                    c1.addClosingTargetRepeat(A1);
+                    c2.addLeadingTargetRepeat(A2);
+                }
+                repeatID++;
             }
-            // overlap only in the target
+            // overlap only in the target, see scenario forward 4
             else if(c1.getTargetEnd() > c2.getTargetStart()){
-
+                qOverlap = 0;
+                tOverlap = c1.getTargetEnd() - c2.getTargetStart();
+                A1 = new Repeat(    c1.getQueryEnd() - (c1.getGradient()*tOverlap),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c2.getTargetStart(),// tstart
+                                    c1.getTargetEnd(),// tend
+                                    repeatID// repeatID
+                );                    
+                A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                    c2.getQueryStart() + (c2.getGradient() *(c1.getTargetEnd() - c2.getTargetStart())),// qend
+                                    c2.getTargetStart(),// tstart
+                                    c1.getTargetEnd(),// tend
+                                    repeatID// repeatID
+                );
+                if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                    c1.addClosingQueryRepeat(A1);
+                    c1.addClosingTargetRepeat(A1);
+                    c2.addLeadingQueryRepeat(A2);
+                }
+                repeatID++;
             }
-            // otherwise there is no repeat 
+            // otherwise no repeat has been found 
             else{
-
+                spitError(c1, c2);
             }
-//            System.out.println(
-//                        "Overlap: \n "+ c1.getQueryEnd()+"-"+c2.getQueryStart()+"="+qOverlap + 
-//                        "\n and "+c1.getTargetLargerIndex()+"-"+c2.getTargetSmallerIndex()+"="+tOverlap+
-//                        "\n on Cluster "+c1.getQueryName() +" and "+c2.getQueryName());
+        
         }
         // identify and cut the backward - repeats
         else if (c1.isInverted() && c2.isInverted()){
-            
-            // overlap in query and target
+            // overlap in query and target, see scenario backward 1 and backward 2
             if(c1.getQueryEnd() > c2.getQueryStart() && c2.getTargetEnd() > c1.getTargetStart()){
+                qOverlap = c1.getQueryEnd() - c2.getQueryStart();
+                tOverlap = c2.getTargetStart() - c1.getTargetEnd();
+                //scenario backward 1
+                if(tOverlap >= qOverlap){
+                    A1 = new Repeat(    c2.getQueryStart(),// qstart
+                                        c1.getQueryEnd(),// qend
+                                        c1.getTargetEnd()+ (c1.getReziprocalGradient()*qOverlap),// tstart
+                                        c1.getTargetEnd(),// tend
+                                        repeatID// repeatID
+                    );                    
+                    A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                        c1.getQueryEnd(),// qend
+                                        c2.getTargetStart(),// tstart
+                                        c2.getTargetStart() -(c2.getReziprocalGradient()*qOverlap),// tend
+                                        repeatID// repeatID
+                    );
+                    B1  = new Repeat(   c2.getQueryStart() -(c1.getGradient() *(c1.getTargetEnd() + A1.getTargetSize() - c2.getTargetStart() - A2.getTargetSize())),// qstart
+                                        c2.getQueryStart(),// qend
+                                        c2.getTargetStart() - A2.getTargetSize(),// tstart
+                                        c1.getTargetEnd() + A1.getTargetSize(),// tend
+                                        repeatID+0.5// repeatID
+                    );
+                    B2  = new Repeat(   c1.getQueryEnd(),// qstart
+                                        c1.getQueryEnd() + (c2.getGradient() * (c1.getTargetEnd() + A1.getTargetSize() - c2.getTargetStart() - A2.getTargetSize())),// qend
+                                        c2.getTargetStart() - A2.getTargetSize(),// tstart
+                                        c1.getTargetEnd() + A1.getTargetSize(),// tend
+                                        repeatID+0.5// repeatID)
+                    );
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(A1);
+                        c1.addClosingTargetRepeat(A1);
+                    }
 
-            }
-            // overlap only in the query
-            else if(c1.getQueryEnd() > c2.getQueryStart()){
+                    if(B1.getSquareSize() >= minRepLengthSquare && B2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(B1);
+                        c1.addClosingTargetRepeat(B1);
+                        c2.addLeadingQueryRepeat(B2);
+                    }
 
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(A1);
+                        c1.addClosingTargetRepeat(A1);
+                        c2.addLeadingQueryRepeat(A2);
+                    }
+                    repeatID++;
+                }
+                //scenario backward 2
+                else{
+                    A1 = new Repeat(    c1.getQueryEnd()-(c1.getGradient()*qOverlap),// qstart
+                                        c1.getQueryEnd(),// qend
+                                        c2.getTargetStart(),// tstart
+                                        c1.getTargetEnd(),// tend
+                                        repeatID// repeatID
+                    );                    
+                    A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                        c2.getQueryStart()+(c2.getGradient()*qOverlap),// qend
+                                        c2.getTargetStart(),// tstart
+                                        c1.getTargetEnd(),// tend
+                                        repeatID// repeatID
+                    );
+                    B1  = new Repeat(   A2.getQueryEnd(),// qstart
+                                        A1.getQueryStart(),// qend
+                                        c2.getTargetStart() + (c1.getReziprocalGradient()*(A1.getQueryStart()-A2.getQueryEnd())),// tstart
+                                        c2.getTargetStart(),// tend
+                                        repeatID+0.5// repeatID
+                    );
+                    B2  = new Repeat(   A2.getQueryEnd(),// qstart
+                                        A1.getQueryStart(),// qend
+                                        c1.getTargetEnd(),// tstart
+                                        c1.getTargetEnd() - (c2.getReziprocalGradient()*(A1.getQueryStart()-A2.getQueryEnd())),// tend
+                                        repeatID+0.5// repeatID)
+                    );
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(A1);
+                        c1.addClosingTargetRepeat(A1);
+                    }
+
+                    if(B1.getSquareSize() >= minRepLengthSquare && B2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(B1);
+                        c1.addClosingTargetRepeat(B1);
+                        c2.addLeadingTargetRepeat(B2);
+                    }
+
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(A1);
+                        c1.addClosingTargetRepeat(A1);
+                        c2.addLeadingTargetRepeat(A2);
+                    }
+                    repeatID++;
+                }
             }
-            // overlap only in the target
+            // overlap only in the target, see scenario backward 3
             else if(c2.getTargetEnd() > c1.getTargetStart()){
-                
-            }
-            // otherwise there is no repeat
-            else{
+                qOverlap = 0;
+                tOverlap = c2.getTargetStart() - c1.getTargetEnd();
+                A1 = new Repeat(    c1.getQueryEnd()-(c1.getGradient()*tOverlap),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c2.getTargetStart(),// tstart
+                                    c1.getTargetEnd(),// tend
+                                    repeatID// repeatID
+                );                    
+                A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                    c2.getQueryStart()+(c2.getGradient()*tOverlap),// qend
+                                    c2.getTargetStart(),// tstart
+                                    c1.getTargetEnd(),// tend
+                                    repeatID// repeatID
+                );
 
+                if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                    c1.addClosingQueryRepeat(A1);
+                    c1.addClosingTargetRepeat(A1);
+                    c2.addLeadingQueryRepeat(A2);
+                }
+                repeatID++;
+            }
+            // overlap only in the query, see scenario backward 4
+            else if(c1.getQueryEnd() > c2.getQueryStart()){
+                qOverlap = c1.getQueryEnd() - c2.getQueryStart();
+                tOverlap = 0;
+                A1 = new Repeat(    c2.getQueryStart(),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c1.getTargetEnd() - (c1.getReziprocalGradient()*qOverlap),// tstart
+                                    c1.getTargetEnd(),// tend
+                                    repeatID// repeatID
+                );                    
+                A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c2.getTargetStart(),// tstart
+                                    c2.getTargetStart() +(c2.getReziprocalGradient()*qOverlap),// tend
+                                    repeatID// repeatID
+                );
+
+                if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                    c1.addClosingQueryRepeat(A1);
+                    c1.addClosingTargetRepeat(A1);
+                    c2.addLeadingTargetRepeat(A2);
+                }
+                repeatID++;
+            }
+
+            // otherwise no repeat has been found -> ERROR
+            else{
+                spitError(c1, c2);
             }
         }
-        else{
-            // inverted repeat (Query: A, Target: -A or similar)
+        // inverted repeat (Query: A, Target: -A or similar) -> palindroms
+        else if (!c1.isInverted() && c2.isInverted()){
+        // overlap in the query and the target, see scenario forwardbackward1
+            if(c1.getQueryEnd() > c2.getQueryStart() && c1.getTargetEnd() > c2.getTargetEnd()){
+                qOverlap = c1.getQueryEnd() - c2.getQueryStart();
+                tOverlap = c1.getTargetEnd() - c2.getTargetEnd();
+                B1  = new Repeat(   c1.getQueryEnd() - (c1.getGradient() * tOverlap),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c2.getTargetEnd(),// tstart
+                                    c1.getTargetEnd(),// tend
+                                    repeatID+0.5,// repeatID
+                                    true //isPalindrom
+                );
+                A1 = new Repeat(    c2.getQueryStart(),// qstart
+                                    B1.getQueryStart(),// qend
+                                    c2.getTargetEnd() - (c1.getReziprocalGradient() *(B1.getQueryStart()-c2.getQueryStart())),// tstart
+                                    c2.getTargetEnd(),// tend
+                                    repeatID,// repeatID
+                                    true //isPalindrom
+                );        
+                A2 = new Repeat(    c2.getQueryStart(),// qstart
+                                    B1.getQueryStart(),// qend
+                                    c2.getTargetStart(),// tstart
+                                    c2.getTargetStart() - (c2.getReziprocalGradient()*(B1.getQueryStart()-c2.getQueryStart())),// tend
+                                    repeatID,// repeatID
+                                    true //isPalindrom
+                ); 
+                B2  = new Repeat(   c1.getQueryEnd() - (c2.getGradient() * tOverlap),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    A2.getTargetEnd(),// tstart
+                                    A2.getTargetEnd() - (c2.getReziprocalGradient()*B1.getQuerySize()),// tend
+                                    repeatID+0.5,// repeatID
+                                    true //isPalindrom
+                );
+                if(B1.getSquareSize() >= minRepLengthSquare && B2.getSquareSize() >= minRepLengthSquare){
+                    c1.addClosingQueryRepeat(B1);
+                    c1.addClosingTargetRepeat(B1);
+                    c2.addClosingQueryRepeat(B2);
+                }
+                if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                    c1.addClosingQueryRepeat(A1);
+                    c1.addClosingTargetRepeat(A1);
+                    c2.addLeadingTargetRepeat(A2);
 
+                }
+                if(B1.getSquareSize() >= minRepLengthSquare && B2.getSquareSize() >= minRepLengthSquare){
+                    c2.addLeadingTargetRepeat(B2);
+                }
+                repeatID++;
+            }
+            // scenario forwardbackward2
+            else if(c1.getQueryEnd() > c2.getQueryStart()){
+                qOverlap = c1.getQueryEnd() - c2.getQueryStart();
+                tOverlap = 0;
+                A1 = new Repeat(    c2.getQueryStart(),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c1.getTargetEnd() - (c1.getReziprocalGradient()*qOverlap),// tstart
+                                    c1.getTargetEnd(),// tend
+                                    repeatID,// repeatID
+                                    true //isPalindrom
+                );                    
+                A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c2.getTargetStart(),// tstart
+                                    c2.getTargetStart()- (c2.getReziprocalGradient() * qOverlap),// tend
+                                    repeatID,// repeatID
+                                    true //isPalindrom
+                );
+                if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                    c1.addClosingTargetRepeat(A1);
+                    c2.addLeadingTargetRepeat(A2);
+                    c1.addClosingQueryRepeat(A1);
+                }
+                repeatID++;
+            }
+            //scenario forwardbackward3 and forwardbackward4
+            else if(c1.getTargetEnd() > c2.getTargetEnd()){
+                //forwardbackward3
+                if((c1.getTargetEnd() - c2.getTargetEnd()) < (c2.getTargetStart() - c1.getTargetStart())){
+                    qOverlap = 0;
+                    tOverlap = c1.getTargetEnd() - c2.getTargetEnd();
+                    A1 = new Repeat(    c1.getQueryEnd()-(c1.getGradient() * tOverlap),// qstart
+                                        c1.getQueryEnd(),// qend
+                                        c2.getTargetEnd(),// tstart
+                                        c1.getTargetStart(),// tend
+                                        repeatID,// repeatID
+                                        true //isPalindrom
+                    );                    
+                    A2  = new Repeat(   c2.getQueryEnd()-(c2.getGradient() * tOverlap),// qstart
+                                        c2.getQueryEnd(),// qend
+                                        c2.getTargetEnd(),// tstart
+                                        c1.getTargetStart(),// tend
+                                        repeatID,// repeatID
+                                        true //isPalindrom
+                    );
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingTargetRepeat(A1);
+                        c1.addClosingQueryRepeat(A1);
+                        c2.addClosingQueryRepeat(A2);
+                    }
+                    repeatID++;
+                }
+                //forwardbackward4
+                else{
+                    qOverlap = 0;
+                    tOverlap = c2.getTargetStart() - c1.getTargetStart();
+                    A1 = new Repeat(    c1.getQueryStart(),// qstart
+                                        c1.getQueryStart() + (c1.getGradient() *tOverlap),// qend
+                                        c1.getTargetStart(),// tstart
+                                        c2.getTargetStart(),// tend
+                                        repeatID,// repeatID
+                                        true //isPalindrom
+                    );                    
+                    A2  = new Repeat(   c2.getTargetStart(),// qstart
+                                        c2.getQueryStart() + (c2.getGradient() * tOverlap),// qend
+                                        c2.getTargetStart(),// tstart
+                                        c1.getTargetStart(),// tend
+                                        repeatID,// repeatID
+                                        true //isPalindrom
+                    );  
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addLeadingTargetRepeat(A1);
+                        c1.addLeadingQueryRepeat(A1);
+                        c2.addLeadingQueryRepeat(A2);
+                    }
+                    repeatID++;
+                }
+            }
+            // otherwise no repeat has been found -> ERROR
+            else{
+                spitError(c1, c2);
+            }
+        }
+        else if (c1.isInverted() && !c2.isInverted()){
+            //scenario backwardforward1
+            if(c1.getQueryEnd() > c2.getQueryStart() && c2.getTargetEnd() > c1.getTargetEnd()){
+                qOverlap = c1.getQueryEnd() - c2.getQueryStart();
+                tOverlap = c2.getTargetEnd() - c1.getTargetEnd();
+
+                B1  = new Repeat(   c2.getQueryEnd() - (c1.getGradient() * tOverlap),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c2.getTargetEnd(),// tstart
+                                    c1.getTargetEnd(),// tend
+                                    repeatID+0.5,// repeatID
+                                    true //isPalindrom
+                );
+                A1 = new Repeat(    c2.getQueryStart(),// qstart
+                                    B1.getQueryStart(),// qend
+                                    c2.getTargetEnd()+ (c1.getReziprocalGradient()*(c2.getQueryStart() - B1.getQueryStart())),// tstart
+                                    c2.getTargetEnd(),// tend
+                                    repeatID,// repeatID
+                                    true //isPalindrom
+                );             
+                A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                    B1.getQueryStart(),// qend
+                                    c2.getTargetStart(),// tstart
+                                    c2.getTargetStart() + (c2.getReziprocalGradient()* (c2.getQueryStart() - B1.getQueryStart())),// tend
+                                    repeatID,// repeatID
+                                    true //isPalindrom
+                );
+                B2  = new Repeat(   c2.getQueryEnd() - (c1.getGradient() * tOverlap),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    A2.getTargetEnd(),// tstart
+                                    A2.getTargetEnd() + (c2.getReziprocalGradient() * tOverlap),// tend
+                                    repeatID+0.5,// repeatID
+                                    true //isPalindrom
+                );
+                if(B1.getSquareSize() >= minRepLengthSquare && B2.getSquareSize() >= minRepLengthSquare){
+                    c2.addClosingQueryRepeat(B2);
+                    c1.addClosingQueryRepeat(B1);
+                }
+
+                if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                    c1.addClosingQueryRepeat(A1);
+                    c1.addClosingTargetRepeat(A1);
+                    c2.addLeadingTargetRepeat(A2);
+                }
+                if(B1.getSquareSize() >= minRepLengthSquare && B2.getSquareSize() >= minRepLengthSquare){
+                    c1.addClosingTargetRepeat(B1);
+                    c2.addLeadingTargetRepeat(B2);
+                }
+                repeatID++;
+            }
+            //backwardforward2
+            else if(c1.getQueryEnd() > c2.getQueryStart()){
+                qOverlap = c1.getQueryEnd() - c2.getQueryStart();
+                tOverlap = 0;
+                A1 = new Repeat(    c2.getQueryStart(),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c1.getTargetEnd() * (c1.getReziprocalGradient() * qOverlap),// tstart
+                                    c1.getTargetEnd(),// tend
+                                    repeatID,// repeatID
+                                    true //isPalindrom
+                );             
+                A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                    c1.getQueryEnd(),// qend
+                                    c2.getTargetStart(),// tstart
+                                    c2.getTargetStart() + (c2.getReziprocalGradient() *qOverlap),// tend
+                                    repeatID,// repeatID
+                                    true //isPalindrom
+                );
+                if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                    c1.addClosingQueryRepeat(A1);
+                    c1.addClosingTargetRepeat(A1);
+                    c2.addLeadingTargetRepeat(A2);
+                }
+            }
+            //backwardforward3 and backwardforward4
+            else if(c2.getTargetEnd() > c1.getTargetEnd()){
+                // backwardforward3
+                if((c2.getTargetEnd() - c1.getTargetEnd())<(c1.getTargetStart() - c2.getTargetStart())){
+                    qOverlap = 0;
+                    tOverlap = c2.getTargetEnd() - c1.getTargetEnd();
+                    A1 = new Repeat(    c1.getQueryEnd()- (c1.getGradient() * tOverlap),// qstart
+                                        c1.getQueryEnd(),// qend
+                                        c2.getTargetEnd(),// tstart
+                                        c1.getTargetEnd(),// tend
+                                        repeatID,// repeatID
+                                        true //isPalindrom
+                    );             
+                    A2  = new Repeat(   c2.getQueryEnd() - (c2.getGradient() * tOverlap),// qstart
+                                        c2.getQueryEnd(),// qend
+                                        c1.getTargetEnd(),// tstart
+                                        c2.getTargetEnd(),// tend
+                                        repeatID,// repeatID
+                                        true //isPalindrom
+                    );
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addClosingQueryRepeat(A1);
+                        c1.addClosingTargetRepeat(A1);
+                        c2.addClosingQueryRepeat(A2);
+                    }
+                }
+                //backwardforward4
+                else{
+                    qOverlap = 0;
+                    tOverlap = c1.getTargetStart() - c2.getTargetStart();
+                    A1 = new Repeat(    c1.getQueryStart(),// qstart
+                                        c1.getQueryStart() + (c1.getGradient() *tOverlap),// qend
+                                        c1.getTargetStart(),// tstart
+                                        c2.getTargetStart(),// tend
+                                        repeatID,// repeatID
+                                        true //isPalindrom
+                    );             
+                    A2  = new Repeat(   c2.getQueryStart(),// qstart
+                                        c2.getQueryStart() + (c2.getGradient() * tOverlap),// qend
+                                        c2.getTargetStart(),// tstart
+                                        c1.getTargetStart(),// tend
+                                        repeatID,// repeatID
+                                        true //isPalindrom
+                    );
+                    if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
+                        c1.addLeadingQueryRepeat(A1);
+                        c1.addLeadingTargetRepeat(A1);
+                        c2.addLeadingQueryRepeat(A2);
+                    }
+                }
+            }
+            // otherwise no repeat has been found -> ERROR
+            else{
+                spitError(c1, c2);
+            }
         }
     }
+
     
     /**
      * Calculates the distance between 2 entries with Pythagoras. a^2 +b^2 = c^2
@@ -322,22 +842,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
      * with the smaller queryStart)
      */
     public double getSquareDistance(int i1, int i2){
-        int index1, index2;
-        if(this.get(i1).getQueryStart() <= this.get(i2).getQueryStart()){
-            index1 = i1;
-            index2 = i2;
-        }
-        else{
-            index1 = i2;
-            index2 = i1;
-        }
-        long qDis = (this.get(index2).getQuerySmallerIndex() - this.get(index1).getQueryLargerIndex());
-        qDis *= qDis;
-                
-        long tDis = (this.get(index2).getTargetSmallerIndex() - this.get(index1).getTargetLargerIndex());
-        tDis*=tDis;
-        
-        return qDis+tDis;
+        return this.getSquareDistance(this.get(i1), this.get(i2));
     }
     
     public double getSquareDistance(Cluster ce1, Cluster ce2){
@@ -354,7 +859,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         qDis *= qDis;
         
         long tDis = (c2.getTargetSmallerIndex() - c1.getTargetLargerIndex());
-        tDis*=tDis;
+        tDis *= tDis;
         
         return qDis+tDis;
     }
@@ -373,7 +878,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
      * Pay attention to the fact that this method doesn't prove that c1 and
      * c2 are in the right order. For that, you have to use follows(c1, cut, c2).
      */
-    public double getRepeatlessScore(Cluster c1, Cluster c2){
+    public double getRepeatlessScore(Cluster c1, Cluster c2, long qSize, long tSize, boolean qCirc, boolean tCirc){
         /** 
          * Pay attention to the fact, that the score of the following (= upper
          * right) Cluster c2 the bestScore is not influenced by leading 
@@ -382,14 +887,12 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
          * the closing repeat in c1. 
          */
         double renormJ =1;
-        double jumpcost =0;
-//                = Math.abs(
-//                        c1.getQuerySmallerIndex() - c2.getTargetSmallerIndex()
-//                        - c2.getQuerySmallerIndex() - c2.getTargetSmallerIndex()
-//                    ) * renormJ;
-        double renormE = 1;
-        double euklid = this.getMaximalOverlap(c1, c2); 
-                //(Math.sqrt(this.getSquareDistance(c1, c2))) * renormE;
+        double jumpcost =0; 
+                //= Math.abs(c1.getDiagonal() - c2.getDiagonal()) * renormJ;
+        double renormE = 0.5;
+        double euklid = Math.sqrt(this.getRectangleDistanceSquare(c1, c2, qSize, tSize, qCirc, tCirc))*renormE;
+        //double euklid = (Math.sqrt(this.getSquareDistance(c1, c2))) * renormE;
+        //double euklid = this.getMaximalOverlap(c1, c2);
         
         return ( c1.size()
                 +c2.getBestScore() 
@@ -412,6 +915,13 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         return (temp>0)?temp:0;
     }
     
+    public long getMinimalOverlap(Cluster c1, Cluster c2){
+        long temp1 = c1.getQueryLargerIndex() - c2.getQuerySmallerIndex();
+        long temp2 = c1.getTargetLargerIndex() - c2.getTargetSmallerIndex();
+        long temp = Math.min(temp1, temp2);
+        return (temp>0)?temp:0;
+    }
+    
     /**
      * This method proves that a Cluster follows another Cluster.
      * Graphical: c2 follows c1 if it is in the upper right to c1.
@@ -421,8 +931,23 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
      * @return true, if c2 is "upper right" in comparison to c1
      */
     public boolean follows(Cluster c1, long cut, Cluster c2){
+        boolean targetFollow = false;
+        if (c1.isInverted() != c2.isInverted()){
+            targetFollow = true; // when the Clusters are not directed in the same way,
+            // we have to admit that it could be a follower 
+        }
+        else if(c1.getTargetSmallerIndex()+cut <= c2.getTargetSmallerIndex()
+                && !c1.isInverted() 
+                && !c2.isInverted()){
+                    targetFollow = true;
+        }
+        else if(c1.getTargetLargerIndex() >= c2.getTargetLargerIndex()+cut
+                && c1.isInverted() 
+                && c2.isInverted()){
+                    targetFollow = true;
+        }
         return(c1.getQuerySmallerIndex()+cut < c2.getQuerySmallerIndex()
-                && c1.getTargetSmallerIndex()+cut < c2.getTargetSmallerIndex())
+                && targetFollow)
                 ?true:false;
            
     }
@@ -437,5 +962,93 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         for(Cluster c:clusters){
             this.add(c);
         }
+    }
+
+    private void spitError(Cluster c1, Cluster c2) {
+        long qOverlap;
+        long tOverlap;
+        qOverlap = c1.getQueryLargerIndex() - c2.getQuerySmallerIndex();
+        tOverlap = Math.min(c1.getTargetLargerIndex() - c2.getTargetSmallerIndex(), 
+                            c2.getTargetLargerIndex() - c1.getTargetSmallerIndex());
+        qOverlap = Math.max(qOverlap, 0);
+        tOverlap = Math.max(tOverlap, 0);
+        System.err.println(
+         "Overlap: "+
+          "\n \t"+ c1.getQueryEnd()+"-"+c2.getQueryStart()+"="+qOverlap +
+          "\n \t and "+c1.getTargetLargerIndex()+"-"+c2.getTargetSmallerIndex()+"="+tOverlap+
+          "\n \t on Cluster "+c1.getQueryName() +" and "+c2.getQueryName()+
+          "could not be identify");
+    }
+    
+    private long getRectangleDistanceSquare(Cluster c1, Cluster c2, long qSize, long tSize, boolean qCirc, boolean tCirc){
+        long distanceSquare = -1;
+        long smallerQueryPoint;
+        long smallerTargetPoint;
+        long largerQueryPoint;
+        long largerTargetPoint;
+        long queryDistance1;
+        long targetDistance1;
+        long jumpQueryDistance;
+        long targetDistance2;
+        long jumpTargetDistance1;
+        long jumpTargetDistance2;
+
+        // scenario rectangle 1 and 2
+        smallerQueryPoint = Math.min(c1.getQueryLargerIndex(), c2.getQuerySmallerIndex());
+        largerQueryPoint = Math.max(c1.getQueryLargerIndex(), c2.getQuerySmallerIndex());
+        queryDistance1 = Math.abs(largerQueryPoint - smallerQueryPoint);
+        queryDistance1 *= queryDistance1;
+        // scenario rectangle 1
+        smallerTargetPoint = c1.getTargetLargerIndex();
+        largerTargetPoint = c2.getTargetSmallerIndex();
+        targetDistance1 = Math.abs(largerTargetPoint - smallerTargetPoint);
+        targetDistance1 *=targetDistance1;
+        distanceSquare = queryDistance1 + targetDistance1;
+        // scenario rectangle 2
+        smallerTargetPoint = c2.getTargetLargerIndex();
+        largerTargetPoint = c1.getTargetSmallerIndex();
+        targetDistance2 = Math.abs(largerTargetPoint - smallerTargetPoint);
+        targetDistance2 *=targetDistance2;
+        distanceSquare = Math.min(distanceSquare, queryDistance1 + targetDistance2);
+        //scenario rectangle 3 and 4
+        if(qCirc){
+            smallerQueryPoint = c2.getQueryLargerIndex();
+            largerQueryPoint = c1.getQueryLargerIndex() + qSize;
+            jumpQueryDistance = Math.abs(smallerQueryPoint - largerQueryPoint);
+            jumpQueryDistance *=jumpQueryDistance;
+            distanceSquare = Math.min(distanceSquare,
+                              jumpQueryDistance + Math.min(targetDistance1, targetDistance2));
+        }
+        else{
+            // not logical but necessary for implementing scenario rectangle 7 and 8
+            jumpQueryDistance = 0;
+        }
+        //scenario rectangle 5 and 6
+        if(tCirc){
+            //scenario 5
+            smallerTargetPoint = c1.getTargetLargerIndex();
+            largerTargetPoint = c2.getTargetSmallerIndex()+tSize;
+            jumpTargetDistance1 = Math.abs(largerTargetPoint - smallerTargetPoint);
+            jumpTargetDistance1 *=jumpTargetDistance1;
+            distanceSquare = Math.min(distanceSquare, queryDistance1 + jumpTargetDistance1);
+            //scenario 6
+            smallerTargetPoint = c2.getTargetLargerIndex();
+            largerTargetPoint = c1.getTargetSmallerIndex() +tSize;
+            jumpTargetDistance2 = Math.abs(largerTargetPoint - smallerTargetPoint);
+            jumpTargetDistance2 *=jumpTargetDistance2;
+            distanceSquare = Math.min(distanceSquare, queryDistance1 + jumpTargetDistance2);
+            //scenario rectangle 7 and 8
+            if(qCirc && tCirc){
+                distanceSquare = Math.min(distanceSquare, 
+                        jumpQueryDistance + Math.min(jumpTargetDistance1, jumpTargetDistance2));
+            }
+        }
+        
+        if(distanceSquare <= 0){
+            System.err.println("ERROR while calculating the distance of rectangles "
+                    + ""+c1.getQueryName()+" and " +c2.getQueryName());
+        }
+        return distanceSquare;
+        
     }
 }

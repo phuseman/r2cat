@@ -22,6 +22,8 @@ public class ExportMainModel extends Thread{
     private long minlenght;
     private boolean queryIsCircular;
     private boolean targetIsCircular;
+    private long querySize;
+    private long targetSize;
     //ArrayList which is filtered by length and sorted by the starting postion in the query
     private ClusterOrganizer filteredQ;
     //another ArrayList qhich is getting the order of the matches in filteredQ
@@ -37,6 +39,9 @@ public class ExportMainModel extends Thread{
         this.useUnique = useU;
         this.useRepeats = useR;
         this.minlenght = minLen;
+        this.querySize = matches.getStatistics().getQueriesSize();
+        this.targetSize = matches.getStatistics().getTargetsSize();
+                
         this.queryIsCircular = qCirc;
         this.targetIsCircular = tCirc;
         this.filteredQ = new ClusterOrganizer();
@@ -57,11 +62,7 @@ public class ExportMainModel extends Thread{
     
     private void calculate(){
         this.isWritten = false;
-        // sorting the filteredQ ArrayList while constructing
-        for(Match m:matches){
-               Cluster c = new Cluster(m);
-               this.filteredQ.add(c);
-        }    
+        this.construct();
         testOrder();
         mergeShortCluster();
         rejectShortClusters();
@@ -103,7 +104,13 @@ public class ExportMainModel extends Thread{
         }        
     }
     
-    
+    private void construct(){
+        // sorting the filteredQ ArrayList while constructing
+        for(Match m:matches){
+               Cluster c = new Cluster(m);
+               this.filteredQ.add(c);
+        }    
+    }
     
     private void write(){
         // writing query data
@@ -183,10 +190,26 @@ public class ExportMainModel extends Thread{
             if(this.filteredQ.getSquareDistance(inQ, inQ+1)>this.maxDistanceSquare){
                 Cluster c1 = this.filteredQ.get(inQ);
                 Cluster c2 = this.filteredQ.get(inQ+1);
-                this.filteredQ.add(inQ+1, new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false, false));
+                this.filteredQ.add(inQ+1, new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false));
                 inQ++;
             }
             inQ++;  
+        }
+        this.filteredQ.createSortedTargetStartList();
+        int inT = 0;
+        int t1,t2;
+        while(inQ<this.filteredQ.size()-2){
+            t1 =this.filteredQ.getTargetOrder().get(inT);
+            t2 =this.filteredQ.getTargetOrder().get(inT+1);
+            if(this.filteredQ.getSquareDistance(t1, t2)>this.maxDistanceSquare){
+                Cluster c1 = this.filteredQ.get(t1);
+                Cluster c2 = this.filteredQ.get(t2);
+                this.filteredQ.add(new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false));
+                this.filteredQ.createSortedTargetStartList();
+            }
+            else{
+                inQ++; 
+            }  
         }
     }
 
@@ -217,10 +240,10 @@ public class ExportMainModel extends Thread{
             for(int j =i+1; j<this.filteredQ.size(); j++){
                 c2 = this.filteredQ.get(j);
                 if(this.filteredQ.follows(c1, 0, c2)
-                   && c1.getBestScore() <= this.filteredQ.getRepeatlessScore(c1, c2))
+                   && c1.getBestScore() <= this.filteredQ.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular))
                 {
                         c1.setBestPredecessor(c2);
-                        c1.setBestScore(this.filteredQ.getRepeatlessScore(c1, c2));
+                        c1.setBestScore(this.filteredQ.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular));
                 }
             }
             if(bestEnd == null || c1.getBestScore()>bestEnd.getBestScore()){
@@ -251,4 +274,5 @@ public class ExportMainModel extends Thread{
         this.matches.copyDataFromOtherMatchList(pathMatches);
         this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
     }
+    
 }

@@ -67,6 +67,7 @@ public class ExportController {
     
     private void init(){
         this.matches = this.dataControl.getMatchesList();
+        
         this.model=null;
 
         this.sequenceLength = matches.getQueries().elementAt(0).getSize();
@@ -98,7 +99,7 @@ public class ExportController {
      * @return the output
      */
     public String calculateOutput(boolean unique, boolean repeat, boolean qCircular, boolean tCircular){
-        this.model = new ExportMainModel(this.matches, this.frame.getMaxGap_field(), unique, repeat, this.frame.getMinLength_field(), qCircular, tCircular);
+        this.model = new ExportMainModel(this.matches, this.frame.getMaxGap_field(), unique, repeat, this.frame.getMinLength_field(),  qCircular, tCircular);
         this.model.run();
         if(this.model.isWritten){
            return this.model.getOuput(); 

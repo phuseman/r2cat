@@ -25,19 +25,19 @@ public class Cluster {
      * If the Cluster is a Match or a line of matches, both names are equal or
      * (if it is inverted in the target) equal except a '-' in the nameInTarget
      */
-    private String nameInQuery;
+
     private long queryStart;
     private long queryEnd;
      
-    private String nameInTarget;
+
     private long targetStart;
     private long targetEnd;
     
     private ArrayList<Match> includedMatches;
     private ArrayList<Repeat> leadingQueryRepeats;
     private ArrayList<Repeat> closingQueryRepeats;
-    private ArrayList<Integer> leadingTargetRepeatRef;
-    private ArrayList<Integer> closingTargetRepeatRef;
+    private ArrayList<Repeat> leadingTargetRepeats;
+    private ArrayList<Repeat> closingTargetRepeats;
     
     /**
      * The following fields are for the calculation of the best path through all
@@ -45,7 +45,6 @@ public class Cluster {
      */
     private double bestScore;
     private Cluster bestPredecessor;
-    private boolean isDummy;
     
     
     /**
@@ -59,13 +58,15 @@ public class Cluster {
      */
     public Cluster(Match m){
         this.hasMatches = true;
-        this.isDummy = false;
+
         this.bestPredecessor = null;
         this.includedMatches = new ArrayList();
         this.includedMatches.add(m);
         
         this.leadingQueryRepeats = new ArrayList();
         this.closingQueryRepeats = new ArrayList();
+        this.leadingTargetRepeats = new ArrayList();
+        this.closingTargetRepeats = new ArrayList();
 
         this.queryStart = m.getQueryStart();
         this.queryEnd = m.getQueryEnd();
@@ -76,8 +77,7 @@ public class Cluster {
             this.switchStartEnd();
         }
         this.bestScore = this.size();
-        this.nameInQuery = this.generateQueryName();
-        this.nameInTarget = this.generateTargetName();         
+       
     }
     
     /**
@@ -88,21 +88,23 @@ public class Cluster {
      * @param tEnd
      * @param isM 
      */
-    public Cluster(long qStart, long qEnd, long tStart, long tEnd, boolean isM, boolean isDummy){
+    public Cluster(long qStart, long qEnd, long tStart, long tEnd, boolean isM){
         this.hasMatches = isM;
         
         if(hasMatches){
             this.includedMatches = new ArrayList();
-
             this.leadingQueryRepeats = new ArrayList();
             this.closingQueryRepeats = new ArrayList();
+            this.leadingTargetRepeats = new ArrayList();
+            this.closingTargetRepeats = new ArrayList();
         }
         else{
             this.includedMatches = null;
             this.closingQueryRepeats = null;
             this.leadingQueryRepeats = null;
+            this.leadingTargetRepeats = null;
+            this.closingTargetRepeats = null;
         }
-       this.isDummy = isDummy;
        this.bestPredecessor = null;
 
         this.queryStart = qStart;
@@ -114,9 +116,7 @@ public class Cluster {
             this.switchStartEnd();
         }
         this.bestScore = this.size();
-        
-        this.nameInQuery = this.generateQueryName();
-        this.nameInTarget = this.generateTargetName();
+
     }
     
 // TODO include Repeats
@@ -128,9 +128,15 @@ public class Cluster {
             System.err.println("QUERY NAME ERROR:"+this.queryStart +" to "+this.queryEnd);
         }
         if(this.hasMatches){
+            for(Repeat r : this.leadingQueryRepeats){
+                ret.append("repeat"+r.getID()+" ");
+            }
             ret.append(this.queryStart);
             ret.append("matches");
             ret.append(this.targetStart);
+            for(Repeat r: this.closingQueryRepeats){
+                ret.append(" repeat"+r.getID());
+            }
             
         }
         else{
@@ -145,14 +151,43 @@ public class Cluster {
     
     private String generateTargetName(){
         StringBuilder ret = new StringBuilder();
+        
         if(this.hasMatches){
             if(this.isInverted()){
+                if(!this.closingTargetRepeats.isEmpty()){
+                    for(int cR = this.closingTargetRepeats.size()-1; cR>=0; cR--){
+                        ret.append(" -repeat"+this.closingTargetRepeats.get(cR).getID());
+                    }
+                }
+                
                 ret.append("-");
+                ret.append(this.queryStart);
+                ret.append("matches");
+                ret.append(this.targetStart);
+                if(!this.leadingTargetRepeats.isEmpty()){
+                   for(int lR = this.leadingTargetRepeats.size()-1; lR>=0; lR--){
+                        ret.append(" -repeat"+this.leadingTargetRepeats.get(lR).getID());
+                   } 
+                }
+                
             }
-            ret.append(this.queryStart);
-            ret.append("matches");
-            ret.append(this.targetStart);
-
+            else{
+                if(!this.leadingTargetRepeats.isEmpty()){
+                    for(Repeat r: this.leadingTargetRepeats){
+                        ret.append("repeat"+r.getID()+ " ");
+                    }
+                }
+                
+                ret.append(this.queryStart);
+                ret.append("matches");
+                ret.append(this.targetStart);
+                if(!this.closingTargetRepeats.isEmpty()){
+                    for(Repeat r: this.closingTargetRepeats){
+                        ret.append(" repeat"+r.getID());
+                    }
+                }
+                
+            }    
         }
         else{
             ret.append("unmatch");
@@ -202,7 +237,7 @@ public class Cluster {
     }
     
     public String getQueryName(){
-        return this.nameInQuery;
+        return this.generateQueryName();
     }
     
     public long getQueryStart(){
@@ -222,7 +257,7 @@ public class Cluster {
 
 
     public String getTargetName(){
-        return this.nameInTarget;
+        return this.generateTargetName();
     }
     
     public long getTargetStart(){
@@ -297,4 +332,42 @@ public class Cluster {
     public void setBestPredecessor(Cluster c){
         this.bestPredecessor = c;
     }
+    
+    
+    public void addLeadingQueryRepeat(Repeat e){
+        this.leadingQueryRepeats.add(e);
+    }
+    public ArrayList<Repeat> getLeadingQueryRepeats(){
+        return this.leadingQueryRepeats;
+    }
+    public void addLeadingTargetRepeat(Repeat e){
+        this.leadingTargetRepeats.add(e);
+    }
+    public ArrayList<Repeat> getLeadingTargetRepeats(){
+        return this.leadingTargetRepeats;
+    }
+    public void addClosingQueryRepeat(Repeat e){
+        this.closingQueryRepeats.add(0,e);
+    }
+    public ArrayList<Repeat> getClosingQueryRepeats(){
+        return this.closingQueryRepeats;
+    }
+    public void addClosingTargetRepeat(Repeat e){
+        this.closingTargetRepeats.add(0,e);
+    }
+    public ArrayList<Repeat> getClosingTargetRepeats(){
+        return this.closingTargetRepeats;
+    }
+    
+    public long getGradient(){
+        return (this.getQuerySize()/this.getTargetSize());
+    }
+    public long getReziprocalGradient(){
+        return (this.getTargetSize()/this.getQuerySize());
+    }
+    
+    public long getDiagonal(){
+        return this.queryStart -this.targetStart;
+    }
+    
 }
