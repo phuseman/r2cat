@@ -1,0 +1,1 @@
+Main-Class: de.bielefeld.uni.cebitec.r2cat.R2cat
