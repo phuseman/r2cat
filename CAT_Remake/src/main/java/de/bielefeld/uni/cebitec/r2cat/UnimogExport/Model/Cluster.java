@@ -199,6 +199,10 @@ public class Cluster {
         return ret.toString();
     }
     
+    /**
+     * Make sure c.getQueryStart()> this.getQueryStart().
+     * @param c 
+     */
     public void joinMatchesFrom(Cluster c){
         if(!this.hasMatches || !c.consistsOfMatches()){
             return;
@@ -208,14 +212,36 @@ public class Cluster {
         }
         this.queryStart = Math.min(this.queryStart, c.getQueryStart());
         this.queryEnd = Math.max(this.queryEnd, c.getQueryEnd());
-        if(!this.isInverted()){
+        if(!this.isInverted() && !c.isInverted()){
             this.targetStart = Math.min(this.targetStart, c.getTargetSmallerIndex());
-            this.targetEnd = Math.min(this.targetEnd, c.getTargetLargerIndex());
+            this.targetEnd = Math.max(this.targetEnd, c.getTargetLargerIndex());
         }
-        else{
+        else if(this.isInverted() && c.isInverted()){
             this.targetStart = Math.max(this.targetStart, c.getTargetLargerIndex());
-            this.targetEnd = Math.max(this.targetEnd, c.getTargetSmallerIndex());
+            this.targetEnd = Math.min(this.targetEnd, c.getTargetSmallerIndex());
         }
+        else if(!this.isInverted() && c.isInverted()){
+            if(this.targetStart < c.getTargetEnd()){
+                // this.targetStart = this.targetStart()
+                this.targetEnd = Math.max(this.targetEnd, c.getTargetLargerIndex());
+            }
+            else{
+                this.targetStart = this.getTargetEnd();
+                this.targetEnd = c.getTargetEnd();
+            }
+        }
+        else if(this.isInverted() && !c.isInverted()){
+            if(this.targetEnd < c.getTargetStart()){
+                this.targetStart = this.targetEnd;
+                this.targetEnd = c.getTargetEnd();
+            }
+            else{
+                //this.targetStart = this.getTargetStart();
+                this.targetEnd = c.getTargetStart();
+            }
+        }
+//        System.out.println("New Query: "+this.queryStart + " to "+this.queryEnd);
+//        System.out.println("New Target: "+this.targetStart + " to "+this.targetEnd);
     }
     
     public ArrayList<Match> getIncludedMatches(){

@@ -33,6 +33,16 @@ public class ExportMainModel extends Thread{
     
     public boolean isWritten;
     
+    /**
+     * Initializing the Class with all parameters.
+     * @param matchList a List of Matches which will be transformed to Cluster
+     * @param maxDis every two Cluster with a distance lower than this will be merged
+     * @param useU if true, unique regions will be mentioned
+     * @param useR if true, repeats will be mentioned (not compatible with UniMoG)
+     * @param minLen every Cluster shorter than this (after mergeNeighbors()) will be rejected
+     * @param qCirc is true if the query is circular (Vectors, Plasmids...)
+     * @param tCirc is true if the target is circular
+     */
     public ExportMainModel(MatchList matchList, long maxDis,  boolean useU, boolean useR, long minLen, boolean qCirc, boolean tCirc){
         this.matches = matchList;
         this.maxDistanceSquare = maxDis*maxDis;
@@ -64,13 +74,10 @@ public class ExportMainModel extends Thread{
         this.isWritten = false;
         this.construct();
         testOrder();
-        mergeShortCluster();
+        mergeNeighbors();
         rejectShortClusters();
         this.filteredQ = detectPath();
         resynthesizeGraphics();
-        
-        
-        
         
         if(this.useUnique){
             checkForUnique();
@@ -141,7 +148,7 @@ public class ExportMainModel extends Thread{
         }
     }
 
-    private void mergeShortCluster() {
+    private void mergeNeighbors() {
         int inQ=0;
         // merging Clusters whose distance is shorter than the maximal distance the user configured
        
@@ -151,7 +158,7 @@ public class ExportMainModel extends Thread{
             
             if(this.filteredQ.getSquareDistance(inQ, inQ+1)<=this.maxDistanceSquare 
                     && this.filteredQ.get(inQ).isInverted() == this.filteredQ.get(inQ+1).isInverted()){
-                System.out.println("Merged while distance " +this.filteredQ.getSquareDistance(inQ, inQ+1));
+                //System.out.println("Merged while square of distance " +this.filteredQ.getSquareDistance(inQ, inQ+1));
                 this.filteredQ.join(inQ, inQ+1);
             }
             else{
@@ -239,7 +246,7 @@ public class ExportMainModel extends Thread{
             c1 = this.filteredQ.get(i);
             for(int j =i+1; j<this.filteredQ.size(); j++){
                 c2 = this.filteredQ.get(j);
-                if(this.filteredQ.follows(c1, 0, c2)
+                if((this.filteredQ.follows(c1, 0, c2)|| this.targetIsCircular)
                    && c1.getBestScore() <= this.filteredQ.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular))
                 {
                         c1.setBestPredecessor(c2);
