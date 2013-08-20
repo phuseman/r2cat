@@ -70,7 +70,7 @@ public class ExportController {
         
         this.model=null;
 
-        this.sequenceLength = matches.getQueries().elementAt(0).getSize();
+        this.sequenceLength = Math.min(matches.getStatistics().getTargetsSize(), matches.getStatistics().getQueriesSize());
 
         frame = new ExportFrame(sequenceLength, calculateMajorTickSpacing((int)sequenceLength));
         valueListener = new FrameListener(frame, this);

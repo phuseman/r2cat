@@ -19,11 +19,11 @@ import java.util.ArrayList;
  * @author Mark Ugarov
  */
 public class ClusterOrganizer extends ArrayList<Cluster> {
-    private ArrayList<Integer> targetStarts;
+    private ArrayList<Integer> targetOrder;
     private long repeatID;
     
     public ClusterOrganizer(){
-        targetStarts = new ArrayList();
+        targetOrder = new ArrayList();
         repeatID = 0;
     }
 
@@ -140,23 +140,23 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
      * @param qPosition 
      */
     private void targetSortByInsert(int lowerBreakpoint, int upperBreakpoint, Cluster insert, int qPosition){
-        int newUpper = Math.min(this.targetStarts.size()-1,upperBreakpoint); 
-        if (this.targetStarts.isEmpty()){
-            this.targetStarts.add(qPosition);
+        int newUpper = Math.min(this.targetOrder.size()-1,upperBreakpoint); 
+        if (this.targetOrder.isEmpty()){
+            this.targetOrder.add(qPosition);
         }
         else if(lowerBreakpoint >= newUpper ){
-            if(this.get(this.targetStarts.get(newUpper)).getTargetStart() <= insert.getTargetStart()){
-                this.targetStarts.add(newUpper+1,qPosition);
+            if(this.get(this.targetOrder.get(newUpper)).getTargetStart() <= insert.getTargetStart()){
+                this.targetOrder.add(newUpper+1,qPosition);
             }
             else {
-                this.targetStarts.add(newUpper, qPosition);
+                this.targetOrder.add(newUpper, qPosition);
             }
         }
         else{
             int middlePoint = (int) lowerBreakpoint+((newUpper-lowerBreakpoint+1)/2);
-            middlePoint = Math.min(this.targetStarts.size()-1, middlePoint);
+            middlePoint = Math.min(this.targetOrder.size()-1, middlePoint);
             //System.out.println(lowerBreakpoint + " " + middlePoint +" "+upperBreakpoint+"----"+this.filteredQ.size());
-            if(this.get(this.targetStarts.get(middlePoint)).getTargetStart() <= insert.getTargetStart()){
+            if(this.get(this.targetOrder.get(middlePoint)).getTargetStart() <= insert.getTargetStart()){
                  this.targetSortByInsert(middlePoint+1, newUpper, insert, qPosition);
             }
             else{
@@ -176,11 +176,11 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
      */
     private void updateTargetOrder(){
         // make sure, that all targets are in the list
-        if(this.size() == this.targetStarts.size()){
+        if(this.size() == this.targetOrder.size()){
             boolean allExist = true;
             for(int i = 0; i< this.size() && allExist; i++){
                 // is i in the targetStarts?
-                if(!this.targetStarts.contains(i)){
+                if(!this.targetOrder.contains(i)){
                     allExist = false;
                 }
             }
@@ -205,9 +205,9 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
 
     // reseting the whole targetStarts - ArrayList 
     private void recreateAllTargets(){
-        this.targetStarts = new ArrayList();
+        this.targetOrder = new ArrayList();
         for(int i = 0; i< this.size() ; i++){
-            this.targetSortByInsert(0, this.targetStarts.size()-1, this.get(i), i);
+            this.targetSortByInsert(0, this.targetOrder.size()-1, this.get(i), i);
         }
     } 
     
@@ -215,29 +215,39 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
     // targets are in the list
     public void resortTargets(int index){
         int i = index;
-        if(i< this.targetStarts.size()-2 
-                && this.get(this.targetStarts.get(i)).getTargetStart()<=this.get(this.targetStarts.get(i+1)).getTargetStart()){
+        if(i< this.targetOrder.size()-2 
+                && this.get(this.targetOrder.get(i)).getTargetStart()<=this.get(this.targetOrder.get(i+1)).getTargetStart()){
             resortTargets(i+1);
         }
-        else if(i< this.targetStarts.size()-2 
-                && this.get(this.targetStarts.get(i)).getTargetStart()>this.get(this.targetStarts.get(i+1)).getTargetStart()){
-            Cluster smaller = this.get(this.targetStarts.get(i+1));
-            this.targetStarts.remove(i+1);
+        else if(i< this.targetOrder.size()-2 
+                && this.get(this.targetOrder.get(i)).getTargetStart()>this.get(this.targetOrder.get(i+1)).getTargetStart()){
+            Cluster smaller = this.get(this.targetOrder.get(i+1));
+            this.targetOrder.remove(i+1);
             this.targetSortByInsert(0, i, smaller, i+1);
             this.increaseTargetsAfter(i);       
         } 
     }
     
     private void increaseTargetsAfter(int index){
-        for(int targetStart : this.targetStarts){
+        for(int targetStart : this.targetOrder){
             if (targetStart>index){
                 targetStart++;
             }
         }
     }
+    public void deleteFromTargetOrder(int index){
+        this.targetOrder.remove(index);
+    }
+    public void decreaseTargetsAfter(int index){
+        for(int targetStart:this.targetOrder){
+            if(targetStart<index){
+                targetStart--;
+            }
+        }
+    }
     
     public ArrayList<Integer> getTargetOrder(){
-        return this.targetStarts;
+        return this.targetOrder;
     }
     
     /**
@@ -858,7 +868,8 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         long qDis = (c2.getQuerySmallerIndex() - c1.getQueryLargerIndex());
         qDis *= qDis;
         
-        long tDis = (c2.getTargetSmallerIndex() - c1.getTargetLargerIndex());
+        long tDis = (c2.getTargetStart() - c1.getTargetEnd());
+
         tDis *= tDis;
         
         return qDis+tDis;
@@ -890,14 +901,16 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         double jumpcost =0; 
                 //= Math.abs(c1.getDiagonal() - c2.getDiagonal()) * renormJ;
         double renormE = 0.5;
-        double euklid = Math.sqrt(this.getRectangleDistanceSquare(c1, c2, qSize, tSize, qCirc, tCirc))*renormE;
+        double rectangle = Math.sqrt(this.getRectangleDistanceSquare(c1, c2, qSize, tSize, qCirc, tCirc))*renormE;
         //double euklid = (Math.sqrt(this.getSquareDistance(c1, c2))) * renormE;
         //double euklid = this.getMaximalOverlap(c1, c2);
         
         return ( c1.size()
                 +c2.getBestScore() 
                 - jumpcost
-                - euklid);
+                - rectangle
+                //- this.getMaximalOverlap(c1, c2)
+                );
     }
     
     /**

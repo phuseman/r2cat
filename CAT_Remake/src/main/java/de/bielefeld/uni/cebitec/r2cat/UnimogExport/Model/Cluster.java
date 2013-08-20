@@ -325,9 +325,7 @@ public class Cluster {
     }
     
     public double size() {
-	return(this.getTargetSize() == this.getQuerySize())
-                ? this.queryEnd - this.queryStart
-                : Math.sqrt(((long) this.getTargetSize() * (long) this.getTargetSize()) + ((long) this.getQuerySize()*(long) this.getQuerySize()));
+	return Math.sqrt(((long) this.getTargetSize() * (long) this.getTargetSize()) + ((long) this.getQuerySize()*(long) this.getQuerySize()));
     }
     
     public long getSquareSize(){

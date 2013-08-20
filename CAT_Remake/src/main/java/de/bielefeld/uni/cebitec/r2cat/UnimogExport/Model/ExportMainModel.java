@@ -25,7 +25,7 @@ public class ExportMainModel extends Thread{
     private long querySize;
     private long targetSize;
     //ArrayList which is filtered by length and sorted by the starting postion in the query
-    private ClusterOrganizer filteredQ;
+    private ClusterOrganizer sortedByQuery;
     //another ArrayList qhich is getting the order of the matches in filteredQ
     // in the Target
     private ArrayList<Integer> orderT;
@@ -54,7 +54,7 @@ public class ExportMainModel extends Thread{
                 
         this.queryIsCircular = qCirc;
         this.targetIsCircular = tCirc;
-        this.filteredQ = new ClusterOrganizer();
+        this.sortedByQuery = new ClusterOrganizer();
         this.orderT = new ArrayList();
         this.output = new StringBuilder();
         this.isWritten = false;
@@ -74,9 +74,14 @@ public class ExportMainModel extends Thread{
         this.isWritten = false;
         this.construct();
         testOrder();
-        mergeNeighbors();
-        rejectShortClusters();
-        this.filteredQ = detectPath();
+        if(this.maxDistanceSquare > 0){
+            mergeNeighbors();
+        }
+        if(this.minlenght > 1){
+           rejectShortClusters(); 
+        }
+        
+        this.sortedByQuery = detectPath();
         resynthesizeGraphics();
         
         if(this.useUnique){
@@ -95,14 +100,14 @@ public class ExportMainModel extends Thread{
         
         /** sorting reference for orderT which points to a match in filteredQ*/
         // TODO possible whith quicksort?
-        for(int indexQ =0; indexQ<this.filteredQ.size(); indexQ++){
+        for(int indexQ =0; indexQ<this.sortedByQuery.size(); indexQ++){
             if(this.orderT.isEmpty()){
                 this.orderT.add(indexQ);
             }
             else{
-                Cluster c = this.filteredQ.get(indexQ);
+                Cluster c = this.sortedByQuery.get(indexQ);
                 int indexT = (this.orderT.size()-1);
-                while(indexT > 0 && c.getTargetStart() < this.filteredQ.get(indexT).getTargetStart()){
+                while(indexT > 0 && c.getTargetStart() < this.sortedByQuery.get(indexT).getTargetStart()){
                     indexT--;
                 }
                 this.orderT.add(indexT, indexQ);
@@ -115,7 +120,7 @@ public class ExportMainModel extends Thread{
         // sorting the filteredQ ArrayList while constructing
         for(Match m:matches){
                Cluster c = new Cluster(m);
-               this.filteredQ.add(c);
+               this.sortedByQuery.add(c);
         }    
     }
     
@@ -123,7 +128,7 @@ public class ExportMainModel extends Thread{
         // writing query data
         this.output.append(">"+this.matches.getQueries().get(0)+"\n");
         long i = 0;
-        for(Cluster c: filteredQ){
+        for(Cluster c: sortedByQuery){
             this.output.append(c.getQueryName()+" ");
             i++;
         }
@@ -132,7 +137,7 @@ public class ExportMainModel extends Thread{
         // writing target data
         this.output.append("\n>"+this.matches.getTargets().get(0)+"\n");
         for(int j: this.orderT){
-            this.output.append(this.filteredQ.get(j).getTargetName() +" ");
+            this.output.append(this.sortedByQuery.get(j).getTargetName() +" ");
         }
         this.output.append(this.targetIsCircular ? ")":"|");
         this.isWritten = true;
@@ -141,8 +146,8 @@ public class ExportMainModel extends Thread{
     // only for testing!
     private void testOrder() {
         //only for testing
-        for(int i= 0; i<this.filteredQ.size()-2; i++){
-            if(this.filteredQ.get(i).getQueryStart()>this.filteredQ.get(i+1).getQueryStart()){
+        for(int i= 0; i<this.sortedByQuery.size()-2; i++){
+            if(this.sortedByQuery.get(i).getQueryStart()>this.sortedByQuery.get(i+1).getQueryStart()){
                 System.err.println("---------------not sorted!!!---------");
             }
         }
@@ -153,13 +158,11 @@ public class ExportMainModel extends Thread{
         // merging Clusters whose distance is shorter than the maximal distance the user configured
        
         // first step: going through the List in order of the queryStarts
-        while(inQ<this.filteredQ.size()-2){
-          
-            
-            if(this.filteredQ.getSquareDistance(inQ, inQ+1)<=this.maxDistanceSquare 
-                    && this.filteredQ.get(inQ).isInverted() == this.filteredQ.get(inQ+1).isInverted()){
+        while(inQ<this.sortedByQuery.size()-2){
+            if(this.sortedByQuery.getSquareDistance(inQ, inQ+1)<=this.maxDistanceSquare 
+                    && this.sortedByQuery.get(inQ).isInverted() == this.sortedByQuery.get(inQ+1).isInverted()){
                 //System.out.println("Merged while square of distance " +this.filteredQ.getSquareDistance(inQ, inQ+1));
-                this.filteredQ.join(inQ, inQ+1);
+                this.sortedByQuery.join(inQ, inQ+1);
             }
             else{
                 inQ++;
@@ -169,19 +172,21 @@ public class ExportMainModel extends Thread{
         // second step: going through the List in order of the targetStarts
         inQ=0; 
 
-        this.filteredQ.createSortedTargetStartList();
-        ArrayList<Integer> targetOrder = this.filteredQ.getTargetOrder();
+        this.sortedByQuery.createSortedTargetStartList();
+        ArrayList<Integer> targetOrder = this.sortedByQuery.getTargetOrder();
         int po1;
         int po2;
-        int maxPos = this.filteredQ.size()-2;
+        int maxPos = this.sortedByQuery.size()-2;
         while(inQ<maxPos){
             po1 = targetOrder.get(inQ);
             po2 = targetOrder.get(inQ+1);
-            if(this.filteredQ.getSquareDistance(po1, po2)<=this.maxDistanceSquare 
-                    && this.filteredQ.get(po1).isInverted() == this.filteredQ.get(po2).isInverted()){
-                this.filteredQ.join(po1, po2);
-                this.filteredQ.createSortedTargetStartList();
-                targetOrder = this.filteredQ.getTargetOrder();
+            if(this.sortedByQuery.getSquareDistance(po1, po2)<=this.maxDistanceSquare 
+                    && this.sortedByQuery.follows(this.sortedByQuery.get(po1), minlenght, this.sortedByQuery.get(po1))
+                ){
+                this.sortedByQuery.join(po1, po2);
+                this.sortedByQuery.deleteFromTargetOrder(inQ+1);
+                this.sortedByQuery.decreaseTargetsAfter(inQ);
+                targetOrder = this.sortedByQuery.getTargetOrder();
                 maxPos--;
             }
             else{
@@ -193,26 +198,26 @@ public class ExportMainModel extends Thread{
     // checking for unique regions -> whereever there is no Match, there must be a unique region
     private void checkForUnique() {
         int inQ = 0;
-        while(inQ<this.filteredQ.size()-2){
-            if(this.filteredQ.getSquareDistance(inQ, inQ+1)>this.maxDistanceSquare){
-                Cluster c1 = this.filteredQ.get(inQ);
-                Cluster c2 = this.filteredQ.get(inQ+1);
-                this.filteredQ.add(inQ+1, new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false));
+        while(inQ<this.sortedByQuery.size()-2){
+            if(this.sortedByQuery.getSquareDistance(inQ, inQ+1)>this.maxDistanceSquare){
+                Cluster c1 = this.sortedByQuery.get(inQ);
+                Cluster c2 = this.sortedByQuery.get(inQ+1);
+                this.sortedByQuery.add(inQ+1, new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false));
                 inQ++;
             }
             inQ++;  
         }
-        this.filteredQ.createSortedTargetStartList();
+        this.sortedByQuery.createSortedTargetStartList();
         int inT = 0;
         int t1,t2;
-        while(inQ<this.filteredQ.size()-2){
-            t1 =this.filteredQ.getTargetOrder().get(inT);
-            t2 =this.filteredQ.getTargetOrder().get(inT+1);
-            if(this.filteredQ.getSquareDistance(t1, t2)>this.maxDistanceSquare){
-                Cluster c1 = this.filteredQ.get(t1);
-                Cluster c2 = this.filteredQ.get(t2);
-                this.filteredQ.add(new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false));
-                this.filteredQ.createSortedTargetStartList();
+        while(inQ<this.sortedByQuery.size()-2){
+            t1 =this.sortedByQuery.getTargetOrder().get(inT);
+            t2 =this.sortedByQuery.getTargetOrder().get(inT+1);
+            if(this.sortedByQuery.getSquareDistance(t1, t2)>this.maxDistanceSquare){
+                Cluster c1 = this.sortedByQuery.get(t1);
+                Cluster c2 = this.sortedByQuery.get(t2);
+                this.sortedByQuery.add(new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false));
+                this.sortedByQuery.createSortedTargetStartList();
             }
             else{
                 inQ++; 
@@ -225,10 +230,10 @@ public class ExportMainModel extends Thread{
 
         int inQ = 0;
         long squareMinLength = ((long)this.minlenght * (long)this.minlenght);
-        while(inQ<this.filteredQ.size()){
-            if(this.filteredQ.get(inQ).getSquareSize()<squareMinLength){
+        while(inQ<this.sortedByQuery.size()){
+            if(this.sortedByQuery.get(inQ).getSquareSize()<squareMinLength){
                 //System.out.println("Remove: size "+this.filteredQ.get(inQ).size());
-                this.filteredQ.remove(inQ);
+                this.sortedByQuery.remove(inQ);
                 }
             else{
                 //System.out.println(this.filteredQ.get(inQ).size());
@@ -242,15 +247,15 @@ public class ExportMainModel extends Thread{
         Cluster bestEnd = null;
         Cluster c1;
         Cluster c2;
-        for(int i = this.filteredQ.size()-1; i >=0; i--){
-            c1 = this.filteredQ.get(i);
-            for(int j =i+1; j<this.filteredQ.size(); j++){
-                c2 = this.filteredQ.get(j);
-                if((this.filteredQ.follows(c1, 0, c2)|| this.targetIsCircular)
-                   && c1.getBestScore() <= this.filteredQ.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular))
+        for(int i = this.sortedByQuery.size()-1; i >=0; i--){
+            c1 = this.sortedByQuery.get(i);
+            for(int j =i+1; j<this.sortedByQuery.size(); j++){
+                c2 = this.sortedByQuery.get(j);
+                if((this.sortedByQuery.follows(c1, 0, c2))
+                   && c1.getBestScore() <= this.sortedByQuery.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular))
                 {
                         c1.setBestPredecessor(c2);
-                        c1.setBestScore(this.filteredQ.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular));
+                        c1.setBestScore(this.sortedByQuery.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular));
                 }
             }
             if(bestEnd == null || c1.getBestScore()>bestEnd.getBestScore()){
@@ -260,7 +265,7 @@ public class ExportMainModel extends Thread{
         }
         if(bestEnd == null){
             System.err.println("No optimal path has been detected.");
-            return this.filteredQ;
+            return this.sortedByQuery;
         }
         ClusterOrganizer retOrg = new ClusterOrganizer();
         Cluster aktC = bestEnd;
@@ -273,7 +278,7 @@ public class ExportMainModel extends Thread{
 
     private void resynthesizeGraphics() {
         MatchList pathMatches = new MatchList();
-        for(Cluster c:this.filteredQ){
+        for(Cluster c:this.sortedByQuery){
             for(Match m:c.getIncludedMatches()){
                 pathMatches.addMatch(m);
             }
