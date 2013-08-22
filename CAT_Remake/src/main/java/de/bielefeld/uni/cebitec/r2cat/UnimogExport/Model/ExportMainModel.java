@@ -136,6 +136,10 @@ public class ExportMainModel extends Thread{
         
         // writing target data
         this.output.append("\n>"+this.matches.getTargets().get(0)+"\n");
+        // please notice: while rejectShortClusters() and detectPath() 
+        // the order of targets could have been adulterated so it has to be recreated
+        this.sortedByQuery.createSortedTargetStartList();
+        this.orderT = this.sortedByQuery.getTargetOrder();
         for(int j: this.orderT){
             this.output.append(this.sortedByQuery.get(j).getTargetName() +" ");
         }
