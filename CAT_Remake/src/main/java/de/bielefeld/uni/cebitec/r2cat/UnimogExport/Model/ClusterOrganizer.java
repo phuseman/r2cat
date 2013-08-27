@@ -943,7 +943,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
     }
     
     public long getTargetOverlap(Cluster c1, Cluster c2){
-        if(c1.getTargetSmallerIndex()<c2.getTargetSmallerIndex()){
+        if(c1.getTargetSmallerIndex()>c2.getTargetSmallerIndex()){
             return this.getTargetOverlap(c2, c1);
         }
         else if(c1.getTargetLargerIndex()<=c2.getTargetSmallerIndex()){
@@ -974,6 +974,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
             return this.getQueryDistance(c2, c1);
         }
         else{
+//            System.out.println("unique in Target, size :"+ (c2.getTargetSmallerIndex()- c1.getTargetLargerIndex()));
             return c2.getTargetSmallerIndex()- c1.getTargetLargerIndex();
         }
     }

@@ -226,20 +226,32 @@ public class ExportMainModel extends Thread{
                 this.uniqueQuery[i]=false;
             }
         }
+        this.testTargetOrder();
         this.sortedByQuery.createSortedTargetStartList();
         ArrayList<Integer> targetSort= this.sortedByQuery.getTargetOrder();
         this.uniqueTarget = new boolean[this.sortedByQuery.size()];
-        for(int i =0; i< this.sortedByQuery.size()-1; i++){
-            c1 = this.sortedByQuery.get(targetSort.get(i));
-            c2 = this.sortedByQuery.get(targetSort.get(i+1));
+        for(int t =0; t< this.sortedByQuery.size()-1; t++){
+            c1 = this.sortedByQuery.get(targetSort.get(t));
+            c2 = this.sortedByQuery.get(targetSort.get(t+1));
             if(this.sortedByQuery.getTargetDistance(c1, c2)>max1Dim){
-                this.uniqueTarget[i]=true;
+                this.uniqueTarget[t]=true;
+                
             }
             else{
-                this.uniqueTarget[i]=false;
+                this.uniqueTarget[t]=false;
+                //System.out.println("no overlap in Target by max1Dim = "+max1Dim);
+            }
+        }  
+    }
+    
+    private void testTargetOrder(){
+        this.sortedByQuery.createSortedTargetStartList();
+        ArrayList<Integer> targetSort=this.sortedByQuery.getTargetOrder();
+        for (int i=0; i<this.sortedByQuery.size()-1;i++){
+            if (this.sortedByQuery.get(targetSort.get(i)).getTargetStart()>this.sortedByQuery.get(targetSort.get(i+1)).getTargetStart()){
+                System.err.println("---------------target not sorted!!!---------");
             }
         }
-        
     }
     
    
