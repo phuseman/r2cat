@@ -232,7 +232,7 @@ public class ExportMainModel extends Thread{
         for(int i =0; i< this.sortedByQuery.size()-1; i++){
             c1 = this.sortedByQuery.get(targetSort.get(i));
             c2 = this.sortedByQuery.get(targetSort.get(i+1));
-            if(this.sortedByQuery.getTargetOverlap(c1, c2)>max1Dim){
+            if(this.sortedByQuery.getTargetDistance(c1, c2)>max1Dim){
                 this.uniqueTarget[i]=true;
             }
             else{
