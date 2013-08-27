@@ -26,10 +26,16 @@ public class Cluster {
      * (if it is inverted in the target) equal except a '-' in the nameInTarget
      */
 
+    /**
+     * existsInQuery and existsInTarget especially necessary fot unique regions
+     * because sometimes gaps exists in the target and not in the query and the
+     * other way round
+     */
+    private boolean existsInQuery;
     private long queryStart;
     private long queryEnd;
-     
 
+    private boolean existsInTarget;
     private long targetStart;
     private long targetEnd;
     
@@ -118,6 +124,7 @@ public class Cluster {
         this.bestScore = this.size();
 
     }
+    
     
 // TODO include Repeats
     private String generateQueryName(){
@@ -393,5 +400,4 @@ public class Cluster {
     public long getDiagonal(){
         return this.queryStart -this.targetStart;
     }
-    
 }

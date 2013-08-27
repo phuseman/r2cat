@@ -60,9 +60,8 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
      * @return the position where the Cluster was inserted
      */
     private int querySortByInsert(int lowerBreakpoint, int upperBreakpoint, Cluster insert){
-        
-        int newUpper = Math.min(upperBreakpoint, this.size()-1);
         Cluster rel;
+        int newUpper = Math.min(upperBreakpoint, this.size()-1);
         if(this.isEmpty()){
             super.add(insert);
             return 0;
@@ -142,6 +141,10 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
     private void targetSortByInsert(int lowerBreakpoint, int upperBreakpoint, Cluster insert, int qPosition){
         int newUpper = Math.min(this.targetOrder.size()-1,upperBreakpoint); 
         if (this.targetOrder.isEmpty()){
+            this.targetOrder.add(qPosition);
+            return;
+        }
+        if(newUpper<0){
             this.targetOrder.add(qPosition);
         }
         else if(lowerBreakpoint >= newUpper ){
@@ -257,7 +260,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
      * @param pos2 is the position of a Cluster which start (query or target) 
      * is bigger than the start of c1
      */
-    private void cutRepeats(int pos1, int pos2){
+    public void cutRepeats(int pos1, int pos2){
         Cluster c1 = this.get(pos1);
         Cluster c2 = this.get(pos2);
         long minRepLengthSquare = ExportConstants.MIN_REPEAT_LENGTH*ExportConstants.MIN_REPEAT_LENGTH;
@@ -918,22 +921,64 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
      * @param c1 is the first Cluster
      * @param c2 is a following Cluster
      * @return 0 if no overlap was found, otherwise it returns the overlap
-     * Pay attention to the fact that this method doesn't prove that c1 and
-     * c2 are in the right order. For that, you have to use follows(c1, cut, c2).
      */
     public long getMaximalOverlap(Cluster c1, Cluster c2){
-        long temp1 = c1.getQueryLargerIndex() - c2.getQuerySmallerIndex();
-        long temp2 = c1.getTargetLargerIndex() - c2.getTargetSmallerIndex();
-        long temp = Math.max(temp1, temp2);
-        return (temp>0)?temp:0;
+        return Math.max(this.getTargetOverlap(c1, c2),this.getQueryOverlap(c1, c2) );
     }
     
     public long getMinimalOverlap(Cluster c1, Cluster c2){
-        long temp1 = c1.getQueryLargerIndex() - c2.getQuerySmallerIndex();
-        long temp2 = c1.getTargetLargerIndex() - c2.getTargetSmallerIndex();
-        long temp = Math.min(temp1, temp2);
-        return (temp>0)?temp:0;
+        return Math.min(this.getTargetOverlap(c1, c2),this.getQueryOverlap(c1, c2) );
     }
+    
+    public long getQueryOverlap(Cluster c1, Cluster c2){
+        if(c1.getQueryStart()>c2.getQueryStart()){
+            return this.getQueryOverlap(c2, c1);
+        }
+        else if(c1.getQueryEnd()<= c2.getQueryStart()){
+            return 0;
+        }
+        else{
+            return Math.min(c1.getQueryEnd()- c2.getQueryStart(), c2.getQuerySize());
+        }
+    }
+    
+    public long getTargetOverlap(Cluster c1, Cluster c2){
+        if(c1.getTargetSmallerIndex()<c2.getTargetSmallerIndex()){
+            return this.getTargetOverlap(c2, c1);
+        }
+        else if(c1.getTargetLargerIndex()<=c2.getTargetSmallerIndex()){
+            return 0;
+        }
+        else{
+            return Math.min(c1.getTargetLargerIndex()- c2.getTargetSmallerIndex(), c2.getTargetSize());
+        }
+    }
+    
+    public long getQueryDistance(Cluster c1, Cluster c2){
+        if(this.getQueryOverlap(c1, c2)!=0){
+            return 0;
+        }
+        else if (c1.getQueryStart()>c2.getQueryStart()){
+            return this.getQueryDistance(c2, c1);
+        }
+        else{
+            return c2.getQuerySmallerIndex()- c1.getQueryLargerIndex();
+        }
+    }
+    
+    public long getTargetDistance(Cluster c1, Cluster c2){
+        if(this.getTargetOverlap(c1, c2)!=0){
+            return 0;
+        }
+        else if (c1.getTargetStart()>c2.getTargetStart()){
+            return this.getQueryDistance(c2, c1);
+        }
+        else{
+            return c2.getTargetSmallerIndex()- c1.getTargetLargerIndex();
+        }
+    }
+    
+   
     
     /**
      * This method proves that a Cluster follows another Cluster.

@@ -19,6 +19,9 @@ public class ExportMainModel extends Thread{
     private boolean useUnique;
     private boolean useRepeats;
     
+    boolean[] uniqueQuery;
+    boolean[] uniqueTarget;
+    
     private long minlenght;
     private boolean queryIsCircular;
     private boolean targetIsCircular;
@@ -56,6 +59,8 @@ public class ExportMainModel extends Thread{
         this.targetIsCircular = tCirc;
         this.sortedByQuery = new ClusterOrganizer();
         this.orderT = new ArrayList();
+        this.uniqueQuery = null;
+        this.uniqueTarget = null;
         this.output = new StringBuilder();
         this.isWritten = false;
     }
@@ -74,14 +79,17 @@ public class ExportMainModel extends Thread{
         this.isWritten = false;
         this.construct();
         testOrder();
-        if(this.maxDistanceSquare > 0){
+        //if(this.maxDistanceSquare > 0){
             mergeNeighbors();
-        }
+        //}
         if(this.minlenght > 1){
            rejectShortClusters(); 
         }
         
         this.sortedByQuery = detectPath();
+        if(this.useRepeats){
+            this.searchRepeats();
+        }
         resynthesizeGraphics();
         
         if(this.useUnique){
@@ -99,21 +107,7 @@ public class ExportMainModel extends Thread{
         this.testOrder();
         
         /** sorting reference for orderT which points to a match in filteredQ*/
-        // TODO possible whith quicksort?
-        for(int indexQ =0; indexQ<this.sortedByQuery.size(); indexQ++){
-            if(this.orderT.isEmpty()){
-                this.orderT.add(indexQ);
-            }
-            else{
-                Cluster c = this.sortedByQuery.get(indexQ);
-                int indexT = (this.orderT.size()-1);
-                while(indexT > 0 && c.getTargetStart() < this.sortedByQuery.get(indexT).getTargetStart()){
-                    indexT--;
-                }
-                this.orderT.add(indexT, indexQ);
-            }
-            
-        }        
+        this.sortedByQuery.createSortedTargetStartList();
     }
     
     private void construct(){
@@ -127,9 +121,13 @@ public class ExportMainModel extends Thread{
     private void write(){
         // writing query data
         this.output.append(">"+this.matches.getQueries().get(0)+"\n");
-        long i = 0;
+        int i = 0;
+
         for(Cluster c: sortedByQuery){
             this.output.append(c.getQueryName()+" ");
+            if(this.useUnique && this.uniqueQuery[i]){
+                this.output.append("uniqueQ"+i+" ");
+            }
             i++;
         }
         this.output.append(this.queryIsCircular ? ")":"|");
@@ -140,8 +138,13 @@ public class ExportMainModel extends Thread{
         // the order of targets could have been adulterated so it has to be recreated
         this.sortedByQuery.createSortedTargetStartList();
         this.orderT = this.sortedByQuery.getTargetOrder();
+        i=0;
         for(int j: this.orderT){
             this.output.append(this.sortedByQuery.get(j).getTargetName() +" ");
+            if(this.useUnique && this.uniqueTarget[i]){
+                this.output.append("uniqueT"+i+" ");
+            }
+            i++;
         }
         this.output.append(this.targetIsCircular ? ")":"|");
         this.isWritten = true;
@@ -150,8 +153,12 @@ public class ExportMainModel extends Thread{
     // only for testing!
     private void testOrder() {
         //only for testing
+        Cluster c1;
+        Cluster c2;
         for(int i= 0; i<this.sortedByQuery.size()-2; i++){
-            if(this.sortedByQuery.get(i).getQueryStart()>this.sortedByQuery.get(i+1).getQueryStart()){
+            c1=this.sortedByQuery.get(i);
+            c2=this.sortedByQuery.get(i+1);
+            if(c1.getQueryStart()>c2.getQueryStart()){
                 System.err.println("---------------not sorted!!!---------");
             }
         }
@@ -201,31 +208,45 @@ public class ExportMainModel extends Thread{
 
     // checking for unique regions -> whereever there is no Match, there must be a unique region
     private void checkForUnique() {
-        int inQ = 0;
-        while(inQ<this.sortedByQuery.size()-2){
-            if(this.sortedByQuery.getSquareDistance(inQ, inQ+1)>this.maxDistanceSquare){
-                Cluster c1 = this.sortedByQuery.get(inQ);
-                Cluster c2 = this.sortedByQuery.get(inQ+1);
-                this.sortedByQuery.add(inQ+1, new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false));
-                inQ++;
-            }
-            inQ++;  
-        }
-        this.sortedByQuery.createSortedTargetStartList();
-        int inT = 0;
-        int t1,t2;
-        while(inQ<this.sortedByQuery.size()-2){
-            t1 =this.sortedByQuery.getTargetOrder().get(inT);
-            t2 =this.sortedByQuery.getTargetOrder().get(inT+1);
-            if(this.sortedByQuery.getSquareDistance(t1, t2)>this.maxDistanceSquare){
-                Cluster c1 = this.sortedByQuery.get(t1);
-                Cluster c2 = this.sortedByQuery.get(t2);
-                this.sortedByQuery.add(new Cluster(c1.getQueryEnd(), c2.getQueryStart(), c1.getTargetEnd(), c2.getTargetStart(), false));
-                this.sortedByQuery.createSortedTargetStartList();
+        /**
+         * c^2 = a^2+b^2 |a=b
+         * c^2 = 2a^2 -> c^2/2 = a^2
+         */
+        long max1Dim = (this.maxDistanceSquare/2);
+        Cluster c1;
+        Cluster c2;
+        this.uniqueQuery = new boolean[this.sortedByQuery.size()];
+        for(int i=0; i<this.sortedByQuery.size()-1;i++){
+            c1 = this.sortedByQuery.get(i);
+            c2 = this.sortedByQuery.get(i+1);
+            if(this.sortedByQuery.getQueryDistance(c1, c2)>max1Dim){
+                this.uniqueQuery[i]= true;
             }
             else{
-                inQ++; 
-            }  
+                this.uniqueQuery[i]=false;
+            }
+        }
+        this.sortedByQuery.createSortedTargetStartList();
+        ArrayList<Integer> targetSort= this.sortedByQuery.getTargetOrder();
+        this.uniqueTarget = new boolean[this.sortedByQuery.size()];
+        for(int i =0; i< this.sortedByQuery.size()-1; i++){
+            c1 = this.sortedByQuery.get(targetSort.get(i));
+            c2 = this.sortedByQuery.get(targetSort.get(i+1));
+            if(this.sortedByQuery.getTargetOverlap(c1, c2)>max1Dim){
+                this.uniqueTarget[i]=true;
+            }
+            else{
+                this.uniqueTarget[i]=false;
+            }
+        }
+        
+    }
+    
+   
+    
+    private void searchRepeats(){
+        for(int inQ = 0; inQ< this.sortedByQuery.size()-1; inQ++){
+            this.sortedByQuery.cutRepeats(inQ, inQ+1);
         }
     }
 
@@ -255,8 +276,8 @@ public class ExportMainModel extends Thread{
             c1 = this.sortedByQuery.get(i);
             for(int j =i+1; j<this.sortedByQuery.size(); j++){
                 c2 = this.sortedByQuery.get(j);
-                if((this.sortedByQuery.follows(c1, 0, c2))
-                   && c1.getBestScore() <= this.sortedByQuery.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular))
+                if(
+                    c1.getBestScore() <= this.sortedByQuery.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular))
                 {
                         c1.setBestPredecessor(c2);
                         c1.setBestScore(this.sortedByQuery.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular));
