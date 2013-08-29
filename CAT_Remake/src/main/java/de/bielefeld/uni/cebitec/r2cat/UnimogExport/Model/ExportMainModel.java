@@ -229,8 +229,7 @@ public class ExportMainModel extends Thread{
         if(this.queryIsCircular){
             c1=this.sortedByQuery.get(this.sortedByQuery.size()-1);
             c2=this.sortedByQuery.get(0);
-            if(this.square(c1.getQueryStart()+this.querySize-c2.getQueryEnd())>max1DimSquare 
-                    && this.sortedByQuery.getMaximalOverlap(c1, c2)<=0)
+            if(this.square(c1.getQueryStart()+this.querySize-c2.getQueryEnd())>max1DimSquare)
             {
                 this.uniqueQuery[this.uniqueQuery.length-1] = true;
             }
@@ -257,8 +256,7 @@ public class ExportMainModel extends Thread{
         if(this.targetIsCircular){
             c1=this.sortedByQuery.get(targetSort.get(targetSort.size()-1));
             c2=this.sortedByQuery.get(targetSort.get(0));
-            if(this.square(c1.getTargetSmallerIndex()+this.targetSize -c2.getTargetLargerIndex())>max1DimSquare 
-                    && this.sortedByQuery.getMaximalOverlap(c1, c2)<=0)
+            if(this.square(c1.getTargetSmallerIndex()+this.targetSize -c2.getTargetLargerIndex())>max1DimSquare)
             {
                 this.uniqueTarget[this.uniqueTarget.length-1] = true;
             }
