@@ -966,6 +966,10 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         }
     }
     
+    public long getQuerySquareDistance(Cluster c1, Cluster c2){
+        return (this.getQueryDistance(c1, c2)*this.getQueryDistance(c1, c2));
+    }
+    
     public long getTargetDistance(Cluster c1, Cluster c2){
         if(this.getTargetOverlap(c1, c2)!=0){
             return 0;
@@ -977,6 +981,10 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
 //            System.out.println("unique in Target, size :"+ (c2.getTargetSmallerIndex()- c1.getTargetLargerIndex()));
             return c2.getTargetSmallerIndex()- c1.getTargetLargerIndex();
         }
+    }
+    
+    public long getTargetSquareDistance(Cluster c1, Cluster c2){
+        return (this.getTargetDistance(c1, c2)* this.getTargetDistance(c1, c2));
     }
     
    

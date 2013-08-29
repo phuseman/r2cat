@@ -212,14 +212,14 @@ public class ExportMainModel extends Thread{
          * c^2 = a^2+b^2 |a=b
          * c^2 = 2a^2 -> c^2/2 = a^2
          */
-        long max1Dim = (this.maxDistanceSquare/2);
+        long max1DimSquare = (this.maxDistanceSquare/2);
         Cluster c1;
         Cluster c2;
         this.uniqueQuery = new boolean[this.sortedByQuery.size()];
         for(int i=0; i<this.sortedByQuery.size()-1;i++){
             c1 = this.sortedByQuery.get(i);
             c2 = this.sortedByQuery.get(i+1);
-            if(this.sortedByQuery.getQueryDistance(c1, c2)>max1Dim){
+            if(this.sortedByQuery.getQuerySquareDistance(c1, c2)>max1DimSquare){
                 this.uniqueQuery[i]= true;
             }
             else{
@@ -229,7 +229,7 @@ public class ExportMainModel extends Thread{
         if(this.queryIsCircular){
             c1=this.sortedByQuery.get(this.sortedByQuery.size()-1);
             c2=this.sortedByQuery.get(0);
-            if(c1.getQueryStart()+this.querySize-c2.getQueryEnd()>max1Dim 
+            if(this.square(c1.getQueryStart()+this.querySize-c2.getQueryEnd())>max1DimSquare 
                     && this.sortedByQuery.getMaximalOverlap(c1, c2)<=0)
             {
                 this.uniqueQuery[this.uniqueQuery.length-1] = true;
@@ -246,7 +246,7 @@ public class ExportMainModel extends Thread{
         for(int t =0; t< this.sortedByQuery.size()-1; t++){
             c1 = this.sortedByQuery.get(targetSort.get(t));
             c2 = this.sortedByQuery.get(targetSort.get(t+1));
-            if(this.sortedByQuery.getTargetDistance(c1, c2)>max1Dim){
+            if(this.sortedByQuery.getTargetSquareDistance(c1, c2)>max1DimSquare){
                 this.uniqueTarget[t]=true;
             }
             else{
@@ -257,7 +257,7 @@ public class ExportMainModel extends Thread{
         if(this.targetIsCircular){
             c1=this.sortedByQuery.get(targetSort.get(targetSort.size()-1));
             c2=this.sortedByQuery.get(targetSort.get(0));
-            if(c1.getTargetSmallerIndex()+this.targetSize -c2.getTargetLargerIndex() >max1Dim 
+            if(this.square(c1.getTargetSmallerIndex()+this.targetSize -c2.getTargetLargerIndex())>max1DimSquare 
                     && this.sortedByQuery.getMaximalOverlap(c1, c2)<=0)
             {
                 this.uniqueTarget[this.uniqueTarget.length-1] = true;
@@ -266,6 +266,10 @@ public class ExportMainModel extends Thread{
                 this.uniqueQuery[this.uniqueQuery.length-1] = false;
             }
         }
+    }
+    
+    private long square(long x){
+        return (x*x);
     }
     
     private void testTargetOrder(){
