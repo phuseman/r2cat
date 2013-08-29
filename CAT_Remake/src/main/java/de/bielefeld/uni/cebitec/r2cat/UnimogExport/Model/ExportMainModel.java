@@ -226,6 +226,19 @@ public class ExportMainModel extends Thread{
                 this.uniqueQuery[i]=false;
             }
         }
+        if(this.queryIsCircular){
+            c1=this.sortedByQuery.get(this.sortedByQuery.size()-1);
+            c2=this.sortedByQuery.get(0);
+            if(c1.getQueryStart()+this.querySize-c2.getQueryEnd()>max1Dim 
+                    && this.sortedByQuery.getMaximalOverlap(c1, c2)<=0)
+            {
+                this.uniqueQuery[this.uniqueQuery.length-1] = true;
+            }
+            else{
+                this.uniqueQuery[this.uniqueQuery.length-1] = false;
+            }
+        }
+        
         this.testTargetOrder();
         this.sortedByQuery.createSortedTargetStartList();
         ArrayList<Integer> targetSort= this.sortedByQuery.getTargetOrder();
@@ -235,13 +248,24 @@ public class ExportMainModel extends Thread{
             c2 = this.sortedByQuery.get(targetSort.get(t+1));
             if(this.sortedByQuery.getTargetDistance(c1, c2)>max1Dim){
                 this.uniqueTarget[t]=true;
-                
             }
             else{
                 this.uniqueTarget[t]=false;
                 //System.out.println("no overlap in Target by max1Dim = "+max1Dim);
             }
         }  
+        if(this.targetIsCircular){
+            c1=this.sortedByQuery.get(targetSort.get(targetSort.size()-1));
+            c2=this.sortedByQuery.get(targetSort.get(0));
+            if(c1.getTargetSmallerIndex()+this.targetSize -c2.getTargetLargerIndex() >max1Dim 
+                    && this.sortedByQuery.getMaximalOverlap(c1, c2)<=0)
+            {
+                this.uniqueTarget[this.uniqueTarget.length-1] = true;
+            }
+            else{
+                this.uniqueQuery[this.uniqueQuery.length-1] = false;
+            }
+        }
     }
     
     private void testTargetOrder(){
