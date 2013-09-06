@@ -120,7 +120,7 @@ public class ExportMainModel extends Thread{
     
     private void write(){
         // writing query data
-        this.output.append(">"+this.matches.getQueries().get(0)+"\n");
+        this.output.append(">"+this.matches.getQueries().get(0).getDescription()+"\n");
         int i = 0;
 
         for(Cluster c: sortedByQuery){
@@ -133,7 +133,7 @@ public class ExportMainModel extends Thread{
         this.output.append(this.queryIsCircular ? ")":"|");
         
         // writing target data
-        this.output.append("\n>"+this.matches.getTargets().get(0)+"\n");
+        this.output.append("\n>"+this.matches.getTargets().get(0).getDescription()+"\n");
         // please notice: while rejectShortClusters() and detectPath() 
         // the order of targets could have been adulterated so it has to be recreated
         this.sortedByQuery.createSortedTargetStartList();
