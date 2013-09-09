@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import javax.swing.JDialog;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
@@ -63,7 +64,7 @@ public class FrameListener implements ChangeListener,KeyListener,ActionListener 
             this.frame.dispose();
         }    
         else if(e.getActionCommand().equals(ExportConstants.BUTTON_RUN)){
-            String output = this.eC.calculateOutput(this.frame.useUnique(), this.frame.useRepeats(), this.frame.queryIsCircular(), this.frame.targetIsCircular());
+            String output = this.eC.calculateOutput();
             if(output != null){
                 this.frame.setOutput(output);
             } 

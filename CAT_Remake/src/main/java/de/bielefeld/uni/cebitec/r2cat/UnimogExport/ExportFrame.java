@@ -60,7 +60,7 @@ public class ExportFrame extends JDialog{
     
     
     public ExportFrame(long seqLength, int majorTickSpacing, MainWindow mW){
-        super(mW,"Export to Unimog", true);
+        super(mW,"Export to Unimog", false);
         this.sequenceLength = seqLength;
         
         this.paraPanel = new JPanel();
@@ -172,18 +172,18 @@ public class ExportFrame extends JDialog{
     }
     
     public long getMaxGap_slider(){
-        int value = this.maxGapSlider.getValue();
+        long value = (long)this.maxGapSlider.getValue();
         if(value > this.sequenceLength){
-            value = (int)this.sequenceLength;
+            value = (long)this.sequenceLength;
         }
         return value;
     }
     public long getMaxGap_field(){
         String v =this.maxGapField.getText();
         if ("".equals(v)) return 0;
-        int value = Integer.parseInt(v);
+        long value = Long.parseLong(v);
         if(value > this.sequenceLength){
-            value = (int)this.sequenceLength;
+            value = (long)this.sequenceLength;
         }
         return value;
     }
@@ -206,9 +206,9 @@ public class ExportFrame extends JDialog{
     public long getMinLength_field(){
         String v =this.minLengthField.getText();
         if ("".equals(v)) return 0;
-        int value = Integer.parseInt(v);
+        long value = Long.parseLong(v);
         if(value > this.sequenceLength){
-            value = (int)this.sequenceLength;
+            value = (long)this.sequenceLength;
         }
         return value;
     }

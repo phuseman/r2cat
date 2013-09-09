@@ -50,13 +50,13 @@ public class ExportMainModel extends Thread{
      */
     public ExportMainModel(MatchList matchList, long maxDis,  boolean useU, boolean useR, long minLen, boolean qCirc, boolean tCirc){
         this.matches = matchList;
-        this.matches.generateNewStatistics();
-        this.matches.setInitialQueryOrientation();
-        this.matches.setQueryOffsets();
-        this.matches.setTargetOffsets();
-        this.matches.setInitialQueryOrder();
-        this.matches.setInitialTargetOrder();
-        this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
+//        this.matches.generateNewStatistics();
+//        this.matches.setInitialQueryOrientation();
+//        this.matches.setQueryOffsets();
+//        this.matches.setTargetOffsets();
+//        this.matches.setInitialQueryOrder();
+//        this.matches.setInitialTargetOrder();
+//        this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
         
         this.maxDistanceSquare = maxDis*maxDis;
         this.useUnique = useU;

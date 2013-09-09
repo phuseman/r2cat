@@ -77,7 +77,7 @@ public class ExportController {
 
         this.sequenceLength = Math.min(matches.getStatistics().getTargetsSize(), matches.getStatistics().getQueriesSize());
 
-        JDialog dialog = new ExportFrame(sequenceLength, calculateMajorTickSpacing((int)sequenceLength), this.mainWin);
+        frame = new ExportFrame(sequenceLength, calculateMajorTickSpacing((int)sequenceLength), this.mainWin);
         valueListener = new FrameListener(frame, this);
         frame.setListener(valueListener);
     }
@@ -103,8 +103,15 @@ public class ExportController {
      * sequence comes from a linear chromosom or not
      * @return the output
      */
-    public String calculateOutput(boolean unique, boolean repeat, boolean qCircular, boolean tCircular){
-        this.model = new ExportMainModel(this.matches, this.frame.getMaxGap_field(), unique, repeat, this.frame.getMinLength_field(),  qCircular, tCircular);
+    public String calculateOutput(){
+        long minLength= this.frame.getMinLength_field();
+        long maxGap = this.frame.getMaxGap_field();
+        boolean unique = this.frame.useUnique();
+        boolean repeat = this.frame.useRepeats();
+        boolean qCircular = this.frame.queryIsCircular();
+        boolean tCircular = this.frame.targetIsCircular();
+        
+        this.model = new ExportMainModel(this.matches, maxGap, unique, repeat, minLength,  qCircular, tCircular);
         this.model.run();
         if(this.model.isWritten){
            return this.model.getOuput(); 
