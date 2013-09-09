@@ -50,14 +50,7 @@ public class ExportMainModel extends Thread{
      */
     public ExportMainModel(MatchList matchList, long maxDis,  boolean useU, boolean useR, long minLen, boolean qCirc, boolean tCirc){
         this.matches = matchList;
-//        this.matches.generateNewStatistics();
-//        this.matches.setInitialQueryOrientation();
-//        this.matches.setQueryOffsets();
-//        this.matches.setTargetOffsets();
-//        this.matches.setInitialQueryOrder();
-//        this.matches.setInitialTargetOrder();
-//        this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
-        
+        this.direction=0;        
         this.maxDistanceSquare = maxDis*maxDis;
         this.useUnique = useU;
         this.useRepeats = useR;
@@ -133,7 +126,6 @@ public class ExportMainModel extends Thread{
         // writing query data
         this.output.append(">"+this.matches.getQueries().get(0).getDescription()+"\n");
         int i = 0;
-
         for(Cluster c: sortedByQuery){
             this.output.append(c.getQueryName()+" ");
             if(this.useUnique && this.uniqueQuery[i]){
@@ -149,13 +141,27 @@ public class ExportMainModel extends Thread{
         // the order of targets could have been adulterated so it has to be recreated
         this.sortedByQuery.createSortedTargetStartList();
         this.orderT = this.sortedByQuery.getTargetOrder();
-        i=0;
-        for(int j: this.orderT){
-            this.output.append(this.sortedByQuery.get(j).getTargetName() +" ");
-            if(this.useUnique && this.uniqueTarget[i]){
-                this.output.append("uniqueT"+i+" ");
+        if(this.direction>=0){
+            i=0;
+            for(int j: this.orderT){
+                this.output.append(this.sortedByQuery.get(j).getTargetName() +" ");
+                if(this.useUnique && this.uniqueTarget[i]){
+                    this.output.append("uniqueT"+i+" ");
+                }
+                i++;
             }
-            i++;
+        }
+        else{
+            for(i=this.orderT.size()-1;i>0; i--){
+                this.sortedByQuery.get(i).invertCluster();
+                this.output.append(this.sortedByQuery.get(i).getTargetName() +" ");
+                if(this.useUnique && i>0 && this.uniqueTarget[i-1]){
+                    this.output.append("uniqueT"+i+" ");
+                }
+                else if(this.useUnique && i == 0 && this.uniqueTarget[this.orderT.size()-1]){
+                    this.output.append("uniqueT"+i+" ");
+                }
+            }
         }
         this.output.append(this.targetIsCircular ? ")":"|");
         this.isWritten = true;
@@ -345,27 +351,32 @@ public class ExportMainModel extends Thread{
         Cluster aktC = bestEnd;
         while(aktC != null){
             retOrg.add(aktC);
+            if(aktC.isInverted()){this.direction--;}else{this.direction++;}
             aktC = aktC.getBestPredecessor();
         }
+        
         return retOrg;
     }
 
     private void resynthesizeGraphics() {
         MatchList pathMatches = new MatchList();
-        for(Cluster c:this.sortedByQuery){
-            for(Match m:c.getIncludedMatches()){
-                pathMatches.addMatch(m);
+        if(this.direction>=0){
+            for(Cluster c:this.sortedByQuery){
+                for(Match m:c.getIncludedMatches()){
+                    pathMatches.addMatch(m);
+                }
             }
         }
-        pathMatches.generateNewStatistics();
-        pathMatches.setInitialQueryOrientation();
-        pathMatches.setQueryOffsets();
-        pathMatches.setTargetOffsets();
-        pathMatches.setInitialQueryOrder();
-        pathMatches.setInitialTargetOrder();
+        else{
+            for(int i=this.sortedByQuery.size()-1; i>0; i--){
+                for(Match m: this.sortedByQuery.get(i).getIncludedMatches()){
+                    pathMatches.addMatch(m);
+                }
+            }
+        }
         this.matches.copyDataFromOtherMatchList(pathMatches);
-
         this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
+
     }
     
 }

@@ -206,6 +206,21 @@ public class Cluster {
         return ret.toString();
     }
     
+    public void invertCluster(){
+        long newEnd = this.targetStart;
+        this.targetStart = this.targetEnd;
+        this.targetEnd = newEnd;
+          
+        if(this.leadingTargetRepeats== null && this.closingTargetRepeats == null){
+            return;
+        }
+        //inverting the rank of the repeats
+        ArrayList newLeader = this.closingTargetRepeats;
+        this.closingTargetRepeats = this.leadingTargetRepeats;
+        this.leadingQueryRepeats = newLeader;
+        
+    }
+    
     /**
      * Make sure c.getQueryStart()> this.getQueryStart().
      * @param c 
