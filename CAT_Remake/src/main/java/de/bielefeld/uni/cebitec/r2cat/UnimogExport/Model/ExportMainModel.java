@@ -32,6 +32,8 @@ public class ExportMainModel extends Thread{
     //another ArrayList qhich is getting the order of the matches in filteredQ
     // in the Target
     private ArrayList<Integer> orderT;
+    private int direction;
+    
     private StringBuilder output;
     
     public boolean isWritten;
@@ -48,6 +50,14 @@ public class ExportMainModel extends Thread{
      */
     public ExportMainModel(MatchList matchList, long maxDis,  boolean useU, boolean useR, long minLen, boolean qCirc, boolean tCirc){
         this.matches = matchList;
+        this.matches.generateNewStatistics();
+        this.matches.setInitialQueryOrientation();
+        this.matches.setQueryOffsets();
+        this.matches.setTargetOffsets();
+        this.matches.setInitialQueryOrder();
+        this.matches.setInitialTargetOrder();
+        this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
+        
         this.maxDistanceSquare = maxDis*maxDis;
         this.useUnique = useU;
         this.useRepeats = useR;
@@ -59,6 +69,7 @@ public class ExportMainModel extends Thread{
         this.targetIsCircular = tCirc;
         this.sortedByQuery = new ClusterOrganizer();
         this.orderT = new ArrayList();
+
         this.uniqueQuery = null;
         this.uniqueTarget = null;
         this.output = new StringBuilder();
@@ -133,7 +144,7 @@ public class ExportMainModel extends Thread{
         this.output.append(this.queryIsCircular ? ")":"|");
         
         // writing target data
-        this.output.append("\n>"+this.matches.getTargets().get(0).getDescription()+"\n");
+        this.output.append("\n>"+this.matches.getTargets().get(0).getDescription()  +"\n");
         // please notice: while rejectShortClusters() and detectPath() 
         // the order of targets could have been adulterated so it has to be recreated
         this.sortedByQuery.createSortedTargetStartList();
@@ -346,7 +357,14 @@ public class ExportMainModel extends Thread{
                 pathMatches.addMatch(m);
             }
         }
+        pathMatches.generateNewStatistics();
+        pathMatches.setInitialQueryOrientation();
+        pathMatches.setQueryOffsets();
+        pathMatches.setTargetOffsets();
+        pathMatches.setInitialQueryOrder();
+        pathMatches.setInitialTargetOrder();
         this.matches.copyDataFromOtherMatchList(pathMatches);
+
         this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
     }
     

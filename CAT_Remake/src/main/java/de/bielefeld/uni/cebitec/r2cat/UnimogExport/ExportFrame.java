@@ -4,14 +4,13 @@
  */
 package de.bielefeld.uni.cebitec.r2cat.UnimogExport;
 
+import de.bielefeld.uni.cebitec.r2cat.gui.MainWindow;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.List;
-import java.awt.event.ActionListener;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -20,14 +19,12 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 /**
  *
  * @author Mark Ugarov
  */
-public class ExportFrame extends JFrame{
+public class ExportFrame extends JDialog{
     /**
      * The @param paraPanel contains all elements the user needs to give the
      * parameters for the running - process and the buttons. 
@@ -62,8 +59,8 @@ public class ExportFrame extends JFrame{
     private JScrollPane outputScroll;
     
     
-    public ExportFrame(long seqLength, int majorTickSpacing){
-        super("Export to Unimog");
+    public ExportFrame(long seqLength, int majorTickSpacing, MainWindow mW){
+        super(mW,"Export to Unimog", true);
         this.sequenceLength = seqLength;
         
         this.paraPanel = new JPanel();
@@ -132,7 +129,7 @@ public class ExportFrame extends JFrame{
         this.minLengthField = new JTextField(0+"",(this.sequenceLength+"").length());
         this.minLengthField.setName(ExportConstants.LABEL_MINLENGTH);
         this.minLengthPanel.add(this.minLengthField);
-        
+          
         this.formCheckPanel = new JPanel();
         this.formCheckPanel.setLayout(new BoxLayout(this.formCheckPanel, BoxLayout.PAGE_AXIS));
         this.formCheckQuery = new JCheckBox(ExportConstants.FORMCHECK_QUERY);

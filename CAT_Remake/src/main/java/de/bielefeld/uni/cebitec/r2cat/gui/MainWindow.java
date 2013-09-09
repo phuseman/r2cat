@@ -127,7 +127,7 @@ public class MainWindow extends JFrame implements ChangeListener, KeyListener {
 		content.add(controls, BorderLayout.SOUTH);
 		content.add(drawing, BorderLayout.CENTER);
 
-		menuBar = new MainMenu(guiController);
+		menuBar = new MainMenu(guiController, this);
 		this.setJMenuBar(menuBar);
 
 		this.pack();

@@ -44,9 +44,11 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
 	 */
 	private static final long serialVersionUID = 4355383922470557796L;
 	private GuiController guiController;
+        private MainWindow mainWindow;
 
-	public MainMenu(GuiController guiController) {
+	public MainMenu(GuiController guiController, MainWindow mW) {
 		super();
+                this.mainWindow = mW;
 		this.guiController = guiController;
 		init();
 	}
@@ -311,7 +313,7 @@ public class MainMenu extends JMenuBar implements ActionListener, ItemListener {
                 } else if (e.getActionCommand().matches("export_image")) {
                         guiController.exportMatchesAsImage();
                 } else if (e.getActionCommand().equals( de.bielefeld.uni.cebitec.r2cat.UnimogExport.ExportConstants.MENUPOINT)){
-                        new  de.bielefeld.uni.cebitec.r2cat.UnimogExport.ExportController(R2cat.dataModelController);
+                        new  de.bielefeld.uni.cebitec.r2cat.UnimogExport.ExportController(R2cat.dataModelController, this.mainWindow);
                 }
 		
 		

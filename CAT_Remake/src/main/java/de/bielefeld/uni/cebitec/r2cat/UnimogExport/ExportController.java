@@ -7,6 +7,8 @@ package de.bielefeld.uni.cebitec.r2cat.UnimogExport;
 import de.bielefeld.uni.cebitec.r2cat.UnimogExport.Model.ExportMainModel;
 import de.bielefeld.uni.cebitec.qgram.MatchList;
 import de.bielefeld.uni.cebitec.r2cat.DataModelController;
+import de.bielefeld.uni.cebitec.r2cat.gui.MainWindow;
+import javax.swing.JDialog;
 
 /**
  *
@@ -49,18 +51,21 @@ public class ExportController {
     private String patternName;
     
     private ExportMainModel model;
+    private MainWindow mainWin;
     
     
     /**
      * The Constructor needs the DataModelController
      * @param datCon 
      */
-    public ExportController(DataModelController datCon){
+    public ExportController(DataModelController datCon, MainWindow mW){
         // the following lines have to be corrected: 
         //the maximum has to be the length of the longer sequence 
         //the sequenceName and the patternName have to be the names of the input-sequence
         this.dataControl = datCon;
+        this.mainWin = mW;
         if(!this.dataControl.getMatchesList().isEmpty()){
+            this.mainWin.setFocusable(false);
             this.init();
         }    
     }
@@ -72,7 +77,7 @@ public class ExportController {
 
         this.sequenceLength = Math.min(matches.getStatistics().getTargetsSize(), matches.getStatistics().getQueriesSize());
 
-        frame = new ExportFrame(sequenceLength, calculateMajorTickSpacing((int)sequenceLength));
+        JDialog dialog = new ExportFrame(sequenceLength, calculateMajorTickSpacing((int)sequenceLength), this.mainWin);
         valueListener = new FrameListener(frame, this);
         frame.setListener(valueListener);
     }
@@ -112,6 +117,10 @@ public class ExportController {
             this.model.stop();
         }
         
+    }
+    
+    public void activateMainFrame(){
+        this.mainWin.setFocusable(true);
     }
     
 }
