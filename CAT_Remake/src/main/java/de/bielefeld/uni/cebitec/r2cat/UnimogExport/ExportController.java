@@ -65,7 +65,6 @@ public class ExportController {
         this.dataControl = datCon;
         this.mainWin = mW;
         if(!this.dataControl.getMatchesList().isEmpty()){
-            this.mainWin.setFocusable(false);
             this.init();
         }    
     }
@@ -126,8 +125,5 @@ public class ExportController {
         
     }
     
-    public void activateMainFrame(){
-        this.mainWin.setFocusable(true);
-    }
     
 }

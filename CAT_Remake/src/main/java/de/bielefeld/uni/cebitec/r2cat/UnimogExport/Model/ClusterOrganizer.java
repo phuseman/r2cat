@@ -20,7 +20,7 @@ import java.util.ArrayList;
  */
 public class ClusterOrganizer extends ArrayList<Cluster> {
     private ArrayList<Integer> targetOrder;
-    private long repeatID;
+    private double repeatID;
     
     public ClusterOrganizer(){
         targetOrder = new ArrayList();
@@ -287,10 +287,11 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         else if(!c1.isInverted() && !c2.isInverted()){
             // overlap in query and target, see scenario forward 1 and forward 2
             if(c1.getQueryEnd() > c2.getQueryStart() && c1.getTargetEnd() > c2.getTargetStart()){
-                qOverlap = c1.getQueryEnd() - c2.getQueryStart();
-                tOverlap = c1.getTargetEnd() - c2.getTargetStart();
+                qOverlap = (c1.getQueryEnd() - c2.getQueryStart())*c1.getReziprocalGradient();
+                tOverlap = (c1.getTargetEnd() - c2.getTargetStart())*c1.getGradient();
                 //scenario forward 1
                 if(qOverlap >= tOverlap){
+                    
                     A1 = new Repeat(    c1.getQueryEnd() -(c1.getGradient()*tOverlap), // qstart
                                         c1.getQueryEnd(), // qend
                                         c2.getTargetStart(), // tstart
@@ -334,6 +335,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
                 }
                 // scenario forward 2
                 else{
+                    
                     A1 = new Repeat(    c2.getQueryStart(),// qstart
                                         c1.getQueryEnd(),// qend
                                         c1.getTargetEnd() - (c1.getGradient()*qOverlap),// tstart
@@ -434,8 +436,8 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         else if (c1.isInverted() && c2.isInverted()){
             // overlap in query and target, see scenario backward 1 and backward 2
             if(c1.getQueryEnd() > c2.getQueryStart() && c2.getTargetEnd() > c1.getTargetStart()){
-                qOverlap = c1.getQueryEnd() - c2.getQueryStart();
-                tOverlap = c2.getTargetStart() - c1.getTargetEnd();
+                qOverlap = (c1.getQueryEnd() - c2.getQueryStart())*c1.getReziprocalGradient();
+                tOverlap = (c2.getTargetStart() - c1.getTargetEnd())*c1.getGradient();
                 //scenario backward 1
                 if(tOverlap >= qOverlap){
                     A1 = new Repeat(    c2.getQueryStart(),// qstart

@@ -113,14 +113,14 @@ public class MatchList extends Observable implements
 		this.queryOrderDefined = other.queryOrderDefined;
 		this.queryOrientationDefined = other.queryOrientationDefined;
 		this.targetOrderDefined = other.targetOrderDefined;
-
+         
 		statistics = null; // will be recomputed
 		Match.setParentList(this);
 		unmarkAllAlignments();
 
 		this.setChanged();
 	}
-
+        
 	public void addMatch(Match a) {
 		matches.add(a);
 		Match.setParentList(this);
@@ -136,6 +136,8 @@ public class MatchList extends Observable implements
 
 		this.setChanged();
 	}
+        
+ 
 
 	public Iterator<Match> iterator() {
 		return matches.iterator();

@@ -73,6 +73,7 @@ public class ExportMainModel extends Thread{
     public void run(){
         this.calculate();
         this.write();
+        this.resynthesizeGraphics();
     }
     
     public String getOuput(){
@@ -94,7 +95,7 @@ public class ExportMainModel extends Thread{
         if(this.useRepeats){
             this.searchRepeats();
         }
-        resynthesizeGraphics();
+        
         
         if(this.useUnique){
             checkForUnique();
@@ -116,10 +117,25 @@ public class ExportMainModel extends Thread{
     
     private void construct(){
         // sorting the filteredQ ArrayList while constructing
+        int reverse=0;
+        int forward=0;
+        int before;
         for(Match m:matches){
+            before= m.getQuery().hashCode();
+//               if(m.getQuery().isReverseComplemented() ){
+//                   reverse++;
+//               }
+//               else{
+//                   forward++;
+//               }
+               
                Cluster c = new Cluster(m);
+               if(before != m.getQuery().hashCode()){
+                   System.err.println("Failure while constructing");
+               }
                this.sortedByQuery.add(c);
-        }    
+        } 
+//        System.out.println("Von "+matches.size()+" Matches waren "+reverse+" reverse und "+ forward +" nicht.");
     }
     
     private void write(){
@@ -332,7 +348,7 @@ public class ExportMainModel extends Thread{
             for(int j =i+1; j<this.sortedByQuery.size(); j++){
                 c2 = this.sortedByQuery.get(j);
                 if(
-                    c1.getBestScore() <= this.sortedByQuery.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular))
+                    c1.getBestScore() < this.sortedByQuery.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular))
                 {
                         c1.setBestPredecessor(c2);
                         c1.setBestScore(this.sortedByQuery.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular));
@@ -353,6 +369,7 @@ public class ExportMainModel extends Thread{
             retOrg.add(aktC);
             if(aktC.isInverted()){this.direction--;}else{this.direction++;}
             aktC = aktC.getBestPredecessor();
+            
         }
         
         return retOrg;
@@ -360,22 +377,44 @@ public class ExportMainModel extends Thread{
 
     private void resynthesizeGraphics() {
         MatchList pathMatches = new MatchList();
-        if(this.direction>=0){
-            for(Cluster c:this.sortedByQuery){
-                for(Match m:c.getIncludedMatches()){
+        //if(this.direction>=0){
+            int before;
+            for(int i = 0; i<this.sortedByQuery.size();i++){
+                for(Match m:this.sortedByQuery.get(i).getIncludedMatches()){
+                    before=m.getQuery().hashCode();
                     pathMatches.addMatch(m);
+                    m.getQuery().setReverseComplemented(true);
+                    if(before != m.getQuery().hashCode()){
+                        System.out.println("Failure");
+                    }
                 }
             }
-        }
-        else{
-            for(int i=this.sortedByQuery.size()-1; i>0; i--){
-                for(Match m: this.sortedByQuery.get(i).getIncludedMatches()){
-                    pathMatches.addMatch(m);
-                }
-            }
-        }
+        //}
+                
+        
+//        else{
+//            for(int i=this.sortedByQuery.size()-1; i>0; i--){
+//                for(Match m: this.sortedByQuery.get(i).getIncludedMatches()){
+//                    pathMatches.addMatch(m);
+//                }
+//            }
+//            
+//        }
         this.matches.copyDataFromOtherMatchList(pathMatches);
+        this.matches.generateNewStatistics();
         this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
+        
+        int reverse =0;
+        int forward =0;
+//       for(Match m:matches){
+//               if(m.getQuery().isReverseComplemented() ){
+//                   reverse++;
+//               }
+//               else{
+//                   forward++;
+//               }
+//        } 
+//        System.out.println("Von "+matches.size()+" Matches waren "+reverse+" reverse und "+ forward +" nicht.");
 
     }
     
