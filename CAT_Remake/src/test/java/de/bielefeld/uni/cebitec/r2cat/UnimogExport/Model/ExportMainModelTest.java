@@ -274,6 +274,62 @@ public class ExportMainModelTest extends TestCase {
         this.invokeMethod(instance, construct);
         this.invokeMethod(instance, searchRepeats);
         this.testNames(instance, methodName, queryExpRes, targetExpRes);
+        
+        Match r6 = ModelTestConstants.R6;
+        Match r7 = ModelTestConstants.R7;
+        Match r8 = ModelTestConstants.R8;
+        Match r9 = ModelTestConstants.R9;
+        Match r10 = ModelTestConstants.R10;
+        
+        //scenario backward1
+        System.out.println("Scenario backward1");
+        matches = new MatchList();
+        matches.addMatch(r7);
+        matches.addMatch(r9);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        queryExpRes = "300matches700 repeat0.0 repeat0.0 repeat0.0 400matches600 ";
+        targetExpRes = "-400matches600 -repeat0.0 -repeat0.0 -300matches700 ";
+        this.invokeMethod(instance, construct);
+        this.invokeMethod(instance, searchRepeats);
+        this.testNames(instance, methodName, queryExpRes, targetExpRes);
+        
+        //scenario backward2
+        System.out.println("Scenario backward2");
+        matches = new MatchList();
+        matches.addMatch(r7);
+        matches.addMatch(r8);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        queryExpRes = "300matches700 repeat0.0 repeat0.5 repeat0.0 350matches550 ";
+        targetExpRes = "-350matches550 -repeat0.0 -repeat0.5 -repeat0.0 -repeat0.5 -repeat0.0 -300matches700 ";
+        this.invokeMethod(instance, construct);
+        this.invokeMethod(instance, searchRepeats);
+        this.testNames(instance, methodName, queryExpRes, targetExpRes);
+        
+        //scenario backward3
+        System.out.println("Scenario backward3");
+        matches = new MatchList();
+        matches.addMatch(r6);
+        matches.addMatch(r9);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        queryExpRes = "200matches700 repeat0.0 repeat0.0 400matches600 ";
+        targetExpRes = "-400matches600 -repeat0.0 -200matches700 ";
+        this.invokeMethod(instance, construct);
+        this.invokeMethod(instance, searchRepeats);
+        this.testNames(instance, methodName, queryExpRes, targetExpRes);
+        
+        //scenario backward3
+        System.out.println("Scenario backward4");
+        matches = new MatchList();
+        matches.addMatch(r9);
+        matches.addMatch(r10);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        queryExpRes = "400matches600 repeat0.0 500matches400 ";
+        targetExpRes = "-500matches400 -repeat0.0 -repeat0.0 -400matches600 ";
+        this.invokeMethod(instance, construct);
+        this.invokeMethod(instance, searchRepeats);
+        this.testNames(instance, methodName, queryExpRes, targetExpRes);
+        
+        
 
     }
     
@@ -359,7 +415,7 @@ public class ExportMainModelTest extends TestCase {
         } catch (IllegalArgumentException ex) {
             fail("IllegalArgumentException by getting method "+method.getName());
         } catch (InvocationTargetException ex) {
-            fail("InvocationTargetException by getting method "+method.getName());
+            fail("InvocationTargetException by getting method "+method.getName()+" "+ex.getTargetException());
         }
     }
     

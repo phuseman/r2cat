@@ -163,7 +163,7 @@ public class Cluster {
             if(this.isInverted()){
                 if(!this.closingTargetRepeats.isEmpty()){
                     for(int cR = this.closingTargetRepeats.size()-1; cR>=0; cR--){
-                        ret.append(" -repeat"+this.closingTargetRepeats.get(cR).getID());
+                        ret.append("-repeat"+this.closingTargetRepeats.get(cR).getID()+" ");
                     }
                 }
                 

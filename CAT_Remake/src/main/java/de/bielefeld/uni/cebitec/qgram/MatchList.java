@@ -137,6 +137,16 @@ public class MatchList extends Observable implements
 		this.setChanged();
 	}
         
+        public void clearOrderAndContent(){
+            matches = new Vector();
+            
+            queries = new HashMap();
+            queryOrder = new Vector();
+            
+            targets= new HashMap();
+            targetOrder = new Vector();
+        }
+        
  
 
 	public Iterator<Match> iterator() {

@@ -376,45 +376,15 @@ public class ExportMainModel extends Thread{
     }
 
     private void resynthesizeGraphics() {
-        MatchList pathMatches = new MatchList();
-        //if(this.direction>=0){
-            int before;
-            for(int i = 0; i<this.sortedByQuery.size();i++){
-                for(Match m:this.sortedByQuery.get(i).getIncludedMatches()){
-                    before=m.getQuery().hashCode();
-                    pathMatches.addMatch(m);
-                    m.getQuery().setReverseComplemented(true);
-                    if(before != m.getQuery().hashCode()){
-                        System.out.println("Failure");
-                    }
-                }
-            }
-        //}
-                
         
-//        else{
-//            for(int i=this.sortedByQuery.size()-1; i>0; i--){
-//                for(Match m: this.sortedByQuery.get(i).getIncludedMatches()){
-//                    pathMatches.addMatch(m);
-//                }
-//            }
-//            
-//        }
-        this.matches.copyDataFromOtherMatchList(pathMatches);
+        this.matches.clearOrderAndContent();
+        for(Cluster c: this.sortedByQuery){
+            for(Match m:c.getIncludedMatches()){
+                this.matches.addMatch(m);
+            }
+        }
         this.matches.generateNewStatistics();
         this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
-        
-        int reverse =0;
-        int forward =0;
-//       for(Match m:matches){
-//               if(m.getQuery().isReverseComplemented() ){
-//                   reverse++;
-//               }
-//               else{
-//                   forward++;
-//               }
-//        } 
-//        System.out.println("Von "+matches.size()+" Matches waren "+reverse+" reverse und "+ forward +" nicht.");
 
     }
     
