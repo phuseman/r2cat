@@ -34,4 +34,10 @@ public abstract class ModelTestConstants extends TestCase {
     public static final Match R8= new Match(new DNASequence(null), 550, 300, new DNASequence(null), 350, 550);
     public static final Match R9 = new Match(new DNASequence(null), 600, 400, new DNASequence(null), 400, 600);
     public static final Match R10 = new Match(new DNASequence(null), 400,200, new DNASequence(null), 500,800);
+    
+    public static final Match R11 = new Match(new DNASequence(null), 300, 600, new DNASequence(null), 300, 600);
+    public static final Match R12 = new Match(new DNASequence(null), 1000, 700, new DNASequence(null), 400, 700);
+    public static final Match R13 = new Match(new DNASequence(null), 800, 500, new DNASequence(null), 500, 800);
+    public static final Match R14 = new Match(new DNASequence(null), 400, 100, new DNASequence(null), 700, 900);
+    public static final Match R15 = new Match(new DNASequence(null), 800, 500, new DNASequence(null), 700, 900);
 }

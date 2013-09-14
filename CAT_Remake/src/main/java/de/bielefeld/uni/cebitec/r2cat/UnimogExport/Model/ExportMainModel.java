@@ -157,9 +157,12 @@ public class ExportMainModel extends Thread{
         // the order of targets could have been adulterated so it has to be recreated
         this.sortedByQuery.createSortedTargetStartList();
         this.orderT = this.sortedByQuery.getTargetOrder();
+        this.testTargetOrder();
         if(this.direction>=0){
             i=0;
-            for(int j: this.orderT){
+            int j;
+            for(int t = 0; t< this.orderT.size(); t++){
+                j= this.orderT.get(t);
                 this.output.append(this.sortedByQuery.get(j).getTargetName() +" ");
                 if(this.useUnique && this.uniqueTarget[i]){
                     this.output.append("uniqueT"+i+" ");
@@ -307,7 +310,7 @@ public class ExportMainModel extends Thread{
         this.sortedByQuery.createSortedTargetStartList();
         ArrayList<Integer> targetSort=this.sortedByQuery.getTargetOrder();
         for (int i=0; i<this.sortedByQuery.size()-1;i++){
-            if (this.sortedByQuery.get(targetSort.get(i)).getTargetStart()>this.sortedByQuery.get(targetSort.get(i+1)).getTargetStart()){
+            if (this.sortedByQuery.get(targetSort.get(i)).getTargetSmallerIndex()>this.sortedByQuery.get(targetSort.get(i+1)).getTargetSmallerIndex()){
                 System.err.println("---------------target not sorted!!!---------");
             }
         }
@@ -348,7 +351,10 @@ public class ExportMainModel extends Thread{
             for(int j =i+1; j<this.sortedByQuery.size(); j++){
                 c2 = this.sortedByQuery.get(j);
                 if(
-                    c1.getBestScore() < this.sortedByQuery.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular))
+                    c1.getBestScore() < this.sortedByQuery.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular)
+                    &&    !c1.isInQueryShadowOf(c2) && !c1.isInTargetShadowOf(c2)
+                    &&    !c2.isInQueryShadowOf(c1) && !c2.isInTargetShadowOf(c1)
+                  )
                 {
                         c1.setBestPredecessor(c2);
                         c1.setBestScore(this.sortedByQuery.getRepeatlessScore(c1, c2, this.querySize, this.targetSize, this.queryIsCircular, this.targetIsCircular));
