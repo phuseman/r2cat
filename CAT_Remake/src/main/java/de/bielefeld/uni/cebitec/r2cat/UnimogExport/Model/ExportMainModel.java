@@ -84,9 +84,7 @@ public class ExportMainModel extends Thread{
         this.isWritten = false;
         this.construct();
         testOrder();
-        //if(this.maxDistanceSquare > 0){
-            mergeNeighbors();
-        //}
+        mergeNeighbors();
         if(this.minlenght > 1){
            rejectShortClusters(); 
         }
@@ -383,7 +381,7 @@ public class ExportMainModel extends Thread{
 
     private void resynthesizeGraphics() {
         
-        this.matches.clearOrderAndContent();
+        this.matches.clearMatches();
         for(Cluster c: this.sortedByQuery){
             for(Match m:c.getIncludedMatches()){
                 this.matches.addMatch(m);

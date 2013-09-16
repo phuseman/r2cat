@@ -137,14 +137,12 @@ public class MatchList extends Observable implements
 		this.setChanged();
 	}
         
-        public void clearOrderAndContent(){
+        /**
+         * this method will not delete the ArrayLists targets, queries,
+         * targetOrder or queryOrder
+         */
+        public void clearMatches(){
             matches = new Vector();
-            
-            queries = new HashMap();
-            queryOrder = new Vector();
-            
-            targets= new HashMap();
-            targetOrder = new Vector();
         }
         
  

@@ -64,7 +64,7 @@ public class ExportController {
         //the sequenceName and the patternName have to be the names of the input-sequence
         this.dataControl = datCon;
         this.mainWin = mW;
-        if(!this.dataControl.getMatchesList().isEmpty()){
+        if(this.dataControl.getMatchesList() != null){
             this.init();
         }    
     }

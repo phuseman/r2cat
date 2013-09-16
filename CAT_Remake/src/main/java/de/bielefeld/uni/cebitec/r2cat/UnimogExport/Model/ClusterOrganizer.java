@@ -562,6 +562,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
             }
             // overlap only in the query, see scenario backward 4
             else if(c1.getQueryEnd() > c2.getQueryStart()){
+                 System.out.println("This is backward4");
                 qOverlap = c1.getQueryEnd() - c2.getQueryStart();
                 tOverlap = 0;
                 A1 = new Repeat(    c2.getQueryStart(),// qstart
@@ -730,6 +731,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         else if (c1.isInverted() && !c2.isInverted()){
             //scenario backwardforward1
             if(c1.getQueryEnd() > c2.getQueryStart() && c2.getTargetEnd() > c1.getTargetEnd()){
+                System.out.println("This is backwardforward1");
                 qOverlap = c1.getQueryEnd() - c2.getQueryStart();
                 tOverlap = c2.getTargetEnd() - c1.getTargetEnd();
 
@@ -764,6 +766,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
                 if(B1.getSquareSize() >= minRepLengthSquare && B2.getSquareSize() >= minRepLengthSquare){
                     c2.addClosingQueryRepeat(B2);
                     c1.addClosingQueryRepeat(B1);
+                    c1.addClosingTargetRepeat(B1);
                 }
 
                 if(A1.getSquareSize() >= minRepLengthSquare && A2.getSquareSize() >= minRepLengthSquare){
@@ -772,13 +775,13 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
                     c2.addLeadingTargetRepeat(A2);
                 }
                 if(B1.getSquareSize() >= minRepLengthSquare && B2.getSquareSize() >= minRepLengthSquare){
-                    c1.addClosingTargetRepeat(B1);
                     c2.addLeadingTargetRepeat(B2);
                 }
                 repeatID++;
             }
             //backwardforward2
             else if(c1.getQueryEnd() > c2.getQueryStart()){
+                System.out.println("This is backwardforward2");
                 qOverlap = c1.getQueryEnd() - c2.getQueryStart();
                 tOverlap = 0;
                 A1 = new Repeat(    c2.getQueryStart(),// qstart
@@ -805,6 +808,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
             else if(c2.getTargetEnd() > c1.getTargetEnd()){
                 // backwardforward3
                 if((c2.getTargetEnd() - c1.getTargetEnd())<(c1.getTargetStart() - c2.getTargetStart())){
+                    System.out.println("This is backwardforward3");
                     qOverlap = 0;
                     tOverlap = c2.getTargetEnd() - c1.getTargetEnd();
                     A1 = new Repeat(    c1.getQueryEnd()- (c1.getGradient() * tOverlap),// qstart
@@ -829,6 +833,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
                 }
                 //backwardforward4
                 else{
+                    System.out.println("This is backwardforward4");
                     qOverlap = 0;
                     tOverlap = c1.getTargetStart() - c2.getTargetStart();
                     A1 = new Repeat(    c1.getQueryStart(),// qstart
