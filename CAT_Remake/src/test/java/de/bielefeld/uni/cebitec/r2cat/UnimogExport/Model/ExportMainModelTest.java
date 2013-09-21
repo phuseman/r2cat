@@ -11,7 +11,6 @@ package de.bielefeld.uni.cebitec.r2cat.UnimogExport.Model;
 
 import static junit.framework.Assert.fail;
 
-import de.bielefeld.uni.cebitec.r2cat.UnimogExport.ModelTestConstants;
 import de.bielefeld.uni.cebitec.qgram.Match;
 import de.bielefeld.uni.cebitec.qgram.MatchList;
 import java.lang.reflect.Field;

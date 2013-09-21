@@ -26,6 +26,12 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         targetOrder = new ArrayList();
         repeatID = 0;
     }
+    
+    public ClusterOrganizer(int size){
+        super(size);
+        targetOrder = new ArrayList(size);
+        repeatID=0;
+    }
 
     @Override
     /**
@@ -208,7 +214,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
 
     // reseting the whole targetStarts - ArrayList 
     private void recreateAllTargets(){
-        this.targetOrder = new ArrayList();
+        this.targetOrder = new ArrayList(this.size());
         for(int i = 0; i< this.size() ; i++){
             this.targetSortByInsert(0, this.targetOrder.size()-1, this.get(i), i);
         }
@@ -923,7 +929,7 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         double renormJ =1;
         double jumpcost =0; 
                 //= Math.abs(c1.getDiagonal() - c2.getDiagonal()) * renormJ;
-        double renormE = 0.5;
+        double renormE = 1/(2.71);
         double rectangle = Math.sqrt(this.getRectangleDistanceSquare(c1, c2, qSize, tSize, qCirc, tCirc))*renormE;
         //double euklid = (Math.sqrt(this.getSquareDistance(c1, c2))) * renormE;
         //double euklid = this.getMaximalOverlap(c1, c2);

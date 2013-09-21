@@ -18,6 +18,7 @@ public class ExportMainModel extends Thread{
     private long maxDistanceSquare;
     private boolean useUnique;
     private boolean useRepeats;
+    private boolean shorten;
     
     boolean[] uniqueQuery;
     boolean[] uniqueTarget;
@@ -38,6 +39,7 @@ public class ExportMainModel extends Thread{
     
     public boolean isWritten;
     
+    
     /**
      * Initializing the Class with all parameters.
      * @param matchList a List of Matches which will be transformed to Cluster
@@ -57,10 +59,11 @@ public class ExportMainModel extends Thread{
         this.minlenght = minLen;
         this.querySize = matches.getStatistics().getQueriesSize();
         this.targetSize = matches.getStatistics().getTargetsSize();
+        this.shorten = false;
                 
         this.queryIsCircular = qCirc;
         this.targetIsCircular = tCirc;
-        this.sortedByQuery = new ClusterOrganizer();
+        this.sortedByQuery = new ClusterOrganizer(this.matches.size());
         this.orderT = new ArrayList();
 
         this.uniqueQuery = null;
@@ -94,10 +97,10 @@ public class ExportMainModel extends Thread{
             this.searchRepeats();
         }
         
-        
-        if(this.useUnique){
-            checkForUnique();
-        }
+        this.shortingList();
+//        if(this.useUnique){
+//            checkForUnique();
+//        }
         
         //testOrder();
         //TODO
@@ -239,6 +242,68 @@ public class ExportMainModel extends Thread{
             }
         }
     }
+    
+    public void shortingList(){
+        int inQ =0;
+        ArrayList<Integer> targetOrder = this.sortedByQuery.getTargetOrder();
+        int po1;
+        int po2;
+        Cluster c1;
+        Cluster c2;
+        int maxPos = this.sortedByQuery.size()-2;
+        long max1DimSquare = (this.maxDistanceSquare/2);
+        while(inQ<maxPos){
+            po1 = targetOrder.get(inQ);
+            po2 = targetOrder.get(inQ+1);
+            c1 = this.sortedByQuery.get(po1);
+            c2 = this.sortedByQuery.get(po2);
+            if(  (po2-1) == po1 && shorten 
+                 && (   !this.useUnique 
+                        || this.square(c1.getQueryStart()-c2.getQueryEnd())<=max1DimSquare)
+                ){
+                this.sortedByQuery.join(po1, po2);
+                this.sortedByQuery.deleteFromTargetOrder(inQ+1);
+                this.sortedByQuery.decreaseTargetsAfter(inQ);
+                targetOrder = this.sortedByQuery.getTargetOrder();
+                this.uniqueQuery[po1]= false;
+                maxPos--;
+            }
+            else if((po2-1) == po1 && this.useUnique && this.sortedByQuery.getQuerySquareDistance(c1, c2)>max1DimSquare){
+                this.uniqueQuery[po1]= true;
+                inQ++;
+            }
+            else{
+                inQ++;
+            }
+        }
+        if(this.useUnique){
+            if(this.queryIsCircular){
+                c1=this.sortedByQuery.get(this.sortedByQuery.size()-1);
+                c2=this.sortedByQuery.get(0);
+                if(this.square(c1.getQueryStart()+this.querySize-c2.getQueryEnd())>max1DimSquare)
+                {
+                    this.uniqueQuery[this.uniqueQuery.length-1] = true;
+                }
+                else{
+                    this.uniqueQuery[this.uniqueQuery.length-1] = false;
+                }
+            }
+            if(this.targetIsCircular){
+                c1=this.sortedByQuery.get(targetOrder.get(targetOrder.size()-1));
+                c2=this.sortedByQuery.get(targetOrder.get(0));
+                if(this.square(c1.getTargetSmallerIndex()+this.targetSize -c2.getTargetLargerIndex())>max1DimSquare)
+                {
+                    this.uniqueTarget[this.uniqueTarget.length-1] = true;
+                }
+                else{
+                    this.uniqueQuery[this.uniqueQuery.length-1] = false;
+                }
+            }
+        }
+        
+    }
+    
+
 
     // checking for unique regions -> whereever there is no Match, there must be a unique region
     private void checkForUnique() {
@@ -270,6 +335,7 @@ public class ExportMainModel extends Thread{
             else{
                 this.uniqueQuery[this.uniqueQuery.length-1] = false;
             }
+            
         }
         
         this.testTargetOrder();
