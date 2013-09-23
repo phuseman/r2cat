@@ -2,11 +2,8 @@
  * This Class is a ArrayList of Clusters which is always sorted by the 
  * queryStart - positions. 
  * 
- * It also has a ArrayList targetStarts of references 
- * which can be sorted by the targetStarts - positions. 
- * (that means if the fifth element of the ClusterOrganizer has the highest 
- * start - position in the target, the last position in the 
- * targetStarts - ArrayList will be a 5)
+ * It also has a ArrayList targetOrder of references 
+ * which can be sorted by the targetSmallerIndex - positions. 
  */
 package de.bielefeld.uni.cebitec.r2cat.UnimogExport.Model;
 
@@ -248,9 +245,9 @@ public class ClusterOrganizer extends ArrayList<Cluster> {
         this.targetOrder.remove(index);
     }
     public void decreaseTargetsAfter(int index){
-        for(int targetStart:this.targetOrder){
-            if(targetStart<index){
-                targetStart--;
+        for(int targetIndex:this.targetOrder){
+            if(targetIndex<index){
+                targetIndex--;
             }
         }
     }

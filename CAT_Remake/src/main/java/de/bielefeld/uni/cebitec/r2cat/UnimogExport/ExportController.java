@@ -109,8 +109,9 @@ public class ExportController {
         boolean repeat = this.frame.useRepeats();
         boolean qCircular = this.frame.queryIsCircular();
         boolean tCircular = this.frame.targetIsCircular();
+        boolean shorten = this.frame.shortenOutput();
         
-        this.model = new ExportMainModel(this.matches, maxGap, unique, repeat, minLength,  qCircular, tCircular);
+        this.model = new ExportMainModel(this.matches, maxGap, unique, repeat, minLength,  qCircular, tCircular, shorten);
         this.model.run();
         if(this.model.isWritten){
            return this.model.getOuput(); 

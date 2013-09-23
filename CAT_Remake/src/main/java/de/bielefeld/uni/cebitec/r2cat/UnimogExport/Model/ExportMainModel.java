@@ -50,7 +50,7 @@ public class ExportMainModel extends Thread{
      * @param qCirc is true if the query is circular (Vectors, Plasmids...)
      * @param tCirc is true if the target is circular
      */
-    public ExportMainModel(MatchList matchList, long maxDis,  boolean useU, boolean useR, long minLen, boolean qCirc, boolean tCirc){
+    public ExportMainModel(MatchList matchList, long maxDis,  boolean useU, boolean useR, long minLen, boolean qCirc, boolean tCirc, boolean shortOut){
         this.matches = matchList;
         this.direction=0;        
         this.maxDistanceSquare = maxDis*maxDis;
@@ -59,7 +59,7 @@ public class ExportMainModel extends Thread{
         this.minlenght = minLen;
         this.querySize = matches.getStatistics().getQueriesSize();
         this.targetSize = matches.getStatistics().getTargetsSize();
-        this.shorten = false;
+        this.shorten = shortOut;
                 
         this.queryIsCircular = qCirc;
         this.targetIsCircular = tCirc;
@@ -91,49 +91,26 @@ public class ExportMainModel extends Thread{
         if(this.minlenght > 1){
            rejectShortClusters(); 
         }
-        
         this.sortedByQuery = detectPath();
         if(this.useRepeats){
             this.searchRepeats();
         }
-        
-        this.shortingList();
-//        if(this.useUnique){
-//            checkForUnique();
-//        }
-        
-        //testOrder();
-        //TODO
-        /** detecting repeats 
-         * wherever there is a overlap greater than the maxDistance, there are two repeats
-         * and both together can be presented by ONE Cluster
-        */
-        
+        if(this.shorten){
+            this.shortening();
+        }
+        if(this.useUnique){
+            checkForUnique();
+        }    
 
         this.testOrder();
-        
         /** sorting reference for orderT which points to a match in filteredQ*/
         this.sortedByQuery.createSortedTargetStartList();
     }
     
     private void construct(){
         // sorting the filteredQ ArrayList while constructing
-        int reverse=0;
-        int forward=0;
-        int before;
-        for(Match m:matches){
-            before= m.getQuery().hashCode();
-//               if(m.getQuery().isReverseComplemented() ){
-//                   reverse++;
-//               }
-//               else{
-//                   forward++;
-//               }
-               
+        for(Match m:matches){         
                Cluster c = new Cluster(m);
-               if(before != m.getQuery().hashCode()){
-                   System.err.println("Failure while constructing");
-               }
                this.sortedByQuery.add(c);
         } 
 //        System.out.println("Von "+matches.size()+" Matches waren "+reverse+" reverse und "+ forward +" nicht.");
@@ -143,15 +120,20 @@ public class ExportMainModel extends Thread{
         // writing query data
         this.output.append(">"+this.matches.getQueries().get(0).getDescription()+"\n");
         int i = 0;
+        if(direction<0){
+            for(Cluster c:sortedByQuery){
+                c.invertCluster();
+            }
+        }
         for(Cluster c: sortedByQuery){
             this.output.append(c.getQueryName()+" ");
             if(this.useUnique && this.uniqueQuery[i]){
                 this.output.append("uniqueQ"+i+" ");
             }
+            
             i++;
         }
         this.output.append(this.queryIsCircular ? ")":"|");
-        
         // writing target data
         this.output.append("\n>"+this.matches.getTargets().get(0).getDescription()  +"\n");
         // please notice: while rejectShortClusters() and detectPath() 
@@ -159,6 +141,7 @@ public class ExportMainModel extends Thread{
         this.sortedByQuery.createSortedTargetStartList();
         this.orderT = this.sortedByQuery.getTargetOrder();
         this.testTargetOrder();
+        
         if(this.direction>=0){
             i=0;
             int j;
@@ -172,8 +155,7 @@ public class ExportMainModel extends Thread{
             }
         }
         else{
-            for(i=this.orderT.size()-1;i>0; i--){
-                this.sortedByQuery.get(i).invertCluster();
+            for(i=this.orderT.size()-1;i>=0; i--){
                 this.output.append(this.sortedByQuery.get(i).getTargetName() +" ");
                 if(this.useUnique && i>0 && this.uniqueTarget[i-1]){
                     this.output.append("uniqueT"+i+" ");
@@ -204,7 +186,6 @@ public class ExportMainModel extends Thread{
     private void mergeNeighbors() {
         int inQ=0;
         // merging Clusters whose distance is shorter than the maximal distance the user configured
-       
         // first step: going through the List in order of the queryStarts
         while(inQ<this.sortedByQuery.size()-2){
             if(this.sortedByQuery.getSquareDistance(inQ, inQ+1)<=this.maxDistanceSquare 
@@ -216,10 +197,8 @@ public class ExportMainModel extends Thread{
                 inQ++;
             }
         }
-
         // second step: going through the List in order of the targetStarts
         inQ=0; 
-
         this.sortedByQuery.createSortedTargetStartList();
         ArrayList<Integer> targetOrder = this.sortedByQuery.getTargetOrder();
         int po1;
@@ -243,69 +222,42 @@ public class ExportMainModel extends Thread{
         }
     }
     
-    public void shortingList(){
-        int inQ =0;
+    public void shortening(){
+        int runIndex =0;
+        this.sortedByQuery.createSortedTargetStartList();
         ArrayList<Integer> targetOrder = this.sortedByQuery.getTargetOrder();
-        int po1;
-        int po2;
+        int refT1;
+        int refT2;
         Cluster c1;
         Cluster c2;
-        int maxPos = this.sortedByQuery.size()-2;
+        int maxIndex = this.sortedByQuery.size() -2;
         long max1DimSquare = (this.maxDistanceSquare/2);
-        while(inQ<maxPos){
-            po1 = targetOrder.get(inQ);
-            po2 = targetOrder.get(inQ+1);
-            c1 = this.sortedByQuery.get(po1);
-            c2 = this.sortedByQuery.get(po2);
-            if(  (po2-1) == po1 && shorten 
-                 && (   !this.useUnique 
-                        || this.square(c1.getQueryStart()-c2.getQueryEnd())<=max1DimSquare)
+        boolean hastojoin = false;
+        while(runIndex<maxIndex){
+            refT1=  Math.min(targetOrder.get(runIndex), targetOrder.get(runIndex+1));
+            refT2 = Math.max(targetOrder.get(runIndex), targetOrder.get(runIndex+1));
+            c1 = this.sortedByQuery.get(refT1);
+            c2 = this.sortedByQuery.get(refT2);
+            if(  (refT2-1) == refT1
+                 && c1.isInverted() == c2.isInverted()
+                 && (!this.useUnique 
+                     || ( this.sortedByQuery.getQuerySquareDistance(c1, c2)<=max1DimSquare
+                          && this.sortedByQuery.getTargetSquareDistance(c1, c2)<=max1DimSquare
+                        )
+                    )
                 ){
-                this.sortedByQuery.join(po1, po2);
-                this.sortedByQuery.deleteFromTargetOrder(inQ+1);
-                this.sortedByQuery.decreaseTargetsAfter(inQ);
+                this.sortedByQuery.join(refT1, refT2);
+                this.sortedByQuery.createSortedTargetStartList();
                 targetOrder = this.sortedByQuery.getTargetOrder();
-                this.uniqueQuery[po1]= false;
-                maxPos--;
-            }
-            else if((po2-1) == po1 && this.useUnique && this.sortedByQuery.getQuerySquareDistance(c1, c2)>max1DimSquare){
-                this.uniqueQuery[po1]= true;
-                inQ++;
+                maxIndex--;
             }
             else{
-                inQ++;
+                runIndex++;
             }
         }
-        if(this.useUnique){
-            if(this.queryIsCircular){
-                c1=this.sortedByQuery.get(this.sortedByQuery.size()-1);
-                c2=this.sortedByQuery.get(0);
-                if(this.square(c1.getQueryStart()+this.querySize-c2.getQueryEnd())>max1DimSquare)
-                {
-                    this.uniqueQuery[this.uniqueQuery.length-1] = true;
-                }
-                else{
-                    this.uniqueQuery[this.uniqueQuery.length-1] = false;
-                }
-            }
-            if(this.targetIsCircular){
-                c1=this.sortedByQuery.get(targetOrder.get(targetOrder.size()-1));
-                c2=this.sortedByQuery.get(targetOrder.get(0));
-                if(this.square(c1.getTargetSmallerIndex()+this.targetSize -c2.getTargetLargerIndex())>max1DimSquare)
-                {
-                    this.uniqueTarget[this.uniqueTarget.length-1] = true;
-                }
-                else{
-                    this.uniqueQuery[this.uniqueQuery.length-1] = false;
-                }
-            }
-        }
-        
     }
     
-
-
-    // checking for unique regions -> whereever there is no Match, there must be a unique region
+    // checking for unique regions 
     private void checkForUnique() {
         /**
          * c^2 = a^2+b^2 |a=b
@@ -335,9 +287,7 @@ public class ExportMainModel extends Thread{
             else{
                 this.uniqueQuery[this.uniqueQuery.length-1] = false;
             }
-            
         }
-        
         this.testTargetOrder();
         this.sortedByQuery.createSortedTargetStartList();
         ArrayList<Integer> targetSort= this.sortedByQuery.getTargetOrder();
@@ -350,7 +300,6 @@ public class ExportMainModel extends Thread{
             }
             else{
                 this.uniqueTarget[t]=false;
-                //System.out.println("no overlap in Target by max1Dim = "+max1Dim);
             }
         }  
         if(this.targetIsCircular){
@@ -380,8 +329,6 @@ public class ExportMainModel extends Thread{
         }
     }
     
-   
-    
     private void searchRepeats(){
         for(int inQ = 0; inQ< this.sortedByQuery.size()-1; inQ++){
             this.sortedByQuery.cutRepeats(inQ, inQ+1);
@@ -390,16 +337,13 @@ public class ExportMainModel extends Thread{
 
     private void rejectShortClusters() {
         // reject Clusters which are shorter than the minlength (given by user)
-
         int inQ = 0;
         long squareMinLength = ((long)this.minlenght * (long)this.minlenght);
         while(inQ<this.sortedByQuery.size()){
             if(this.sortedByQuery.get(inQ).getSquareSize()<squareMinLength){
-                //System.out.println("Remove: size "+this.filteredQ.get(inQ).size());
                 this.sortedByQuery.remove(inQ);
                 }
             else{
-                //System.out.println(this.filteredQ.get(inQ).size());
                 inQ++;
             }
         }
@@ -441,12 +385,10 @@ public class ExportMainModel extends Thread{
             aktC = aktC.getBestPredecessor();
             
         }
-        
         return retOrg;
     }
 
     private void resynthesizeGraphics() {
-        
         this.matches.clearMatches();
         for(Cluster c: this.sortedByQuery){
             for(Match m:c.getIncludedMatches()){
@@ -457,5 +399,4 @@ public class ExportMainModel extends Thread{
         this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
 
     }
-    
 }

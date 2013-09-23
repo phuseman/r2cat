@@ -41,7 +41,7 @@ public class ExportMainModelTest extends TestCase {
         matches.addMatch(ModelTestConstants.M2);
         matches.addMatch(ModelTestConstants.M1);
         //the distance "60" is irrelevant, we dont run mergeNeighbors() here
-        ExportMainModel instance = new ExportMainModel(matches,60,false, false,0, false, false );
+        ExportMainModel instance = new ExportMainModel(matches,60,false, false,0, false, false, false);
         
         Method construct = this.getMethod(methodName);
         this.invokeMethod(instance, construct);
@@ -74,7 +74,7 @@ public class ExportMainModelTest extends TestCase {
         matches.addMatch(m1);
         matches.addMatch(m2);
         matches.addMatch(m3);
-        ExportMainModel instance = new ExportMainModel(matches, 60, false, false, 0, false, false);
+        ExportMainModel instance = new ExportMainModel(matches, 60, false, false, 0, false, false,false);
         
         Method construct = this.getMethod("construct");
         Method merge = this.getMethod(methodName);
@@ -111,7 +111,7 @@ public class ExportMainModelTest extends TestCase {
         matches.addMatch(m2);
         matches.addMatch(m3);
         matches.addMatch(m4);
-        ExportMainModel instance = new ExportMainModel(matches, 0, false, false, 80, false, false);
+        ExportMainModel instance = new ExportMainModel(matches, 0, false, false, 80, false, false,false);
         
         Method construct = this.getMethod("construct");
         Method reject = this.getMethod(methodName);
@@ -135,7 +135,7 @@ public class ExportMainModelTest extends TestCase {
          
         // comparison / second test without minimum 
         expRes.add(new Cluster(m4));
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         this.invokeMethod(instance, construct);
         this.invokeMethod(instance, reject);
         try {
@@ -175,7 +175,7 @@ public class ExportMainModelTest extends TestCase {
         matches.addMatch(m3);
         matches.addMatch(m4);
         
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         Method construct = this.getMethod("construct");
         Method detect = this.getMethod(methodName);
         this.invokeMethod(instance, construct);
@@ -229,7 +229,7 @@ public class ExportMainModelTest extends TestCase {
         matches= new MatchList();
         matches.addMatch(r1);
         matches.addMatch(r2);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "50matches50 repeat0.0 repeat0.0 100matches150 ";;
         targetExpRes = "50matches50 repeat0.0 repeat0.0 repeat0.0 100matches150 ";  
         this.invokeMethod(instance, construct);
@@ -241,7 +241,7 @@ public class ExportMainModelTest extends TestCase {
         matches= new MatchList();
         matches.addMatch(r2);
         matches.addMatch(r3);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "100matches150 repeat0.0 repeat0.5 repeat0.0 repeat0.5 repeat0.0 250matches250 ";;
         targetExpRes = "100matches150 repeat0.0 repeat0.5 repeat0.0 250matches250 ";  
         this.invokeMethod(instance, construct);
@@ -253,7 +253,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r3);
         matches.addMatch(r5);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "250matches250 repeat0.0 400matches450 ";
         targetExpRes = "250matches250 repeat0.0 repeat0.0 400matches450 ";
         this.invokeMethod(instance, construct);
@@ -265,7 +265,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r1);
         matches.addMatch(r4);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "50matches50 repeat0.0 repeat0.0 300matches150 ";
         targetExpRes = "50matches50 repeat0.0 300matches150 ";
         this.invokeMethod(instance, construct);
@@ -283,7 +283,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r7);
         matches.addMatch(r9);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "300matches700 repeat0.0 repeat0.0 repeat0.0 400matches600 ";
         targetExpRes = "-400matches600 -repeat0.0 -repeat0.0 -300matches700 ";
         this.invokeMethod(instance, construct);
@@ -295,7 +295,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r7);
         matches.addMatch(r8);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "300matches700 repeat0.0 repeat0.5 repeat0.0 350matches550 ";
         targetExpRes = "-350matches550 -repeat0.0 -repeat0.5 -repeat0.0 -repeat0.5 -repeat0.0 -300matches700 ";
         this.invokeMethod(instance, construct);
@@ -307,7 +307,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r6);
         matches.addMatch(r9);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "200matches700 repeat0.0 repeat0.0 400matches600 ";
         targetExpRes = "-400matches600 -repeat0.0 -200matches700 ";
         this.invokeMethod(instance, construct);
@@ -319,7 +319,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r9);
         matches.addMatch(r10);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "400matches600 repeat0.0 500matches400 ";
         targetExpRes = "-500matches400 -repeat0.0 -repeat0.0 -400matches600 ";
         this.invokeMethod(instance, construct);
@@ -337,7 +337,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r11);
         matches.addMatch(r13);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "300matches300 repeat0.5 500matches800 repeat0.5 ";
         targetExpRes = "300matches300 repeat0.5 -500matches800 -repeat0.5 ";
         this.invokeMethod(instance, construct);
@@ -349,7 +349,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r11);
         matches.addMatch(r12);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "300matches300 repeat0.0 400matches1000 ";
         targetExpRes = "300matches300 repeat0.0 -400matches1000 -repeat0.0 ";
         this.invokeMethod(instance, construct);
@@ -361,7 +361,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r11);
         matches.addMatch(r15);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "300matches300 repeat0.0 700matches800 repeat0.0 ";
         targetExpRes = "300matches300 repeat0.0 -700matches800 ";
         this.invokeMethod(instance, construct);
@@ -373,7 +373,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r11);
         matches.addMatch(r14);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "repeat0.0 300matches300 repeat0.0 700matches400 ";
         targetExpRes = "-700matches400 repeat0.0 300matches300 ";
         this.invokeMethod(instance, construct);
@@ -392,7 +392,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r16);
         matches.addMatch(r17);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "400matches600 repeat0.0 repeat0.5 500matches200 repeat0.5 ";
         targetExpRes = "repeat0.0 repeat0.5 500matches200 -repeat0.5 -repeat0.0 -400matches600 ";
         this.invokeMethod(instance, construct);
@@ -404,7 +404,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r16);
         matches.addMatch(r18);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "400matches600 repeat0.0 550matches100 ";
         targetExpRes = "repeat0.0 550matches100 -repeat0.0 -400matches600 ";
         this.invokeMethod(instance, construct);
@@ -416,7 +416,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r16);
         matches.addMatch(r20);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "400matches600 repeat0.0 700matches300 repeat0.0 ";
         targetExpRes = "700matches300 -repeat0.0 -400matches600 ";
         this.invokeMethod(instance, construct);
@@ -428,7 +428,7 @@ public class ExportMainModelTest extends TestCase {
         matches = new MatchList();
         matches.addMatch(r16);
         matches.addMatch(r19);
-        instance = new ExportMainModel(matches, 0, false, false, 0, false, false);
+        instance = new ExportMainModel(matches, 0, false, false, 0, false, false,false);
         queryExpRes = "repeat0.0 400matches600 repeat0.0 600matches500 ";
         targetExpRes = "-400matches600 -repeat0.0 600matches500 ";
         this.invokeMethod(instance, construct);

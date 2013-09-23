@@ -29,5 +29,7 @@ public abstract class ExportConstants {
     
     public static final String FORMCHECK_TARGET = "target is circular";
     
+    public static final String SHORTENGING_OUTPUT ="trim the output";
+    
     public static final long MIN_REPEAT_LENGTH = 12;
 }

@@ -48,6 +48,7 @@ public class ExportFrame extends JDialog{
     private final JPanel formCheckPanel;
     private JCheckBox formCheckQuery;
     private JCheckBox formCheckTarget;
+    private JCheckBox shorteningOutput;
     
     private final JPanel buttonPanel;
     private JButton runButton;
@@ -138,6 +139,9 @@ public class ExportFrame extends JDialog{
         this.formCheckTarget = new JCheckBox(ExportConstants.FORMCHECK_TARGET);
         this.formCheckTarget.setMnemonic('t');
         this.formCheckPanel.add(this.formCheckTarget);
+        this.shorteningOutput = new JCheckBox(ExportConstants.SHORTENGING_OUTPUT);
+        this.shorteningOutput.setMnemonic('o');
+        this.formCheckPanel.add(this.shorteningOutput);
         this.minLengthPanel.add(this.formCheckPanel);
         
         this.paraPanel.add(this.minLengthPanel);
@@ -278,6 +282,8 @@ public class ExportFrame extends JDialog{
     public boolean useRepeats(){
         return this.repeatCheck.isSelected();
     }
-    
+    public boolean shortenOutput(){
+        return this.shorteningOutput.isSelected();
+    }
  
 }
