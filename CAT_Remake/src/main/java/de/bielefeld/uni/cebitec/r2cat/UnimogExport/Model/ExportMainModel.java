@@ -113,7 +113,6 @@ public class ExportMainModel extends Thread{
                Cluster c = new Cluster(m);
                this.sortedByQuery.add(c);
         } 
-//        System.out.println("Von "+matches.size()+" Matches waren "+reverse+" reverse und "+ forward +" nicht.");
     }
     
     private void write(){
@@ -171,7 +170,6 @@ public class ExportMainModel extends Thread{
 
     // only for testing!
     private void testOrder() {
-        //only for testing
         Cluster c1;
         Cluster c2;
         for(int i= 0; i<this.sortedByQuery.size()-2; i++){
@@ -234,7 +232,7 @@ public class ExportMainModel extends Thread{
         long max1DimSquare = (this.maxDistanceSquare/2);
         boolean hastojoin = false;
         while(runIndex<maxIndex){
-            refT1=  Math.min(targetOrder.get(runIndex), targetOrder.get(runIndex+1));
+            refT1 =  Math.min(targetOrder.get(runIndex), targetOrder.get(runIndex+1));
             refT2 = Math.max(targetOrder.get(runIndex), targetOrder.get(runIndex+1));
             c1 = this.sortedByQuery.get(refT1);
             c2 = this.sortedByQuery.get(refT2);
@@ -247,7 +245,15 @@ public class ExportMainModel extends Thread{
                     )
                 ){
                 this.sortedByQuery.join(refT1, refT2);
-                this.sortedByQuery.createSortedTargetStartList();
+                //this.sortedByQuery.createSortedTargetStartList();
+                
+                if(targetOrder.get(runIndex)<targetOrder.get(runIndex+1)){
+                    this.sortedByQuery.deleteFromTargetOrder(runIndex+1);
+                }
+                else{
+                    this.sortedByQuery.deleteFromTargetOrder(runIndex);
+                }
+                this.sortedByQuery.decreaseTargetsAfter(refT1);
                 targetOrder = this.sortedByQuery.getTargetOrder();
                 maxIndex--;
             }
@@ -397,6 +403,5 @@ public class ExportMainModel extends Thread{
         }
         this.matches.generateNewStatistics();
         this.matches.notifyObservers(MatchList.NotifyEvent.CHANGE);
-
     }
 }
