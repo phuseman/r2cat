@@ -231,7 +231,7 @@ public class ExportMainModel extends Thread{
         int maxIndex = this.sortedByQuery.size() -2;
         long max1DimSquare = (this.maxDistanceSquare/2);
         boolean hastojoin = false;
-        while(runIndex<maxIndex){
+        while(runIndex<=maxIndex){
             if(this.direction>=0){
                 refT1 = targetOrder.get(runIndex);
                 refT2 = targetOrder.get(runIndex+1);
