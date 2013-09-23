@@ -232,8 +232,14 @@ public class ExportMainModel extends Thread{
         long max1DimSquare = (this.maxDistanceSquare/2);
         boolean hastojoin = false;
         while(runIndex<maxIndex){
-            refT1 =  Math.min(targetOrder.get(runIndex), targetOrder.get(runIndex+1));
-            refT2 = Math.max(targetOrder.get(runIndex), targetOrder.get(runIndex+1));
+            if(this.direction>=0){
+                refT1 = targetOrder.get(runIndex);
+                refT2 = targetOrder.get(runIndex+1);
+            }
+            else{
+                refT1 = targetOrder.get(runIndex+1);
+                refT2 = targetOrder.get(runIndex);
+            }
             c1 = this.sortedByQuery.get(refT1);
             c2 = this.sortedByQuery.get(refT2);
             if(  (refT2-1) == refT1
@@ -245,8 +251,6 @@ public class ExportMainModel extends Thread{
                     )
                 ){
                 this.sortedByQuery.join(refT1, refT2);
-                //this.sortedByQuery.createSortedTargetStartList();
-                
                 if(targetOrder.get(runIndex)<targetOrder.get(runIndex+1)){
                     this.sortedByQuery.deleteFromTargetOrder(runIndex+1);
                 }
