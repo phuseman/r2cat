@@ -809,7 +809,7 @@ public class MatchList extends Observable implements
 					line = in.readLine();
 					linenumber++;
 					if (line.startsWith("#") || line.startsWith("\"#")
-							|| line.matches("END_TARGET")) {
+							|| line.matches("END_UNMATCHED")) {
 						continue;
 					}
 					// read each line and process the
